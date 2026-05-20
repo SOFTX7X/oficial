@@ -492,6 +492,148 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Outfit
   .apt-actions{gap:4px}
   .act-btn{font-size:10px;padding:4px 8px}
 }
+
+/* ══════════════════════════════
+   FIX FINAL — LAYOUT QUEBRADO
+   Corrige menu ⋮, status, timeline e card da conta
+══════════════════════════════ */
+.sidebar{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  padding-bottom:18px !important;
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:20px}
+.side-user{
+  flex-shrink:0 !important;
+  margin-top:16px !important;
+  padding:14px !important;
+  min-height:auto !important;
+}
+.public-link-box{
+  word-break:break-word !important;
+  overflow-wrap:anywhere !important;
+  max-height:92px !important;
+  overflow:auto !important;
+  line-height:1.45 !important;
+}
+.public-link-box::-webkit-scrollbar{width:3px}
+.public-link-box::-webkit-scrollbar-thumb{background:rgba(200,168,107,.35);border-radius:20px}
+
+.tl-block{min-width:0 !important}
+.tl-content{min-width:0 !important}
+.tl-apt{
+  position:relative !important;
+  padding:14px 14px !important;
+  overflow:visible !important;
+}
+.tl-apt-main{
+  display:flex !important;
+  align-items:flex-start !important;
+  gap:11px !important;
+  padding-right:52px !important;
+  min-width:0 !important;
+}
+.tl-apt-info{
+  flex:1 !important;
+  min-width:0 !important;
+  padding-right:8px !important;
+}
+.tl-apt-status{
+  flex-shrink:0 !important;
+  display:flex !important;
+  justify-content:flex-end !important;
+  align-items:flex-start !important;
+  padding-top:1px !important;
+}
+.tl-apt-status .badge{
+  white-space:nowrap !important;
+  max-width:118px !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.tl-apt .action-menu-wrap{
+  position:absolute !important;
+  top:12px !important;
+  right:12px !important;
+  z-index:30 !important;
+}
+.tl-apt .action-menu-btn{
+  width:34px !important;
+  height:34px !important;
+  border-radius:12px !important;
+  background:rgba(255,255,255,.055) !important;
+}
+.tl-apt .action-menu-dropdown{
+  z-index:99999 !important;
+}
+.apt-actions{
+  padding-right:0 !important;
+  gap:6px !important;
+}
+.act-btn{
+  min-height:30px !important;
+  line-height:1 !important;
+}
+.apt-card{
+  overflow:visible !important;
+}
+.apt-card .apt-right{
+  flex-shrink:0 !important;
+}
+.action-menu-wrap{
+  isolation:isolate !important;
+}
+.action-menu-dropdown{
+  max-width:240px !important;
+}
+
+@media(max-width:900px){
+  .side-user{margin-bottom:8px !important}
+  .tl-block{
+    gap:8px !important;
+  }
+  .tl-timestamp{
+    min-width:42px !important;
+    font-size:10px !important;
+  }
+  .tl-apt-main{
+    flex-wrap:wrap !important;
+    padding-right:44px !important;
+  }
+  .tl-apt-status{
+    width:100% !important;
+    justify-content:flex-start !important;
+    padding-left:47px !important;
+    margin-top:-3px !important;
+  }
+  .tl-apt-status .badge{
+    max-width:none !important;
+  }
+  .apt-actions{
+    padding-left:47px !important;
+  }
+}
+@media(max-width:480px){
+  .tl-timestamp{
+    min-width:36px !important;
+  }
+  .tl-apt{
+    padding:12px !important;
+  }
+  .tl-apt-main{
+    padding-right:42px !important;
+  }
+  .tl-apt-status,
+  .apt-actions{
+    padding-left:0 !important;
+  }
+  .act-btn{
+    flex:1 1 calc(50% - 4px) !important;
+    justify-content:center !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1280,11 +1422,17 @@ function renderAgendaTimeline(){
       <div class="tl-timestamp">${a.hora||"—"}</div>
       <div class="tl-line"></div>
       <div class="tl-content">
-        <div class="tl-apt" style="flex-direction:column;align-items:stretch;gap:0;padding:12px 14px;position:relative">
-          <div style="display:flex;align-items:center;gap:11px">
+        <div class="tl-apt">
+          <div class="tl-apt-main">
             <div class="apt-avatar" style="width:36px;height:36px;border-radius:11px;font-size:14px;flex-shrink:0">${initial(a.cliente_nome)}</div>
-            <div style="flex:1;min-width:0"><div class="apt-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.cliente_nome||"Cliente"}</div><div class="apt-meta">${a.servico_nome||"—"} · ${a.profissional_nome||"—"}</div><div class="apt-meta" style="margin-top:1px">📅 ${formatDateBR(a.data)}${a.cliente_telefone?` · 📱 ${a.cliente_telefone}`:""}</div></div>
-            <span class="badge ${badgeClass(a.status)}" style="flex-shrink:0">${a.status||"Pendente"}</span>
+            <div class="tl-apt-info">
+              <div class="apt-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.cliente_nome||"Cliente"}</div>
+              <div class="apt-meta">${a.servico_nome||"—"} · ${a.profissional_nome||"—"}</div>
+              <div class="apt-meta" style="margin-top:1px">📅 ${formatDateBR(a.data)}${a.cliente_telefone?` · 📱 ${a.cliente_telefone}`:""}</div>
+            </div>
+            <div class="tl-apt-status">
+              <span class="badge ${badgeClass(a.status)}">${a.status||"Pendente"}</span>
+            </div>
           </div>
           <div class="apt-actions">
             <button class="act-btn confirm" onclick="confirmarAg('${a.id}')">✅ Confirmar</button>
@@ -1303,7 +1451,6 @@ function renderAgendaTimeline(){
       "sep",
       {icon:"🗑",label:"Excluir",cls:"danger",action:()=>excluirAgendamento(a.id)}
     ]);
-    menu.style.position="absolute";menu.style.top="10px";menu.style.right="10px";
     tlapt.appendChild(menu);
     agendaTimeline.appendChild(block);
   });
