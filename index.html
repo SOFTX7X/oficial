@@ -6,595 +6,1023 @@
 <title>AgendaPro — Sistema Premium de Agendamento</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
-  --bg:#050505;
-  --bg2:#0a0a0b;
-  --panel:#111113;
-  --panel2:#171719;
-  --panel3:#202024;
-  --line:rgba(255,255,255,.08);
-  --line2:rgba(255,255,255,.14);
-  --gold:#c9a96e;
-  --gold2:#f0d38a;
-  --gold3:rgba(201,169,110,.14);
-  --text:#f6f1e8;
-  --muted:rgba(246,241,232,.56);
-  --muted2:rgba(246,241,232,.34);
-  --green:#4ade80;
-  --red:#fb7185;
-  --yellow:#facc15;
-  --blue:#60a5fa;
-  --radius:24px;
-  --shadow:0 30px 90px rgba(0,0,0,.55);
+  --bg:#060608;
+  --bg2:#0b0b0e;
+  --panel:rgba(16,16,20,.82);
+  --panel2:rgba(22,22,28,.9);
+  --line:rgba(255,255,255,.07);
+  --line2:rgba(255,255,255,.13);
+  --gold:#c8a86b;
+  --gold2:#e8cc8e;
+  --gold3:#f5e4b8;
+  --goldglow:rgba(200,168,107,.18);
+  --goldring:rgba(200,168,107,.30);
+  --text:#f2ede4;
+  --muted:rgba(242,237,228,.52);
+  --muted2:rgba(242,237,228,.28);
+  --green:#52d68a;
+  --red:#f06d7a;
+  --yellow:#f5c842;
+  --blue:#6ab4f5;
+  --purple:#a78bfa;
+  --r:20px;
+  --rl:28px;
+  --rxl:36px;
 }
-
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
 html{scroll-behavior:smooth}
 body{
   min-height:100vh;
-  background:
-    radial-gradient(circle at 20% 0%, rgba(201,169,110,.12), transparent 34%),
-    radial-gradient(circle at 85% 15%, rgba(255,255,255,.06), transparent 28%),
-    linear-gradient(180deg,#050505,#090909 45%,#050505);
+  background:var(--bg);
   color:var(--text);
-  font-family:'DM Sans',sans-serif;
+  font-family:'Outfit',sans-serif;
+  font-size:15px;
   overflow-x:hidden;
 }
-body:before{
-  content:"";
+
+/* ── NOISE + GRID overlay ─────────────────────────── */
+.noise-bg{
   position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:
-  linear-gradient(rgba(255,255,255,.026) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(255,255,255,.026) 1px, transparent 1px);
-  background-size:56px 56px;
-  mask-image:radial-gradient(circle at 50% 10%, #000 0 35%, transparent 75%);
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");
 }
-body:after{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.2;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+.grid-bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 0 40%,transparent 75%);
+}
+.glow-top{
+  position:fixed;top:-200px;left:50%;transform:translateX(-50%);
+  width:900px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,168,107,.13),transparent 65%);
+  pointer-events:none;z-index:0;
 }
 
-button,input,select,textarea{font-family:'DM Sans',sans-serif}
-button{cursor:pointer}
-a{color:inherit;text-decoration:none}
+/* ── TYPOGRAPHY ──────────────────────────────────── */
+.serif{font-family:'Playfair Display',serif}
+h1,h2,.serif{font-family:'Playfair Display',serif}
 
-.app-shell{position:relative;z-index:1;min-height:100vh}
-
-/* AUTH / ONBOARDING */
+/* ── AUTH ─────────────────────────────────────────── */
 .auth-wrap{
-  min-height:100vh;
-  display:grid;
-  grid-template-columns:1.04fr .96fr;
-  padding:26px;
-  gap:22px;
+  position:relative;z-index:1;
+  min-height:100vh;display:grid;
+  grid-template-columns:1.1fr .9fr;
+  padding:20px;gap:16px;
 }
 .brand-panel{
   position:relative;overflow:hidden;
-  border:1px solid var(--line);
-  border-radius:32px;
-  background:
-    linear-gradient(145deg, rgba(201,169,110,.14), transparent 38%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
-    rgba(15,15,17,.84);
-  box-shadow:var(--shadow);
-  padding:42px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-.brand-panel:before{
-  content:"";position:absolute;inset:-1px;opacity:.5;
-  background:radial-gradient(circle at 60% 30%, rgba(201,169,110,.20), transparent 38%);
-}
-.brand-content{position:relative;z-index:1}
-.logo{
-  display:flex;align-items:center;gap:12px;
-  font-family:'Cormorant Garamond',serif;
-  font-size:32px;font-weight:700;letter-spacing:.03em;
-}
-.logo-dot{width:10px;height:10px;border-radius:99px;background:var(--gold);box-shadow:0 0 28px var(--gold)}
-.hero-kicker{
-  margin-top:72px;
-  display:inline-flex;align-items:center;gap:10px;
-  padding:9px 15px;border:1px solid rgba(201,169,110,.24);
-  background:var(--gold3);border-radius:99px;
-  color:var(--gold2);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
-}
-.hero-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:clamp(46px,6vw,86px);
-  line-height:.96;font-weight:600;letter-spacing:-.04em;
-  margin-top:28px;max-width:720px;
-}
-.hero-title em{
-  font-style:normal;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
-.hero-desc{max-width:560px;color:var(--muted);line-height:1.75;margin-top:24px;font-size:16px}
-.mock-window{
-  margin-top:56px;border:1px solid var(--line2);border-radius:26px;background:rgba(7,7,7,.64);
-  backdrop-filter:blur(18px);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45)
-}
-.mock-top{height:52px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px}
-.dots{display:flex;gap:7px}.dots i{width:9px;height:9px;border-radius:50%;display:block}.dots i:nth-child(1){background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
-.mock-body{padding:22px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.mini-card{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:18px}
-.mini-label{font-size:11px;color:var(--muted2);letter-spacing:.12em;text-transform:uppercase}
-.mini-value{font-family:'Cormorant Garamond',serif;font-size:34px;margin-top:10px}
-.mini-good{font-size:12px;color:var(--green);margin-top:6px}
-.auth-card{
-  border:1px solid var(--line);
-  border-radius:32px;
-  background:rgba(12,12,14,.78);
+  border:1px solid var(--line2);border-radius:var(--rxl);
+  background:linear-gradient(155deg,rgba(200,168,107,.10) 0%,rgba(255,255,255,.03) 50%,transparent 100%),
+    rgba(12,12,16,.7);
   backdrop-filter:blur(24px);
-  box-shadow:var(--shadow);
-  padding:32px;
-  display:flex;align-items:center;justify-content:center;
-}
-.form-box{width:100%;max-width:520px}
-.form-head{margin-bottom:28px}
-.form-head h1,.form-head h2{
-  font-family:'Cormorant Garamond',serif;font-size:46px;line-height:1;font-weight:600
-}
-.form-head p{margin-top:12px;color:var(--muted);line-height:1.65}
-.stepper{display:flex;gap:10px;margin:22px 0 28px}
-.step-dot{
-  flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden
-}
-.step-dot.active:before,.step-dot.done:before{content:"";display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2))}
-.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted2);margin-bottom:8px}
-.field input,.field select,.field textarea{
-  width:100%;border:1px solid var(--line);background:rgba(255,255,255,.045);
-  color:var(--text);border-radius:16px;padding:15px 16px;outline:none;font-size:14px;
-  transition:.25s;
-}
-.field select option{background:#111;color:#fff}
-.field textarea{min-height:96px;resize:vertical}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(201,169,110,.55);box-shadow:0 0 0 4px rgba(201,169,110,.08)}
-.btn-row{display:flex;gap:12px;align-items:center;margin-top:18px}
-.btn{
-  border:none;border-radius:16px;padding:15px 20px;font-weight:700;letter-spacing:.04em;
-  display:inline-flex;align-items:center;justify-content:center;gap:10px;transition:.25s
-}
-.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0b0b0b;box-shadow:0 16px 42px rgba(201,169,110,.24)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 22px 58px rgba(201,169,110,.34)}
-.btn-ghost{background:rgba(255,255,255,.045);color:var(--text);border:1px solid var(--line)}
-.btn-ghost:hover{border-color:rgba(201,169,110,.35);color:var(--gold2)}
-.btn-full{width:100%}
-.auth-switch{margin-top:20px;text-align:center;color:var(--muted);font-size:14px}
-.auth-switch button{background:none;border:none;color:var(--gold2);font-weight:700}
-
-/* DASHBOARD */
-.dashboard{display:none;min-height:100vh}
-.sidebar{
-  position:fixed;left:20px;top:20px;bottom:20px;width:286px;
-  border:1px solid var(--line);border-radius:30px;background:rgba(13,13,15,.78);
-  backdrop-filter:blur(24px);padding:22px;box-shadow:var(--shadow);z-index:20;
+  padding:44px;
   display:flex;flex-direction:column;justify-content:space-between;
 }
-.side-top .logo{font-size:27px;margin-bottom:28px}
-.nav-group{display:flex;flex-direction:column;gap:8px}
-.nav-btn{
-  width:100%;border:none;background:transparent;color:var(--muted);
-  display:flex;align-items:center;gap:13px;padding:14px 14px;border-radius:17px;text-align:left;
-  font-weight:600;transition:.2s
+.brand-panel .orb{
+  position:absolute;top:-80px;right:-80px;
+  width:480px;height:480px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,168,107,.18),transparent 65%);
+  pointer-events:none;
 }
-.nav-btn span{width:30px;height:30px;border-radius:11px;display:grid;place-items:center;background:rgba(255,255,255,.04)}
-.nav-btn:hover,.nav-btn.active{background:rgba(255,255,255,.055);color:var(--text)}
-.nav-btn.active{border:1px solid rgba(201,169,110,.20);box-shadow:inset 0 0 0 1px rgba(201,169,110,.05),0 14px 36px rgba(0,0,0,.22)}
-.nav-btn.active span{background:var(--gold3);color:var(--gold2)}
-.side-user{
-  border:1px solid var(--line);border-radius:22px;padding:14px;background:rgba(255,255,255,.035)
-}
-.user-line{display:flex;gap:12px;align-items:center}
-.avatar{width:42px;height:42px;border-radius:15px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111;display:grid;place-items:center;font-weight:900}
-.user-name{font-weight:800}.user-plan{color:var(--muted2);font-size:12px;margin-top:2px}
-.public-link-box{
-  margin-top:14px;padding:12px;border-radius:16px;background:rgba(0,0,0,.22);border:1px solid var(--line);
-  color:var(--muted);font-size:12px;word-break:break-all;line-height:1.4
-}
-.main{
-  margin-left:326px;padding:22px 22px 44px;min-height:100vh
-}
-.topbar{
-  border:1px solid var(--line);border-radius:28px;background:rgba(13,13,15,.62);
-  backdrop-filter:blur(24px);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;
-  position:sticky;top:18px;z-index:10
-}
-.titleblock h2{font-family:'Cormorant Garamond',serif;font-size:36px;line-height:1;font-weight:700}
-.titleblock p{color:var(--muted);font-size:14px;margin-top:7px}
-.top-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-.icon-btn{
-  width:48px;height:48px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text)
-}
-.view{display:none;margin-top:22px}.view.active{display:block}
-.command-hero{
-  position:relative;overflow:hidden;border:1px solid var(--line);border-radius:34px;background:
-  radial-gradient(circle at 10% 0%, rgba(201,169,110,.18), transparent 32%),
-  linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
-  padding:28px;box-shadow:var(--shadow);margin-bottom:22px
-}
-.command-hero:after{
-  content:"";position:absolute;right:-120px;top:-120px;width:360px;height:360px;border-radius:50%;
-  background:radial-gradient(circle,rgba(201,169,110,.20),transparent 68%);
-}
-.hero-row{position:relative;z-index:1;display:flex;justify-content:space-between;gap:20px;align-items:flex-end}
-.hero-row h1{font-family:'Cormorant Garamond',serif;font-size:54px;line-height:.98;max-width:780px}
-.hero-row p{color:var(--muted);max-width:620px;line-height:1.65;margin-top:12px}
-.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.stat{
-  border:1px solid var(--line);border-radius:24px;background:rgba(18,18,20,.72);padding:20px;min-height:142px;
-  position:relative;overflow:hidden;transition:.25s
-}
-.stat:hover{transform:translateY(-4px);border-color:rgba(201,169,110,.23)}
-.stat:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 0%,rgba(201,169,110,.10),transparent 45%);opacity:.9}
-.stat > *{position:relative}
-.stat-label{color:var(--muted2);font-size:11px;letter-spacing:.13em;text-transform:uppercase}
-.stat-value{font-family:'Cormorant Garamond',serif;font-size:44px;margin-top:14px}
-.stat-small{margin-top:8px;font-size:13px;color:var(--muted)}
-.stat-good{color:var(--green)}
-.content-grid{display:grid;grid-template-columns:1.35fr .8fr;gap:16px;margin-top:16px}
-.panel{
-  border:1px solid var(--line);border-radius:28px;background:rgba(17,17,19,.74);backdrop-filter:blur(20px);
-  padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.26)
-}
-.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-.panel-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700}
-.panel-sub{color:var(--muted2);font-size:13px}
-.list{display:flex;flex-direction:column;gap:12px}
-.row-card{
-  border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.035);
-  padding:14px;display:flex;align-items:center;justify-content:space-between;gap:14px;transition:.2s
-}
-.row-card:hover{border-color:rgba(201,169,110,.25);background:rgba(255,255,255,.05)}
-.row-left{display:flex;gap:13px;align-items:center}
-.row-icon{width:46px;height:46px;border-radius:16px;background:var(--gold3);color:var(--gold2);display:grid;place-items:center;font-weight:900}
-.row-title{font-weight:800}.row-sub{font-size:13px;color:var(--muted);margin-top:3px}
-.badge{padding:7px 10px;border-radius:99px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
-.badge.ok{background:rgba(74,222,128,.12);color:var(--green)}
-.badge.wait{background:rgba(250,204,21,.12);color:var(--yellow)}
-.badge.off{background:rgba(251,113,133,.12);color:var(--red)}
-.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-.cal-label{font-size:11px;color:var(--muted2);text-align:center;text-transform:uppercase}
-.cal-day{height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.04);color:var(--muted);font-weight:700}
-.cal-day.busy{background:var(--gold3);color:var(--gold2);border:1px solid rgba(201,169,110,.18)}
-.cal-day.today{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
-.form-panel{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end;margin-bottom:18px}
-.form-panel .field{margin-bottom:0}
-.table-wrap{overflow:auto}
-table{width:100%;border-collapse:separate;border-spacing:0 10px}
-th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);font-weight:800;padding:0 12px}
-td{background:rgba(255,255,255,.035);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 12px;color:var(--muted)}
-td:first-child{border-left:1px solid var(--line);border-radius:16px 0 0 16px;color:var(--text);font-weight:700}
-td:last-child{border-right:1px solid var(--line);border-radius:0 16px 16px 0}
-.empty{padding:34px;border:1px dashed var(--line2);border-radius:22px;text-align:center;color:var(--muted)}
-.toast{
-  position:fixed;right:22px;bottom:22px;z-index:2000;
-  border:1px solid var(--line2);background:rgba(12,12,14,.92);backdrop-filter:blur(16px);
-  padding:14px 16px;border-radius:18px;box-shadow:var(--shadow);display:none;max-width:360px
+.brand-panel .orb2{
+  position:absolute;bottom:-120px;left:-60px;
+  width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle,rgba(160,140,200,.09),transparent 65%);
+  pointer-events:none;
 }
 
-/* PUBLIC BOOKING */
-.public-page{display:none;min-height:100vh;padding:26px}
-.public-card{
-  max-width:1120px;margin:0 auto;border:1px solid var(--line);border-radius:34px;background:rgba(12,12,14,.80);
-  backdrop-filter:blur(24px);box-shadow:var(--shadow);overflow:hidden
+/* LOGO */
+.logo{
+  position:relative;z-index:1;
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:'Playfair Display',serif;font-size:26px;font-weight:700;
+  letter-spacing:.02em;
 }
-.public-cover{padding:34px;background:linear-gradient(135deg,rgba(201,169,110,.16),rgba(255,255,255,.02));border-bottom:1px solid var(--line)}
-.public-cover h1{font-family:'Cormorant Garamond',serif;font-size:58px;line-height:1}
-.public-cover p{color:var(--muted);margin-top:10px}
-.booking-body{padding:24px;display:grid;grid-template-columns:.95fr 1.05fr;gap:18px}
-.choice-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.logo-gem{
+  width:32px;height:32px;position:relative;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-radius:10px;display:grid;place-items:center;
+  box-shadow:0 0 24px rgba(200,168,107,.45);
+  font-size:15px;
+}
+
+/* HERO BADGE */
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:64px;
+  padding:8px 14px;
+  border:1px solid rgba(200,168,107,.22);
+  border-radius:99px;
+  background:rgba(200,168,107,.08);
+  color:var(--gold2);
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+}
+.hero-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+.brand-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(50px,5.8vw,92px);
+  line-height:.95;font-weight:700;
+  letter-spacing:-.03em;
+  margin-top:22px;max-width:660px;
+  position:relative;z-index:1;
+}
+.brand-title em{
+  font-style:italic;
+  background:linear-gradient(130deg,var(--gold),var(--gold3));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.brand-desc{
+  margin-top:20px;color:var(--muted);font-size:16px;line-height:1.72;
+  max-width:500px;position:relative;z-index:1;
+}
+
+/* MOCK WINDOW */
+.mock-window{
+  margin-top:48px;position:relative;z-index:1;
+  border:1px solid var(--line2);border-radius:22px;
+  background:rgba(8,8,12,.75);backdrop-filter:blur(20px);
+  overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.6);
+}
+.mock-top{
+  height:48px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 16px;gap:12px;
+}
+.mac-dots{display:flex;gap:6px}
+.mac-dots span{width:10px;height:10px;border-radius:50%;display:block}
+.mac-dots span:nth-child(1){background:#ff5f57}
+.mac-dots span:nth-child(2){background:#ffbd2e}
+.mac-dots span:nth-child(3){background:#28ca41}
+.mock-title{margin-left:auto;margin-right:auto;color:var(--muted2);font-size:12px}
+.mock-body{padding:18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.mini-stat{
+  border:1px solid var(--line);border-radius:16px;
+  background:rgba(255,255,255,.03);padding:16px;
+}
+.mini-stat .ml{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);font-weight:600}
+.mini-stat .mv{font-family:'Playfair Display',serif;font-size:30px;margin-top:8px;line-height:1}
+.mini-stat .mg{font-size:12px;color:var(--green);margin-top:6px;font-weight:600}
+.mock-timeline{padding:0 18px 18px;display:flex;flex-direction:column;gap:8px}
+.tl-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border:1px solid var(--line);border-radius:14px;
+  background:rgba(255,255,255,.025);
+}
+.tl-time{font-size:11px;color:var(--gold2);font-weight:700;min-width:44px}
+.tl-name{font-size:13px;font-weight:600}
+.tl-srv{font-size:11px;color:var(--muted);margin-top:2px}
+.tl-dot{width:8px;height:8px;border-radius:50%;margin-left:auto;flex-shrink:0}
+.tl-dot.ok{background:var(--green)}
+.tl-dot.wait{background:var(--yellow)}
+
+/* AUTH CARD */
+.auth-card{
+  position:relative;z-index:1;
+  border:1px solid var(--line);border-radius:var(--rxl);
+  background:rgba(12,12,18,.8);backdrop-filter:blur(28px);
+  box-shadow:0 40px 100px rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+  padding:32px;
+}
+.form-box{width:100%;max-width:480px}
+.form-head{margin-bottom:26px}
+.form-head h1,.form-head h2{font-family:'Playfair Display',serif;font-size:40px;line-height:1.05;font-weight:700}
+.form-head p{color:var(--muted);margin-top:10px;font-size:14px;line-height:1.65}
+
+/* STEPPER */
+.stepper{display:flex;gap:8px;margin:20px 0 24px;align-items:center}
+.step-dot{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.07);position:relative;overflow:hidden}
+.step-dot.active::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;animation:fill .4s ease forwards}
+.step-dot.done::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px}
+@keyframes fill{from{width:0}to{width:100%}}
+.step-label{font-size:11px;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase;font-weight:700;white-space:nowrap}
+
+/* FIELDS */
+.field{margin-bottom:13px}
+.field label{
+  display:block;font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--muted2);margin-bottom:7px;font-weight:700;
+}
+.field input,.field select,.field textarea{
+  width:100%;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:var(--r);
+  padding:14px 15px;
+  outline:none;
+  font-size:14px;font-family:'Outfit',sans-serif;
+  transition:border-color .2s, box-shadow .2s, background .2s;
+}
+.field select option{background:#111;color:#fff}
+.field textarea{min-height:88px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--goldring);
+  background:rgba(200,168,107,.06);
+  box-shadow:0 0 0 3px rgba(200,168,107,.10);
+}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* BUTTONS */
+.btn{
+  border:none;border-radius:var(--r);
+  padding:14px 20px;
+  font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;
+  letter-spacing:.03em;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  transition:transform .2s,box-shadow .2s,background .2s,opacity .2s;
+  cursor:pointer;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#080808;
+  box-shadow:0 12px 40px rgba(200,168,107,.30);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 50px rgba(200,168,107,.40)}
+.btn-primary:active{transform:translateY(0)}
+.btn-ghost{
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+  border:1px solid rgba(255,255,255,.10);
+}
+.btn-ghost:hover{border-color:var(--goldring);color:var(--gold2);background:rgba(200,168,107,.07)}
+.btn-full{width:100%}
+.btn-danger{background:rgba(240,109,122,.12);color:var(--red);border:1px solid rgba(240,109,122,.18)}
+.btn-danger:hover{background:rgba(240,109,122,.20)}
+.btn-row{display:flex;gap:10px;align-items:center;margin-top:16px}
+.btn-icon{
+  width:44px;height:44px;border-radius:14px;border:1px solid var(--line);
+  background:rgba(255,255,255,.04);color:var(--text);cursor:pointer;
+  display:grid;place-items:center;transition:.2s;font-size:16px;
+}
+.btn-icon:hover{border-color:var(--goldring);color:var(--gold2)}
+
+.auth-switch{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+.auth-switch button{background:none;border:none;color:var(--gold2);font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif}
+
+/* ── DASHBOARD ────────────────────────────────────── */
+.dashboard{display:none;min-height:100vh;position:relative;z-index:1}
+
+.sidebar{
+  position:fixed;left:16px;top:16px;bottom:16px;width:268px;
+  border:1px solid var(--line2);border-radius:28px;
+  background:rgba(11,11,16,.86);backdrop-filter:blur(28px);
+  padding:20px;z-index:30;
+  display:flex;flex-direction:column;justify-content:space-between;
+  box-shadow:0 24px 80px rgba(0,0,0,.5);
+}
+.side-logo{margin-bottom:28px}
+.nav-group{display:flex;flex-direction:column;gap:4px}
+.nav-btn{
+  width:100%;border:none;background:transparent;
+  color:var(--muted);
+  display:flex;align-items:center;gap:12px;
+  padding:12px 13px;border-radius:16px;
+  text-align:left;font-weight:600;font-size:14px;
+  transition:background .15s,color .15s,border-color .15s;
+  cursor:pointer;
+  position:relative;
+  font-family:'Outfit',sans-serif;
+}
+.nav-btn .n-icon{
+  width:34px;height:34px;border-radius:12px;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.05);
+  font-size:15px;flex-shrink:0;
+  transition:background .15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav-btn.active{
+  background:rgba(200,168,107,.10);color:var(--gold2);
+  border:1px solid rgba(200,168,107,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 8px 24px rgba(0,0,0,.18);
+}
+.nav-btn.active .n-icon{background:rgba(200,168,107,.18);color:var(--gold2)}
+
+/* SIDE USER */
+.side-user{
+  border:1px solid var(--line);border-radius:20px;
+  background:rgba(255,255,255,.03);padding:14px;
+}
+.su-row{display:flex;gap:11px;align-items:center}
+.su-avatar{
+  width:40px;height:40px;border-radius:14px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#080808;display:grid;place-items:center;font-weight:800;font-size:18px;
+}
+.su-name{font-weight:700;font-size:14px}
+.su-plan{color:var(--muted2);font-size:11px;margin-top:2px}
+.public-link-box{
+  margin-top:12px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:14px;
+  background:rgba(0,0,0,.25);
+  color:var(--muted);font-size:11px;word-break:break-all;line-height:1.5;
+  cursor:pointer;transition:.2s;
+}
+.public-link-box:hover{border-color:var(--goldring);color:var(--gold2)}
+
+/* MAIN */
+.main{
+  margin-left:300px;
+  padding:16px 20px 48px;
+  min-height:100vh;
+}
+
+/* TOPBAR */
+.topbar{
+  border:1px solid var(--line);border-radius:24px;
+  background:rgba(11,11,16,.78);backdrop-filter:blur(24px);
+  padding:16px 18px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  position:sticky;top:14px;z-index:20;
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.titleblock h2{font-family:'Playfair Display',serif;font-size:30px;line-height:1;font-weight:700}
+.titleblock p{color:var(--muted);font-size:13px;margin-top:5px}
+.top-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+
+/* VIEWS */
+.view{display:none;margin-top:18px;animation:fadeUp .3s ease}
+.view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* COMMAND HERO */
+.command-hero{
+  position:relative;overflow:hidden;
+  border:1px solid var(--line2);border-radius:28px;
+  padding:30px 32px;margin-bottom:18px;
+  background:
+    radial-gradient(ellipse 60% 80% at 5% 50%,rgba(200,168,107,.14),transparent),
+    linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.01));
+}
+.command-hero .orb-hero{
+  position:absolute;right:-80px;top:-80px;
+  width:380px;height:380px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,168,107,.18),transparent 68%);
+  pointer-events:none;
+}
+.ch-inner{position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+.ch-inner h1{font-family:'Playfair Display',serif;font-size:44px;line-height:.97;max-width:660px}
+.ch-inner h1 em{font-style:italic;color:var(--gold2)}
+.ch-inner p{color:var(--muted);margin-top:10px;font-size:14px;line-height:1.65}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat-card{
+  border:1px solid var(--line);border-radius:22px;
+  background:rgba(16,16,22,.75);
+  padding:20px;min-height:130px;
+  position:relative;overflow:hidden;
+  transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+.stat-card:hover{transform:translateY(-3px);border-color:rgba(200,168,107,.22);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.stat-card::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 70% at 100% 0%,rgba(200,168,107,.09),transparent);
+}
+.stat-card > *{position:relative}
+.sc-label{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted2);font-weight:700}
+.sc-value{font-family:'Playfair Display',serif;font-size:40px;line-height:1;margin-top:12px}
+.sc-note{font-size:12px;color:var(--muted);margin-top:8px}
+.sc-good{color:var(--green)}
+.sc-icon{position:absolute;right:16px;top:16px;font-size:24px;opacity:.25}
+
+/* CONTENT GRID */
+.content-grid{display:grid;grid-template-columns:1.4fr .8fr;gap:14px}
+
+/* PANEL */
+.panel{
+  border:1px solid var(--line);border-radius:24px;
+  background:rgba(14,14,20,.78);backdrop-filter:blur(18px);
+  padding:20px;
+  box-shadow:0 16px 56px rgba(0,0,0,.22);
+}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:16px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--line);
+}
+.panel-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700}
+.panel-sub{color:var(--muted2);font-size:12px;margin-top:3px}
+.panel-action{font-size:12px;color:var(--gold2);font-weight:700;background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif}
+
+/* APPOINTMENT ROW CARDS */
+.apt-list{display:flex;flex-direction:column;gap:9px}
+.apt-card{
+  border:1px solid var(--line);border-radius:18px;
+  background:rgba(255,255,255,.03);
+  padding:13px 14px;
+  display:flex;align-items:center;gap:13px;
+  transition:border-color .2s,background .2s;
+}
+.apt-card:hover{border-color:rgba(200,168,107,.22);background:rgba(200,168,107,.04)}
+.apt-avatar{
+  width:42px;height:42px;border-radius:14px;flex-shrink:0;
+  background:rgba(200,168,107,.14);color:var(--gold2);
+  display:grid;place-items:center;font-weight:800;font-size:17px;
+}
+.apt-name{font-weight:700;font-size:14px}
+.apt-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.apt-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+
+/* BADGES */
+.badge{
+  padding:5px 10px;border-radius:99px;
+  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+  display:inline-flex;align-items:center;gap:5px;
+  white-space:nowrap;
+}
+.badge::before{content:"";width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge.ok{background:rgba(82,214,138,.10);color:var(--green)}.badge.ok::before{background:var(--green)}
+.badge.wait{background:rgba(245,200,66,.10);color:var(--yellow)}.badge.wait::before{background:var(--yellow)}
+.badge.off{background:rgba(240,109,122,.10);color:var(--red)}.badge.off::before{background:var(--red)}
+.badge.done{background:rgba(106,180,245,.10);color:var(--blue)}.badge.done::before{background:var(--blue)}
+.badge.re{background:rgba(167,139,250,.10);color:var(--purple)}.badge.re::before{background:var(--purple)}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-label{font-size:10px;color:var(--muted2);text-align:center;text-transform:uppercase;font-weight:700;padding:4px 0}
+.cal-day{
+  aspect-ratio:1;border-radius:11px;display:grid;place-items:center;
+  background:rgba(255,255,255,.03);color:var(--muted);font-size:12px;font-weight:600;
+  cursor:default;transition:.15s;
+}
+.cal-day.busy{background:rgba(200,168,107,.12);color:var(--gold2);border:1px solid rgba(200,168,107,.20)}
+.cal-day.today{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#080808;font-weight:800;box-shadow:0 4px 16px rgba(200,168,107,.35)}
+
+/* TIMELINE AGENDA */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-block{
+  display:flex;gap:14px;padding:10px 0;
+  border-bottom:1px solid var(--line);position:relative;
+}
+.tl-block:last-child{border-bottom:none}
+.tl-timestamp{
+  font-size:11px;font-weight:700;color:var(--muted2);
+  min-width:50px;padding-top:14px;text-align:right;flex-shrink:0;
+}
+.tl-line{width:1px;background:var(--line2);position:relative;flex-shrink:0}
+.tl-line::before{
+  content:"";position:absolute;top:16px;left:50%;transform:translateX(-50%);
+  width:8px;height:8px;border-radius:50%;
+  background:var(--gold);box-shadow:0 0 12px rgba(200,168,107,.5);
+}
+.tl-content{flex:1}
+.tl-apt{
+  border:1px solid var(--line);border-radius:16px;
+  background:rgba(255,255,255,.035);
+  padding:13px 15px;
+  display:flex;align-items:center;gap:12px;
+  transition:.2s;
+}
+.tl-apt:hover{border-color:rgba(200,168,107,.25);background:rgba(200,168,107,.05)}
+
+/* CARDS GRID – Clientes / Serviços / Profissionais */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.client-card{
+  border:1px solid var(--line);border-radius:20px;
+  background:rgba(14,14,20,.78);
+  padding:18px;
+  transition:transform .2s,border-color .2s;
+}
+.client-card:hover{transform:translateY(-3px);border-color:rgba(200,168,107,.22)}
+.cc-top{display:flex;align-items:center;gap:13px;margin-bottom:14px}
+.cc-avatar{
+  width:48px;height:48px;border-radius:16px;flex-shrink:0;
+  display:grid;place-items:center;font-size:20px;font-weight:800;
+  background:linear-gradient(135deg,rgba(200,168,107,.18),rgba(200,168,107,.08));
+  color:var(--gold2);
+}
+.cc-name{font-weight:700;font-size:15px}
+.cc-phone{font-size:12px;color:var(--muted);margin-top:3px}
+.cc-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.cc-stat{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.cc-stat .csl{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);font-weight:700}
+.cc-stat .csv{font-size:15px;font-weight:700;margin-top:4px}
+
+/* SERVICE CARD */
+.svc-card{
+  border:1px solid var(--line);border-radius:20px;
+  background:rgba(14,14,20,.78);padding:20px;
+  position:relative;overflow:hidden;
+  transition:transform .2s,border-color .2s;
+}
+.svc-card:hover{transform:translateY(-3px);border-color:rgba(200,168,107,.22)}
+.svc-card::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 100% 0%,rgba(200,168,107,.07),transparent);
+}
+.svc-card > *{position:relative}
+.svc-price{
+  font-family:'Playfair Display',serif;
+  font-size:28px;font-weight:700;
+  background:linear-gradient(130deg,var(--gold),var(--gold3));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.svc-name{font-size:15px;font-weight:700;margin-top:6px}
+.svc-dur{font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:5px}
+.svc-status{margin-top:12px}
+
+/* PROF CARD */
+.prof-card{
+  border:1px solid var(--line);border-radius:20px;
+  background:rgba(14,14,20,.78);padding:18px;
+  transition:transform .2s,border-color .2s;
+  text-align:center;
+}
+.prof-card:hover{transform:translateY(-3px);border-color:rgba(200,168,107,.22)}
+.prof-avatar{
+  width:64px;height:64px;border-radius:20px;margin:0 auto 12px;
+  background:linear-gradient(135deg,rgba(200,168,107,.22),rgba(200,168,107,.06));
+  color:var(--gold2);display:grid;place-items:center;font-size:24px;font-weight:800;
+  border:2px solid rgba(200,168,107,.18);
+}
+.prof-name{font-weight:700;font-size:15px}
+.prof-esp{font-size:12px;color:var(--muted);margin-top:4px}
+.prof-status{margin-top:10px}
+.status-dot{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700}
+.status-dot::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green)}
+.status-dot.off::before{background:var(--muted2)}
+
+/* FORM ADD SECTION */
+.form-add{
+  border:1px solid rgba(200,168,107,.12);border-radius:20px;
+  background:rgba(200,168,107,.04);padding:18px;
+  margin-bottom:20px;
+  display:grid;gap:12px;
+}
+.form-add-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:end}
+
+/* FINANCEIRO */
+.fin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.fin-card{
+  border:1px solid var(--line);border-radius:22px;
+  background:rgba(14,14,20,.78);padding:20px;
+  position:relative;overflow:hidden;
+}
+.fin-card::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 90% 10%,rgba(200,168,107,.10),transparent 50%);
+}
+.fin-card > *{position:relative}
+.fin-label{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);font-weight:700}
+.fin-value{font-family:'Playfair Display',serif;font-size:36px;margin-top:10px}
+.fin-sub{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* SECTION DIVIDER */
+.sec-div{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:22px 0 14px}
+.sec-div h3{font-family:'Playfair Display',serif;font-size:20px}
+.sec-div p{font-size:12px;color:var(--muted2)}
+
+/* EMPTY STATE */
+.empty-state{
+  padding:40px;border:1px dashed rgba(255,255,255,.10);border-radius:20px;
+  text-align:center;color:var(--muted2);
+}
+.empty-state .es-icon{font-size:36px;opacity:.4;margin-bottom:12px}
+.empty-state p{font-size:14px}
+
+/* TOAST */
+.toast{
+  position:fixed;right:20px;bottom:20px;z-index:9999;
+  border:1px solid var(--line2);background:rgba(12,12,18,.95);
+  backdrop-filter:blur(18px);
+  padding:13px 16px;border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  display:none;max-width:340px;font-size:14px;
+  animation:slideUp .25s ease;
+}
+.toast.visible{display:block}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PUBLIC PAGE ──────────────────────────────────── */
+.public-page{display:none;min-height:100vh;position:relative;z-index:1;padding:20px}
+
+.pub-wrap{max-width:1080px;margin:0 auto}
+.pub-hero{
+  position:relative;overflow:hidden;
+  border:1px solid var(--line2);border-radius:var(--rxl);
+  background:
+    radial-gradient(ellipse 60% 80% at 5% 50%,rgba(200,168,107,.14),transparent),
+    linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+  padding:36px 40px;margin-bottom:16px;
+}
+.pub-hero .orb{
+  position:absolute;right:-60px;top:-60px;
+  width:320px;height:320px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,168,107,.20),transparent 68%);
+  pointer-events:none;
+}
+.pub-hero .logo{margin-bottom:20px}
+.pub-hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,62px);line-height:.97;font-weight:700}
+.pub-hero p{color:var(--muted);margin-top:10px;font-size:15px}
+
+.pub-body{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* STEP INDICATOR */
+.pub-steps{display:flex;gap:6px;margin-bottom:18px}
+.ps{
+  flex:1;padding:10px 14px;border-radius:14px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.03);
+  font-size:12px;font-weight:700;color:var(--muted2);
+  display:flex;align-items:center;gap:8px;
+  transition:.2s;
+}
+.ps.active{border-color:rgba(200,168,107,.30);background:rgba(200,168,107,.08);color:var(--gold2)}
+.ps.done{border-color:rgba(82,214,138,.20);background:rgba(82,214,138,.06);color:var(--green)}
+.ps .psn{
+  width:22px;height:22px;border-radius:8px;
+  display:grid;place-items:center;font-size:11px;
+  background:rgba(255,255,255,.07);flex-shrink:0;
+}
+.ps.active .psn{background:var(--goldglow);color:var(--gold2)}
+.ps.done .psn{background:rgba(82,214,138,.15);color:var(--green)}
+
+/* SERVICE + PROF CHOICE */
 .choice{
-  border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:15px;cursor:pointer;transition:.2s
+  border:1px solid var(--line);border-radius:16px;
+  background:rgba(255,255,255,.03);
+  padding:14px 15px;cursor:pointer;transition:.2s;
+  display:flex;align-items:center;gap:12px;
 }
-.choice.active,.choice:hover{border-color:rgba(201,169,110,.45);background:rgba(201,169,110,.10)}
-.choice-title{font-weight:800}.choice-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.choice:hover{border-color:rgba(200,168,107,.25);background:rgba(200,168,107,.05)}
+.choice.active{border-color:var(--goldring);background:rgba(200,168,107,.10);box-shadow:0 0 0 1px var(--goldring)}
+.choice .c-icon{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  background:rgba(200,168,107,.12);color:var(--gold2);
+  display:grid;place-items:center;font-size:18px;
+}
+.choice-title{font-weight:700;font-size:14px}
+.choice-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.choice-right{margin-left:auto;font-family:'Playfair Display',serif;font-size:18px;color:var(--gold2)}
+
+.choice-grid{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+
+/* CONFIRM SCREEN */
+.confirm-screen{
+  display:none;text-align:center;padding:32px;
+}
+.confirm-screen .tick{
+  width:64px;height:64px;border-radius:20px;margin:0 auto 16px;
+  background:linear-gradient(135deg,rgba(82,214,138,.20),rgba(82,214,138,.05));
+  border:1px solid rgba(82,214,138,.25);
+  display:grid;place-items:center;font-size:28px;
+}
+.confirm-screen h2{font-family:'Playfair Display',serif;font-size:28px}
+.confirm-screen p{color:var(--muted);font-size:14px;margin-top:8px}
 
 /* MOBILE */
-.mobile-menu{display:none}
-@media(max-width:1150px){
-  .grid-4{grid-template-columns:repeat(2,1fr)}
+.mobile-nav{display:none}
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:1fr 1fr}
   .content-grid{grid-template-columns:1fr}
-  .form-panel{grid-template-columns:1fr 1fr}
 }
 @media(max-width:900px){
-  .auth-wrap{grid-template-columns:1fr;padding:14px}
-  .brand-panel{padding:26px}.auth-card{padding:24px}.mock-body{grid-template-columns:1fr}
+  .auth-wrap{grid-template-columns:1fr;padding:12px}
+  .brand-panel{padding:26px;min-height:auto}
+  .auth-card{padding:22px}
   .sidebar{display:none}
-  .main{margin-left:0;padding:12px 12px 32px}
-  .topbar{position:relative;top:0;align-items:flex-start;flex-direction:column}
-  .mobile-menu{display:flex;gap:8px;overflow:auto;margin:12px 0;padding-bottom:5px}
-  .mobile-menu .nav-btn{min-width:max-content;width:auto;background:rgba(255,255,255,.04);border:1px solid var(--line)}
-  .hero-row{flex-direction:column;align-items:flex-start}
-  .hero-row h1{font-size:42px}
-  .grid-4{grid-template-columns:1fr}
-  .form-panel{grid-template-columns:1fr}
-  .booking-body{grid-template-columns:1fr}
+  .main{margin-left:0;padding:12px 12px 40px}
+  .topbar{top:0;border-radius:16px;flex-wrap:wrap}
+  .mobile-nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:10px 0;-webkit-overflow-scrolling:touch}
+  .mobile-nav .nav-btn{min-width:auto;width:auto;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:10px 14px}
+  .stats-grid{grid-template-columns:1fr}
+  .cards-grid{grid-template-columns:1fr}
+  .pub-body{grid-template-columns:1fr}
+  .fin-grid{grid-template-columns:1fr}
+  .form-add-row{grid-template-columns:1fr}
   .field-grid{grid-template-columns:1fr}
+  .pub-hero{padding:24px}
+  .pub-hero h1{font-size:36px}
+  .ch-inner{flex-direction:column;align-items:flex-start}
+  .ch-inner h1{font-size:34px}
+}
+@media(max-width:480px){
+  .mock-body{grid-template-columns:1fr}
+  .auth-wrap{padding:8px;gap:8px}
 }
 </style>
 </head>
 
 <body>
+<div class="noise-bg"></div>
+<div class="grid-bg"></div>
+<div class="glow-top"></div>
+
 <div class="app-shell">
 
-  <!-- LOGIN / CADASTRO -->
-  <section id="authView" class="auth-wrap">
-    <div class="brand-panel">
-      <div class="brand-content">
-        <div class="logo"><div class="logo-dot"></div>AgendaPro</div>
+<!-- ══════════════ AUTH ══════════════ -->
+<section id="authView" class="auth-wrap">
+  <div class="brand-panel">
+    <div class="brand-content">
+      <div class="logo"><div class="logo-gem">✦</div>AgendaPro</div>
+      <div class="hero-badge"><span class="dot"></span>Sistema multiempresa premium</div>
+      <h1 class="brand-title">Agendamento com cara de <em>produto grande.</em></h1>
+      <p class="brand-desc">Cada negócio recebe painel próprio, agenda separada e link exclusivo para clientes agendarem sem complicação.</p>
 
-        <div class="hero-kicker">Sistema multiempresa premium</div>
-        <h1 class="hero-title">Agendamento online com cara de <em>empresa grande</em>.</h1>
-        <p class="hero-desc">
-          Cada negócio recebe uma agenda separada, um painel próprio e um link exclusivo para clientes agendarem sem precisar digitar ID.
-        </p>
-
-        <div class="mock-window">
-          <div class="mock-top">
-            <div class="dots"><i></i><i></i><i></i></div>
-            <span style="color:var(--muted2);font-size:12px">Painel Premium</span>
-          </div>
-          <div class="mock-body">
-            <div class="mini-card"><div class="mini-label">Hoje</div><div class="mini-value">18</div><div class="mini-good">+12%</div></div>
-            <div class="mini-card"><div class="mini-label">Clientes</div><div class="mini-value">248</div><div class="mini-good">+24 novos</div></div>
-            <div class="mini-card"><div class="mini-label">Faturamento</div><div class="mini-value">R$4.2k</div><div class="mini-good">+18%</div></div>
-          </div>
+      <div class="mock-window">
+        <div class="mock-top">
+          <div class="mac-dots"><span></span><span></span><span></span></div>
+          <span class="mock-title">Painel Premium — Dashboard</span>
         </div>
-      </div>
-      <p style="position:relative;z-index:1;color:var(--muted2);font-size:13px">✦ Login, cadastro, empresa, serviços e agenda separados por empresa_id.</p>
-    </div>
-
-    <div class="auth-card">
-      <div class="form-box">
-        <div class="form-head">
-          <h2 id="authTitle">Criar sua conta</h2>
-          <p id="authDesc">Configure sua empresa em 3 etapas e receba seu link de agendamento.</p>
+        <div class="mock-body">
+          <div class="mini-stat"><div class="ml">Hoje</div><div class="mv">18</div><div class="mg">↑ 12%</div></div>
+          <div class="mini-stat"><div class="ml">Clientes</div><div class="mv">248</div><div class="mg">↑ 24 novos</div></div>
+          <div class="mini-stat"><div class="ml">Faturamento</div><div class="mv">R$4.2k</div><div class="mg">↑ 18%</div></div>
         </div>
-
-        <div id="onboardingStepper" class="stepper">
-          <div class="step-dot active" id="st1"></div>
-          <div class="step-dot" id="st2"></div>
-          <div class="step-dot" id="st3"></div>
-        </div>
-
-        <!-- ETAPA 1 -->
-        <div id="stepConta">
-          <div class="field"><label>Seu nome</label><input id="cadNome" placeholder="Ex: Ana Caroline"></div>
-          <div class="field"><label>E-mail</label><input id="cadEmail" type="email" placeholder="seu@email.com"></div>
-          <div class="field"><label>Senha</label><input id="cadSenha" type="password" placeholder="mínimo 6 caracteres"></div>
-          <button class="btn btn-primary btn-full" onclick="goStepNegocio()">Continuar para o negócio →</button>
-          <div class="auth-switch">Já tenho empresa criada. <button onclick="showLoginOnly()">Entrar pelo link salvo</button></div>
-        </div>
-
-        <!-- ETAPA 2 -->
-        <div id="stepNegocio" style="display:none">
-          <div class="field"><label>Nome do negócio</label><input id="empNome" placeholder="Ex: Nails da Ana" oninput="autoSlug()"></div>
-          <div class="field-grid">
-            <div class="field"><label>Área de atuação</label><select id="empCategoria"></select></div>
-            <div class="field"><label>WhatsApp</label><input id="empWhatsapp" placeholder="(92) 99999-9999"></div>
-          </div>
-          <div class="field"><label>Link personalizado</label><input id="empSlug" placeholder="nails-da-ana"></div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="backStepConta()">← Voltar</button>
-            <button class="btn btn-primary" style="flex:1" onclick="goStepServico()">Continuar para serviços →</button>
-          </div>
-        </div>
-
-        <!-- ETAPA 3 -->
-        <div id="stepServico" style="display:none">
-          <div class="field"><label>Primeiro serviço</label><input id="servNome" placeholder="Ex: Alongamento em Gel"></div>
-          <div class="field-grid">
-            <div class="field"><label>Preço</label><input id="servPreco" type="number" placeholder="80"></div>
-            <div class="field"><label>Duração em minutos</label><input id="servDuracao" type="number" placeholder="90"></div>
-          </div>
-          <div class="field"><label>Primeiro profissional</label><input id="profNome" placeholder="Ex: Ana Caroline"></div>
-          <div class="field"><label>Especialidade</label><input id="profEspecialidade" placeholder="Ex: Manicure"></div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="backStepNegocio()">← Voltar</button>
-            <button class="btn btn-primary" style="flex:1" onclick="finalizarCadastro()">Criar painel premium →</button>
-          </div>
-        </div>
-
-        <!-- LOGIN SIMPLES -->
-        <div id="loginOnly" style="display:none">
-          <div class="field"><label>Slug da empresa</label><input id="loginSlug" placeholder="ex: nails-da-ana"></div>
-          <button class="btn btn-primary btn-full" onclick="entrarPorSlug()">Entrar no painel</button>
-          <div class="auth-switch">Ainda não tenho. <button onclick="showCadastro()">Criar cadastro</button></div>
+        <div class="mock-timeline">
+          <div class="tl-row"><span class="tl-time">09:00</span><div><div class="tl-name">Ana Caroline</div><div class="tl-srv">Alongamento em Gel</div></div><div class="tl-dot ok"></div></div>
+          <div class="tl-row"><span class="tl-time">10:30</span><div><div class="tl-name">Juliana Dias</div><div class="tl-srv">Design de Sobrancelha</div></div><div class="tl-dot wait"></div></div>
+          <div class="tl-row"><span class="tl-time">13:00</span><div><div class="tl-name">Mariana Lima</div><div class="tl-srv">Pedicure Premium</div></div><div class="tl-dot ok"></div></div>
         </div>
       </div>
     </div>
-  </section>
+    <div class="orb"></div><div class="orb2"></div>
+    <p style="position:relative;z-index:1;color:var(--muted2);font-size:12px">✦ Login, cadastro, empresa, serviços e agenda separados por empresa_id — Supabase.</p>
+  </div>
 
-  <!-- DASHBOARD -->
-  <section id="dashboardView" class="dashboard">
-    <aside class="sidebar">
-      <div class="side-top">
-        <div class="logo"><div class="logo-dot"></div>AgendaPro</div>
-        <nav class="nav-group" id="sideNav"></nav>
+  <div class="auth-card">
+    <div class="form-box">
+      <div class="form-head">
+        <h2 id="authTitle">Criar sua conta</h2>
+        <p id="authDesc">Configure sua empresa em 3 etapas e receba seu link de agendamento.</p>
       </div>
 
+      <div id="onboardingStepper" class="stepper">
+        <div class="step-dot active" id="st1"></div>
+        <div class="step-dot" id="st2"></div>
+        <div class="step-dot" id="st3"></div>
+      </div>
+
+      <!-- ETAPA 1 -->
+      <div id="stepConta">
+        <div class="field"><label>Seu nome</label><input id="cadNome" placeholder="Ex: Ana Caroline"></div>
+        <div class="field"><label>E-mail</label><input id="cadEmail" type="email" placeholder="seu@email.com"></div>
+        <div class="field"><label>Senha</label><input id="cadSenha" type="password" placeholder="mínimo 6 caracteres"></div>
+        <button class="btn btn-primary btn-full" onclick="goStepNegocio()">Continuar para o negócio →</button>
+        <div class="auth-switch">Já tenho empresa. <button onclick="showLoginOnly()">Entrar pelo link salvo</button></div>
+      </div>
+
+      <!-- ETAPA 2 -->
+      <div id="stepNegocio" style="display:none">
+        <div class="field"><label>Nome do negócio</label><input id="empNome" placeholder="Ex: Nails da Ana" oninput="autoSlug()"></div>
+        <div class="field-grid">
+          <div class="field"><label>Área de atuação</label><select id="empCategoria"></select></div>
+          <div class="field"><label>WhatsApp</label><input id="empWhatsapp" placeholder="(92) 99999-9999"></div>
+        </div>
+        <div class="field"><label>Link personalizado</label><input id="empSlug" placeholder="nails-da-ana"></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="backStepConta()">← Voltar</button>
+          <button class="btn btn-primary" style="flex:1" onclick="goStepServico()">Continuar para serviços →</button>
+        </div>
+      </div>
+
+      <!-- ETAPA 3 -->
+      <div id="stepServico" style="display:none">
+        <div class="field"><label>Primeiro serviço</label><input id="servNome" placeholder="Ex: Alongamento em Gel"></div>
+        <div class="field-grid">
+          <div class="field"><label>Preço (R$)</label><input id="servPreco" type="number" placeholder="80"></div>
+          <div class="field"><label>Duração em minutos</label><input id="servDuracao" type="number" placeholder="90"></div>
+        </div>
+        <div class="field"><label>Primeiro profissional</label><input id="profNome" placeholder="Ex: Ana Caroline"></div>
+        <div class="field"><label>Especialidade</label><input id="profEspecialidade" placeholder="Ex: Manicure"></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="backStepNegocio()">← Voltar</button>
+          <button class="btn btn-primary" style="flex:1" onclick="finalizarCadastro()">Criar painel premium →</button>
+        </div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="loginOnly" style="display:none">
+        <div class="field"><label>Slug da empresa</label><input id="loginSlug" placeholder="ex: nails-da-ana"></div>
+        <button class="btn btn-primary btn-full" onclick="entrarPorSlug()">Entrar no painel</button>
+        <div class="auth-switch">Ainda não tenho. <button onclick="showCadastro()">Criar cadastro</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<section id="dashboardView" class="dashboard">
+  <aside class="sidebar">
+    <div class="side-top">
+      <div class="logo side-logo"><div class="logo-gem">✦</div>AgendaPro</div>
+      <nav class="nav-group" id="sideNav"></nav>
+    </div>
+    <div>
       <div class="side-user">
-        <div class="user-line">
-          <div class="avatar" id="avatarLetter">A</div>
+        <div class="su-row">
+          <div class="su-avatar" id="avatarLetter">A</div>
           <div>
-            <div class="user-name" id="sideEmpresa">Empresa</div>
-            <div class="user-plan" id="sideArea">Premium</div>
+            <div class="su-name" id="sideEmpresa">Empresa</div>
+            <div class="su-plan" id="sideArea">Premium</div>
           </div>
         </div>
-        <div class="public-link-box" id="publicLinkBox">Link público...</div>
-        <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="logout()">Sair</button>
-      </div>
-    </aside>
-
-    <main class="main">
-      <div class="topbar">
-        <div class="titleblock">
-          <h2 id="pageTitle">Dashboard</h2>
-          <p id="pageSub">Controle completo do seu negócio.</p>
-        </div>
-        <div class="top-actions">
-          <button class="icon-btn" onclick="copyPublicLink()">🔗</button>
-          <button class="icon-btn">🔔</button>
-          <button class="btn btn-ghost" onclick="openPublic()">Ver link público</button>
-          <button class="btn btn-primary" onclick="setView('agenda')">+ Novo agendamento</button>
-        </div>
-      </div>
-
-      <div class="mobile-menu" id="mobileNav"></div>
-
-      <section id="view-dashboard" class="view active">
-        <div class="command-hero">
-          <div class="hero-row">
-            <div>
-              <h1>Seu centro de comando premium.</h1>
-              <p>Agenda, clientes, serviços, profissionais e faturamento separados da sua empresa, puxando tudo do Supabase.</p>
-            </div>
-            <button class="btn btn-primary" onclick="copyPublicLink()">Copiar link da agenda</button>
-          </div>
-        </div>
-
-        <div class="grid-4">
-          <div class="stat"><div class="stat-label">Agendamentos hoje</div><div class="stat-value" id="statHoje">0</div><div class="stat-small stat-good">Atualizado em tempo real</div></div>
-          <div class="stat"><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div><div class="stat-small">Base ativa da empresa</div></div>
-          <div class="stat"><div class="stat-label">Faturamento</div><div class="stat-value" id="statFaturamento">R$0</div><div class="stat-small stat-good">Soma dos agendamentos</div></div>
-          <div class="stat"><div class="stat-label">Serviços</div><div class="stat-value" id="statServicos">0</div><div class="stat-small">Catálogo disponível</div></div>
-        </div>
-
-        <div class="content-grid">
-          <div class="panel">
-            <div class="panel-head"><div><div class="panel-title">Próximos agendamentos</div><div class="panel-sub">Últimos horários cadastrados</div></div></div>
-            <div class="list" id="dashAppointments"></div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><div><div class="panel-title">Calendário</div><div class="panel-sub">Dias com movimento</div></div></div>
-            <div class="calendar" id="calendarBox"></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="view-agenda" class="view">
-        <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Criar agendamento</div><div class="panel-sub">Salva direto no Supabase com empresa_id</div></div></div>
-          <div class="form-panel">
-            <div class="field"><label>Cliente</label><input id="agCliente" placeholder="Nome do cliente"></div>
-            <div class="field"><label>Telefone</label><input id="agTelefone" placeholder="WhatsApp"></div>
-            <div class="field"><label>Serviço</label><select id="agServico"></select></div>
-            <div class="field"><label>Profissional</label><select id="agProfissional"></select></div>
-            <div class="field"><label>Data</label><input id="agData" type="date"></div>
-            <div class="field"><label>Hora</label><input id="agHora" type="time"></div>
-            <div class="field"><label>Status</label><select id="agStatus"><option>Confirmado</option><option>Pendente</option><option>Cancelado</option></select></div>
-            <button class="btn btn-primary" onclick="salvarAgendamento()">Salvar agendamento</button>
-          </div>
-          <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Serviço</th><th>Profissional</th><th>Data</th><th>Hora</th><th>Status</th></tr></thead><tbody id="agendaRows"></tbody></table></div>
-        </div>
-      </section>
-
-      <section id="view-clientes" class="view">
-        <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Clientes</div><div class="panel-sub">Todos separados por empresa</div></div></div>
-          <div class="form-panel">
-            <div class="field"><label>Nome</label><input id="cliNome" placeholder="Nome"></div>
-            <div class="field"><label>Telefone</label><input id="cliTel" placeholder="Telefone"></div>
-            <div class="field"><label>E-mail</label><input id="cliEmail" placeholder="E-mail"></div>
-            <button class="btn btn-primary" onclick="salvarCliente()">Adicionar cliente</button>
-          </div>
-          <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>E-mail</th><th>Data</th></tr></thead><tbody id="clientesRows"></tbody></table></div>
-        </div>
-      </section>
-
-      <section id="view-servicos" class="view">
-        <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Serviços</div><div class="panel-sub">Catálogo da empresa</div></div></div>
-          <div class="form-panel">
-            <div class="field"><label>Nome</label><input id="srvNome" placeholder="Serviço"></div>
-            <div class="field"><label>Preço</label><input id="srvPreco" type="number" placeholder="80"></div>
-            <div class="field"><label>Duração</label><input id="srvDur" type="number" placeholder="60"></div>
-            <button class="btn btn-primary" onclick="salvarServico()">Adicionar serviço</button>
-          </div>
-          <div class="table-wrap"><table><thead><tr><th>Serviço</th><th>Preço</th><th>Duração</th><th>Status</th></tr></thead><tbody id="servicosRows"></tbody></table></div>
-        </div>
-      </section>
-
-      <section id="view-profissionais" class="view">
-        <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Profissionais</div><div class="panel-sub">Equipe/atendentes da empresa</div></div></div>
-          <div class="form-panel">
-            <div class="field"><label>Nome</label><input id="proNome" placeholder="Profissional"></div>
-            <div class="field"><label>Especialidade</label><input id="proEsp" placeholder="Manicure"></div>
-            <div class="field"><label>Telefone</label><input id="proTel" placeholder="Telefone"></div>
-            <button class="btn btn-primary" onclick="salvarProfissional()">Adicionar profissional</button>
-          </div>
-          <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Especialidade</th><th>Telefone</th><th>Status</th></tr></thead><tbody id="profRows"></tbody></table></div>
-        </div>
-      </section>
-
-      <section id="view-financeiro" class="view">
-        <div class="grid-4">
-          <div class="stat"><div class="stat-label">Receita total</div><div class="stat-value" id="finReceita">R$0</div><div class="stat-small">Todos os agendamentos</div></div>
-          <div class="stat"><div class="stat-label">Ticket médio</div><div class="stat-value" id="finTicket">R$0</div><div class="stat-small">Média por atendimento</div></div>
-          <div class="stat"><div class="stat-label">Pagamentos</div><div class="stat-value" id="finPagos">0</div><div class="stat-small">Registros de pagamento</div></div>
-          <div class="stat"><div class="stat-label">Plano</div><div class="stat-value" style="font-size:34px" id="finPlano">Premium</div><div class="stat-small">Status ativo</div></div>
-        </div>
-      </section>
-
-      <section id="view-config" class="view">
-        <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Configurações</div><div class="panel-sub">Dados principais da empresa</div></div></div>
-          <div class="form-panel">
-            <div class="field"><label>Nome da empresa</label><input id="cfgNome"></div>
-            <div class="field"><label>WhatsApp</label><input id="cfgWhatsapp"></div>
-            <div class="field"><label>Slug/link</label><input id="cfgSlug"></div>
-            <button class="btn btn-primary" onclick="salvarConfig()">Salvar alterações</button>
-          </div>
-          <div class="empty" id="cfgLink"></div>
-        </div>
-      </section>
-    </main>
-  </section>
-
-  <!-- PÁGINA PÚBLICA -->
-  <section id="publicView" class="public-page">
-    <div class="public-card">
-      <div class="public-cover">
-        <div class="logo"><div class="logo-dot"></div>AgendaPro</div>
-        <h1 id="pubEmpresa">Agendamento</h1>
-        <p id="pubDesc">Escolha seu serviço, profissional, data e horário.</p>
-      </div>
-      <div class="booking-body">
-        <div class="panel">
-          <div class="panel-title">Escolha o atendimento</div>
-          <div class="panel-sub">Serviços disponíveis</div>
-          <div id="pubServicos" class="choice-grid"></div>
-          <div style="height:18px"></div>
-          <div class="panel-sub">Profissionais disponíveis</div>
-          <div id="pubProfissionais" class="choice-grid"></div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-title">Seus dados</div>
-          <div class="field"><label>Nome completo</label><input id="pubNome" placeholder="Seu nome"></div>
-          <div class="field"><label>WhatsApp</label><input id="pubTelefone" placeholder="(92) 99999-9999"></div>
-          <div class="field-grid">
-            <div class="field"><label>Data</label><input id="pubData" type="date"></div>
-            <div class="field"><label>Hora</label><input id="pubHora" type="time"></div>
-          </div>
-          <div class="field"><label>Observação</label><textarea id="pubObs" placeholder="Alguma observação?"></textarea></div>
-          <button class="btn btn-primary btn-full" onclick="confirmarAgendamentoPublico()">Confirmar agendamento</button>
-        </div>
+        <div class="public-link-box" id="publicLinkBox" onclick="copyPublicLink()">Link público...</div>
+        <button class="btn btn-ghost btn-full" style="margin-top:10px;font-size:13px" onclick="logout()">Sair da conta</button>
       </div>
     </div>
-  </section>
+  </aside>
 
-  <div class="toast" id="toast"></div>
+  <main class="main">
+    <div class="topbar">
+      <div class="titleblock">
+        <h2 id="pageTitle">Dashboard</h2>
+        <p id="pageSub">Controle completo do seu negócio.</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn-icon" onclick="copyPublicLink()" title="Copiar link público">🔗</button>
+        <button class="btn-icon" title="Notificações">🔔</button>
+        <button class="btn btn-ghost" onclick="openPublic()" style="font-size:13px">Ver página pública</button>
+        <button class="btn btn-primary" onclick="setView('agenda')">+ Agendamento</button>
+      </div>
+    </div>
+
+    <div class="mobile-nav" id="mobileNav"></div>
+
+    <!-- ── DASHBOARD ── -->
+    <section id="view-dashboard" class="view active">
+      <div class="command-hero">
+        <div class="orb-hero"></div>
+        <div class="ch-inner">
+          <div>
+            <h1>Seu centro de<br><em>comando premium.</em></h1>
+            <p>Agenda, clientes, serviços, profissionais e faturamento — tudo separado por empresa, tudo em tempo real.</p>
+          </div>
+          <button class="btn btn-primary" onclick="copyPublicLink()">🔗 Copiar link da agenda</button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><span class="sc-icon">📅</span><div class="sc-label">Agendamentos hoje</div><div class="sc-value" id="statHoje">0</div><div class="sc-note sc-good">↑ Tempo real</div></div>
+        <div class="stat-card"><span class="sc-icon">👥</span><div class="sc-label">Clientes</div><div class="sc-value" id="statClientes">0</div><div class="sc-note">Base ativa da empresa</div></div>
+        <div class="stat-card"><span class="sc-icon">💰</span><div class="sc-label">Faturamento total</div><div class="sc-value" id="statFaturamento">R$0</div><div class="sc-note sc-good">Soma dos agendamentos</div></div>
+        <div class="stat-card"><span class="sc-icon">✦</span><div class="sc-label">Serviços</div><div class="sc-value" id="statServicos">0</div><div class="sc-note">Catálogo disponível</div></div>
+      </div>
+
+      <div class="content-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div><div class="panel-title">Próximos agendamentos</div><div class="panel-sub">Últimos horários cadastrados</div></div>
+            <button class="panel-action" onclick="setView('agenda')">Ver todos →</button>
+          </div>
+          <div class="apt-list" id="dashAppointments"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><div class="panel-title">Calendário</div><div class="panel-sub">Dias com movimento</div></div></div>
+          <div class="cal-grid" id="calendarBox"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── AGENDA ── -->
+    <section id="view-agenda" class="view">
+      <div class="form-add">
+        <div class="sec-div" style="margin:0 0 10px"><h3>Criar agendamento</h3><p>Salva direto no Supabase com empresa_id</p></div>
+        <div class="form-add-row">
+          <div class="field"><label>Cliente</label><input id="agCliente" placeholder="Nome do cliente"></div>
+          <div class="field"><label>Telefone</label><input id="agTelefone" placeholder="WhatsApp"></div>
+          <div class="field"><label>Serviço</label><select id="agServico"></select></div>
+          <div class="field"><label>Profissional</label><select id="agProfissional"></select></div>
+        </div>
+        <div class="form-add-row">
+          <div class="field"><label>Data</label><input id="agData" type="date"></div>
+          <div class="field"><label>Hora</label><input id="agHora" type="time"></div>
+          <div class="field"><label>Status</label><select id="agStatus"><option>Confirmado</option><option>Pendente</option><option>Cancelado</option></select></div>
+          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary" onclick="salvarAgendamento()">Salvar agendamento</button></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Timeline de agendamentos</div><div class="panel-sub">Todos os horários da empresa</div></div></div>
+        <div class="timeline" id="agendaTimeline"></div>
+      </div>
+    </section>
+
+    <!-- ── CLIENTES ── -->
+    <section id="view-clientes" class="view">
+      <div class="form-add">
+        <div class="sec-div" style="margin:0 0 10px"><h3>Adicionar cliente</h3><p>Separado por empresa</p></div>
+        <div class="form-add-row">
+          <div class="field"><label>Nome</label><input id="cliNome" placeholder="Nome completo"></div>
+          <div class="field"><label>Telefone</label><input id="cliTel" placeholder="WhatsApp"></div>
+          <div class="field"><label>E-mail</label><input id="cliEmail" placeholder="E-mail"></div>
+          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary" onclick="salvarCliente()">Adicionar cliente</button></div>
+        </div>
+      </div>
+      <div class="cards-grid" id="clientesCards"></div>
+    </section>
+
+    <!-- ── SERVIÇOS ── -->
+    <section id="view-servicos" class="view">
+      <div class="form-add">
+        <div class="sec-div" style="margin:0 0 10px"><h3>Adicionar serviço</h3><p>Catálogo da empresa</p></div>
+        <div class="form-add-row">
+          <div class="field"><label>Nome</label><input id="srvNome" placeholder="Nome do serviço"></div>
+          <div class="field"><label>Preço (R$)</label><input id="srvPreco" type="number" placeholder="80"></div>
+          <div class="field"><label>Duração (min)</label><input id="srvDur" type="number" placeholder="60"></div>
+          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary" onclick="salvarServico()">Adicionar serviço</button></div>
+        </div>
+      </div>
+      <div class="cards-grid" id="servicosCards"></div>
+    </section>
+
+    <!-- ── PROFISSIONAIS ── -->
+    <section id="view-profissionais" class="view">
+      <div class="form-add">
+        <div class="sec-div" style="margin:0 0 10px"><h3>Adicionar profissional</h3><p>Equipe da empresa</p></div>
+        <div class="form-add-row">
+          <div class="field"><label>Nome</label><input id="proNome" placeholder="Nome do profissional"></div>
+          <div class="field"><label>Especialidade</label><input id="proEsp" placeholder="Ex: Manicure"></div>
+          <div class="field"><label>Telefone</label><input id="proTel" placeholder="Telefone"></div>
+          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary" onclick="salvarProfissional()">Adicionar profissional</button></div>
+        </div>
+      </div>
+      <div class="cards-grid" id="profCards"></div>
+    </section>
+
+    <!-- ── FINANCEIRO ── -->
+    <section id="view-financeiro" class="view">
+      <div class="command-hero" style="margin-bottom:18px">
+        <div class="orb-hero"></div>
+        <div class="ch-inner">
+          <div><h1>Resultados<br><em>financeiros.</em></h1><p>Receita, ticket médio e histórico de pagamentos da empresa.</p></div>
+        </div>
+      </div>
+      <div class="fin-grid" style="margin-bottom:14px">
+        <div class="fin-card"><div class="fin-label">Receita total</div><div class="fin-value" id="finReceita">R$0</div><div class="fin-sub">Todos os agendamentos</div></div>
+        <div class="fin-card"><div class="fin-label">Ticket médio</div><div class="fin-value" id="finTicket">R$0</div><div class="fin-sub">Média por atendimento</div></div>
+        <div class="fin-card"><div class="fin-label">Total de pagamentos</div><div class="fin-value" id="finPagos">0</div><div class="fin-sub">Registros salvos</div></div>
+        <div class="fin-card"><div class="fin-label">Plano atual</div><div class="fin-value" id="finPlano" style="font-size:28px">Premium</div><div class="fin-sub">Status ativo</div></div>
+      </div>
+    </section>
+
+    <!-- ── CONFIGURAÇÕES ── -->
+    <section id="view-config" class="view">
+      <div class="panel" style="max-width:600px">
+        <div class="panel-head"><div><div class="panel-title">Configurações</div><div class="panel-sub">Dados principais da empresa</div></div></div>
+        <div class="field"><label>Nome da empresa</label><input id="cfgNome"></div>
+        <div class="field"><label>WhatsApp</label><input id="cfgWhatsapp"></div>
+        <div class="field"><label>Slug / link</label><input id="cfgSlug"></div>
+        <button class="btn btn-primary" onclick="salvarConfig()">Salvar alterações</button>
+        <div class="empty-state" id="cfgLink" style="margin-top:16px"></div>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- ══════════════ PÁGINA PÚBLICA ══════════════ -->
+<section id="publicView" class="public-page">
+  <div class="pub-wrap">
+    <div class="pub-hero">
+      <div class="orb"></div>
+      <div class="logo"><div class="logo-gem">✦</div>AgendaPro</div>
+      <h1 id="pubEmpresa">Agendamento Online</h1>
+      <p id="pubDesc">Escolha seu serviço, profissional, data e horário.</p>
+    </div>
+
+    <div id="pubConfirmScreen" class="panel confirm-screen" style="display:none">
+      <div class="tick">✓</div>
+      <h2>Agendamento confirmado!</h2>
+      <p>Entraremos em contato pelo WhatsApp para confirmar seu horário.</p>
+      <button class="btn btn-primary" style="margin-top:20px" onclick="resetPublic()">Fazer novo agendamento</button>
+    </div>
+
+    <div class="pub-body" id="pubMainBody">
+      <div class="panel">
+        <div class="panel-title" style="margin-bottom:4px">Escolha o atendimento</div>
+        <div class="panel-sub" style="margin-bottom:14px">Serviços disponíveis</div>
+        <div id="pubServicos" class="choice-grid"></div>
+        <div style="height:18px"></div>
+        <div class="panel-sub" style="margin-bottom:10px">Escolha o profissional</div>
+        <div id="pubProfissionais" class="choice-grid"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title" style="margin-bottom:16px">Seus dados</div>
+        <div class="field"><label>Nome completo</label><input id="pubNome" placeholder="Seu nome"></div>
+        <div class="field"><label>WhatsApp</label><input id="pubTelefone" placeholder="(92) 99999-9999"></div>
+        <div class="field-grid">
+          <div class="field"><label>Data</label><input id="pubData" type="date"></div>
+          <div class="field"><label>Hora</label><input id="pubHora" type="time"></div>
+        </div>
+        <div class="field"><label>Observação</label><textarea id="pubObs" placeholder="Alguma observação?"></textarea></div>
+        <button class="btn btn-primary btn-full" onclick="confirmarAgendamentoPublico()">Confirmar agendamento ✓</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
 </div>
 
 <script>
@@ -609,19 +1037,23 @@ let state = {
 };
 
 const navItems = [
-  ["dashboard","⬡","Dashboard","Controle geral do negócio"],
-  ["agenda","◷","Agenda","Criar e acompanhar horários"],
-  ["clientes","◎","Clientes","Cadastro de clientes"],
-  ["servicos","◈","Serviços","Catálogo e preços"],
-  ["profissionais","◉","Profissionais","Equipe de atendimento"],
-  ["financeiro","◆","Financeiro","Valores e resultados"],
+  ["dashboard","📊","Dashboard","Controle geral do negócio"],
+  ["agenda","📅","Agenda","Criar e acompanhar horários"],
+  ["clientes","👥","Clientes","Cadastro de clientes"],
+  ["servicos","✦","Serviços","Catálogo e preços"],
+  ["profissionais","👤","Profissionais","Equipe de atendimento"],
+  ["financeiro","💰","Financeiro","Valores e resultados"],
   ["config","⚙","Configurações","Dados do negócio"]
 ];
 
-function toast(msg){
+let toastTimer;
+function toast(msg, type="info"){
   const el=document.getElementById("toast");
-  el.textContent=msg; el.style.display="block";
-  setTimeout(()=>el.style.display="none",3200);
+  el.textContent=msg;
+  el.style.display="block";
+  el.style.borderColor = type==="ok" ? "rgba(82,214,138,.25)" : type==="err" ? "rgba(240,109,122,.25)" : "var(--line2)";
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.style.display="none",3500);
 }
 function money(v){return Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
 function slugify(s){
@@ -629,31 +1061,33 @@ function slugify(s){
     .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").substring(0,60);
 }
 function hojeISO(){return new Date().toISOString().slice(0,10)}
-function publicUrl(slug){
-  return location.origin + location.pathname + "#agendar/" + slug;
+function publicUrl(slug){ return location.origin + location.pathname + "#agendar/" + slug }
+function badgeClass(s){
+  const m={confirmado:"ok",ok:"ok",confirmada:"ok",cancelado:"off",cancelada:"off",concluido:"done",concluída:"done",reagendado:"re",pendente:"wait"};
+  return m[(s||"pendente").toLowerCase()] || "wait";
 }
+function initial(name){ return (name||"?").trim().substring(0,1).toUpperCase() }
 
-/* INIT */
-window.addEventListener("load", init);
+/* ── INIT ── */
+window.addEventListener("load",init);
 async function init(){
   renderNav();
-  const publicSlug = getPublicSlug();
+  const publicSlug=getPublicSlug();
   if(publicSlug){ await loadPublic(publicSlug); return; }
-
   await loadCategorias();
-  const saved = localStorage.getItem("agenda_empresa_id");
+  const saved=localStorage.getItem("agenda_empresa_id");
   if(saved){
     const {data,error}=await db.from("agenda_empresas").select("*").eq("id",saved).single();
-    if(!error && data){ state.empresa=data; showDashboard(); await loadAll(); return; }
+    if(!error&&data){state.empresa=data;showDashboard();await loadAll();return;}
   }
   showAuth();
 }
 
 function getPublicSlug(){
   if(location.hash.startsWith("#agendar/")) return location.hash.replace("#agendar/","").trim();
-  const parts = location.pathname.split("/").filter(Boolean);
-  const idx = parts.indexOf("agendar");
-  if(idx>=0 && parts[idx+1]) return parts[idx+1];
+  const parts=location.pathname.split("/").filter(Boolean);
+  const idx=parts.indexOf("agendar");
+  if(idx>=0&&parts[idx+1]) return parts[idx+1];
   return null;
 }
 
@@ -661,7 +1095,7 @@ async function loadCategorias(){
   const {data}=await db.from("agenda_categorias").select("*").order("nome");
   state.categorias=data||[];
   const sel=document.getElementById("empCategoria");
-  if(sel) sel.innerHTML = state.categorias.map(c=>`<option value="${c.id}" data-nome="${c.nome}">${c.icone||""} ${c.nome}</option>`).join("");
+  if(sel) sel.innerHTML=state.categorias.map(c=>`<option value="${c.id}" data-nome="${c.nome}">${c.icone||""} ${c.nome}</option>`).join("");
 }
 
 function showAuth(){
@@ -674,14 +1108,12 @@ function showDashboard(){
   document.getElementById("dashboardView").style.display="block";
   document.getElementById("publicView").style.display="none";
   document.getElementById("sideEmpresa").textContent=state.empresa.nome;
-  document.getElementById("sideArea").textContent=state.empresa.area_atuacao || state.empresa.plano || "Premium";
-  document.getElementById("avatarLetter").textContent=(state.empresa.nome||"A").substring(0,1).toUpperCase();
+  document.getElementById("sideArea").textContent=state.empresa.area_atuacao||state.empresa.plano||"Premium";
+  document.getElementById("avatarLetter").textContent=initial(state.empresa.nome);
   document.getElementById("publicLinkBox").textContent=publicUrl(state.empresa.slug);
 }
 function showLoginOnly(){
-  document.getElementById("stepConta").style.display="none";
-  document.getElementById("stepNegocio").style.display="none";
-  document.getElementById("stepServico").style.display="none";
+  ["stepConta","stepNegocio","stepServico"].forEach(id=>document.getElementById(id).style.display="none");
   document.getElementById("onboardingStepper").style.display="none";
   document.getElementById("loginOnly").style.display="block";
   document.getElementById("authTitle").textContent="Entrar no painel";
@@ -695,94 +1127,58 @@ function showCadastro(){
   document.getElementById("authDesc").textContent="Configure sua empresa em 3 etapas e receba seu link de agendamento.";
   setStep(1);
 }
-
 function setStep(n){
   ["st1","st2","st3"].forEach((id,i)=>{
     const el=document.getElementById(id);
-    el.className="step-dot" + (i+1===n?" active": i+1<n?" done":"");
+    el.className="step-dot"+(i+1===n?" active":i+1<n?" done":"");
   });
 }
 function goStepNegocio(){
-  if(!cadNome.value || !cadEmail.value || !cadSenha.value) return toast("Preencha nome, e-mail e senha.");
-  if(cadSenha.value.length < 6) return toast("A senha precisa ter no mínimo 6 caracteres.");
-  stepConta.style.display="none"; stepNegocio.style.display="block"; setStep(2);
+  if(!cadNome.value||!cadEmail.value||!cadSenha.value) return toast("Preencha nome, e-mail e senha.","err");
+  if(cadSenha.value.length<6) return toast("Senha precisa ter no mínimo 6 caracteres.","err");
+  stepConta.style.display="none";stepNegocio.style.display="block";setStep(2);
 }
-function backStepConta(){ stepNegocio.style.display="none"; stepConta.style.display="block"; setStep(1); }
+function backStepConta(){stepNegocio.style.display="none";stepConta.style.display="block";setStep(1);}
 function goStepServico(){
-  if(!empNome.value || !empSlug.value || !empWhatsapp.value) return toast("Preencha nome do negócio, WhatsApp e link.");
-  stepNegocio.style.display="none"; stepServico.style.display="block"; setStep(3);
+  if(!empNome.value||!empSlug.value||!empWhatsapp.value) return toast("Preencha nome, WhatsApp e link.","err");
+  stepNegocio.style.display="none";stepServico.style.display="block";setStep(3);
 }
-function backStepNegocio(){ stepServico.style.display="none"; stepNegocio.style.display="block"; setStep(2); }
-function autoSlug(){ if(!empSlug.value || empSlug.dataset.manual!=="1") empSlug.value=slugify(empNome.value); }
-document.addEventListener("input",e=>{ if(e.target && e.target.id==="empSlug") e.target.dataset.manual="1"; });
+function backStepNegocio(){stepServico.style.display="none";stepNegocio.style.display="block";setStep(2);}
+function autoSlug(){if(!empSlug.value||empSlug.dataset.manual!=="1") empSlug.value=slugify(empNome.value);}
+document.addEventListener("input",e=>{if(e.target&&e.target.id==="empSlug") e.target.dataset.manual="1";});
 
 async function finalizarCadastro(){
-  if(!servNome.value || !servPreco.value || !servDuracao.value || !profNome.value) return toast("Preencha serviço, preço, duração e profissional.");
-
-  const categoriaId = empCategoria.value || null;
-  const categoriaNome = empCategoria.options[empCategoria.selectedIndex]?.textContent?.replace(/^[^\wÀ-ÿ]+/,"").trim() || "Outro";
-
+  if(!servNome.value||!servPreco.value||!servDuracao.value||!profNome.value) return toast("Preencha serviço, preço, duração e profissional.","err");
+  const categoriaId=empCategoria.value||null;
+  const categoriaNome=empCategoria.options[empCategoria.selectedIndex]?.textContent?.replace(/^[^\wÀ-ÿ]+/,"").trim()||"Outro";
   const {data:empresa,error:errEmp}=await db.from("agenda_empresas").insert({
-    nome:empNome.value.trim(),
-    slug:slugify(empSlug.value),
-    categoria_id:categoriaId,
-    area_atuacao:categoriaNome,
-    whatsapp:empWhatsapp.value.trim(),
-    email:cadEmail.value.trim(),
-    plano:"Grátis",
-    onboarding_finalizado:true
+    nome:empNome.value.trim(),slug:slugify(empSlug.value),categoria_id:categoriaId,area_atuacao:categoriaNome,
+    whatsapp:empWhatsapp.value.trim(),email:cadEmail.value.trim(),plano:"Grátis",onboarding_finalizado:true
   }).select("*").single();
-
-  if(errEmp){ console.error(errEmp); return toast("Erro ao criar empresa. Talvez esse link já exista."); }
-
-  await db.from("agenda_perfis").insert({
-    empresa_id:empresa.id,
-    nome:cadNome.value.trim(),
-    email:cadEmail.value.trim(),
-    whatsapp:empWhatsapp.value.trim(),
-    cargo:"Administrador"
-  });
-
-  await db.from("agenda_onboarding").insert({
-    empresa_id:empresa.id, etapa_atual:3, conta_ok:true, negocio_ok:true, servicos_ok:true, finalizado:true
-  });
-
-  await db.from("agenda_servicos").insert({
-    empresa_id:empresa.id,
-    nome:servNome.value.trim(),
-    descricao:"Serviço inicial criado no cadastro.",
-    preco:Number(servPreco.value||0),
-    duracao_minutos:Number(servDuracao.value||60),
-    status:"ativo"
-  });
-
-  await db.from("agenda_profissionais").insert({
-    empresa_id:empresa.id,
-    nome:profNome.value.trim(),
-    especialidade:profEspecialidade.value || "Profissional",
-    telefone:empWhatsapp.value.trim(),
-    status:"ativo"
-  });
-
+  if(errEmp){console.error(errEmp);return toast("Erro ao criar empresa. Talvez o link já exista.","err");}
+  await db.from("agenda_perfis").insert({empresa_id:empresa.id,nome:cadNome.value.trim(),email:cadEmail.value.trim(),whatsapp:empWhatsapp.value.trim(),cargo:"Administrador"});
+  await db.from("agenda_onboarding").insert({empresa_id:empresa.id,etapa_atual:3,conta_ok:true,negocio_ok:true,servicos_ok:true,finalizado:true});
+  await db.from("agenda_servicos").insert({empresa_id:empresa.id,nome:servNome.value.trim(),descricao:"Serviço inicial criado no cadastro.",preco:Number(servPreco.value||0),duracao_minutos:Number(servDuracao.value||60),status:"ativo"});
+  await db.from("agenda_profissionais").insert({empresa_id:empresa.id,nome:profNome.value.trim(),especialidade:profEspecialidade.value||"Profissional",telefone:empWhatsapp.value.trim(),status:"ativo"});
   localStorage.setItem("agenda_empresa_id",empresa.id);
-  state.empresa=empresa;
-  showDashboard();
-  await loadAll();
-  toast("Painel criado com sucesso.");
+  state.empresa=empresa;showDashboard();await loadAll();toast("Painel criado com sucesso! 🎉","ok");
 }
 
 async function entrarPorSlug(){
-  const slug = slugify(loginSlug.value);
-  if(!slug) return toast("Digite o slug da empresa.");
+  const slug=slugify(loginSlug.value);
+  if(!slug) return toast("Digite o slug da empresa.","err");
   const {data,error}=await db.from("agenda_empresas").select("*").eq("slug",slug).single();
-  if(error || !data) return toast("Empresa não encontrada.");
+  if(error||!data) return toast("Empresa não encontrada.","err");
   localStorage.setItem("agenda_empresa_id",data.id);
-  state.empresa=data; showDashboard(); await loadAll();
+  state.empresa=data;showDashboard();await loadAll();
 }
 
-/* NAV */
+/* ── NAV ── */
 function renderNav(){
-  const html=navItems.map(n=>`<button class="nav-btn ${n[0]==="dashboard"?"active":""}" onclick="setView('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join("");
+  const html=navItems.map(n=>`
+    <button class="nav-btn ${n[0]==="dashboard"?"active":""}" onclick="setView('${n[0]}')">
+      <span class="n-icon">${n[1]}</span>${n[2]}
+    </button>`).join("");
   document.getElementById("sideNav").innerHTML=html;
   document.getElementById("mobileNav").innerHTML=html;
 }
@@ -790,21 +1186,21 @@ function setView(view){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   document.getElementById("view-"+view).classList.add("active");
   document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
-  document.querySelectorAll(".nav-btn").forEach(b=>{ if(b.getAttribute("onclick")===`setView('${view}')`) b.classList.add("active"); });
+  document.querySelectorAll(".nav-btn").forEach(b=>{if(b.getAttribute("onclick")===`setView('${view}')`) b.classList.add("active");});
   const item=navItems.find(i=>i[0]===view);
-  pageTitle.textContent=item[2]; pageSub.textContent=item[3];
+  pageTitle.textContent=item[2];pageSub.textContent=item[3];
 }
 
-/* LOAD DATA */
+/* ── LOAD ALL ── */
 async function loadAll(){
   if(!state.empresa) return;
-  const empresa_id=state.empresa.id;
+  const id=state.empresa.id;
   const [clientes,servicos,profissionais,agendamentos,pagamentos]=await Promise.all([
-    db.from("agenda_clientes").select("*").eq("empresa_id",empresa_id).order("criado_em",{ascending:false}),
-    db.from("agenda_servicos").select("*").eq("empresa_id",empresa_id).order("criado_em",{ascending:false}),
-    db.from("agenda_profissionais").select("*").eq("empresa_id",empresa_id).order("criado_em",{ascending:false}),
-    db.from("agenda_agendamentos").select("*").eq("empresa_id",empresa_id).order("data",{ascending:true}).order("hora",{ascending:true}),
-    db.from("agenda_pagamentos").select("*").eq("empresa_id",empresa_id).order("criado_em",{ascending:false})
+    db.from("agenda_clientes").select("*").eq("empresa_id",id).order("criado_em",{ascending:false}),
+    db.from("agenda_servicos").select("*").eq("empresa_id",id).order("criado_em",{ascending:false}),
+    db.from("agenda_profissionais").select("*").eq("empresa_id",id).order("criado_em",{ascending:false}),
+    db.from("agenda_agendamentos").select("*").eq("empresa_id",id).order("data",{ascending:true}).order("hora",{ascending:true}),
+    db.from("agenda_pagamentos").select("*").eq("empresa_id",id).order("criado_em",{ascending:false})
   ]);
   state.clientes=clientes.data||[];
   state.servicos=servicos.data||[];
@@ -815,8 +1211,11 @@ async function loadAll(){
 }
 
 function renderAll(){
-  renderStats(); renderDashboardLists(); renderCalendar(); renderSelects(); renderTables(); renderFinanceiro(); renderConfig();
+  renderStats();renderDashboardLists();renderCalendar();renderSelects();
+  renderAgendaTimeline();renderClienteCards();renderServicosCards();renderProfCards();
+  renderFinanceiro();renderConfig();
 }
+
 function renderStats(){
   const hoje=hojeISO();
   const agHoje=state.agendamentos.filter(a=>a.data===hoje).length;
@@ -826,144 +1225,215 @@ function renderStats(){
   statFaturamento.textContent=money(total).replace(",00","");
   statServicos.textContent=state.servicos.length;
 }
+
 function renderDashboardLists(){
   const list=state.agendamentos.slice(0,8).map(a=>`
-    <div class="row-card">
-      <div class="row-left"><div class="row-icon">${(a.cliente_nome||"C").substring(0,1)}</div>
-        <div><div class="row-title">${a.cliente_nome||"Cliente"}</div><div class="row-sub">${a.servico_nome||"-"} • ${a.data||""} às ${a.hora||""}</div></div>
+    <div class="apt-card">
+      <div class="apt-avatar">${initial(a.cliente_nome)}</div>
+      <div>
+        <div class="apt-name">${a.cliente_nome||"Cliente"}</div>
+        <div class="apt-meta">${a.servico_nome||"—"} · ${a.profissional_nome||"—"}</div>
+        <div class="apt-meta" style="margin-top:2px">📅 ${a.data||""} às ${a.hora||""}</div>
       </div>
-      <span class="badge ${a.status==="Confirmado"||a.status==="confirmado"?"ok":a.status==="Cancelado"||a.status==="cancelado"?"off":"wait"}">${a.status||"Pendente"}</span>
+      <div class="apt-right">
+        <span class="badge ${badgeClass(a.status)}">${a.status||"Pendente"}</span>
+      </div>
     </div>`).join("");
-  dashAppointments.innerHTML=list || `<div class="empty">Nenhum agendamento ainda.</div>`;
+  dashAppointments.innerHTML=list||`<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>`;
 }
+
 function renderCalendar(){
   const days=["S","T","Q","Q","S","S","D"];
   const busy=new Set(state.agendamentos.map(a=>String(new Date(a.data+"T00:00:00").getDate())));
   let html=days.map(d=>`<div class="cal-label">${d}</div>`).join("");
   const today=String(new Date().getDate());
   for(let i=1;i<=28;i++){
-    html+=`<div class="cal-day ${busy.has(String(i))?"busy":""} ${String(i)===today?"today":""}">${i}</div>`;
+    const d=String(i);
+    html+=`<div class="cal-day ${busy.has(d)?"busy":""} ${d===today?"today":""}">${i}</div>`;
   }
   calendarBox.innerHTML=html;
 }
+
 function renderSelects(){
-  agServico.innerHTML = `<option value="">Selecione</option>` + state.servicos.map(s=>`<option value="${s.id}">${s.nome} — ${money(s.preco)}</option>`).join("");
-  agProfissional.innerHTML = `<option value="">Selecione</option>` + state.profissionais.map(p=>`<option value="${p.id}">${p.nome}</option>`).join("");
+  agServico.innerHTML=`<option value="">Selecione serviço</option>`+state.servicos.map(s=>`<option value="${s.id}">${s.nome} — ${money(s.preco)}</option>`).join("");
+  agProfissional.innerHTML=`<option value="">Selecione profissional</option>`+state.profissionais.map(p=>`<option value="${p.id}">${p.nome}</option>`).join("");
 }
-function renderTables(){
-  agendaRows.innerHTML=state.agendamentos.map(a=>`<tr><td>${a.cliente_nome||"-"}</td><td>${a.servico_nome||"-"}</td><td>${a.profissional_nome||"-"}</td><td>${a.data||"-"}</td><td>${a.hora||"-"}</td><td><span class="badge ${a.status==="Confirmado"?"ok":a.status==="Cancelado"?"off":"wait"}">${a.status||"Pendente"}</span></td></tr>`).join("") || `<tr><td colspan="6">Nenhum agendamento.</td></tr>`;
-  clientesRows.innerHTML=state.clientes.map(c=>`<tr><td>${c.nome}</td><td>${c.telefone||"-"}</td><td>${c.email||"-"}</td><td>${(c.criado_em||"").slice(0,10)}</td></tr>`).join("") || `<tr><td colspan="4">Nenhum cliente.</td></tr>`;
-  servicosRows.innerHTML=state.servicos.map(s=>`<tr><td>${s.nome}</td><td>${money(s.preco)}</td><td>${s.duracao_minutos||0} min</td><td>${s.status||"ativo"}</td></tr>`).join("") || `<tr><td colspan="4">Nenhum serviço.</td></tr>`;
-  profRows.innerHTML=state.profissionais.map(p=>`<tr><td>${p.nome}</td><td>${p.especialidade||"-"}</td><td>${p.telefone||"-"}</td><td>${p.status||"ativo"}</td></tr>`).join("") || `<tr><td colspan="4">Nenhum profissional.</td></tr>`;
+
+function renderAgendaTimeline(){
+  if(!state.agendamentos.length){
+    agendaTimeline.innerHTML=`<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>`;
+    return;
+  }
+  agendaTimeline.innerHTML=state.agendamentos.map(a=>`
+    <div class="tl-block">
+      <div class="tl-timestamp">${a.hora||"—"}</div>
+      <div class="tl-line"></div>
+      <div class="tl-content">
+        <div class="tl-apt">
+          <div class="apt-avatar" style="width:36px;height:36px;border-radius:12px;font-size:14px">${initial(a.cliente_nome)}</div>
+          <div>
+            <div class="apt-name">${a.cliente_nome||"Cliente"}</div>
+            <div class="apt-meta">${a.servico_nome||"—"} · ${a.profissional_nome||"—"} · ${a.data||"—"}</div>
+          </div>
+          <div style="margin-left:auto"><span class="badge ${badgeClass(a.status)}">${a.status||"Pendente"}</span></div>
+        </div>
+      </div>
+    </div>`).join("");
 }
+
+function renderClienteCards(){
+  if(!state.clientes.length){
+    clientesCards.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente ainda.</p></div>`;
+    return;
+  }
+  clientesCards.innerHTML=state.clientes.map(c=>{
+    const agts=state.agendamentos.filter(a=>a.cliente_nome===c.nome).length;
+    const gasto=state.agendamentos.filter(a=>a.cliente_nome===c.nome).reduce((s,a)=>s+Number(a.valor||0),0);
+    return `<div class="client-card">
+      <div class="cc-top">
+        <div class="cc-avatar">${initial(c.nome)}</div>
+        <div><div class="cc-name">${c.nome}</div><div class="cc-phone">${c.telefone||"—"}</div></div>
+      </div>
+      ${c.email?`<div style="font-size:12px;color:var(--muted);margin-bottom:10px">✉ ${c.email}</div>`:""}
+      <div class="cc-stats">
+        <div class="cc-stat"><div class="csl">Atendimentos</div><div class="csv">${agts}</div></div>
+        <div class="cc-stat"><div class="csl">Total gasto</div><div class="csv" style="font-size:13px">${money(gasto).replace(",00","")}</div></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderServicosCards(){
+  if(!state.servicos.length){
+    servicosCards.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">✦</div><p>Nenhum serviço ainda.</p></div>`;
+    return;
+  }
+  servicosCards.innerHTML=state.servicos.map(s=>`
+    <div class="svc-card">
+      <div class="svc-price">${money(s.preco).replace(",00","")}</div>
+      <div class="svc-name">${s.nome}</div>
+      <div class="svc-dur">⏱ ${s.duracao_minutos||60} min</div>
+      <div class="svc-status"><span class="badge ${s.status==="ativo"?"ok":"wait"}">${s.status||"ativo"}</span></div>
+    </div>`).join("");
+}
+
+function renderProfCards(){
+  if(!state.profissionais.length){
+    profCards.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👤</div><p>Nenhum profissional ainda.</p></div>`;
+    return;
+  }
+  profCards.innerHTML=state.profissionais.map(p=>`
+    <div class="prof-card">
+      <div class="prof-avatar">${initial(p.nome)}</div>
+      <div class="prof-name">${p.nome}</div>
+      <div class="prof-esp">${p.especialidade||"Profissional"}</div>
+      ${p.telefone?`<div style="font-size:12px;color:var(--muted);margin-top:6px">📱 ${p.telefone}</div>`:""}
+      <div class="prof-status">
+        <span class="status-dot ${p.status!=="ativo"?"off":""}">${p.status==="ativo"?"Online":"Offline"}</span>
+      </div>
+    </div>`).join("");
+}
+
 function renderFinanceiro(){
   const total=state.agendamentos.reduce((s,a)=>s+Number(a.valor||0),0);
-  const ticket=state.agendamentos.length ? total/state.agendamentos.length : 0;
+  const ticket=state.agendamentos.length?total/state.agendamentos.length:0;
   finReceita.textContent=money(total).replace(",00","");
   finTicket.textContent=money(ticket).replace(",00","");
   finPagos.textContent=state.pagamentos.length;
-  finPlano.textContent=state.empresa.plano || "Grátis";
+  finPlano.textContent=state.empresa.plano||"Grátis";
 }
+
 function renderConfig(){
   cfgNome.value=state.empresa.nome||"";
   cfgWhatsapp.value=state.empresa.whatsapp||"";
   cfgSlug.value=state.empresa.slug||"";
-  cfgLink.textContent=publicUrl(state.empresa.slug);
+  cfgLink.textContent="🔗 "+publicUrl(state.empresa.slug);
 }
 
-/* SAVE */
+/* ── SAVE ── */
 async function salvarCliente(){
-  if(!cliNome.value) return toast("Digite o nome do cliente.");
+  if(!cliNome.value) return toast("Digite o nome do cliente.","err");
   const {error}=await db.from("agenda_clientes").insert({empresa_id:state.empresa.id,nome:cliNome.value,telefone:cliTel.value,email:cliEmail.value});
-  if(error) return toast("Erro ao salvar cliente.");
+  if(error) return toast("Erro ao salvar cliente.","err");
   cliNome.value=cliTel.value=cliEmail.value="";
-  await loadAll(); toast("Cliente salvo.");
+  await loadAll();toast("Cliente salvo com sucesso.","ok");
 }
 async function salvarServico(){
-  if(!srvNome.value) return toast("Digite o nome do serviço.");
+  if(!srvNome.value) return toast("Digite o nome do serviço.","err");
   const {error}=await db.from("agenda_servicos").insert({empresa_id:state.empresa.id,nome:srvNome.value,preco:Number(srvPreco.value||0),duracao_minutos:Number(srvDur.value||60),status:"ativo"});
-  if(error) return toast("Erro ao salvar serviço.");
+  if(error) return toast("Erro ao salvar serviço.","err");
   srvNome.value=srvPreco.value=srvDur.value="";
-  await loadAll(); toast("Serviço salvo.");
+  await loadAll();toast("Serviço salvo.","ok");
 }
 async function salvarProfissional(){
-  if(!proNome.value) return toast("Digite o nome do profissional.");
+  if(!proNome.value) return toast("Digite o nome do profissional.","err");
   const {error}=await db.from("agenda_profissionais").insert({empresa_id:state.empresa.id,nome:proNome.value,especialidade:proEsp.value,telefone:proTel.value,status:"ativo"});
-  if(error) return toast("Erro ao salvar profissional.");
+  if(error) return toast("Erro ao salvar profissional.","err");
   proNome.value=proEsp.value=proTel.value="";
-  await loadAll(); toast("Profissional salvo.");
+  await loadAll();toast("Profissional salvo.","ok");
 }
 async function salvarAgendamento(){
-  if(!agCliente.value || !agServico.value || !agProfissional.value || !agData.value || !agHora.value) return toast("Preencha todos os campos do agendamento.");
+  if(!agCliente.value||!agServico.value||!agProfissional.value||!agData.value||!agHora.value)
+    return toast("Preencha todos os campos.","err");
   const serv=state.servicos.find(s=>s.id===agServico.value);
   const prof=state.profissionais.find(p=>p.id===agProfissional.value);
-
   let clienteId=null;
   const {data:cli}=await db.from("agenda_clientes").insert({empresa_id:state.empresa.id,nome:agCliente.value,telefone:agTelefone.value}).select("*").single();
   if(cli) clienteId=cli.id;
-
   const {error}=await db.from("agenda_agendamentos").insert({
-    empresa_id:state.empresa.id,
-    cliente_id:clienteId,
-    servico_id:serv?.id,
-    profissional_id:prof?.id,
-    cliente_nome:agCliente.value,
-    cliente_telefone:agTelefone.value,
-    servico_nome:serv?.nome,
-    profissional_nome:prof?.nome,
-    data:agData.value,
-    hora:agHora.value,
-    status:agStatus.value,
-    valor:Number(serv?.preco||0)
+    empresa_id:state.empresa.id,cliente_id:clienteId,
+    servico_id:serv?.id,profissional_id:prof?.id,
+    cliente_nome:agCliente.value,cliente_telefone:agTelefone.value,
+    servico_nome:serv?.nome,profissional_nome:prof?.nome,
+    data:agData.value,hora:agHora.value,status:agStatus.value,valor:Number(serv?.preco||0)
   });
-  if(error){ console.error(error); return toast("Erro ao salvar agendamento."); }
+  if(error){console.error(error);return toast("Erro ao salvar agendamento.","err");}
   agCliente.value=agTelefone.value=agData.value=agHora.value="";
-  await loadAll(); toast("Agendamento salvo.");
+  await loadAll();toast("Agendamento salvo!","ok");
 }
 async function salvarConfig(){
   const newSlug=slugify(cfgSlug.value);
   const {data,error}=await db.from("agenda_empresas").update({nome:cfgNome.value,whatsapp:cfgWhatsapp.value,slug:newSlug}).eq("id",state.empresa.id).select("*").single();
-  if(error) return toast("Erro ao salvar. Talvez o slug já exista.");
-  state.empresa=data; localStorage.setItem("agenda_empresa_id",data.id);
-  showDashboard(); renderConfig(); toast("Configurações salvas.");
+  if(error) return toast("Erro ao salvar. Talvez o slug já exista.","err");
+  state.empresa=data;localStorage.setItem("agenda_empresa_id",data.id);
+  showDashboard();renderConfig();toast("Configurações salvas.","ok");
 }
 
-/* PUBLIC */
+/* ── PUBLIC ── */
 async function loadPublic(slug){
   document.getElementById("authView").style.display="none";
   document.getElementById("dashboardView").style.display="none";
   document.getElementById("publicView").style.display="block";
-
   const {data:empresa,error}=await db.from("agenda_empresas").select("*").eq("slug",slug).single();
-  if(error || !empresa){
+  if(error||!empresa){
     pubEmpresa.textContent="Agenda não encontrada";
     pubDesc.textContent="Verifique se o link está correto.";
     return;
   }
   state.pubEmpresa=empresa;
   pubEmpresa.textContent=empresa.nome;
-  pubDesc.textContent=`${empresa.area_atuacao||"Agendamento online"} • WhatsApp: ${empresa.whatsapp||""}`;
-
+  pubDesc.textContent=`${empresa.area_atuacao||"Agendamento online"} · WhatsApp: ${empresa.whatsapp||""}`;
   const [servicos,profissionais]=await Promise.all([
     db.from("agenda_servicos").select("*").eq("empresa_id",empresa.id).eq("status","ativo").order("nome"),
     db.from("agenda_profissionais").select("*").eq("empresa_id",empresa.id).eq("status","ativo").order("nome")
   ]);
-
   state.servicos=servicos.data||[];
   state.profissionais=profissionais.data||[];
 
   pubServicos.innerHTML=state.servicos.map(s=>`
-    <div class="choice" onclick="selectPubServico('${s.id}', this)">
-      <div class="choice-title">${s.nome}</div>
-      <div class="choice-sub">${money(s.preco)} • ${s.duracao_minutos||60} min</div>
-    </div>`).join("") || `<div class="empty">Nenhum serviço cadastrado.</div>`;
+    <div class="choice" onclick="selectPubServico('${s.id}',this)">
+      <div class="c-icon">✦</div>
+      <div><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos||60} min</div></div>
+      <div class="choice-right">${money(s.preco).replace(",00","")}</div>
+    </div>`).join()||`<div class="empty-state"><div class="es-icon">✦</div><p>Nenhum serviço disponível.</p></div>`;
 
   pubProfissionais.innerHTML=state.profissionais.map(p=>`
-    <div class="choice" onclick="selectPubProfissional('${p.id}', this)">
-      <div class="choice-title">${p.nome}</div>
-      <div class="choice-sub">${p.especialidade||"Profissional"}</div>
-    </div>`).join("") || `<div class="empty">Nenhum profissional cadastrado.</div>`;
+    <div class="choice" onclick="selectPubProfissional('${p.id}',this)">
+      <div class="c-icon">👤</div>
+      <div><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade||"Profissional"}</div></div>
+    </div>`).join()||`<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional disponível.</p></div>`;
 }
+
 function selectPubServico(id,el){
   state.pubServico=state.servicos.find(s=>s.id===id);
   document.querySelectorAll("#pubServicos .choice").forEach(c=>c.classList.remove("active"));
@@ -975,41 +1445,38 @@ function selectPubProfissional(id,el){
   el.classList.add("active");
 }
 async function confirmarAgendamentoPublico(){
-  if(!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !pubNome.value || !pubTelefone.value || !pubData.value || !pubHora.value)
-    return toast("Preencha tudo para confirmar.");
-
-  const {data:cli}=await db.from("agenda_clientes").insert({
-    empresa_id:state.pubEmpresa.id,nome:pubNome.value,telefone:pubTelefone.value
-  }).select("*").single();
-
+  if(!state.pubEmpresa||!state.pubServico||!state.pubProfissional||!pubNome.value||!pubTelefone.value||!pubData.value||!pubHora.value)
+    return toast("Preencha tudo para confirmar.","err");
+  const {data:cli}=await db.from("agenda_clientes").insert({empresa_id:state.pubEmpresa.id,nome:pubNome.value,telefone:pubTelefone.value}).select("*").single();
   const {error}=await db.from("agenda_agendamentos").insert({
-    empresa_id:state.pubEmpresa.id,
-    cliente_id:cli?.id||null,
-    servico_id:state.pubServico.id,
-    profissional_id:state.pubProfissional.id,
-    cliente_nome:pubNome.value,
-    cliente_telefone:pubTelefone.value,
-    servico_nome:state.pubServico.nome,
-    profissional_nome:state.pubProfissional.nome,
-    data:pubData.value,
-    hora:pubHora.value,
-    status:"Pendente",
-    valor:Number(state.pubServico.preco||0),
-    observacoes:pubObs.value
+    empresa_id:state.pubEmpresa.id,cliente_id:cli?.id||null,
+    servico_id:state.pubServico.id,profissional_id:state.pubProfissional.id,
+    cliente_nome:pubNome.value,cliente_telefone:pubTelefone.value,
+    servico_nome:state.pubServico.nome,profissional_nome:state.pubProfissional.nome,
+    data:pubData.value,hora:pubHora.value,status:"Pendente",
+    valor:Number(state.pubServico.preco||0),observacoes:pubObs.value
   });
-  if(error){ console.error(error); return toast("Erro ao confirmar agendamento."); }
+  if(error){console.error(error);return toast("Erro ao confirmar agendamento.","err");}
+  document.getElementById("pubMainBody").style.display="none";
+  document.getElementById("pubConfirmScreen").style.display="block";
+}
+function resetPublic(){
+  document.getElementById("pubMainBody").style.display="grid";
+  document.getElementById("pubConfirmScreen").style.display="none";
   pubNome.value=pubTelefone.value=pubData.value=pubHora.value=pubObs.value="";
-  toast("Agendamento enviado com sucesso.");
+  state.pubServico=null;state.pubProfissional=null;
+  document.querySelectorAll(".choice").forEach(c=>c.classList.remove("active"));
 }
 
-/* HELPERS */
+/* ── HELPERS ── */
 function copyPublicLink(){
+  if(!state.empresa) return;
   const link=publicUrl(state.empresa.slug);
   navigator.clipboard?.writeText(link);
-  toast("Link copiado: " + link);
+  toast("Link copiado: "+link,"ok");
 }
 function openPublic(){
-  location.href = "#agendar/" + state.empresa.slug;
+  location.href="#agendar/"+state.empresa.slug;
   location.reload();
 }
 function logout(){
