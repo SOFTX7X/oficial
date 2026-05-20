@@ -1992,6 +1992,112 @@ function resetPublic(){
 function copyPublicLink(){if(!state.empresa)return;const link=publicUrl(state.empresa.slug);navigator.clipboard?.writeText(link);toast("Link copiado: "+link,"ok");}
 function openPublic(){location.href="#agendar/"+state.empresa.slug;location.reload();}
 async function logout(){await db.auth.signOut();state.user=null;state.perfil=null;state.empresa=null;state.clientes=[];state.servicos=[];state.profissionais=[];state.agendamentos=[];state.pagamentos=[];location.href=location.pathname;}
+
+
+/* ══════════════════════════════════════════════════════
+   PATCH FINAL — CARREGAMENTO ROBUSTO SUPABASE
+   Corrige dashboard zerado após trocar o index.
+   Busca sem order quebrando e normaliza nomes de colunas.
+══════════════════════════════════════════════════════ */
+function pickField(obj, names, fallback = null){
+  for(const n of names){
+    if(obj && obj[n] !== undefined && obj[n] !== null && obj[n] !== "") return obj[n];
+  }
+  return fallback;
+}
+
+function normalizeClienteRow(c){
+  return {
+    ...c,
+    nome: pickField(c,["nome","cliente_nome","nome_cliente"],"Cliente"),
+    telefone: pickField(c,["telefone","cliente_telefone","whatsapp"],""),
+    email: pickField(c,["email","cliente_email"],""),
+    ativo: c.ativo === undefined ? true : c.ativo
+  };
+}
+
+function normalizeServicoRow(s){
+  const ativoStatus = s.ativo === false ? "inativo" : "ativo";
+  return {
+    ...s,
+    nome: pickField(s,["nome","servico_nome"],"Serviço"),
+    preco: Number(pickField(s,["preco","valor"],0) || 0),
+    duracao_minutos: Number(pickField(s,["duracao_minutos","duracao"],60) || 60),
+    status: pickField(s,["status"],ativoStatus)
+  };
+}
+
+function normalizeProfissionalRow(p){
+  const ativoStatus = p.ativo === false ? "inativo" : "ativo";
+  return {
+    ...p,
+    nome: pickField(p,["nome","profissional_nome"],"Profissional"),
+    especialidade: pickField(p,["especialidade","cargo"],"Profissional"),
+    telefone: pickField(p,["telefone","whatsapp"],""),
+    status: pickField(p,["status"],ativoStatus)
+  };
+}
+
+function normalizeAgendamentoRow(a){
+  return {
+    ...a,
+    data: pickField(a,["data","data_agendamento","dia"],""),
+    hora: pickField(a,["hora","horario_agendamento","horario"],""),
+    cliente_nome: pickField(a,["cliente_nome","nome_cliente","cliente"],"Cliente"),
+    cliente_telefone: pickField(a,["cliente_telefone","telefone_cliente","telefone","whatsapp"],""),
+    cliente_email: pickField(a,["cliente_email","email_cliente","email"],""),
+    servico_nome: pickField(a,["servico_nome","nome_servico","servico"],"—"),
+    profissional_nome: pickField(a,["profissional_nome","nome_profissional","profissional"],"—"),
+    status: pickField(a,["status"],"Pendente"),
+    valor: Number(pickField(a,["valor","preco"],0) || 0)
+  };
+}
+
+async function safeSelectTable(table, empresaId){
+  const res = await db.from(table).select("*").eq("empresa_id", empresaId);
+  if(res.error){
+    console.error("Erro ao carregar", table, res.error);
+    return [];
+  }
+  return res.data || [];
+}
+
+async function loadAll(){
+  if(!state.empresa || !state.empresa.id) return;
+  const id = state.empresa.id;
+
+  const [clientes, servicos, profissionais, agendamentos, pagamentos] = await Promise.all([
+    safeSelectTable("agenda_clientes", id),
+    safeSelectTable("agenda_servicos", id),
+    safeSelectTable("agenda_profissionais", id),
+    safeSelectTable("agenda_agendamentos", id),
+    safeSelectTable("agenda_pagamentos", id)
+  ]);
+
+  state.clientes = clientes.map(normalizeClienteRow);
+  state.servicos = servicos.map(normalizeServicoRow);
+  state.profissionais = profissionais.map(normalizeProfissionalRow);
+  state.agendamentos = agendamentos.map(normalizeAgendamentoRow).sort((a,b)=>{
+    const aa = String(a.data || "") + " " + String(a.hora || "");
+    const bb = String(b.data || "") + " " + String(b.hora || "");
+    return aa.localeCompare(bb);
+  });
+  state.pagamentos = pagamentos || [];
+
+  renderAll();
+}
+
+function renderSelects(){
+  const servicosAtivos = state.servicos.filter(s => normStatus(s.status) === "ativo");
+  const profissionaisAtivos = state.profissionais.filter(p => normStatus(p.status) === "ativo");
+  if(window.agServico){
+    agServico.innerHTML = `<option value="">Selecione serviço</option>` + servicosAtivos.map(s=>`<option value="${s.id}">${s.nome} — ${money(s.preco)}</option>`).join("");
+  }
+  if(window.agProfissional){
+    agProfissional.innerHTML = `<option value="">Selecione profissional</option>` + profissionaisAtivos.map(p=>`<option value="${p.id}">${p.nome}</option>`).join("");
+  }
+}
+
 </script>
 </body>
 </html>
