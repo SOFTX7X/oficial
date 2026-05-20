@@ -20,9 +20,9 @@
   --yellow:#f5c842;--yellow2:rgba(245,200,66,.10);--yellowborder:rgba(245,200,66,.22);
   --blue:#6ab4f5;--blue2:rgba(106,180,245,.10);--blueborder:rgba(106,180,245,.22);
   --purple:#a78bfa;--purple2:rgba(167,139,250,.10);--purpleborder:rgba(167,139,250,.22);
-  --teal:#3dd6c8;
+  --teal:#3dd6c8;--gray:rgba(255,255,255,.35);--gray2:rgba(255,255,255,.07);
   --r:14px;--rl:20px;--rxl:28px;--rxxl:36px;
-  --sidebar:270px;
+  --sidebar:272px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 html{scroll-behavior:smooth}
@@ -105,7 +105,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .mf-stat .msv{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;margin-top:5px;background:linear-gradient(130deg,var(--gold),var(--gold3));-webkit-background-clip:text;background-clip:text;color:transparent;}
 .mf-stat .msg{font-size:10px;color:var(--green);margin-top:3px;font-weight:700}
 .mf-apts{display:flex;flex-direction:column;gap:7px}
-.mf-apt{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02);transition:.2s;}
+.mf-apt{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02);}
 .mf-apt-av{width:30px;height:30px;border-radius:9px;background:var(--goldsoft);color:var(--gold2);display:grid;place-items:center;font-size:12px;font-weight:800;flex-shrink:0;border:1px solid var(--goldborder);}
 .mf-apt-name{font-size:12px;font-weight:700}
 .mf-apt-meta{font-size:10px;color:var(--muted);margin-top:1px}
@@ -138,7 +138,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .feat-card:hover{transform:translateY(-5px);border-color:var(--goldborder);box-shadow:0 24px 60px rgba(0,0,0,.4)}
 .feat-card::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% 15%,rgba(201,169,110,.08),transparent 55%);pointer-events:none;}
 .feat-icon{width:48px;height:48px;border-radius:14px;margin-bottom:18px;background:var(--goldsoft);border:1px solid var(--goldborder);display:grid;place-items:center;font-size:20px;position:relative;z-index:1;box-shadow:0 6px 20px rgba(201,169,110,.10);}
-.feat-title{font-size:14.5px;font-weight:700;margin-bottom:8px;position:relative;z-index:1;font-family:'Cormorant Garamond',serif;font-size:17px;}
+.feat-title{font-size:17px;font-weight:700;margin-bottom:8px;position:relative;z-index:1;font-family:'Cormorant Garamond',serif;}
 .feat-desc{font-size:13px;color:var(--muted);line-height:1.65;position:relative;z-index:1}
 
 /* ════ SEGMENT ════ */
@@ -154,7 +154,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .test-card:hover{transform:translateY(-4px);border-color:var(--goldborder)}
 .test-card::before{content:"";position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(201,169,110,.11),transparent 65%);pointer-events:none;}
 .test-stars{color:var(--gold2);font-size:12px;letter-spacing:4px}
-.test-quote{font-size:14.5px;line-height:1.75;color:var(--text2);font-family:'Cormorant Garamond',serif;font-style:italic;position:relative;z-index:1;font-size:16px;}
+.test-quote{font-size:16px;line-height:1.75;color:var(--text2);font-family:'Cormorant Garamond',serif;font-style:italic;position:relative;z-index:1;}
 .test-quote::before{content:"\201C";font-size:56px;line-height:.5;color:var(--gold);opacity:.35;display:block;margin-bottom:10px;font-family:'Cormorant Garamond',serif}
 .test-author{display:flex;align-items:center;gap:12px;margin-top:auto}
 .test-av{width:44px;height:44px;border-radius:14px;flex-shrink:0;background:linear-gradient(135deg,var(--goldsoft),rgba(201,169,110,.04));border:1px solid var(--goldborder);color:var(--gold2);display:grid;place-items:center;font-weight:800;font-size:17px;}
@@ -233,17 +233,17 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 
 /* ════ DASHBOARD MAIN ════ */
 .dashboard{display:none;min-height:100vh;position:relative;z-index:1}
-.sidebar{position:fixed;left:14px;top:14px;bottom:14px;width:var(--sidebar);border:1px solid var(--line2);border-radius:24px;background:rgba(8,8,16,.94);backdrop-filter:blur(32px);padding:16px 12px;z-index:30;display:flex;flex-direction:column;box-shadow:0 28px 80px rgba(0,0,0,.55);overflow-y:auto;overflow-x:hidden;}
+.sidebar{position:fixed;left:14px;top:14px;bottom:14px;width:var(--sidebar);border:1px solid var(--line2);border-radius:24px;background:rgba(8,8,16,.96);backdrop-filter:blur(32px);padding:16px 12px;z-index:30;display:flex;flex-direction:column;box-shadow:0 28px 80px rgba(0,0,0,.55);overflow-y:auto;overflow-x:hidden;}
 .sidebar::-webkit-scrollbar{width:3px}
 .sidebar::-webkit-scrollbar-thumb{background:rgba(201,169,110,.20);border-radius:20px}
-.side-logo{margin-bottom:22px;padding:2px 6px;display:inline-flex;align-items:center;gap:10px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;flex-shrink:0;}
+.side-logo{margin-bottom:18px;padding:4px 6px;display:inline-flex;align-items:center;gap:10px;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;flex-shrink:0;}
 .side-nav-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:6px}
 .side-nav-scroll::-webkit-scrollbar{width:0}
-.nav-group-label{font-size:9.5px;color:var(--muted3);font-weight:700;text-transform:uppercase;letter-spacing:.22em;padding:14px 8px 5px;flex-shrink:0;}
-.nav-group-label:first-child{padding-top:4px}
-.nav-group-sep{height:1px;background:var(--line);margin:8px 0;flex-shrink:0}
-.nav-btn{width:100%;border:none;background:transparent;color:var(--muted);display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;text-align:left;font-weight:600;font-size:13.5px;transition:.18s;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
-.nav-btn .n-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.045);font-size:14px;flex-shrink:0;transition:.18s}
+.nav-group-label{font-size:9px;color:var(--muted3);font-weight:700;text-transform:uppercase;letter-spacing:.22em;padding:12px 10px 4px;flex-shrink:0;}
+.nav-group-label:first-child{padding-top:2px}
+.nav-group-sep{height:1px;background:var(--line);margin:7px 0;flex-shrink:0}
+.nav-btn{width:100%;border:none;background:transparent;color:var(--muted);display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;text-align:left;font-weight:600;font-size:13px;transition:.18s;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.nav-btn .n-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.045);font-size:13px;flex-shrink:0;transition:.18s}
 .nav-btn:hover{background:rgba(255,255,255,.05);color:var(--text2)}
 .nav-btn.active{background:rgba(201,169,110,.11);color:var(--gold2);border:1px solid rgba(201,169,110,.18);}
 .nav-btn.active .n-icon{background:rgba(201,169,110,.18);color:var(--gold2)}
@@ -259,53 +259,44 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 /* ════ MAIN AREA ════ */
 .main{margin-left:calc(var(--sidebar) + 28px);padding:14px 18px 52px;min-height:100vh}
 .topbar{border:1px solid var(--line);border-radius:20px;background:rgba(8,8,16,.85);backdrop-filter:blur(28px);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:14px;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,.3)}
-.titleblock h2{font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1;font-weight:700}
-.titleblock p{color:var(--muted);font-size:12.5px;margin-top:3px}
+.titleblock h2{font-family:'Cormorant Garamond',serif;font-size:26px;line-height:1;font-weight:700}
+.titleblock p{color:var(--muted);font-size:12px;margin-top:3px}
 .top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 .view{display:none;margin-top:18px;animation:fadeUp .3s ease}
 .view.active{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.mobile-nav{display:none}
 
 /* ════ COMMAND HERO ════ */
-.command-hero{position:relative;overflow:hidden;border:1px solid var(--line2);border-radius:26px;padding:30px 34px;margin-bottom:16px;background:radial-gradient(ellipse 55% 80% at 5% 50%,rgba(201,169,110,.16),transparent),linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.008))}
+.command-hero{position:relative;overflow:hidden;border:1px solid var(--line2);border-radius:26px;padding:28px 32px;margin-bottom:16px;background:radial-gradient(ellipse 55% 80% at 5% 50%,rgba(201,169,110,.16),transparent),linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.008))}
 .command-hero .orb-hero{position:absolute;right:-60px;top:-60px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(201,169,110,.18),transparent 68%);pointer-events:none}
 .ch-inner{position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
-.ch-inner h1{font-family:'Cormorant Garamond',serif;font-size:44px;line-height:.93;max-width:640px}
+.ch-inner h1{font-family:'Cormorant Garamond',serif;font-size:40px;line-height:.93;max-width:640px}
 .ch-inner h1 em{font-style:italic;color:var(--gold2)}
 .ch-inner p{color:var(--muted);margin-top:10px;font-size:14px;line-height:1.68}
 
-/* ════ STAT CARDS ════ */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.stat-card{border:1px solid var(--line);border-radius:20px;background:rgba(12,12,20,.82);padding:20px;min-height:128px;position:relative;overflow:hidden;transition:.22s}
+/* ════ DASHBOARD STATS GRID ════ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.stats-grid-2{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.stats-grid-3{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-card{border:1px solid var(--line);border-radius:18px;background:rgba(12,12,20,.82);padding:18px;min-height:112px;position:relative;overflow:hidden;transition:.22s}
 .stat-card:hover{transform:translateY(-4px);border-color:rgba(201,169,110,.24);box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .stat-card::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 65% 65% at 100% 0%,rgba(201,169,110,.09),transparent)}
 .stat-card>*{position:relative}
-.sc-label{font-size:10px;text-transform:uppercase;letter-spacing:.17em;color:var(--muted2);font-weight:700}
-.sc-value{font-family:'Cormorant Garamond',serif;font-size:42px;line-height:1;margin-top:10px;background:linear-gradient(130deg,var(--gold),var(--gold3));-webkit-background-clip:text;background-clip:text;color:transparent;}
-.sc-note{font-size:12px;color:var(--muted);margin-top:6px}
-.sc-good{color:var(--green)}
-.sc-icon{position:absolute;right:16px;top:16px;font-size:22px;opacity:.18}
+.sc-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.17em;color:var(--muted2);font-weight:700}
+.sc-value{font-family:'Cormorant Garamond',serif;font-size:36px;line-height:1;margin-top:8px;background:linear-gradient(130deg,var(--gold),var(--gold3));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.sc-value.green{background:linear-gradient(130deg,var(--green),#8effc8);-webkit-background-clip:text;background-clip:text;}
+.sc-value.blue{background:linear-gradient(130deg,var(--blue),#c2e4ff);-webkit-background-clip:text;background-clip:text;}
+.sc-value.purple{background:linear-gradient(130deg,var(--purple),#d5c8ff);-webkit-background-clip:text;background-clip:text;}
+.sc-value.red{background:linear-gradient(130deg,var(--red),#ffc2c8);-webkit-background-clip:text;background-clip:text;}
+.sc-value.yellow{background:linear-gradient(130deg,var(--yellow),#ffe88c);-webkit-background-clip:text;background-clip:text;}
+.sc-note{font-size:11.5px;color:var(--muted);margin-top:5px}
+.sc-note.green{color:var(--green)}
+.sc-icon{position:absolute;right:14px;top:14px;font-size:20px;opacity:.20}
+.dash-section-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.2em;color:var(--muted3);font-weight:700;margin:6px 0 10px;padding-left:2px}
 
 /* ════ PANELS ════ */
 .content-grid{display:grid;grid-template-columns:1.45fr .85fr;gap:14px}
-
-.status-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.status-mini-card{border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.026);padding:14px 15px;display:flex;align-items:center;gap:12px;transition:.22s;cursor:pointer;min-height:82px}
-.status-mini-card:hover{transform:translateY(-3px);border-color:var(--goldborder);background:rgba(201,169,110,.045)}
-.status-mini-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line2);background:rgba(255,255,255,.045);font-size:17px;flex-shrink:0}
-.status-mini-info{min-width:0}.status-mini-label{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);font-weight:800}.status-mini-value{font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1;font-weight:700;margin-top:3px;color:var(--text)}
-.status-mini-card.pendente .status-mini-icon{background:var(--yellow2);color:var(--yellow);border-color:var(--yellowborder)}
-.status-mini-card.confirmado .status-mini-icon{background:var(--green2);color:var(--green);border-color:var(--greenborder)}
-.status-mini-card.reagendado .status-mini-icon{background:var(--purple2);color:var(--purple);border-color:var(--purpleborder)}
-.status-mini-card.concluido .status-mini-icon{background:var(--blue2);color:var(--blue);border-color:var(--blueborder)}
-.status-mini-card.recusado .status-mini-icon{background:var(--red2);color:var(--red);border-color:var(--redborder)}
-.status-mini-card.excluido .status-mini-icon{background:rgba(255,255,255,.06);color:var(--muted);border-color:var(--line2)}
-.agenda-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px;padding:10px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.025)}
-.filter-chip{border:1px solid var(--line2);background:rgba(255,255,255,.035);color:var(--muted);border-radius:999px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-weight:800;font-size:12px;cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
-.filter-chip:hover{border-color:var(--goldring);color:var(--gold2);background:var(--goldsoft)}
-.filter-chip.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#050505;border-color:transparent;box-shadow:0 8px 26px rgba(201,169,110,.22)}
-.dashboard-calendar-panel .cal-grid{grid-template-columns:repeat(7,1fr)}
-
 .panel{border:1px solid var(--line);border-radius:22px;background:rgba(10,10,18,.86);backdrop-filter:blur(18px);padding:20px;box-shadow:0 14px 52px rgba(0,0,0,.22)}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .panel-title{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700}
@@ -327,6 +318,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .badge.off{background:var(--red2);color:var(--red);border:1px solid var(--redborder)}.badge.off::before{background:var(--red)}
 .badge.done{background:var(--blue2);color:var(--blue);border:1px solid var(--blueborder)}.badge.done::before{background:var(--blue)}
 .badge.re{background:var(--purple2);color:var(--purple);border:1px solid var(--purpleborder)}.badge.re::before{background:var(--purple)}
+.badge.exc{background:rgba(255,255,255,.06);color:var(--muted2);border:1px solid var(--line)}.badge.exc::before{background:var(--muted2)}
 .badge.inactive{background:rgba(255,255,255,.06);color:var(--muted2);border:1px solid var(--line)}.badge.inactive::before{background:var(--muted2)}
 
 /* ════ CALENDAR ════ */
@@ -335,6 +327,26 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .cal-day{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.03);color:var(--muted);font-size:11.5px;font-weight:600;cursor:default;transition:.15s}
 .cal-day.busy{background:rgba(201,169,110,.13);color:var(--gold2);border:1px solid rgba(201,169,110,.22)}
 .cal-day.today{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#050505;font-weight:800;box-shadow:0 4px 16px rgba(201,169,110,.38)}
+
+/* ════ AGENDA FILTERS ════ */
+.agenda-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.agenda-filters::-webkit-scrollbar{display:none}
+.af-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
+.af-btn:hover{border-color:var(--goldring);color:var(--gold2);background:var(--goldsoft)}
+.af-btn.active{background:rgba(201,169,110,.12);color:var(--gold2);border-color:var(--goldring);}
+.af-btn .af-count{background:rgba(201,169,110,.18);color:var(--gold2);padding:1px 7px;border-radius:99px;font-size:10px;font-weight:800;}
+.af-btn.f-pendente.active{background:rgba(245,200,66,.10);color:var(--yellow);border-color:var(--yellowborder);}
+.af-btn.f-pendente.active .af-count{background:rgba(245,200,66,.15);color:var(--yellow);}
+.af-btn.f-confirmado.active{background:var(--green2);color:var(--green);border-color:var(--greenborder);}
+.af-btn.f-confirmado.active .af-count{background:rgba(77,214,140,.15);color:var(--green);}
+.af-btn.f-reagendado.active{background:var(--purple2);color:var(--purple);border-color:var(--purpleborder);}
+.af-btn.f-reagendado.active .af-count{background:rgba(167,139,250,.15);color:var(--purple);}
+.af-btn.f-concluido.active{background:var(--blue2);color:var(--blue);border-color:var(--blueborder);}
+.af-btn.f-concluido.active .af-count{background:rgba(106,180,245,.15);color:var(--blue);}
+.af-btn.f-recusado.active{background:var(--red2);color:var(--red);border-color:var(--redborder);}
+.af-btn.f-recusado.active .af-count{background:rgba(240,109,122,.15);color:var(--red);}
+.af-btn.f-excluido.active{background:rgba(255,255,255,.06);color:var(--muted2);border-color:var(--line2);}
+.af-btn.f-excluido.active .af-count{background:rgba(255,255,255,.08);color:var(--muted);}
 
 /* ════ TIMELINE ════ */
 .timeline{display:flex;flex-direction:column;gap:0}
@@ -409,7 +421,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .btn-icon:hover{border-color:var(--goldring);color:var(--gold2)}
 .btn-danger{background:rgba(240,109,122,.12);color:var(--red);border:1px solid rgba(240,109,122,.18)}
 .btn-danger:hover{background:rgba(240,109,122,.20)}
-.mobile-nav{display:none}
 
 /* ════ ACTION BUTTONS ════ */
 .apt-actions{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line);}
@@ -514,9 +525,9 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .confirm-screen p{color:var(--muted);font-size:14px;margin-top:8px}
 
 /* ════ RESPONSIVE ════ */
-@media(max-width:1100px){.stats-grid{grid-template-columns:1fr 1fr}.content-grid{grid-template-columns:1fr}.status-summary-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr)}.stats-grid-2{grid-template-columns:repeat(3,1fr)}.stats-grid-3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}.stats-grid-3{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){
-  --sidebar:0px;
   .navbar{padding:12px 20px}.nav-links{display:none}.hero{padding:110px 18px 65px}
   .mockup-wrap{padding:0 18px}.mf-body{grid-template-columns:1fr}.mf-sidebar{display:none}
   .steps-grid,.test-grid,.plans-grid{grid-template-columns:1fr}
@@ -526,10 +537,10 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
   .mobile-nav{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin:10px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
   .mobile-nav::-webkit-scrollbar{display:none}
   .mobile-nav .nav-btn{min-width:auto;width:auto;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:9px 13px;flex-shrink:0}
-  .stats-grid{grid-template-columns:1fr}.cards-grid{grid-template-columns:1fr}.status-summary-grid{grid-template-columns:1fr}.agenda-filter-bar{overflow-x:auto;flex-wrap:nowrap}.filter-chip{flex-shrink:0}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}.stats-grid-2{grid-template-columns:repeat(2,1fr)}.stats-grid-3{grid-template-columns:repeat(2,1fr)}.cards-grid{grid-template-columns:1fr}
   .pub-body{grid-template-columns:1fr}.fin-grid{grid-template-columns:1fr}
   .form-add-row{grid-template-columns:1fr}.field-grid{grid-template-columns:1fr}
-  .ch-inner{flex-direction:column;align-items:flex-start}.ch-inner h1{font-size:34px}
+  .ch-inner{flex-direction:column;align-items:flex-start}.ch-inner h1{font-size:32px}
   .footer{flex-direction:column;gap:12px;text-align:center;padding:24px 20px}
   .features-grid{grid-template-columns:1fr 1fr}
   .reagendar-inputs{grid-template-columns:1fr}
@@ -545,6 +556,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
   .tl-apt-status{width:100%;justify-content:flex-start;padding-left:0;margin-top:4px}
   .apt-actions{padding-left:0}
   .act-btn{flex:1 1 calc(50% - 4px);justify-content:center}
+  .stats-grid{grid-template-columns:1fr 1fr}.stats-grid-2{grid-template-columns:1fr 1fr}.stats-grid-3{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -868,9 +880,10 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
       <div class="nav-group-label">Financeiro</div>
       <button class="nav-btn" onclick="setView('financeiro')"><span class="n-icon">💰</span>Financeiro</button>
       <button class="nav-btn" onclick="setView('relatorios')"><span class="n-icon">📈</span>Relatórios</button>
-      <!-- AUTOMAÇÃO -->
+      <!-- ORGANIZAÇÃO -->
       <div class="nav-group-sep"></div>
-      <div class="nav-group-label">Automação</div>
+      <div class="nav-group-label">Organização</div>
+      <button class="nav-btn" onclick="setView('historico')"><span class="n-icon">🗂</span>Histórico</button>
       <button class="nav-btn" onclick="setView('mensagens')"><span class="n-icon">💬</span>Mensagens</button>
       <button class="nav-btn" onclick="setView('campanhas')"><span class="n-icon">📨</span>Campanhas</button>
       <!-- EMPRESA -->
@@ -910,29 +923,50 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
         <div class="orb-hero"></div>
         <div class="ch-inner">
           <div>
-            <h1 class="serif">Seu centro de<br><em>comando premium.</em></h1>
-            <p>Agenda, clientes, serviços, profissionais e faturamento — tudo separado por empresa, tudo em tempo real.</p>
+            <h1 class="serif">Centro de <em>comando.</em></h1>
+            <p>Visão completa do seu negócio em tempo real — agendamentos, faturamento e métricas.</p>
           </div>
           <button class="btn btn-primary" onclick="copyPublicLink()">🔗 Copiar link da agenda</button>
         </div>
       </div>
+
+      <!-- Linha 1: Agendamentos -->
+      <div class="dash-section-label">Agendamentos de hoje</div>
       <div class="stats-grid">
-        <div class="stat-card"><span class="sc-icon">📅</span><div class="sc-label">Agendamentos hoje</div><div class="sc-value" id="statHoje">0</div><div class="sc-note sc-good">Agenda do dia</div></div>
-        <div class="stat-card"><span class="sc-icon">💵</span><div class="sc-label">Faturamento hoje</div><div class="sc-value" id="statFaturamentoHoje">R$0</div><div class="sc-note sc-good">Só horários válidos</div></div>
-        <div class="stat-card"><span class="sc-icon">💰</span><div class="sc-label">Faturamento do mês</div><div class="sc-value" id="statFaturamentoMes">R$0</div><div class="sc-note">Resumo mensal</div></div>
-        <div class="stat-card"><span class="sc-icon">👥</span><div class="sc-label">Clientes ativos</div><div class="sc-value" id="statClientes">0</div><div class="sc-note">Base da empresa</div></div>
-        <div class="stat-card"><span class="sc-icon">🟡</span><div class="sc-label">Pendentes</div><div class="sc-value" id="statPendentes">0</div><div class="sc-note">Aguardando ação</div></div>
-        <div class="stat-card"><span class="sc-icon">🟢</span><div class="sc-label">Confirmados</div><div class="sc-value" id="statConfirmados">0</div><div class="sc-note">Agenda aprovada</div></div>
-        <div class="stat-card"><span class="sc-icon">✅</span><div class="sc-label">Concluídos</div><div class="sc-value" id="statConcluidos">0</div><div class="sc-note">Atendimentos feitos</div></div>
-        <div class="stat-card"><span class="sc-icon">✦</span><div class="sc-label">Serviços ativos</div><div class="sc-value" id="statServicos">0</div><div class="sc-note">Catálogo disponível</div></div>
+        <div class="stat-card"><span class="sc-icon">📅</span><div class="sc-label">Hoje</div><div class="sc-value" id="statHoje">0</div><div class="sc-note green">↑ Tempo real</div></div>
+        <div class="stat-card"><span class="sc-icon">⏳</span><div class="sc-label">Pendentes</div><div class="sc-value yellow" id="statPendentes">0</div><div class="sc-note">Aguardando confirmação</div></div>
+        <div class="stat-card"><span class="sc-icon">✅</span><div class="sc-label">Confirmados</div><div class="sc-value green" id="statConfirmados">0</div><div class="sc-note green">Prontos para atender</div></div>
+        <div class="stat-card"><span class="sc-icon">📅</span><div class="sc-label">Reagendados</div><div class="sc-value purple" id="statReagendados">0</div><div class="sc-note">Nova data definida</div></div>
       </div>
+
+      <!-- Linha 2: Outros status -->
+      <div class="dash-section-label">Histórico de status</div>
+      <div class="stats-grid-3">
+        <div class="stat-card"><span class="sc-icon">🎯</span><div class="sc-label">Concluídos</div><div class="sc-value blue" id="statConcluidos">0</div><div class="sc-note">Atendimentos finalizados</div></div>
+        <div class="stat-card"><span class="sc-icon">✕</span><div class="sc-label">Recusados</div><div class="sc-value red" id="statRecusados">0</div><div class="sc-note">Não confirmados</div></div>
+        <div class="stat-card"><span class="sc-icon">🗑</span><div class="sc-label">Excluídos</div><div class="sc-value" id="statExcluidos">0</div><div class="sc-note">Removidos da agenda</div></div>
+        <div class="stat-card"><span class="sc-icon">📊</span><div class="sc-label">Taxa de confirmação</div><div class="sc-value green" id="statTaxaConf">0%</div><div class="sc-note green">Confirmados / Total</div></div>
+      </div>
+
+      <!-- Linha 3: Financeiro e base -->
+      <div class="dash-section-label">Financeiro e base ativa</div>
+      <div class="stats-grid-2">
+        <div class="stat-card"><span class="sc-icon">💵</span><div class="sc-label">Faturamento hoje</div><div class="sc-value" id="statFatHoje">R$0</div><div class="sc-note">Agendamentos do dia</div></div>
+        <div class="stat-card"><span class="sc-icon">💰</span><div class="sc-label">Faturamento do mês</div><div class="sc-value" id="statFatMes">R$0</div><div class="sc-note green">Mês atual</div></div>
+        <div class="stat-card"><span class="sc-icon">👥</span><div class="sc-label">Clientes ativos</div><div class="sc-value" id="statClientes">0</div><div class="sc-note">Base da empresa</div></div>
+        <div class="stat-card"><span class="sc-icon">✦</span><div class="sc-label">Serviços ativos</div><div class="sc-value" id="statServicos">0</div><div class="sc-note">Catálogo disponível</div></div>
+        <div class="stat-card"><span class="sc-icon">👤</span><div class="sc-label">Profissionais ativos</div><div class="sc-value" id="statProfissionais">0</div><div class="sc-note">Equipe disponível</div></div>
+        <div class="stat-card"><span class="sc-icon">📅</span><div class="sc-label">Total de agendamentos</div><div class="sc-value" id="statTotal">0</div><div class="sc-note">Todos os registros</div></div>
+      </div>
+
+      <!-- Próximos e calendário -->
       <div class="content-grid">
         <div class="panel">
-          <div class="panel-head"><div><div class="panel-title serif">Gestão por status</div><div class="panel-sub">Cada etapa separada, sem bagunça no dashboard</div></div><button class="panel-action" onclick="setView('agenda')">Abrir agenda →</button></div>
-          <div class="status-summary-grid" id="dashboardStatusGrid"></div>
+          <div class="panel-head"><div><div class="panel-title serif">Próximos agendamentos</div><div class="panel-sub">Pendentes e confirmados — os que precisam de atenção</div></div><button class="panel-action" onclick="setView('agenda')">Ver todos →</button></div>
+          <div class="apt-list" id="dashAppointments"></div>
         </div>
-        <div class="panel dashboard-calendar-panel">
-          <div class="panel-head"><div><div class="panel-title serif">Calendário do mês</div><div class="panel-sub">Dias com movimento e foco do dia</div></div></div>
+        <div class="panel">
+          <div class="panel-head"><div><div class="panel-title serif">Calendário</div><div class="panel-sub">Dias com agendamentos</div></div></div>
           <div class="cal-grid" id="calendarBox"></div>
         </div>
       </div>
@@ -956,16 +990,17 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
         </div>
       </div>
       <div class="panel">
-        <div class="panel-head"><div><div class="panel-title serif">Central de agendamentos</div><div class="panel-sub" id="agendaFiltroSub">Mostrando pendentes, confirmados e reagendados</div></div></div>
-        <div class="agenda-filter-bar" id="agendaFilterBar">
-          <button class="filter-chip active" data-filter="ativos" onclick="setAgendaFiltro('ativos')">⚡ Ativos</button>
-          <button class="filter-chip" data-filter="todos" onclick="setAgendaFiltro('todos')">📋 Todos</button>
-          <button class="filter-chip" data-filter="pendente" onclick="setAgendaFiltro('pendente')">🟡 Pendentes</button>
-          <button class="filter-chip" data-filter="confirmado" onclick="setAgendaFiltro('confirmado')">🟢 Confirmados</button>
-          <button class="filter-chip" data-filter="reagendado" onclick="setAgendaFiltro('reagendado')">🔵 Reagendados</button>
-          <button class="filter-chip" data-filter="concluido" onclick="setAgendaFiltro('concluido')">✅ Concluídos</button>
-          <button class="filter-chip" data-filter="recusado" onclick="setAgendaFiltro('recusado')">🔴 Recusados</button>
-          <button class="filter-chip" data-filter="excluido" onclick="setAgendaFiltro('excluido')">🗑 Excluídos</button>
+        <div class="panel-head">
+          <div><div class="panel-title serif">Agenda de agendamentos</div><div class="panel-sub">Filtre por status para encontrar o que precisa</div></div>
+        </div>
+        <div class="agenda-filters" id="agendaFilters">
+          <button class="af-btn active" data-filter="todos" onclick="setAgendaFilter('todos',this)">Todos <span class="af-count" id="fc-todos">0</span></button>
+          <button class="af-btn f-pendente" data-filter="pendente" onclick="setAgendaFilter('pendente',this)">⏳ Pendentes <span class="af-count" id="fc-pendente">0</span></button>
+          <button class="af-btn f-confirmado" data-filter="confirmado" onclick="setAgendaFilter('confirmado',this)">✅ Confirmados <span class="af-count" id="fc-confirmado">0</span></button>
+          <button class="af-btn f-reagendado" data-filter="reagendado" onclick="setAgendaFilter('reagendado',this)">📅 Reagendados <span class="af-count" id="fc-reagendado">0</span></button>
+          <button class="af-btn f-concluido" data-filter="concluido" onclick="setAgendaFilter('concluido',this)">🎯 Concluídos <span class="af-count" id="fc-concluido">0</span></button>
+          <button class="af-btn f-recusado" data-filter="recusado" onclick="setAgendaFilter('recusado',this)">✕ Recusados <span class="af-count" id="fc-recusado">0</span></button>
+          <button class="af-btn f-excluido" data-filter="excluido" onclick="setAgendaFilter('excluido',this)">🗑 Excluídos <span class="af-count" id="fc-excluido">0</span></button>
         </div>
         <div class="timeline" id="agendaTimeline"></div>
       </div>
@@ -1034,6 +1069,15 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
         <div class="ch-inner"><div><h1 class="serif">Relatórios<br><em>e métricas.</em></h1><p>Acompanhe o desempenho do seu negócio em detalhes.</p></div></div>
       </div>
       <div class="empty-state"><div class="es-icon">📈</div><p>Relatórios avançados em breve.</p></div>
+    </section>
+
+    <!-- VIEW: HISTÓRICO -->
+    <section id="view-historico" class="view">
+      <div class="command-hero" style="margin-bottom:16px">
+        <div class="orb-hero"></div>
+        <div class="ch-inner"><div><h1 class="serif">Histórico<br><em>completo.</em></h1><p>Todos os agendamentos da empresa organizados por data.</p></div></div>
+      </div>
+      <div class="empty-state"><div class="es-icon">🗂</div><p>Histórico em breve.</p></div>
     </section>
 
     <!-- VIEW: MENSAGENS -->
@@ -1188,8 +1232,21 @@ let state={
   user:null,empresa:null,perfil:null,categorias:[],
   clientes:[],servicos:[],profissionais:[],agendamentos:[],pagamentos:[],
   pubEmpresa:null,pubServico:null,pubProfissional:null,
-  agendaFiltro:"ativos"
+  agendaFilter:"todos"
 };
+
+/* ── normalizar status ── */
+function normStatus(s){
+  const raw=(s||"pendente").toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  if(raw==="confirmado"||raw==="confirmada")return"Confirmado";
+  if(raw==="pendente")return"Pendente";
+  if(raw==="concluido"||raw==="concluida"||raw==="conclu\xeddo")return"Concluído";
+  if(raw==="recusado"||raw==="recusada"||raw==="cancelado"||raw==="cancelada")return"Recusado";
+  if(raw==="reagendado"||raw==="reagendada")return"Reagendado";
+  if(raw==="excluido"||raw==="exclui\u00eddo"||raw==="excluída")return"Excluído";
+  return s||"Pendente";
+}
 
 const navItemsFlat=[
   ["dashboard","📊","Dashboard","Controle geral do negócio"],
@@ -1199,6 +1256,7 @@ const navItemsFlat=[
   ["profissionais","👤","Profissionais","Equipe de atendimento"],
   ["financeiro","💰","Financeiro","Valores e resultados"],
   ["relatorios","📈","Relatórios","Dados e métricas"],
+  ["historico","🗂","Histórico","Todos os registros"],
   ["mensagens","💬","Mensagens","Comunicação automática"],
   ["campanhas","📨","Campanhas","Promoções e ofertas"],
   ["config","⚙","Configurações","Dados do negócio"]
@@ -1210,8 +1268,13 @@ function scrollToId(id){document.getElementById(id)?.scrollIntoView({behavior:"s
 function money(v){return Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
 function slugify(s){return(s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").substring(0,60);}
 function hojeISO(){return new Date().toISOString().slice(0,10)}
+function mesPrefixo(){return new Date().toISOString().slice(0,7)}
 function publicUrl(slug){return location.origin+location.pathname+"#agendar/"+slug}
-function badgeClass(s){const m={confirmado:"ok",ok:"ok",confirmada:"ok",cancelado:"off",cancelada:"off",recusado:"off",recusada:"off",concluido:"done",concluída:"done","concluído":"done",reagendado:"re",pendente:"wait"};return m[(s||"pendente").toLowerCase()]||"wait";}
+function badgeClass(s){
+  const n=normStatus(s);
+  const m={"Confirmado":"ok","Pendente":"wait","Concluído":"done","Recusado":"off","Reagendado":"re","Excluído":"exc"};
+  return m[n]||"wait";
+}
 function initial(name){return(name||"?").trim().substring(0,1).toUpperCase()}
 function formatDateBR(d){if(!d)return"—";const[y,m,dd]=d.split("-");return dd+"/"+m+"/"+y;}
 function buildWaLink(tel,msg){const n=(tel||"").replace(/\D/g,"");if(!n)return null;const f=n.startsWith("55")?n:"55"+n;return"https://wa.me/"+f+"?text="+encodeURIComponent(msg);}
@@ -1358,10 +1421,7 @@ async function finalizarCadastro(){
   const senha=cadSenha.value.trim();
   const nomeUser=cadNome.value.trim();
 
-  const {data:authData,error:authErr}=await db.auth.signUp({
-    email,
-    password:senha
-  });
+  const {data:authData,error:authErr}=await db.auth.signUp({email,password:senha});
 
   if(authErr||!authData.user){
     console.error(authErr);
@@ -1421,10 +1481,7 @@ async function loginComSenha(){
   const senha=(document.getElementById("loginSenha")?.value||"").trim();
   if(!email||!senha)return toast("Digite e-mail e senha.","err");
 
-  const {data,error}=await db.auth.signInWithPassword({
-    email,
-    password:senha
-  });
+  const {data,error}=await db.auth.signInWithPassword({email,password:senha});
 
   if(error||!data.user){
     console.error(error);
@@ -1475,43 +1532,85 @@ async function loadAll(){
 
 function renderAll(){renderStats();renderDashboardLists();renderCalendar();renderSelects();renderAgendaTimeline();renderClienteCards();renderServicosCards();renderProfCards();renderFinanceiro();renderConfig();}
 
+/* ── Dashboard Stats ── */
 function renderStats(){
   const hoje=hojeISO();
-  const counts=getStatusCounts();
-  const agHoje=state.agendamentos.filter(a=>a.data===hoje && normStatus(a.status)!=="excluido").length;
-  const receitaHoje=state.agendamentos.filter(a=>a.data===hoje && isAgendamentoValidoFinanceiro(a)).reduce((s,a)=>s+Number(a.valor||0),0);
-  const receitaMes=state.agendamentos.filter(a=>sameMonth(a.data) && isAgendamentoValidoFinanceiro(a)).reduce((s,a)=>s+Number(a.valor||0),0);
-  statHoje.textContent=agHoje;
-  statFaturamentoHoje.textContent=money(receitaHoje).replace(",00","");
-  statFaturamentoMes.textContent=money(receitaMes).replace(",00","");
-  statClientes.textContent=state.clientes.filter(c=>c.ativo!==false).length;
-  statPendentes.textContent=counts.pendente;
-  statConfirmados.textContent=counts.confirmado;
-  statConcluidos.textContent=counts.concluido;
-  statServicos.textContent=state.servicos.filter(s=>s.status==="ativo").length;
+  const mes=mesPrefixo();
+  const ags=state.agendamentos;
+
+  const agHoje=ags.filter(a=>a.data===hoje).length;
+  const pendentes=ags.filter(a=>normStatus(a.status)==="Pendente").length;
+  const confirmados=ags.filter(a=>normStatus(a.status)==="Confirmado").length;
+  const reagendados=ags.filter(a=>normStatus(a.status)==="Reagendado").length;
+  const concluidos=ags.filter(a=>normStatus(a.status)==="Concluído").length;
+  const recusados=ags.filter(a=>normStatus(a.status)==="Recusado").length;
+  const excluidos=ags.filter(a=>normStatus(a.status)==="Excluído").length;
+  const total=ags.length;
+  const taxa=total>0?Math.round((confirmados+concluidos)/total*100):0;
+
+  const fatHoje=ags.filter(a=>a.data===hoje&&(normStatus(a.status)==="Confirmado"||normStatus(a.status)==="Concluído")).reduce((s,a)=>s+Number(a.valor||0),0);
+  const fatMes=ags.filter(a=>a.data&&a.data.startsWith(mes)).reduce((s,a)=>s+Number(a.valor||0),0);
+
+  const sv=id=>document.getElementById(id);
+  sv("statHoje").textContent=agHoje;
+  sv("statPendentes").textContent=pendentes;
+  sv("statConfirmados").textContent=confirmados;
+  sv("statReagendados").textContent=reagendados;
+  sv("statConcluidos").textContent=concluidos;
+  sv("statRecusados").textContent=recusados;
+  sv("statExcluidos").textContent=excluidos;
+  sv("statTaxaConf").textContent=taxa+"%";
+  sv("statFatHoje").textContent=money(fatHoje).replace(",00","");
+  sv("statFatMes").textContent=money(fatMes).replace(",00","");
+  sv("statClientes").textContent=state.clientes.filter(c=>c.ativo!==false).length;
+  sv("statServicos").textContent=state.servicos.filter(s=>s.status==="ativo").length;
+  sv("statProfissionais").textContent=state.profissionais.filter(p=>p.status==="ativo").length;
+  sv("statTotal").textContent=total;
+
+  // atualiza contadores dos filtros
+  sv("fc-todos").textContent=total;
+  sv("fc-pendente").textContent=pendentes;
+  sv("fc-confirmado").textContent=confirmados;
+  sv("fc-reagendado").textContent=reagendados;
+  sv("fc-concluido").textContent=concluidos;
+  sv("fc-recusado").textContent=recusados;
+  sv("fc-excluido").textContent=excluidos;
 }
 
 function renderDashboardLists(){
-  const counts=getStatusCounts();
-  const data=[
-    ["pendente","🟡","Pendentes",counts.pendente],
-    ["confirmado","🟢","Confirmados",counts.confirmado],
-    ["reagendado","🔵","Reagendados",counts.reagendado],
-    ["concluido","✅","Concluídos",counts.concluido],
-    ["recusado","🔴","Recusados",counts.recusado],
-    ["excluido","🗑","Excluídos",counts.excluido]
-  ];
-  const box=document.getElementById("dashboardStatusGrid");
-  if(!box)return;
-  box.innerHTML=data.map(([key,icon,label,value])=>`<div class="status-mini-card ${key}" onclick="setView('agenda');setAgendaFiltro('${key}')">
-    <div class="status-mini-icon">${icon}</div>
-    <div class="status-mini-info"><div class="status-mini-label">${label}</div><div class="status-mini-value">${value}</div></div>
-  </div>`).join("");
+  // Mostrar apenas pendentes e confirmados no dashboard (próximos)
+  const visíveis=state.agendamentos.filter(a=>{
+    const s=normStatus(a.status);
+    return s==="Pendente"||s==="Confirmado"||s==="Reagendado";
+  }).slice(0,6);
+
+  const dashAppointments=document.getElementById("dashAppointments");
+  if(!visíveis.length){
+    dashAppointments.innerHTML=`<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento pendente ou confirmado.</p></div>`;
+    return;
+  }
+  dashAppointments.innerHTML=visíveis.map(a=>{
+    const tel=(a.cliente_telefone||a.telefone||"").replace(/\D/g,"");
+    return`<div class="apt-card" style="flex-direction:column;align-items:stretch;gap:0">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="apt-avatar">${initial(a.cliente_nome)}</div>
+        <div style="flex:1"><div class="apt-name">${a.cliente_nome||"Cliente"}</div><div class="apt-meta">${a.servico_nome||"—"} · ${a.profissional_nome||"—"}</div><div class="apt-meta" style="margin-top:2px">📅 ${formatDateBR(a.data)} às ${a.hora||""}</div></div>
+        <div class="apt-right"><span class="badge ${badgeClass(a.status)}">${normStatus(a.status)}</span></div>
+      </div>
+      <div class="apt-actions">
+        <button class="act-btn confirm" onclick="confirmarAg('${a.id}')">✅ Confirmar</button>
+        <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">✕ Recusar</button>
+        <button class="act-btn reschedule" onclick="openModalReagendar('${a.id}')">📅 Reagendar</button>
+        <button class="act-btn done" onclick="concluirAg('${a.id}')">✓ Concluir</button>
+        ${tel?`<button class="act-btn wa" onclick="abrirWhatsappPadrao('${a.id}')">💬 WhatsApp</button>`:""}
+      </div>
+    </div>`;
+  }).join("");
 }
 
 function renderCalendar(){
   const days=["S","T","Q","Q","S","S","D"];
-  const busy=new Set(state.agendamentos.filter(a=>normStatus(a.status)!=="excluido").map(a=>String(new Date(a.data+"T00:00:00").getDate())));
+  const busy=new Set(state.agendamentos.map(a=>String(new Date(a.data+"T00:00:00").getDate())));
   let html=days.map(d=>`<div class="cal-label">${d}</div>`).join("");
   const today=String(new Date().getDate());
   for(let i=1;i<=28;i++){const d=String(i);html+=`<div class="cal-day ${busy.has(d)?"busy":""} ${d===today?"today":""}">${i}</div>`;}
@@ -1523,31 +1622,44 @@ function renderSelects(){
   agProfissional.innerHTML=`<option value="">Selecione profissional</option>`+state.profissionais.filter(p=>p.status==="ativo").map(p=>`<option value="${p.id}">${p.nome}</option>`).join("");
 }
 
-function setAgendaFiltro(f){
-  state.agendaFiltro=f||"ativos";
-  document.querySelectorAll("#agendaFilterBar .filter-chip").forEach(b=>b.classList.toggle("active",b.dataset.filter===state.agendaFiltro));
-  const sub=document.getElementById("agendaFiltroSub");
-  if(sub)sub.textContent="Mostrando agendamentos " + agendaFilterLabel(state.agendaFiltro);
+/* ── Agenda com filtro ── */
+let _agendaFilter="todos";
+
+function setAgendaFilter(filter,btn){
+  _agendaFilter=filter;
+  document.querySelectorAll(".af-btn").forEach(b=>b.classList.remove("active"));
+  if(btn)btn.classList.add("active");
   renderAgendaTimeline();
 }
 
 function renderAgendaTimeline(){
-  const filtro=state.agendaFiltro||"ativos";
-  const lista=state.agendamentos.filter(a=>{
-    const st=normStatus(a.status);
-    if(filtro==="todos")return true;
-    if(filtro==="ativos")return ["pendente","confirmado","reagendado"].includes(st);
-    return st===filtro;
-  });
-  document.querySelectorAll("#agendaFilterBar .filter-chip").forEach(b=>b.classList.toggle("active",b.dataset.filter===filtro));
-  const sub=document.getElementById("agendaFiltroSub");
-  if(sub)sub.textContent="Mostrando agendamentos " + agendaFilterLabel(filtro);
-  if(!lista.length){agendaTimeline.innerHTML=`<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento em ${agendaFilterLabel(filtro)}.</p></div>`;return;}
+  const agendaTimeline=document.getElementById("agendaTimeline");
+  if(!state.agendamentos.length){
+    agendaTimeline.innerHTML=`<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>`;
+    return;
+  }
+
+  let filtered=state.agendamentos;
+  if(_agendaFilter!=="todos"){
+    const map={
+      "pendente":"Pendente","confirmado":"Confirmado","reagendado":"Reagendado",
+      "concluido":"Concluído","recusado":"Recusado","excluido":"Excluído"
+    };
+    const target=map[_agendaFilter]||"Pendente";
+    filtered=state.agendamentos.filter(a=>normStatus(a.status)===target);
+  }
+
+  if(!filtered.length){
+    agendaTimeline.innerHTML=`<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento neste status.</p></div>`;
+    return;
+  }
+
   agendaTimeline.innerHTML="";
-  lista.forEach(a=>{
+  filtered.forEach(a=>{
     const block=document.createElement("div");
     block.className="tl-block";block.id="ag-"+a.id;
     const tel=(a.cliente_telefone||a.telefone||"").replace(/\D/g,"");
+    const statusNorm=normStatus(a.status);
     block.innerHTML=`
       <div class="tl-timestamp">${a.hora||"—"}</div>
       <div class="tl-line"></div>
@@ -1561,7 +1673,7 @@ function renderAgendaTimeline(){
               <div class="apt-meta" style="margin-top:1px">📅 ${formatDateBR(a.data)}${a.cliente_telefone?` · 📱 ${a.cliente_telefone}`:""}</div>
             </div>
             <div class="tl-apt-status">
-              <span class="badge ${badgeClass(a.status)}">${a.status||"Pendente"}</span>
+              <span class="badge ${badgeClass(a.status)}">${statusNorm}</span>
             </div>
           </div>
           <div class="apt-actions">
@@ -1734,11 +1846,12 @@ function editAgendamento(id){
       <div class="field"><label>Hora</label><input id="ed_ag_hora" type="time" value="${a.hora||""}"></div>
     </div>
     <div class="field"><label>Status</label><select id="ed_ag_status">
-      <option ${a.status==="Confirmado"?"selected":""}>Confirmado</option>
-      <option ${a.status==="Pendente"?"selected":""}>Pendente</option>
-      <option ${a.status==="Cancelado"?"selected":""}>Cancelado</option>
-      <option ${a.status==="Concluído"?"selected":""}>Concluído</option>
-      <option ${a.status==="Reagendado"?"selected":""}>Reagendado</option>
+      <option ${normStatus(a.status)==="Confirmado"?"selected":""}>Confirmado</option>
+      <option ${normStatus(a.status)==="Pendente"?"selected":""}>Pendente</option>
+      <option ${normStatus(a.status)==="Reagendado"?"selected":""}>Reagendado</option>
+      <option ${normStatus(a.status)==="Concluído"?"selected":""}>Concluído</option>
+      <option ${normStatus(a.status)==="Recusado"?"selected":""}>Recusado</option>
+      <option ${normStatus(a.status)==="Excluído"?"selected":""}>Excluído</option>
     </select></div>`,async()=>{
     const cli=document.getElementById("ed_ag_cli").value.trim();
     const tel=document.getElementById("ed_ag_tel").value.trim();
@@ -1932,11 +2045,10 @@ async function confirmarReagendar(){
 
 /* ── financeiro / config ── */
 function renderFinanceiro(){
-  const agValidos=state.agendamentos.filter(isAgendamentoValidoFinanceiro);
-  const total=agValidos.reduce((s,a)=>s+Number(a.valor||0),0);
-  const ticket=agValidos.length?total/agValidos.length:0;
+  const total=state.agendamentos.reduce((s,a)=>s+Number(a.valor||0),0);
+  const ticket=state.agendamentos.length?total/state.agendamentos.length:0;
   finReceita.textContent=money(total).replace(",00","");finTicket.textContent=money(ticket).replace(",00","");
-  finPagos.textContent=agValidos.length;finPlano.textContent=state.empresa.plano||"Grátis";
+  finPagos.textContent=state.pagamentos.length;finPlano.textContent=state.empresa.plano||"Grátis";
 }
 function renderConfig(){
   cfgNome.value=state.empresa.nome||"";cfgWhatsapp.value=state.empresa.whatsapp||"";
@@ -1992,112 +2104,6 @@ function resetPublic(){
 function copyPublicLink(){if(!state.empresa)return;const link=publicUrl(state.empresa.slug);navigator.clipboard?.writeText(link);toast("Link copiado: "+link,"ok");}
 function openPublic(){location.href="#agendar/"+state.empresa.slug;location.reload();}
 async function logout(){await db.auth.signOut();state.user=null;state.perfil=null;state.empresa=null;state.clientes=[];state.servicos=[];state.profissionais=[];state.agendamentos=[];state.pagamentos=[];location.href=location.pathname;}
-
-
-/* ══════════════════════════════════════════════════════
-   PATCH FINAL — CARREGAMENTO ROBUSTO SUPABASE
-   Corrige dashboard zerado após trocar o index.
-   Busca sem order quebrando e normaliza nomes de colunas.
-══════════════════════════════════════════════════════ */
-function pickField(obj, names, fallback = null){
-  for(const n of names){
-    if(obj && obj[n] !== undefined && obj[n] !== null && obj[n] !== "") return obj[n];
-  }
-  return fallback;
-}
-
-function normalizeClienteRow(c){
-  return {
-    ...c,
-    nome: pickField(c,["nome","cliente_nome","nome_cliente"],"Cliente"),
-    telefone: pickField(c,["telefone","cliente_telefone","whatsapp"],""),
-    email: pickField(c,["email","cliente_email"],""),
-    ativo: c.ativo === undefined ? true : c.ativo
-  };
-}
-
-function normalizeServicoRow(s){
-  const ativoStatus = s.ativo === false ? "inativo" : "ativo";
-  return {
-    ...s,
-    nome: pickField(s,["nome","servico_nome"],"Serviço"),
-    preco: Number(pickField(s,["preco","valor"],0) || 0),
-    duracao_minutos: Number(pickField(s,["duracao_minutos","duracao"],60) || 60),
-    status: pickField(s,["status"],ativoStatus)
-  };
-}
-
-function normalizeProfissionalRow(p){
-  const ativoStatus = p.ativo === false ? "inativo" : "ativo";
-  return {
-    ...p,
-    nome: pickField(p,["nome","profissional_nome"],"Profissional"),
-    especialidade: pickField(p,["especialidade","cargo"],"Profissional"),
-    telefone: pickField(p,["telefone","whatsapp"],""),
-    status: pickField(p,["status"],ativoStatus)
-  };
-}
-
-function normalizeAgendamentoRow(a){
-  return {
-    ...a,
-    data: pickField(a,["data","data_agendamento","dia"],""),
-    hora: pickField(a,["hora","horario_agendamento","horario"],""),
-    cliente_nome: pickField(a,["cliente_nome","nome_cliente","cliente"],"Cliente"),
-    cliente_telefone: pickField(a,["cliente_telefone","telefone_cliente","telefone","whatsapp"],""),
-    cliente_email: pickField(a,["cliente_email","email_cliente","email"],""),
-    servico_nome: pickField(a,["servico_nome","nome_servico","servico"],"—"),
-    profissional_nome: pickField(a,["profissional_nome","nome_profissional","profissional"],"—"),
-    status: pickField(a,["status"],"Pendente"),
-    valor: Number(pickField(a,["valor","preco"],0) || 0)
-  };
-}
-
-async function safeSelectTable(table, empresaId){
-  const res = await db.from(table).select("*").eq("empresa_id", empresaId);
-  if(res.error){
-    console.error("Erro ao carregar", table, res.error);
-    return [];
-  }
-  return res.data || [];
-}
-
-async function loadAll(){
-  if(!state.empresa || !state.empresa.id) return;
-  const id = state.empresa.id;
-
-  const [clientes, servicos, profissionais, agendamentos, pagamentos] = await Promise.all([
-    safeSelectTable("agenda_clientes", id),
-    safeSelectTable("agenda_servicos", id),
-    safeSelectTable("agenda_profissionais", id),
-    safeSelectTable("agenda_agendamentos", id),
-    safeSelectTable("agenda_pagamentos", id)
-  ]);
-
-  state.clientes = clientes.map(normalizeClienteRow);
-  state.servicos = servicos.map(normalizeServicoRow);
-  state.profissionais = profissionais.map(normalizeProfissionalRow);
-  state.agendamentos = agendamentos.map(normalizeAgendamentoRow).sort((a,b)=>{
-    const aa = String(a.data || "") + " " + String(a.hora || "");
-    const bb = String(b.data || "") + " " + String(b.hora || "");
-    return aa.localeCompare(bb);
-  });
-  state.pagamentos = pagamentos || [];
-
-  renderAll();
-}
-
-function renderSelects(){
-  const servicosAtivos = state.servicos.filter(s => normStatus(s.status) === "ativo");
-  const profissionaisAtivos = state.profissionais.filter(p => normStatus(p.status) === "ativo");
-  if(window.agServico){
-    agServico.innerHTML = `<option value="">Selecione serviço</option>` + servicosAtivos.map(s=>`<option value="${s.id}">${s.nome} — ${money(s.preco)}</option>`).join("");
-  }
-  if(window.agProfissional){
-    agProfissional.innerHTML = `<option value="">Selecione profissional</option>` + profissionaisAtivos.map(p=>`<option value="${p.id}">${p.nome}</option>`).join("");
-  }
-}
-
 </script>
 </body>
 </html>
