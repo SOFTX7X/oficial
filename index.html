@@ -765,6 +765,264 @@ footer{
   .dash-sidebar{display:none;}
   .modal{padding:40px 28px;margin:20px;}
 }
+
+
+/* ========================= DASHBOARD REAL APÓS LOGIN ========================= */
+#dashboardApp{
+  display:none;
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse 60% 40% at 70% 0%, rgba(201,169,110,0.07), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 10% 100%, rgba(201,169,110,0.05), transparent 65%),
+    var(--black);
+  color:var(--text);
+  position:relative;
+  z-index:2;
+}
+#dashboardApp.active{display:flex;}
+.app-sidebar{
+  width:292px;
+  min-height:100vh;
+  padding:28px 22px;
+  background:rgba(15,15,15,0.86);
+  border-right:1px solid var(--border);
+  backdrop-filter:blur(26px);
+  -webkit-backdrop-filter:blur(26px);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+}
+.app-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-family:'Cormorant Garamond',serif;
+  font-size:25px;
+  letter-spacing:.06em;
+  color:var(--white);
+  margin-bottom:38px;
+}
+.app-menu{display:flex;flex-direction:column;gap:8px;}
+.app-menu-item{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:14px 16px;
+  border-radius:16px;
+  color:var(--muted);
+  font-size:14px;
+  cursor:none;
+  transition:all .25s ease;
+  border:1px solid transparent;
+}
+.app-menu-item:hover{
+  color:var(--white);
+  background:rgba(255,255,255,.035);
+  border-color:var(--border);
+}
+.app-menu-item.active{
+  color:var(--gold);
+  background:var(--gold-soft);
+  border-color:rgba(201,169,110,.22);
+  box-shadow:0 0 38px rgba(201,169,110,.08), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.app-menu-icon{width:22px;text-align:center;font-size:15px;}
+.app-sidebar-bottom{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.app-plan-card{
+  padding:18px;
+  border-radius:20px;
+  background:linear-gradient(145deg, rgba(201,169,110,.12), rgba(255,255,255,.025));
+  border:1px solid rgba(201,169,110,.18);
+}
+.app-plan-label{
+  font-size:10px;
+  letter-spacing:.14em;
+  color:var(--gold);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.app-plan-text{font-size:13px;color:var(--muted);line-height:1.55;}
+.app-user-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding-top:16px;
+  border-top:1px solid var(--border);
+}
+.app-avatar{
+  width:46px;height:46px;
+  border-radius:50%;
+  background:var(--gold);
+  color:var(--black);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:600;
+}
+.app-user-name{font-size:14px;color:var(--white);margin-bottom:2px;}
+.app-user-role{font-size:11px;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;}
+.app-main{
+  flex:1;
+  padding:34px;
+  min-width:0;
+}
+.app-mobile-top{display:none;}
+.app-topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:24px;
+  margin-bottom:30px;
+}
+.app-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 14px;
+  border:1px solid rgba(201,169,110,.22);
+  background:var(--gold-soft);
+  color:var(--gold);
+  border-radius:999px;
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+.app-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(34px,4vw,58px);
+  color:var(--white);
+  font-weight:300;
+  line-height:1;
+}
+.app-subtitle{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:14px;
+}
+.app-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;}
+.icon-btn,.app-primary-btn,.app-secondary-btn{
+  border-radius:16px;
+  border:1px solid var(--border2);
+  background:rgba(20,20,20,.88);
+  color:var(--white);
+  cursor:none;
+  font-family:'DM Sans',sans-serif;
+  transition:all .25s ease;
+}
+.icon-btn{width:52px;height:52px;font-size:17px;}
+.icon-btn:hover,.app-secondary-btn:hover{border-color:rgba(201,169,110,.35);color:var(--gold);background:var(--gold-soft);}
+.app-primary-btn{
+  height:52px;
+  padding:0 24px;
+  background:var(--gold);
+  color:var(--black);
+  border:none;
+  font-weight:500;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  font-size:12px;
+}
+.app-primary-btn:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 14px 34px rgba(201,169,110,.28);}
+.app-secondary-btn{height:52px;padding:0 20px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;}
+.metric-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:22px;
+}
+.metric-card{
+  background:rgba(20,20,20,.76);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:22px;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  position:relative;
+  overflow:hidden;
+  transition:all .3s ease;
+}
+.metric-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 80% 0%, rgba(201,169,110,.12), transparent 45%);
+  opacity:0;
+  transition:opacity .3s ease;
+}
+.metric-card:hover{transform:translateY(-4px);border-color:rgba(201,169,110,.22);}
+.metric-card:hover::before{opacity:1;}
+.metric-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;position:relative;z-index:1;}
+.metric-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);}
+.metric-icon{width:34px;height:34px;border-radius:12px;background:var(--gold-soft);color:var(--gold);display:flex;align-items:center;justify-content:center;border:1px solid rgba(201,169,110,.15);}
+.metric-value{font-family:'Cormorant Garamond',serif;font-size:42px;color:var(--white);line-height:1;position:relative;z-index:1;}
+.metric-footer{margin-top:12px;font-size:12px;color:var(--muted);position:relative;z-index:1;}
+.good{color:#4ade80;}.warn{color:#facc15;}.bad{color:#fb7185;}
+.app-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(310px,.8fr);
+  gap:18px;
+  align-items:start;
+}
+.panel-card{
+  background:rgba(20,20,20,.78);
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:24px;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  box-shadow:0 28px 90px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.035);
+}
+.panel-header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px;}
+.panel-title{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--white);font-weight:300;}
+.panel-link{font-size:12px;color:var(--gold);text-decoration:none;letter-spacing:.06em;}
+.appointment-list{display:flex;flex-direction:column;gap:12px;}
+.appointment-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:16px;
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:18px;
+  transition:all .25s ease;
+}
+.appointment-row:hover{background:rgba(255,255,255,.04);border-color:rgba(201,169,110,.18);}
+.client-info{display:flex;align-items:center;gap:13px;min-width:0;}
+.client-avatar{width:46px;height:46px;border-radius:50%;background:var(--gold-soft);border:1px solid rgba(201,169,110,.16);color:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.client-name{color:var(--white);font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.client-service{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.appointment-meta{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+.appointment-time{font-size:14px;color:var(--white);}
+.status-pill{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;border:1px solid transparent;}
+.status-ok{color:#4ade80;background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.18);}
+.status-pending{color:#facc15;background:rgba(250,204,21,.1);border-color:rgba(250,204,21,.18);}
+.status-cancel{color:#fb7185;background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.18);}
+.side-stack{display:flex;flex-direction:column;gap:18px;}
+.calendar-premium .cal-grid{gap:7px;}
+.calendar-premium .cal-day-name{font-size:10px;color:var(--muted2);padding:7px 0;}
+.calendar-premium .cal-day{min-height:42px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid transparent;}
+.calendar-premium .cal-day.booked{background:var(--gold-soft);border-color:rgba(201,169,110,.18);color:var(--gold);}
+.calendar-premium .cal-day.today{background:var(--gold);color:var(--black);font-weight:600;}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.quick-card{padding:16px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.025);transition:all .25s ease;cursor:none;}
+.quick-card:hover{border-color:rgba(201,169,110,.2);background:var(--gold-soft);transform:translateY(-2px);}
+.quick-icon{font-size:19px;margin-bottom:10px;}
+.quick-title{font-size:13px;color:var(--white);margin-bottom:3px;}
+.quick-sub{font-size:11px;color:var(--muted);line-height:1.4;}
+.finance-mini{height:158px;border-radius:20px;background:linear-gradient(180deg,rgba(201,169,110,.12),rgba(255,255,255,.025));border:1px solid var(--border);position:relative;overflow:hidden;margin-top:12px;}
+.finance-mini svg{width:100%;height:100%;display:block;}
+@media(max-width:1180px){.metric-grid{grid-template-columns:repeat(2,1fr);}.app-grid{grid-template-columns:1fr;}.side-stack{display:grid;grid-template-columns:1fr 1fr;}.quick-actions{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:900px){body{cursor:auto;}.cursor,.cursor-ring{display:none;}#dashboardApp.active{display:block;}.app-sidebar{display:none;}.app-main{padding:18px;}.app-mobile-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding:14px 16px;border:1px solid var(--border);border-radius:22px;background:rgba(20,20,20,.8);}.app-topbar{flex-direction:column;align-items:stretch;}.app-actions{justify-content:flex-start;}.metric-grid{grid-template-columns:1fr;}.side-stack{display:flex;}.appointment-row{align-items:flex-start;}.appointment-meta{align-items:flex-start;text-align:left;}.client-info{align-items:flex-start;}.app-title{font-size:38px;}}
+@media(max-width:520px){.app-main{padding:14px;}.panel-card,.metric-card{border-radius:22px;padding:18px;}.app-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;}.app-primary-btn,.app-secondary-btn{grid-column:1/3;width:100%;}.icon-btn{width:100%;}.quick-actions{grid-template-columns:1fr;}.appointment-row{flex-direction:column;}.appointment-meta{width:100%;flex-direction:row;justify-content:space-between;align-items:center;}.client-service,.client-name{white-space:normal;}.modal{max-width:calc(100vw - 28px);}}
+
 </style>
 </head>
 <body>
@@ -772,6 +1030,7 @@ footer{
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
+<div id="landingPage">
 <!-- NAV -->
 <nav id="nav">
   <div class="logo">
@@ -805,7 +1064,7 @@ footer{
       <span>Começar Agora</span>
       <span>→</span>
     </button>
-    <button class="btn-hero-ghost">
+    <button class="btn-hero-ghost" onclick="openModal('login')">
       <span>▶</span>
       <span>Ver demonstração</span>
     </button>
@@ -1181,6 +1440,142 @@ footer{
   </div>
 </footer>
 
+</div>
+
+<!-- DASHBOARD REAL APÓS LOGIN -->
+<section id="dashboardApp" aria-label="Dashboard AgendaPro">
+  <aside class="app-sidebar">
+    <div>
+      <div class="app-brand"><div class="logo-dot"></div>AgendaPro</div>
+      <div class="app-menu">
+        <div class="app-menu-item active"><span class="app-menu-icon">⬡</span>Dashboard</div>
+        <div class="app-menu-item"><span class="app-menu-icon">◷</span>Agenda</div>
+        <div class="app-menu-item"><span class="app-menu-icon">◎</span>Clientes</div>
+        <div class="app-menu-item"><span class="app-menu-icon">◈</span>Financeiro</div>
+        <div class="app-menu-item"><span class="app-menu-icon">◉</span>Serviços</div>
+        <div class="app-menu-item"><span class="app-menu-icon">◌</span>Profissionais</div>
+        <div class="app-menu-item"><span class="app-menu-icon">⚙</span>Configurações</div>
+      </div>
+    </div>
+    <div class="app-sidebar-bottom">
+      <div class="app-plan-card">
+        <div class="app-plan-label">Plano atual</div>
+        <div class="app-plan-text">Premium ativo com agenda completa, relatórios e notificações automáticas.</div>
+      </div>
+      <div class="app-user-card">
+        <div class="app-avatar">A</div>
+        <div>
+          <div class="app-user-name">Arllison</div>
+          <div class="app-user-role">Administrador</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <div class="app-mobile-top">
+      <div class="app-brand" style="margin:0;font-size:22px;"><div class="logo-dot"></div>AgendaPro</div>
+      <button class="icon-btn" onclick="returnToLanding()">⌂</button>
+    </div>
+
+    <div class="app-topbar">
+      <div>
+        <div class="app-kicker"><span class="eyebrow-dot"></span>Painel premium</div>
+        <h1 class="app-title">Olá, Arllison 👋</h1>
+        <div class="app-subtitle">Bem-vindo novamente. Aqui está o resumo completo da sua agenda.</div>
+      </div>
+      <div class="app-actions">
+        <button class="icon-btn" title="Notificações">🔔</button>
+        <button class="app-secondary-btn" onclick="returnToLanding()">Sair</button>
+        <button class="app-primary-btn">+ Novo Agendamento</button>
+      </div>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-head"><div class="metric-label">Agendamentos hoje</div><div class="metric-icon">◷</div></div>
+        <div class="metric-value">18</div>
+        <div class="metric-footer"><span class="good">↑ +12%</span> em relação a ontem</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-head"><div class="metric-label">Clientes ativos</div><div class="metric-icon">◎</div></div>
+        <div class="metric-value">248</div>
+        <div class="metric-footer"><span class="good">+24 novos</span> este mês</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-head"><div class="metric-label">Faturamento mensal</div><div class="metric-icon">◈</div></div>
+        <div class="metric-value">R$4.2k</div>
+        <div class="metric-footer"><span class="good">↑ +18%</span> crescimento mensal</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-head"><div class="metric-label">Horários livres</div><div class="metric-icon">◑</div></div>
+        <div class="metric-value">6</div>
+        <div class="metric-footer"><span class="warn">Restantes</span> para hoje</div>
+      </div>
+    </div>
+
+    <div class="app-grid">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">Próximos agendamentos</div>
+          <a class="panel-link" href="#">Ver agenda completa →</a>
+        </div>
+        <div class="appointment-list">
+          <div class="appointment-row">
+            <div class="client-info"><div class="client-avatar">C</div><div><div class="client-name">Camila Ferreira</div><div class="client-service">Alongamento em Gel · Manicure Premium</div></div></div>
+            <div class="appointment-meta"><div class="appointment-time">14:00</div><div class="status-pill status-ok">Confirmado</div></div>
+          </div>
+          <div class="appointment-row">
+            <div class="client-info"><div class="client-avatar">R</div><div><div class="client-name">Rafael Costa</div><div class="client-service">Corte Premium · Barbearia</div></div></div>
+            <div class="appointment-meta"><div class="appointment-time">15:30</div><div class="status-pill status-pending">Pendente</div></div>
+          </div>
+          <div class="appointment-row">
+            <div class="client-info"><div class="client-avatar">J</div><div><div class="client-name">Juliana Lima</div><div class="client-service">Design de Sobrancelha · Estética</div></div></div>
+            <div class="appointment-meta"><div class="appointment-time">17:00</div><div class="status-pill status-cancel">Cancelado</div></div>
+          </div>
+          <div class="appointment-row">
+            <div class="client-info"><div class="client-avatar">M</div><div><div class="client-name">Mariana Alves</div><div class="client-service">Limpeza de Pele · Clínica</div></div></div>
+            <div class="appointment-meta"><div class="appointment-time">18:20</div><div class="status-pill status-ok">Confirmado</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-stack">
+        <div class="panel-card calendar-premium">
+          <div class="panel-header">
+            <div class="panel-title">Maio 2026</div>
+            <a class="panel-link" href="#">Hoje</a>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-day-name">S</div><div class="cal-day-name">T</div><div class="cal-day-name">Q</div><div class="cal-day-name">Q</div><div class="cal-day-name">S</div><div class="cal-day-name">S</div><div class="cal-day-name">D</div>
+            <div class="cal-day">1</div><div class="cal-day booked">2</div><div class="cal-day booked">3</div><div class="cal-day">4</div><div class="cal-day booked">5</div><div class="cal-day">6</div><div class="cal-day">7</div>
+            <div class="cal-day booked">8</div><div class="cal-day">9</div><div class="cal-day booked">10</div><div class="cal-day booked">11</div><div class="cal-day booked">12</div><div class="cal-day">13</div><div class="cal-day">14</div>
+            <div class="cal-day">15</div><div class="cal-day booked">16</div><div class="cal-day booked">17</div><div class="cal-day booked">18</div><div class="cal-day today">19</div><div class="cal-day">20</div><div class="cal-day">21</div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title">Atalhos rápidos</div>
+          </div>
+          <div class="quick-actions">
+            <div class="quick-card"><div class="quick-icon">＋</div><div class="quick-title">Agendar</div><div class="quick-sub">Criar novo horário</div></div>
+            <div class="quick-card"><div class="quick-icon">◎</div><div class="quick-title">Cliente</div><div class="quick-sub">Cadastrar cliente</div></div>
+            <div class="quick-card"><div class="quick-icon">◉</div><div class="quick-title">Serviço</div><div class="quick-sub">Adicionar serviço</div></div>
+            <div class="quick-card"><div class="quick-icon">◈</div><div class="quick-title">Relatório</div><div class="quick-sub">Ver financeiro</div></div>
+          </div>
+          <div class="finance-mini" aria-label="Gráfico financeiro">
+            <svg viewBox="0 0 420 160" preserveAspectRatio="none">
+              <path d="M0 120 C50 95, 80 130, 125 92 C165 58, 205 72, 245 52 C305 20, 345 48, 420 22" fill="none" stroke="rgba(201,169,110,.9)" stroke-width="4"/>
+              <path d="M0 160 L0 120 C50 95, 80 130, 125 92 C165 58, 205 72, 245 52 C305 20, 345 48, 420 22 L420 160 Z" fill="rgba(201,169,110,.12)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</section>
+
 <!-- MODAL LOGIN -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
@@ -1278,6 +1673,51 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){
   if(e.target===this) closeModal();
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+
+// LOGIN REAL PARA MOSTRAR O DASHBOARD
+function showDashboard(){
+  const landing = document.getElementById('landingPage');
+  const dash = document.getElementById('dashboardApp');
+  const modal = document.getElementById('modalOverlay');
+  if(landing) landing.style.display = 'none';
+  if(modal) modal.classList.remove('open');
+  if(dash) dash.classList.add('active');
+  window.scrollTo({top:0, behavior:'instant'});
+}
+function returnToLanding(){
+  const landing = document.getElementById('landingPage');
+  const dash = document.getElementById('dashboardApp');
+  if(dash) dash.classList.remove('active');
+  if(landing) landing.style.display = 'block';
+  window.scrollTo({top:0, behavior:'instant'});
+}
+const submitLoginBtn = document.getElementById('submitBtn');
+if(submitLoginBtn){
+  submitLoginBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    showDashboard();
+  });
+}
+
+// HOVER DO CURSOR NOS NOVOS ELEMENTOS DO DASHBOARD
+document.querySelectorAll('.app-menu-item,.icon-btn,.app-primary-btn,.app-secondary-btn,.metric-card,.appointment-row,.quick-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    if(cursor) cursor.style.transform='scale(2.5)';
+    if(ring){
+      ring.style.transform='scale(1.5)';
+      ring.style.borderColor='rgba(201,169,110,0.7)';
+    }
+  });
+  el.addEventListener('mouseleave',()=>{
+    if(cursor) cursor.style.transform='scale(1)';
+    if(ring){
+      ring.style.transform='scale(1)';
+      ring.style.borderColor='rgba(201,169,110,0.4)';
+    }
+  });
+});
+
 </script>
 </body>
 </html>
