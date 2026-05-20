@@ -34,7 +34,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(201,169,110,.25);border-radius:20px}
 .brand-logo-img{width:34px;height:34px;border-radius:11px;object-fit:cover;display:inline-block;flex-shrink:0;box-shadow:0 0 24px rgba(201,169,110,.38),0 4px 12px rgba(0,0,0,.35);}
-/* NAVBAR */
 .navbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 52px;background:rgba(4,4,8,.55);backdrop-filter:blur(32px) saturate(1.4);border-bottom:1px solid var(--line);transition:padding .35s,background .35s;}
 .navbar.scrolled{padding:11px 52px;background:rgba(4,4,8,.88)}
 .nav-logo{display:inline-flex;align-items:center;gap:11px;font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;cursor:pointer;color:inherit;}
@@ -43,7 +42,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .nav-link:hover{color:var(--text);background:rgba(255,255,255,.06)}
 .nav-cta{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#050505;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:10px 24px;border-radius:11px;border:none;cursor:pointer;letter-spacing:.02em;box-shadow:0 8px 28px rgba(201,169,110,.30);transition:transform .2s,box-shadow .2s;}
 .nav-cta:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(201,169,110,.40)}
-/* HERO */
 .landing{position:relative;z-index:1}
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:150px 24px 90px;text-align:center;position:relative;}
 .hero-glow{position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:900px;height:500px;pointer-events:none;background:radial-gradient(ellipse,rgba(201,169,110,.18) 0%,transparent 68%);filter:blur(20px);}
@@ -65,7 +63,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .hero-trust{display:flex;align-items:center;gap:16px;margin-top:32px;color:var(--muted2);font-size:12.5px;flex-wrap:wrap;justify-content:center;}
 .hero-trust .sep{width:1px;height:14px;background:var(--line2)}
 .trust-stars{color:var(--gold2);letter-spacing:3px;font-size:11px}
-/* MOCKUP */
 .mockup-wrap{max-width:1100px;margin:70px auto 0;position:relative;z-index:1;padding:0 24px;}
 .mockup-glow{position:absolute;top:60px;left:50%;transform:translateX(-50%);width:75%;height:200px;border-radius:50%;background:radial-gradient(ellipse,rgba(201,169,110,.25),transparent 70%);pointer-events:none;filter:blur(50px);}
 .mockup-frame{position:relative;z-index:1;border:1px solid var(--line2);border-radius:32px;background:rgba(8,8,16,.96);box-shadow:0 52px 130px rgba(0,0,0,.75);overflow:hidden;}
@@ -93,7 +90,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .mf-apt-badge{margin-left:auto;padding:3px 8px;border-radius:99px;font-size:9px;font-weight:800;text-transform:uppercase;}
 .mf-apt-badge.ok{background:rgba(77,214,140,.12);color:var(--green);border:1px solid rgba(77,214,140,.22)}
 .mf-apt-badge.wait{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.22)}
-/* SECTIONS */
 .section{padding:110px 24px;position:relative;z-index:1}
 .section-inner{max-width:1080px;margin:0 auto}
 .section-tag{display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;padding:6px 16px;border:1px solid var(--goldborder);border-radius:99px;background:var(--goldsoft);color:var(--gold2);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
@@ -155,7 +151,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .cta-title em{font-style:italic;color:var(--gold2)}
 .cta-sub{color:var(--muted);font-size:17px;line-height:1.72;margin:22px auto 0;max-width:500px}
 .footer{border-top:1px solid var(--line);padding:32px 52px;display:flex;align-items:center;justify-content:space-between;color:var(--muted2);font-size:13px;position:relative;z-index:1;}
-/* BOTÕES */
 .btn{border:none;border-radius:13px;padding:13px 18px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .2s,box-shadow .2s,background .2s;cursor:pointer;}
 .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#060606;box-shadow:0 10px 36px rgba(201,169,110,.30);}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(201,169,110,.42)}
@@ -165,7 +160,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .btn-row{display:flex;gap:10px;align-items:center;margin-top:14px}
 .btn-icon{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer;display:grid;place-items:center;transition:.2s;font-size:15px;font-family:'DM Sans',sans-serif;}
 .btn-icon:hover{border-color:var(--goldring);color:var(--gold2)}
-/* FIELDS */
 .field{margin-bottom:13px}
 .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted2);margin-bottom:7px;font-weight:700}
 .field input,.field select,.field textarea{width:100%;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);color:var(--text);border-radius:13px;padding:13px 15px;outline:none;font-size:14px;font-family:'DM Sans',sans-serif;transition:border-color .2s,box-shadow .2s,background .2s;}
@@ -173,7 +167,19 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .field textarea{min-height:90px;resize:vertical}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--goldring);background:rgba(201,169,110,.05);box-shadow:0 0 0 3px rgba(201,169,110,.10);}
 .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-/* AUTH MODAL */
+
+/* ── OTP INPUT ── */
+.otp-wrap{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.otp-input{width:52px;height:62px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.04);color:var(--text);font-size:26px;font-weight:700;text-align:center;outline:none;font-family:'Cormorant Garamond',serif;transition:border-color .2s,box-shadow .2s,background .2s;caret-color:var(--gold);}
+.otp-input:focus{border-color:var(--goldring);background:rgba(201,169,110,.07);box-shadow:0 0 0 3px rgba(201,169,110,.12);}
+.otp-input.filled{border-color:var(--goldborder);background:rgba(201,169,110,.06);}
+.otp-hint{text-align:center;color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:4px}
+.otp-email-display{text-align:center;color:var(--gold2);font-weight:700;font-size:14px;margin-bottom:18px;padding:10px 16px;border:1px solid var(--goldborder);border-radius:12px;background:var(--goldsoft);}
+.otp-resend{background:none;border:none;color:var(--gold2);font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;text-decoration:underline;}
+.otp-resend:disabled{color:var(--muted2);text-decoration:none;cursor:default;}
+.otp-countdown{color:var(--muted2);font-size:13px}
+
+/* ── AUTH MODAL ── */
 .auth-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(4,4,8,.92);backdrop-filter:blur(20px);align-items:center;justify-content:center;padding:20px;}
 .auth-overlay.open{display:flex}
 .auth-modal{width:100%;max-width:940px;border:1px solid var(--line2);border-radius:var(--rxxl);background:rgba(8,8,16,.99);box-shadow:0 52px 140px rgba(0,0,0,.80);display:grid;grid-template-columns:1fr 1fr;overflow:hidden;position:relative;max-height:92vh;overflow-y:auto;}
@@ -203,9 +209,9 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .auth-error.visible{display:block}
 .auth-loading{display:none;text-align:center;padding:8px;font-size:13px;color:var(--muted)}
 .auth-loading.visible{display:block}
-/* SECURITY BADGE */
 .security-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border:1px solid rgba(77,214,140,.22);border-radius:99px;background:rgba(77,214,140,.07);color:var(--green);font-size:11px;font-weight:700;margin-bottom:14px;}
-/* DASHBOARD */
+
+/* ── DASHBOARD ── */
 .dashboard{display:none;min-height:100vh;position:relative;z-index:1}
 .sidebar{position:fixed;left:14px;top:14px;bottom:14px;width:var(--sidebar);border:1px solid var(--line2);border-radius:24px;background:rgba(8,8,16,.94);backdrop-filter:blur(32px);padding:16px 12px;z-index:30;display:flex;flex-direction:column;box-shadow:0 28px 80px rgba(0,0,0,.55);overflow-y:auto;overflow-x:hidden;}
 .sidebar::-webkit-scrollbar{width:3px}
@@ -264,7 +270,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .apt-name{font-weight:700;font-size:14px}
 .apt-meta{font-size:12px;color:var(--muted);margin-top:2px}
 .apt-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
-/* BADGES */
 .badge{padding:4px 10px;border-radius:99px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .badge::before{content:"";width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .badge.ok{background:var(--green2);color:var(--green);border:1px solid rgba(77,214,140,.20)}.badge.ok::before{background:var(--green)}
@@ -273,13 +278,11 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .badge.done{background:var(--blue2);color:var(--blue);border:1px solid var(--blueborder)}.badge.done::before{background:var(--blue)}
 .badge.re{background:var(--purple2);color:var(--purple);border:1px solid var(--purpleborder)}.badge.re::before{background:var(--purple)}
 .badge.inactive{background:rgba(255,255,255,.06);color:var(--muted2);border:1px solid var(--line)}.badge.inactive::before{background:var(--muted2)}
-/* CALENDAR */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .cal-label{font-size:9.5px;color:var(--muted2);text-align:center;text-transform:uppercase;font-weight:700;padding:4px 0}
 .cal-day{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.03);color:var(--muted);font-size:11.5px;font-weight:600;cursor:default;transition:.15s}
 .cal-day.busy{background:rgba(201,169,110,.13);color:var(--gold2);border:1px solid rgba(201,169,110,.22)}
 .cal-day.today{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#050505;font-weight:800;box-shadow:0 4px 16px rgba(201,169,110,.38)}
-/* TIMELINE */
 .timeline{display:flex;flex-direction:column;gap:0}
 .tl-block{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
 .tl-block:last-child{border-bottom:none}
@@ -293,7 +296,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .tl-apt-info{flex:1;min-width:0}
 .tl-apt-status{flex-shrink:0}
 .tl-apt .action-menu-wrap{position:absolute;top:12px;right:12px;z-index:30}
-/* CARDS */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px}
 .client-card,.svc-card,.prof-card{border:1px solid var(--line);border-radius:20px;background:rgba(10,10,18,.84);padding:18px;transition:.22s;position:relative;overflow:visible;}
 .client-card:hover,.svc-card:hover,.prof-card:hover{transform:translateY(-4px);border-color:rgba(201,169,110,.22);box-shadow:0 20px 56px rgba(0,0,0,.3)}
@@ -318,7 +320,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700}
 .status-dot::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
 .status-dot.off::before{background:var(--muted2);box-shadow:none}
-/* FORM ADD */
 .form-add{border:1px solid rgba(201,169,110,.13);border-radius:20px;background:rgba(201,169,110,.03);padding:18px;margin-bottom:18px;}
 .form-add-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;align-items:end;margin-top:10px}
 .sec-div{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 14px}
@@ -327,7 +328,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .empty-state{padding:40px;border:1px dashed rgba(255,255,255,.09);border-radius:18px;text-align:center;color:var(--muted2)}
 .empty-state .es-icon{font-size:36px;opacity:.35;margin-bottom:12px}
 .empty-state p{font-size:14px}
-/* FINANCEIRO */
 .fin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .fin-card{border:1px solid var(--line);border-radius:22px;background:rgba(10,10,18,.84);padding:20px;position:relative;overflow:hidden;transition:.22s}
 .fin-card:hover{transform:translateY(-3px);border-color:rgba(201,169,110,.22)}
@@ -336,7 +336,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .fin-label{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted2);font-weight:700}
 .fin-value{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:700;margin-top:8px;background:linear-gradient(130deg,var(--gold),var(--gold3));-webkit-background-clip:text;background-clip:text;color:transparent;}
 .fin-sub{font-size:12px;color:var(--muted);margin-top:5px}
-/* ACTION BUTTONS */
 .apt-actions{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line);}
 .act-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;transition:transform .15s,box-shadow .15s;white-space:nowrap;line-height:1;}
 .act-btn:hover{transform:translateY(-1px)}
@@ -345,7 +344,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .act-btn.reschedule{background:var(--purple2);color:var(--purple);border:1px solid var(--purpleborder)}
 .act-btn.done{background:var(--blue2);color:var(--blue);border:1px solid var(--blueborder)}
 .act-btn.wa{background:rgba(37,211,102,.12);color:#25d366;border:1px solid rgba(37,211,102,.22)}
-/* ACTION MENU */
 .action-menu-wrap{position:absolute;top:12px;right:12px;z-index:10;isolation:isolate}
 .action-menu-btn{width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--muted);display:grid;place-items:center;cursor:pointer;font-size:16px;transition:border-color .2s,color .2s,background .2s;font-weight:900;font-family:'DM Sans',sans-serif;}
 .action-menu-btn:hover{border-color:var(--goldring);color:var(--gold2);background:var(--goldsoft)}
@@ -359,7 +357,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .action-menu-item.toggle-off{color:var(--muted)}
 .action-menu-sep{height:1px;background:var(--line);margin:4px 0}
 .action-menu-icon{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:12px;flex-shrink:0;background:rgba(255,255,255,.05);}
-/* MODALS */
 .action-overlay,.edit-overlay,.confirm-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(4,4,8,.92);backdrop-filter:blur(24px);align-items:center;justify-content:center;padding:20px;}
 .action-overlay.open,.edit-overlay.open,.confirm-overlay.open{display:flex}
 .action-modal{width:100%;max-width:490px;border:1px solid var(--line2);border-radius:var(--rxxl);background:rgba(8,8,16,.99);box-shadow:0 52px 130px rgba(0,0,0,.80);padding:34px;position:relative;animation:fadeUp .25s ease;}
@@ -386,13 +383,11 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .confirm-modal-actions .btn{flex:1}
 .btn-danger-modal{flex:1;background:rgba(240,109,122,.15);color:var(--red);border:1px solid rgba(240,109,122,.28);font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;padding:13px 18px;border-radius:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,transform .2s;}
 .btn-danger-modal:hover{background:rgba(240,109,122,.28);transform:translateY(-1px)}
-/* TOAST */
 .toast{position:fixed;right:20px;bottom:20px;z-index:9999;border:1px solid var(--line2);background:rgba(8,8,16,.98);backdrop-filter:blur(24px);padding:13px 16px 13px 14px;border-radius:15px;box-shadow:0 22px 60px rgba(0,0,0,.55);display:none;max-width:340px;font-size:14px;animation:slideUp .25s ease;align-items:center;gap:11px;}
 .toast.visible{display:flex}
 .toast-icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-size:13px;flex-shrink:0}
 .toast-msg{flex:1}
 @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-/* PÁGINA PÚBLICA */
 .public-page{display:none;min-height:100vh;position:relative;z-index:1;padding:20px}
 .pub-wrap{max-width:1060px;margin:0 auto}
 .pub-hero{position:relative;overflow:hidden;border:1px solid var(--line2);border-radius:var(--rxxl);background:radial-gradient(ellipse 55% 80% at 5% 50%,rgba(201,169,110,.16),transparent),linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.008));padding:36px 40px;margin-bottom:14px}
@@ -413,7 +408,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 .confirm-screen .tick{width:64px;height:64px;border-radius:20px;margin:0 auto 16px;background:linear-gradient(135deg,rgba(77,214,140,.18),rgba(77,214,140,.04));border:1px solid rgba(77,214,140,.26);display:grid;place-items:center;font-size:28px}
 .confirm-screen h2{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700}
 .confirm-screen p{color:var(--muted);font-size:14px;margin-top:8px}
-/* MOBILE */
 .mobile-nav{display:none}
 @media(max-width:900px){
   .navbar{padding:12px 20px}.nav-links{display:none}.hero{padding:110px 18px 65px}
@@ -432,6 +426,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
   .footer{flex-direction:column;gap:12px;text-align:center;padding:24px 20px}
   .features-grid{grid-template-columns:1fr 1fr}.reagendar-inputs{grid-template-columns:1fr}
   .content-grid{grid-template-columns:1fr}
+  .otp-wrap{gap:7px}.otp-input{width:44px;height:54px;font-size:22px;}
 }
 @media(max-width:480px){
   .features-grid{grid-template-columns:1fr}
@@ -440,6 +435,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
   .mf-stat-row{grid-template-columns:1fr 1fr}
   .act-btn{flex:1 1 calc(50% - 4px);justify-content:center}
   .stats-grid{grid-template-columns:1fr}
+  .otp-input{width:38px;height:48px;font-size:20px;}
 }
 </style>
 </head>
@@ -559,7 +555,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
         <div class="feat-card"><div class="feat-icon">💰</div><div class="feat-title">Controle financeiro</div><p class="feat-desc">Receita total, ticket médio e histórico de pagamentos organizados por empresa.</p></div>
         <div class="feat-card"><div class="feat-icon">📱</div><div class="feat-title">Confirmação via WhatsApp</div><p class="feat-desc">Ao agendar, o cliente deixa seu número. Você confirma em segundos pelo WhatsApp.</p></div>
         <div class="feat-card"><div class="feat-icon">🌐</div><div class="feat-title">Página pública de agendamento</div><p class="feat-desc">Página elegante onde o cliente escolhe serviço, profissional, data e horário sozinho.</p></div>
-        <div class="feat-card"><div class="feat-icon">🔒</div><div class="feat-title">Login seguro com Supabase Auth</div><p class="feat-desc">E-mail e senha reais. Sessão não fica salva no navegador. Dados protegidos por RLS.</p></div>
+        <div class="feat-card"><div class="feat-icon">🔒</div><div class="feat-title">Login seguro com Supabase Auth</div><p class="feat-desc">Verificação por código OTP no e-mail. Sem links externos. Sem redirecionamentos.</p></div>
         <div class="feat-card"><div class="feat-icon">📲</div><div class="feat-title">100% responsivo</div><p class="feat-desc">Funciona perfeitamente no celular e no computador, para você e seus clientes.</p></div>
       </div>
     </div>
@@ -656,38 +652,37 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
   <div class="auth-modal">
     <button class="auth-close" onclick="closeAuth()">✕</button>
 
-    <!-- lado esquerdo -->
     <div class="auth-brand">
       <div class="ab-content">
         <div class="nav-logo" style="font-size:20px">AgendaPro</div>
         <h2 class="ab-title serif">Seu painel<br><em>premium</em><br>em minutos.</h2>
         <p class="ab-desc">Configure sua empresa, adicione serviços e profissionais, e receba agendamentos pelo seu link exclusivo.</p>
         <div class="ab-perks">
-          <div class="ab-perk">Login seguro com e-mail e senha</div>
-          <div class="ab-perk">Sessão não fica salva no navegador</div>
+          <div class="ab-perk">Verificação por código no e-mail</div>
+          <div class="ab-perk">Sem clicar em link externo</div>
           <div class="ab-perk">Dados protegidos por Supabase RLS</div>
           <div class="ab-perk">Cada empresa isolada e segura</div>
           <div class="ab-perk">Página pública elegante para clientes</div>
         </div>
       </div>
-      <p class="ab-footer">🔒 Supabase Auth · Dados seguros por empresa</p>
+      <p class="ab-footer">🔒 Supabase Auth OTP · Dados seguros por empresa</p>
     </div>
 
-    <!-- lado direito: formulários -->
     <div class="auth-form-wrap">
 
-      <!-- CADASTRO -->
+      <!-- CADASTRO: passo 1 — dados da conta -->
       <div id="formCadastro">
-        <div class="security-badge">🔒 Cadastro seguro com Supabase Auth</div>
+        <div class="security-badge">🔒 Cadastro seguro com verificação por código</div>
         <div class="form-head-title serif">Criar sua conta</div>
-        <p class="form-head-sub">Configure sua empresa em 3 etapas e receba seu link de agendamento.</p>
+        <p class="form-head-sub">Configure sua empresa em 4 etapas. Código de verificação enviado para seu e-mail.</p>
         <div class="stepper" id="onboardingStepper">
           <div class="step-dot active" id="st1"></div>
           <div class="step-dot" id="st2"></div>
           <div class="step-dot" id="st3"></div>
+          <div class="step-dot" id="st4"></div>
         </div>
         <div id="authErrCad" class="auth-error"></div>
-        <div id="authLoadCad" class="auth-loading">Criando conta segura…</div>
+        <div id="authLoadCad" class="auth-loading">Aguarde…</div>
 
         <!-- passo 1: conta -->
         <div id="stepConta">
@@ -698,10 +693,6 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
           <div class="field">
             <label>E-mail</label>
             <input id="cadEmail" type="email" placeholder="seu@email.com" autocomplete="off">
-          </div>
-          <div class="field">
-            <label>Senha</label>
-            <input id="cadSenha" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password">
           </div>
           <button class="btn btn-primary btn-full" onclick="goStepNegocio()">Continuar para o negócio →</button>
           <div class="auth-switch">Já tenho conta. <button onclick="showLoginForm()">Entrar</button></div>
@@ -759,28 +750,72 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
           </div>
           <div class="btn-row">
             <button class="btn btn-ghost" onclick="backStepNegocio()">← Voltar</button>
-            <button class="btn btn-primary" style="flex:1" onclick="finalizarCadastro()">Criar painel →</button>
+            <button class="btn btn-primary" style="flex:1" onclick="enviarOtpCadastro()">Enviar código →</button>
+          </div>
+        </div>
+
+        <!-- passo 4: OTP verificação -->
+        <div id="stepOtp" style="display:none">
+          <div class="otp-email-display" id="otpEmailDisplay">seu@email.com</div>
+          <p class="otp-hint">Digite o código de 6 dígitos enviado para o e-mail acima.</p>
+          <div class="otp-wrap">
+            <input class="otp-input" id="otp0" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+            <input class="otp-input" id="otp1" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input class="otp-input" id="otp2" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input class="otp-input" id="otp3" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input class="otp-input" id="otp4" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input class="otp-input" id="otp5" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="verificarOtpCadastro()" id="btnVerificarOtp">Verificar e criar painel →</button>
+          <div style="text-align:center;margin-top:14px">
+            <span class="otp-countdown" id="otpCountdown"></span>
+            <button class="otp-resend" id="btnReenviar" onclick="reenviarOtp()" disabled>Reenviar código</button>
+          </div>
+          <div class="btn-row" style="margin-top:10px">
+            <button class="btn btn-ghost btn-full" onclick="backStepServico()">← Voltar e corrigir dados</button>
           </div>
         </div>
       </div>
 
       <!-- LOGIN -->
       <div id="formLogin" style="display:none">
-        <div class="security-badge">🔒 Login seguro com Supabase Auth</div>
+        <div class="security-badge">🔒 Login seguro com código OTP</div>
         <div class="form-head-title serif">Entrar no painel</div>
-        <p class="form-head-sub">Use seu e-mail e senha cadastrados.</p>
+        <p class="form-head-sub">Digite seu e-mail. Enviaremos um código de acesso.</p>
         <div id="authErrLogin" class="auth-error"></div>
-        <div id="authLoadLogin" class="auth-loading">Autenticando…</div>
-        <div class="field">
-          <label>E-mail</label>
-          <input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="off">
+        <div id="authLoadLogin" class="auth-loading">Enviando código…</div>
+
+        <!-- login passo 1: e-mail -->
+        <div id="loginStepEmail">
+          <div class="field">
+            <label>E-mail</label>
+            <input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="off">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="enviarOtpLogin()">Enviar código de acesso →</button>
+          <div class="auth-switch">Ainda não tenho conta. <button onclick="showCadastroForm()">Criar cadastro</button></div>
         </div>
-        <div class="field">
-          <label>Senha</label>
-          <input id="loginSenha" type="password" placeholder="sua senha" autocomplete="current-password">
+
+        <!-- login passo 2: OTP -->
+        <div id="loginStepOtp" style="display:none">
+          <div class="otp-email-display" id="loginOtpEmailDisplay">seu@email.com</div>
+          <p class="otp-hint">Digite o código de 6 dígitos enviado para o e-mail acima.</p>
+          <div class="otp-wrap">
+            <input class="otp-input" id="lotp0" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+            <input class="otp-input" id="lotp1" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input class="otp-input" id="lotp2" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input class="otp-input" id="lotp3" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input class="otp-input" id="lotp4" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input class="otp-input" id="lotp5" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="verificarOtpLogin()">Entrar no painel →</button>
+          <div style="text-align:center;margin-top:14px">
+            <span class="otp-countdown" id="loginOtpCountdown"></span>
+            <button class="otp-resend" id="btnLoginReenviar" onclick="reenviarOtpLogin()" disabled>Reenviar código</button>
+          </div>
+          <div class="btn-row" style="margin-top:10px">
+            <button class="btn btn-ghost btn-full" onclick="backLoginEmail()">← Usar outro e-mail</button>
+          </div>
         </div>
-        <button class="btn btn-primary btn-full" onclick="fazerLogin()">Entrar no painel →</button>
-        <div class="auth-switch">Ainda não tenho conta. <button onclick="showCadastroForm()">Criar cadastro</button></div>
       </div>
 
     </div>
@@ -1102,7 +1137,7 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 
 <script>
 /* ══════════════════════════════════════════════════════
-   SUPABASE — configuração segura (persistSession: false)
+   SUPABASE
 ══════════════════════════════════════════════════════ */
 const SUPABASE_URL = "https://wyjrjioipqfltdyupfna.supabase.co";
 const SUPABASE_KEY = "sb_publishable_PkDkt5S-_rdrT0HhANoPAw_ZWluV2_H";
@@ -1115,7 +1150,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
 });
 
 /* ══════════════════════════════════════════════════════
-   ESTADO — nunca usa localStorage para empresa_id
+   ESTADO
 ══════════════════════════════════════════════════════ */
 let state = {
   user: null,
@@ -1129,11 +1164,13 @@ let state = {
   pagamentos: [],
   pubEmpresa: null,
   pubServico: null,
-  pubProfissional: null
+  pubProfissional: null,
+  otpEmail: null,
+  otpCountdownTimer: null
 };
 
 /* ══════════════════════════════════════════════════════
-   HELPERS
+   NAV ITEMS
 ══════════════════════════════════════════════════════ */
 const navItemsFlat = [
   ["dashboard","📊","Dashboard","Controle geral do negócio"],
@@ -1146,6 +1183,9 @@ const navItemsFlat = [
   ["config","⚙","Configurações","Dados do negócio"]
 ];
 
+/* ══════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════ */
 window.addEventListener("scroll", () => {
   document.getElementById("navbar")?.classList.toggle("scrolled", scrollY > 40);
 });
@@ -1213,6 +1253,88 @@ function toast(msg, type = "info") {
   else { ic.textContent = "💬"; el.style.borderColor = "var(--line2)"; ic.style.background = "rgba(201,169,110,.10)"; ic.style.color = "var(--gold2)"; }
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.className = "toast", 3500);
+}
+
+/* ══════════════════════════════════════════════════════
+   OTP — campos com auto-avançar e colar
+══════════════════════════════════════════════════════ */
+function setupOtpInputs(prefix, count) {
+  for (let i = 0; i < count; i++) {
+    const inp = document.getElementById(prefix + i);
+    if (!inp) continue;
+
+    inp.addEventListener("input", function(e) {
+      const val = this.value.replace(/\D/g, "");
+      this.value = val.slice(-1);
+      if (val && i < count - 1) {
+        document.getElementById(prefix + (i + 1))?.focus();
+      }
+      updateOtpFilled(prefix, count);
+    });
+
+    inp.addEventListener("keydown", function(e) {
+      if (e.key === "Backspace" && !this.value && i > 0) {
+        document.getElementById(prefix + (i - 1))?.focus();
+      }
+    });
+
+    inp.addEventListener("paste", function(e) {
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "");
+      for (let j = 0; j < count && j < paste.length; j++) {
+        const t = document.getElementById(prefix + j);
+        if (t) t.value = paste[j];
+      }
+      updateOtpFilled(prefix, count);
+      const next = Math.min(paste.length, count - 1);
+      document.getElementById(prefix + next)?.focus();
+    });
+  }
+}
+
+function updateOtpFilled(prefix, count) {
+  for (let i = 0; i < count; i++) {
+    const inp = document.getElementById(prefix + i);
+    if (inp) inp.classList.toggle("filled", !!inp.value);
+  }
+}
+
+function getOtpValue(prefix, count) {
+  let v = "";
+  for (let i = 0; i < count; i++) {
+    v += (document.getElementById(prefix + i)?.value || "");
+  }
+  return v;
+}
+
+function clearOtpInputs(prefix, count) {
+  for (let i = 0; i < count; i++) {
+    const inp = document.getElementById(prefix + i);
+    if (inp) { inp.value = ""; inp.classList.remove("filled"); }
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   COUNTDOWN REENVIO
+══════════════════════════════════════════════════════ */
+function startCountdown(countdownId, btnId, seconds) {
+  const cd = document.getElementById(countdownId);
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = true;
+  let remaining = seconds;
+
+  function tick() {
+    if (!cd) return;
+    if (remaining > 0) {
+      cd.textContent = "Reenviar em " + remaining + "s · ";
+      remaining--;
+      state.otpCountdownTimer = setTimeout(tick, 1000);
+    } else {
+      cd.textContent = "";
+      if (btn) btn.disabled = false;
+    }
+  }
+  tick();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1306,6 +1428,7 @@ function openAuth(mode) {
 function closeAuth() {
   document.getElementById("authOverlay").classList.remove("open");
   document.body.style.overflow = "";
+  clearTimeout(state.otpCountdownTimer);
 }
 document.getElementById("authOverlay").addEventListener("click", e => {
   if (e.target === document.getElementById("authOverlay")) closeAuth();
@@ -1314,6 +1437,9 @@ document.getElementById("authOverlay").addEventListener("click", e => {
 function showLoginForm() {
   document.getElementById("formCadastro").style.display = "none";
   document.getElementById("formLogin").style.display = "block";
+  document.getElementById("loginStepEmail").style.display = "block";
+  document.getElementById("loginStepOtp").style.display = "none";
+  hideAuthErr("login");
 }
 function showCadastroForm() {
   document.getElementById("formLogin").style.display = "none";
@@ -1322,21 +1448,25 @@ function showCadastroForm() {
   document.getElementById("stepConta").style.display = "block";
   document.getElementById("stepNegocio").style.display = "none";
   document.getElementById("stepServico").style.display = "none";
+  document.getElementById("stepOtp").style.display = "none";
+  hideAuthErr("cad");
 }
 
 function setStep(n) {
-  ["st1","st2","st3"].forEach((id, i) => {
+  ["st1","st2","st3","st4"].forEach((id, i) => {
     const el = document.getElementById(id);
+    if (!el) return;
     el.className = "step-dot" + (i + 1 === n ? " active" : i + 1 < n ? " done" : "");
   });
 }
 
+/* Navegação entre passos do cadastro */
 function goStepNegocio() {
   const nome = document.getElementById("cadNome").value.trim();
   const email = document.getElementById("cadEmail").value.trim();
-  const senha = document.getElementById("cadSenha").value;
-  if (!nome || !email || !senha) return showAuthErr("cad", "Preencha nome, e-mail e senha.");
-  if (senha.length < 6) return showAuthErr("cad", "Senha mínimo 6 caracteres.");
+  if (!nome || !email) return showAuthErr("cad", "Preencha nome e e-mail.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAuthErr("cad", "Digite um e-mail válido.");
+  hideAuthErr("cad");
   document.getElementById("stepConta").style.display = "none";
   document.getElementById("stepNegocio").style.display = "block";
   setStep(2);
@@ -1349,6 +1479,7 @@ function backStepConta() {
 function goStepServico() {
   if (!document.getElementById("empNome").value || !document.getElementById("empSlug").value || !document.getElementById("empWhatsapp").value)
     return showAuthErr("cad", "Preencha nome, WhatsApp e link.");
+  hideAuthErr("cad");
   document.getElementById("stepNegocio").style.display = "none";
   document.getElementById("stepServico").style.display = "block";
   setStep(3);
@@ -1357,6 +1488,12 @@ function backStepNegocio() {
   document.getElementById("stepServico").style.display = "none";
   document.getElementById("stepNegocio").style.display = "block";
   setStep(2);
+}
+function backStepServico() {
+  document.getElementById("stepOtp").style.display = "none";
+  document.getElementById("stepServico").style.display = "block";
+  setStep(3);
+  clearTimeout(state.otpCountdownTimer);
 }
 function autoSlug() {
   const slugInput = document.getElementById("empSlug");
@@ -1380,34 +1517,68 @@ function showAuthLoad(form, show) {
 }
 
 /* ══════════════════════════════════════════════════════
-   CADASTRO REAL — Supabase Auth signUp
+   CADASTRO — PASSO 3 → envia OTP para e-mail
 ══════════════════════════════════════════════════════ */
-async function finalizarCadastro() {
+async function enviarOtpCadastro() {
   if (!document.getElementById("servNome").value || !document.getElementById("servPreco").value ||
       !document.getElementById("servDuracao").value || !document.getElementById("profNome").value)
     return showAuthErr("cad", "Preencha serviço, preço, duração e profissional.");
 
+  const email = document.getElementById("cadEmail").value.trim();
   hideAuthErr("cad");
   showAuthLoad("cad", true);
 
-  const email = document.getElementById("cadEmail").value.trim();
-  const senha = document.getElementById("cadSenha").value;
+  const { error } = await db.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true }
+  });
+
+  showAuthLoad("cad", false);
+
+  if (error) {
+    return showAuthErr("cad", "Erro ao enviar código: " + (error.message || "tente novamente."));
+  }
+
+  state.otpEmail = email;
+  document.getElementById("otpEmailDisplay").textContent = email;
+  document.getElementById("stepServico").style.display = "none";
+  document.getElementById("stepOtp").style.display = "block";
+  setStep(4);
+  clearOtpInputs("otp", 6);
+  setupOtpInputs("otp", 6);
+  startCountdown("otpCountdown", "btnReenviar", 60);
+  setTimeout(() => document.getElementById("otp0")?.focus(), 100);
+  toast("Código enviado para " + email, "ok");
+}
+
+/* ══════════════════════════════════════════════════════
+   CADASTRO — PASSO 4 → verifica OTP e cria tudo
+══════════════════════════════════════════════════════ */
+async function verificarOtpCadastro() {
+  const codigo = getOtpValue("otp", 6);
+  if (codigo.length < 6) return showAuthErr("cad", "Digite o código completo de 6 dígitos.");
+
+  hideAuthErr("cad");
+  showAuthLoad("cad", true);
+
+  const email = state.otpEmail;
+  const { data: verifyData, error: verifyErr } = await db.auth.verifyOtp({
+    email,
+    token: codigo,
+    type: "email"
+  });
+
+  if (verifyErr || !verifyData?.user) {
+    showAuthLoad("cad", false);
+    clearOtpInputs("otp", 6);
+    document.getElementById("otp0")?.focus();
+    return showAuthErr("cad", "Código incorreto ou expirado. Verifique e tente novamente.");
+  }
+
+  const userId = verifyData.user.id;
   const nomeUser = document.getElementById("cadNome").value.trim();
 
-  // 1. criar usuário no Supabase Auth
-  const { data: authData, error: authErr } = await db.auth.signUp({ email, password: senha });
-  if (authErr) {
-    showAuthLoad("cad", false);
-    return showAuthErr("cad", authErr.message || "Erro ao criar conta.");
-  }
-
-  const userId = authData.user?.id;
-  if (!userId) {
-    showAuthLoad("cad", false);
-    return showAuthErr("cad", "Erro interno. Tente novamente.");
-  }
-
-  // 2. criar empresa
+  /* criar empresa */
   const categoriaNome = document.getElementById("empCategoria").options[document.getElementById("empCategoria").selectedIndex]?.textContent?.trim() || "Outro";
   const { data: empresa, error: errEmp } = await db.from("agenda_empresas").insert({
     nome: document.getElementById("empNome").value.trim(),
@@ -1421,10 +1592,11 @@ async function finalizarCadastro() {
 
   if (errEmp) {
     showAuthLoad("cad", false);
+    await db.auth.signOut();
     return showAuthErr("cad", "Erro ao criar empresa. Talvez o link já exista.");
   }
 
-  // 3. criar perfil com auth_user_id
+  /* perfil */
   await db.from("agenda_perfis").insert({
     auth_user_id: userId,
     empresa_id: empresa.id,
@@ -1434,7 +1606,7 @@ async function finalizarCadastro() {
     cargo: "Administrador"
   });
 
-  // 4. serviço e profissional iniciais
+  /* serviço e profissional iniciais */
   await db.from("agenda_servicos").insert({
     empresa_id: empresa.id,
     nome: document.getElementById("servNome").value.trim(),
@@ -1451,34 +1623,92 @@ async function finalizarCadastro() {
   });
 
   showAuthLoad("cad", false);
-  state.user = authData.user;
+  state.user = verifyData.user;
   state.empresa = empresa;
   state.perfil = { auth_user_id: userId, empresa_id: empresa.id, nome: nomeUser, email };
+  clearTimeout(state.otpCountdownTimer);
   showDashboard();
   await loadAll();
-  toast("Painel criado com sucesso! 🎉", "ok");
+  toast("Conta criada e verificada com sucesso! 🎉", "ok");
 }
 
 /* ══════════════════════════════════════════════════════
-   LOGIN REAL — Supabase Auth signInWithPassword
+   REENVIO OTP CADASTRO
 ══════════════════════════════════════════════════════ */
-async function fazerLogin() {
+async function reenviarOtp() {
+  if (!state.otpEmail) return;
+  showAuthLoad("cad", true);
+  const { error } = await db.auth.signInWithOtp({
+    email: state.otpEmail,
+    options: { shouldCreateUser: true }
+  });
+  showAuthLoad("cad", false);
+  if (error) return showAuthErr("cad", "Erro ao reenviar. Tente novamente.");
+  clearOtpInputs("otp", 6);
+  document.getElementById("otp0")?.focus();
+  startCountdown("otpCountdown", "btnReenviar", 60);
+  toast("Novo código enviado para " + state.otpEmail, "ok");
+}
+
+/* ══════════════════════════════════════════════════════
+   LOGIN — envia OTP
+══════════════════════════════════════════════════════ */
+async function enviarOtpLogin() {
   const email = document.getElementById("loginEmail").value.trim();
-  const senha = document.getElementById("loginSenha").value;
-  if (!email || !senha) return showAuthErr("login", "Preencha e-mail e senha.");
+  if (!email) return showAuthErr("login", "Digite seu e-mail.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAuthErr("login", "E-mail inválido.");
 
   hideAuthErr("login");
   showAuthLoad("login", true);
 
-  const { data: authData, error: authErr } = await db.auth.signInWithPassword({ email, password: senha });
-  if (authErr) {
-    showAuthLoad("login", false);
-    return showAuthErr("login", "E-mail ou senha incorretos.");
+  const { error } = await db.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: false }
+  });
+
+  showAuthLoad("login", false);
+
+  if (error) {
+    return showAuthErr("login", "Não encontramos uma conta com esse e-mail. Crie seu cadastro.");
   }
 
-  const userId = authData.user?.id;
+  state.otpEmail = email;
+  document.getElementById("loginOtpEmailDisplay").textContent = email;
+  document.getElementById("loginStepEmail").style.display = "none";
+  document.getElementById("loginStepOtp").style.display = "block";
+  clearOtpInputs("lotp", 6);
+  setupOtpInputs("lotp", 6);
+  startCountdown("loginOtpCountdown", "btnLoginReenviar", 60);
+  setTimeout(() => document.getElementById("lotp0")?.focus(), 100);
+  toast("Código enviado para " + email, "ok");
+}
 
-  // buscar perfil pelo auth_user_id
+/* ══════════════════════════════════════════════════════
+   LOGIN — verifica OTP
+══════════════════════════════════════════════════════ */
+async function verificarOtpLogin() {
+  const codigo = getOtpValue("lotp", 6);
+  if (codigo.length < 6) return showAuthErr("login", "Digite o código completo de 6 dígitos.");
+
+  hideAuthErr("login");
+  showAuthLoad("login", true);
+
+  const email = state.otpEmail;
+  const { data: verifyData, error: verifyErr } = await db.auth.verifyOtp({
+    email,
+    token: codigo,
+    type: "email"
+  });
+
+  if (verifyErr || !verifyData?.user) {
+    showAuthLoad("login", false);
+    clearOtpInputs("lotp", 6);
+    document.getElementById("lotp0")?.focus();
+    return showAuthErr("login", "Código incorreto ou expirado. Verifique e tente novamente.");
+  }
+
+  const userId = verifyData.user.id;
+
   const { data: perfil, error: perfilErr } = await db.from("agenda_perfis")
     .select("*").eq("auth_user_id", userId).single();
 
@@ -1488,7 +1718,6 @@ async function fazerLogin() {
     return showAuthErr("login", "Perfil não encontrado. Entre em contato com o suporte.");
   }
 
-  // buscar empresa pelo empresa_id do perfil
   const { data: empresa, error: empErr } = await db.from("agenda_empresas")
     .select("*").eq("id", perfil.empresa_id).single();
 
@@ -1499,12 +1728,38 @@ async function fazerLogin() {
   }
 
   showAuthLoad("login", false);
-  state.user = authData.user;
+  state.user = verifyData.user;
   state.perfil = perfil;
   state.empresa = empresa;
+  clearTimeout(state.otpCountdownTimer);
   showDashboard();
   await loadAll();
   toast("Bem-vindo(a) de volta! 👋", "ok");
+}
+
+/* ══════════════════════════════════════════════════════
+   REENVIO OTP LOGIN
+══════════════════════════════════════════════════════ */
+async function reenviarOtpLogin() {
+  if (!state.otpEmail) return;
+  showAuthLoad("login", true);
+  const { error } = await db.auth.signInWithOtp({
+    email: state.otpEmail,
+    options: { shouldCreateUser: false }
+  });
+  showAuthLoad("login", false);
+  if (error) return showAuthErr("login", "Erro ao reenviar. Tente novamente.");
+  clearOtpInputs("lotp", 6);
+  document.getElementById("lotp0")?.focus();
+  startCountdown("loginOtpCountdown", "btnLoginReenviar", 60);
+  toast("Novo código enviado para " + state.otpEmail, "ok");
+}
+
+function backLoginEmail() {
+  document.getElementById("loginStepOtp").style.display = "none";
+  document.getElementById("loginStepEmail").style.display = "block";
+  clearTimeout(state.otpCountdownTimer);
+  hideAuthErr("login");
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1512,14 +1767,9 @@ async function fazerLogin() {
 ══════════════════════════════════════════════════════ */
 async function logout() {
   await db.auth.signOut();
-  state.user = null;
-  state.perfil = null;
-  state.empresa = null;
-  state.clientes = [];
-  state.servicos = [];
-  state.profissionais = [];
-  state.agendamentos = [];
-  state.pagamentos = [];
+  state.user = null; state.perfil = null; state.empresa = null;
+  state.clientes = []; state.servicos = []; state.profissionais = [];
+  state.agendamentos = []; state.pagamentos = [];
   document.getElementById("dashboardView").style.display = "none";
   document.getElementById("landingView").style.display = "block";
   document.getElementById("publicView").style.display = "none";
@@ -1527,16 +1777,14 @@ async function logout() {
 }
 
 /* ══════════════════════════════════════════════════════
-   INIT — verifica sessão Supabase (não localStorage)
+   INIT
 ══════════════════════════════════════════════════════ */
 window.addEventListener("load", init);
 async function init() {
   await loadCategorias();
-
   const publicSlug = getPublicSlug();
   if (publicSlug) { await loadPublic(publicSlug); return; }
 
-  // verificar sessão ativa no Supabase Auth
   const { data: { session } } = await db.auth.getSession();
   if (session && session.user) {
     const userId = session.user.id;
@@ -1552,10 +1800,8 @@ async function init() {
         return;
       }
     }
-    // se não achou perfil/empresa, faz logout
     await db.auth.signOut();
   }
-  // sem sessão: mostrar landing
 }
 
 async function loadCategorias() {
@@ -1564,7 +1810,7 @@ async function loadCategorias() {
   const sel = document.getElementById("empCategoria");
   if (sel) sel.innerHTML = (state.categorias.length
     ? state.categorias.map(c => `<option value="${c.id}">${c.icone || ""} ${c.nome}</option>`).join("")
-    : `<option value="">Beleza &amp; Estética</option><option value="">Saúde</option><option value="">Fitness</option><option value="">Outro</option>`);
+    : `<option>Beleza &amp; Estética</option><option>Saúde</option><option>Fitness</option><option>Outro</option>`);
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1606,7 +1852,7 @@ function setView(view) {
 }
 
 /* ══════════════════════════════════════════════════════
-   CARREGAR DADOS — todos filtrados pela empresa do usuário
+   CARREGAR DADOS
 ══════════════════════════════════════════════════════ */
 async function loadAll() {
   if (!state.empresa) return;
@@ -1895,60 +2141,51 @@ function renderConfig() {
 }
 
 /* ══════════════════════════════════════════════════════
-   SALVAR NOVO — clientes, serviços, profissionais, agenda
+   SALVAR NOVO
 ══════════════════════════════════════════════════════ */
 async function salvarCliente() {
   const nome = document.getElementById("cliNome").value.trim();
   if (!nome) return toast("Digite o nome do cliente.", "err");
   const { error } = await db.from("agenda_clientes").insert({
-    empresa_id: state.empresa.id,
-    nome,
+    empresa_id: state.empresa.id, nome,
     telefone: document.getElementById("cliTel").value,
-    email: document.getElementById("cliEmail").value,
-    ativo: true
+    email: document.getElementById("cliEmail").value, ativo: true
   });
   if (error) return toast("Erro ao salvar cliente.", "err");
   document.getElementById("cliNome").value = "";
   document.getElementById("cliTel").value = "";
   document.getElementById("cliEmail").value = "";
-  await loadAll();
-  toast("Cliente salvo com sucesso.", "ok");
+  await loadAll(); toast("Cliente salvo com sucesso.", "ok");
 }
 
 async function salvarServico() {
   const nome = document.getElementById("srvNome").value.trim();
   if (!nome) return toast("Digite o nome do serviço.", "err");
   const { error } = await db.from("agenda_servicos").insert({
-    empresa_id: state.empresa.id,
-    nome,
+    empresa_id: state.empresa.id, nome,
     preco: Number(document.getElementById("srvPreco").value || 0),
-    duracao_minutos: Number(document.getElementById("srvDur").value || 60),
-    status: "ativo"
+    duracao_minutos: Number(document.getElementById("srvDur").value || 60), status: "ativo"
   });
   if (error) return toast("Erro ao salvar serviço.", "err");
   document.getElementById("srvNome").value = "";
   document.getElementById("srvPreco").value = "";
   document.getElementById("srvDur").value = "";
-  await loadAll();
-  toast("Serviço salvo.", "ok");
+  await loadAll(); toast("Serviço salvo.", "ok");
 }
 
 async function salvarProfissional() {
   const nome = document.getElementById("proNome").value.trim();
   if (!nome) return toast("Digite o nome do profissional.", "err");
   const { error } = await db.from("agenda_profissionais").insert({
-    empresa_id: state.empresa.id,
-    nome,
+    empresa_id: state.empresa.id, nome,
     especialidade: document.getElementById("proEsp").value,
-    telefone: document.getElementById("proTel").value,
-    status: "ativo"
+    telefone: document.getElementById("proTel").value, status: "ativo"
   });
   if (error) return toast("Erro ao salvar profissional.", "err");
   document.getElementById("proNome").value = "";
   document.getElementById("proEsp").value = "";
   document.getElementById("proTel").value = "";
-  await loadAll();
-  toast("Profissional salvo.", "ok");
+  await loadAll(); toast("Profissional salvo.", "ok");
 }
 
 async function salvarAgendamento() {
@@ -1958,51 +2195,33 @@ async function salvarAgendamento() {
     return toast("Preencha todos os campos.", "err");
   const serv = state.servicos.find(s => s.id === document.getElementById("agServico").value);
   const prof = state.profissionais.find(p => p.id === document.getElementById("agProfissional").value);
-  let clienteId = null;
   const { data: cliRow } = await db.from("agenda_clientes").insert({
-    empresa_id: state.empresa.id,
-    nome: cli,
-    telefone: document.getElementById("agTelefone").value,
-    ativo: true
+    empresa_id: state.empresa.id, nome: cli,
+    telefone: document.getElementById("agTelefone").value, ativo: true
   }).select("*").single();
-  if (cliRow) clienteId = cliRow.id;
   const { error } = await db.from("agenda_agendamentos").insert({
-    empresa_id: state.empresa.id,
-    cliente_id: clienteId,
-    servico_id: serv?.id,
-    profissional_id: prof?.id,
-    cliente_nome: cli,
-    cliente_telefone: document.getElementById("agTelefone").value,
-    servico_nome: serv?.nome,
-    profissional_nome: prof?.nome,
-    data: document.getElementById("agData").value,
-    hora: document.getElementById("agHora").value,
-    status: document.getElementById("agStatus").value,
-    valor: Number(serv?.preco || 0)
+    empresa_id: state.empresa.id, cliente_id: cliRow?.id || null,
+    servico_id: serv?.id, profissional_id: prof?.id,
+    cliente_nome: cli, cliente_telefone: document.getElementById("agTelefone").value,
+    servico_nome: serv?.nome, profissional_nome: prof?.nome,
+    data: document.getElementById("agData").value, hora: document.getElementById("agHora").value,
+    status: document.getElementById("agStatus").value, valor: Number(serv?.preco || 0)
   });
   if (error) return toast("Erro ao salvar agendamento.", "err");
   document.getElementById("agCliente").value = "";
   document.getElementById("agTelefone").value = "";
   document.getElementById("agData").value = "";
   document.getElementById("agHora").value = "";
-  await loadAll();
-  toast("Agendamento salvo!", "ok");
+  await loadAll(); toast("Agendamento salvo!", "ok");
 }
 
 async function salvarConfig() {
   const newSlug = slugify(document.getElementById("cfgSlug").value);
   const { data, error } = await db.from("agenda_empresas")
-    .update({
-      nome: document.getElementById("cfgNome").value,
-      whatsapp: document.getElementById("cfgWhatsapp").value,
-      slug: newSlug
-    })
+    .update({ nome: document.getElementById("cfgNome").value, whatsapp: document.getElementById("cfgWhatsapp").value, slug: newSlug })
     .eq("id", state.empresa.id).select("*").single();
   if (error) return toast("Erro ao salvar. Talvez o slug já exista.", "err");
-  state.empresa = data;
-  showDashboard();
-  renderConfig();
-  toast("Configurações salvas.", "ok");
+  state.empresa = data; showDashboard(); renderConfig(); toast("Configurações salvas.", "ok");
 }
 
 /* ══════════════════════════════════════════════════════
@@ -2019,8 +2238,7 @@ function editServico(id) {
     const nome = document.getElementById("ed_svc_nome").value.trim();
     if (!nome) return toast("Preencha o nome.", "err");
     const { error } = await db.from("agenda_servicos").update({
-      nome,
-      preco: Number(document.getElementById("ed_svc_preco").value || 0),
+      nome, preco: Number(document.getElementById("ed_svc_preco").value || 0),
       duracao_minutos: Number(document.getElementById("ed_svc_dur").value || 60)
     }).eq("id", id);
     if (error) return toast("Erro ao salvar.", "err");
@@ -2037,8 +2255,7 @@ function editProfissional(id) {
     const nome = document.getElementById("ed_pro_nome").value.trim();
     if (!nome) return toast("Preencha o nome.", "err");
     const { error } = await db.from("agenda_profissionais").update({
-      nome,
-      especialidade: document.getElementById("ed_pro_esp").value.trim(),
+      nome, especialidade: document.getElementById("ed_pro_esp").value.trim(),
       telefone: document.getElementById("ed_pro_tel").value.trim()
     }).eq("id", id);
     if (error) return toast("Erro ao salvar.", "err");
@@ -2055,8 +2272,7 @@ function editCliente(id) {
     const nome = document.getElementById("ed_cli_nome").value.trim();
     if (!nome) return toast("Preencha o nome.", "err");
     const { error } = await db.from("agenda_clientes").update({
-      nome,
-      telefone: document.getElementById("ed_cli_tel").value.trim(),
+      nome, telefone: document.getElementById("ed_cli_tel").value.trim(),
       email: document.getElementById("ed_cli_email").value.trim()
     }).eq("id", id);
     if (error) return toast("Erro ao salvar.", "err");
@@ -2095,14 +2311,10 @@ function editAgendamento(id) {
     const serv = state.servicos.find(s => s.id === svcId);
     const prof = state.profissionais.find(p => p.id === profId);
     const { error } = await db.from("agenda_agendamentos").update({
-      cliente_nome: cli,
-      cliente_telefone: document.getElementById("ed_ag_tel").value.trim(),
-      servico_id: svcId || null,
-      profissional_id: profId || null,
-      servico_nome: serv?.nome || a.servico_nome,
-      profissional_nome: prof?.nome || a.profissional_nome,
-      data, hora,
-      status: document.getElementById("ed_ag_status").value,
+      cliente_nome: cli, cliente_telefone: document.getElementById("ed_ag_tel").value.trim(),
+      servico_id: svcId || null, profissional_id: profId || null,
+      servico_nome: serv?.nome || a.servico_nome, profissional_nome: prof?.nome || a.profissional_nome,
+      data, hora, status: document.getElementById("ed_ag_status").value,
       valor: Number(serv?.preco || a.valor || 0)
     }).eq("id", id);
     if (error) return toast("Erro ao salvar.", "err");
@@ -2210,8 +2422,7 @@ function excluirServico(id) {
   openConfirmModal({ icon:"🗑", iconCls:"danger", title:"Excluir serviço?",
     sub: `"${s.nome}" será removido do catálogo.`, btnLabel:"🗑 Excluir", btnStyle:"danger",
     cb: async () => {
-      const { error } = await db.from("agenda_servicos").update({ status: "excluido" }).eq("id", id);
-      if (error) return toast("Erro ao excluir.", "err");
+      await db.from("agenda_servicos").update({ status: "excluido" }).eq("id", id);
       await loadAll(); toast("Serviço excluído.", "warn");
     }
   });
@@ -2221,8 +2432,7 @@ function excluirProfissional(id) {
   openConfirmModal({ icon:"🗑", iconCls:"danger", title:"Excluir profissional?",
     sub: `"${p.nome}" será removido da equipe.`, btnLabel:"🗑 Excluir", btnStyle:"danger",
     cb: async () => {
-      const { error } = await db.from("agenda_profissionais").update({ status: "excluido" }).eq("id", id);
-      if (error) return toast("Erro ao excluir.", "err");
+      await db.from("agenda_profissionais").update({ status: "excluido" }).eq("id", id);
       await loadAll(); toast("Profissional excluído.", "warn");
     }
   });
@@ -2232,8 +2442,7 @@ function excluirCliente(id) {
   openConfirmModal({ icon:"🗑", iconCls:"danger", title:"Excluir cliente?",
     sub: `"${c.nome}" será removido da listagem.`, btnLabel:"🗑 Excluir", btnStyle:"danger",
     cb: async () => {
-      const { error } = await db.from("agenda_clientes").update({ ativo: false }).eq("id", id);
-      if (error) return toast("Erro ao excluir.", "err");
+      await db.from("agenda_clientes").update({ ativo: false }).eq("id", id);
       await loadAll(); toast("Cliente excluído.", "warn");
     }
   });
@@ -2244,8 +2453,7 @@ function excluirAgendamento(id) {
     sub: `Agendamento de "${a.cliente_nome}" em ${formatDateBR(a.data)} às ${a.hora || "—"}.`,
     btnLabel:"🗑 Excluir", btnStyle:"danger",
     cb: async () => {
-      const { error } = await db.from("agenda_agendamentos").update({ status: "Excluído" }).eq("id", id);
-      if (error) return toast("Erro ao excluir.", "err");
+      await db.from("agenda_agendamentos").update({ status: "Excluído" }).eq("id", id);
       await loadAll(); toast("Agendamento excluído.", "warn");
     }
   });
@@ -2352,7 +2560,7 @@ async function confirmarReagendar() {
 document.getElementById("modalReagendar").addEventListener("click", e => { if (e.target === document.getElementById("modalReagendar")) closeModalReagendar(); });
 
 /* ══════════════════════════════════════════════════════
-   LINK PÚBLICO / ABRIR PÁGINA PÚBLICA
+   LINK PÚBLICO
 ══════════════════════════════════════════════════════ */
 function copyPublicLink() {
   if (!state.empresa) return;
@@ -2367,7 +2575,7 @@ function openPublic() {
 }
 
 /* ══════════════════════════════════════════════════════
-   PÁGINA PÚBLICA — carrega por slug, SEM acessar dashboard
+   PÁGINA PÚBLICA
 ══════════════════════════════════════════════════════ */
 async function loadPublic(slug) {
   document.getElementById("landingView").style.display = "none";
@@ -2433,23 +2641,17 @@ async function confirmarAgendamentoPublico() {
   const { data: cli } = await db.from("agenda_clientes").insert({
     empresa_id: state.pubEmpresa.id,
     nome: document.getElementById("pubNome").value,
-    telefone: document.getElementById("pubTelefone").value,
-    ativo: true
+    telefone: document.getElementById("pubTelefone").value, ativo: true
   }).select("*").single();
 
   const { error } = await db.from("agenda_agendamentos").insert({
-    empresa_id: state.pubEmpresa.id,
-    cliente_id: cli?.id || null,
-    servico_id: state.pubServico.id,
-    profissional_id: state.pubProfissional.id,
+    empresa_id: state.pubEmpresa.id, cliente_id: cli?.id || null,
+    servico_id: state.pubServico.id, profissional_id: state.pubProfissional.id,
     cliente_nome: document.getElementById("pubNome").value,
     cliente_telefone: document.getElementById("pubTelefone").value,
-    servico_nome: state.pubServico.nome,
-    profissional_nome: state.pubProfissional.nome,
-    data: document.getElementById("pubData").value,
-    hora: document.getElementById("pubHora").value,
-    status: "Pendente",
-    valor: Number(state.pubServico.preco || 0),
+    servico_nome: state.pubServico.nome, profissional_nome: state.pubProfissional.nome,
+    data: document.getElementById("pubData").value, hora: document.getElementById("pubHora").value,
+    status: "Pendente", valor: Number(state.pubServico.preco || 0),
     observacoes: document.getElementById("pubObs").value
   });
   if (error) { console.error(error); return toast("Erro ao confirmar agendamento.", "err"); }
@@ -2465,8 +2667,7 @@ function resetPublic() {
   document.getElementById("pubData").value = "";
   document.getElementById("pubHora").value = "";
   document.getElementById("pubObs").value = "";
-  state.pubServico = null;
-  state.pubProfissional = null;
+  state.pubServico = null; state.pubProfissional = null;
   document.querySelectorAll(".choice").forEach(c => c.classList.remove("active"));
 }
 </script>
