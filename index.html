@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AgendaPro — Plataforma Premium de Agendamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --black: #080808;
+  --deep: #0f0f0f;
+  --surface: #141414;
+  --surface2: #1a1a1a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --gold: #c9a96e;
+  --gold2: #e8c97a;
+  --gold-soft: rgba(201,169,110,0.12);
+  --white: #f5f5f0;
+  --muted: rgba(245,245,240,0.45);
+  --muted2: rgba(245,245,240,0.25);
+  --text: #e8e8e2;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html{scroll-behavior:smooth;}
+
+body{
+  background:var(--black);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  font-weight:300;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CURSOR */
+.cursor{
+  position:fixed;width:8px;height:8px;
+  background:var(--gold);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transition:transform 0.15s ease;
+  mix-blend-mode:difference;
+}
+.cursor-ring{
+  position:fixed;width:32px;height:32px;
+  border:1px solid rgba(201,169,110,0.4);
+  border-radius:50%;pointer-events:none;z-index:9998;
+  transition:all 0.3s cubic-bezier(0.23,1,0.32,1);
+}
+
+/* NOISE OVERLAY */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:0.35;pointer-events:none;z-index:0;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:28px 60px;
+  transition:all 0.4s ease;
+}
+nav.scrolled{
+  background:rgba(8,8,8,0.85);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  padding:20px 60px;
+}
+.logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:500;
+  letter-spacing:0.08em;
+  color:var(--white);
+  display:flex;align-items:center;gap:10px;
+}
+.logo-dot{
+  width:6px;height:6px;
+  background:var(--gold);border-radius:50%;
+}
+.nav-links{
+  display:flex;align-items:center;gap:48px;
+  list-style:none;
+}
+.nav-links a{
+  color:var(--muted);font-size:13px;
+  letter-spacing:0.06em;text-decoration:none;
+  text-transform:uppercase;
+  transition:color 0.3s;
+}
+.nav-links a:hover{color:var(--white);}
+.nav-actions{display:flex;align-items:center;gap:16px;}
+.btn-ghost{
+  padding:10px 24px;font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:400;letter-spacing:0.05em;
+  color:var(--muted);background:transparent;
+  border:1px solid var(--border2);
+  border-radius:40px;cursor:none;
+  transition:all 0.3s;text-transform:uppercase;
+}
+.btn-ghost:hover{color:var(--white);border-color:var(--gold);background:var(--gold-soft);}
+.btn-primary{
+  padding:11px 28px;font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:400;letter-spacing:0.05em;
+  color:var(--black);background:var(--gold);
+  border:none;border-radius:40px;cursor:none;
+  transition:all 0.3s;text-transform:uppercase;
+  position:relative;overflow:hidden;
+}
+.btn-primary::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.2),transparent);
+}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-1px);
+  box-shadow:0 8px 32px rgba(201,169,110,0.35);}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  position:relative;overflow:hidden;
+  padding:120px 60px 80px;
+  text-align:center;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,169,110,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(201,169,110,0.04) 0%, transparent 60%);
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 40%,transparent 100%);
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:12px;
+  padding:8px 20px;
+  background:var(--gold-soft);
+  border:1px solid rgba(201,169,110,0.25);
+  border-radius:40px;
+  margin-bottom:40px;
+  opacity:0;animation:fadeUp 0.8s ease 0.2s forwards;
+}
+.hero-eyebrow span{
+  font-size:11px;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--gold);
+}
+.eyebrow-dot{
+  width:4px;height:4px;background:var(--gold);
+  border-radius:50%;animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(48px,6vw,96px);
+  font-weight:300;line-height:1.05;
+  letter-spacing:-0.01em;
+  color:var(--white);
+  max-width:900px;
+  margin-bottom:28px;
+  opacity:0;animation:fadeUp 0.9s ease 0.4s forwards;
+}
+h1 em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-sub{
+  font-size:17px;line-height:1.7;
+  color:var(--muted);max-width:520px;
+  margin:0 auto 52px;
+  opacity:0;animation:fadeUp 0.9s ease 0.6s forwards;
+}
+.hero-cta{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;
+  opacity:0;animation:fadeUp 0.9s ease 0.8s forwards;
+}
+.btn-hero{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 36px;
+  background:var(--gold);color:var(--black);
+  border:none;border-radius:50px;cursor:none;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;font-weight:500;letter-spacing:0.04em;
+  transition:all 0.35s cubic-bezier(0.23,1,0.32,1);
+  position:relative;overflow:hidden;
+  text-transform:uppercase;
+}
+.btn-hero:hover{transform:translateY(-2px);
+  box-shadow:0 16px 48px rgba(201,169,110,0.4);background:var(--gold2);}
+.btn-hero-ghost{
+  display:flex;align-items:center;gap:10px;
+  padding:15px 32px;
+  background:transparent;color:var(--white);
+  border:1px solid var(--border2);
+  border-radius:50px;cursor:none;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;font-weight:300;letter-spacing:0.04em;
+  transition:all 0.3s;text-transform:uppercase;
+}
+.btn-hero-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.hero-note{
+  font-size:12px;color:var(--muted2);
+  margin-top:24px;letter-spacing:0.05em;
+  opacity:0;animation:fadeUp 0.9s ease 1s forwards;
+}
+
+/* FLOATING DASHBOARD */
+.hero-dashboard{
+  width:100%;max-width:900px;
+  margin:64px auto 0;
+  position:relative;
+  opacity:0;animation:fadeUp 1s ease 0.7s forwards;
+}
+.dashboard-glow{
+  position:absolute;
+  top:-40px;left:50%;transform:translateX(-50%);
+  width:600px;height:200px;
+  background:radial-gradient(ellipse,rgba(201,169,110,0.15),transparent 70%);
+  filter:blur(20px);
+  pointer-events:none;
+}
+.dashboard-card{
+  background:rgba(20,20,20,0.9);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  overflow:hidden;
+  backdrop-filter:blur(20px);
+  box-shadow:
+    0 40px 120px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(201,169,110,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.dash-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.02);
+}
+.dash-dots{display:flex;gap:7px;}
+.dash-dots span{width:10px;height:10px;border-radius:50%;}
+.dash-dots span:nth-child(1){background:#ff5f57;}
+.dash-dots span:nth-child(2){background:#febc2e;}
+.dash-dots span:nth-child(3){background:#28c840;}
+.dash-title{font-size:12px;color:var(--muted2);letter-spacing:0.1em;text-transform:uppercase;}
+.dash-body{display:flex;gap:0;}
+.dash-sidebar{
+  width:200px;flex-shrink:0;
+  border-right:1px solid var(--border);
+  padding:20px 0;
+}
+.dash-sidebar-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 20px;font-size:12px;
+  color:var(--muted);letter-spacing:0.04em;
+  transition:all 0.2s;cursor:none;
+}
+.dash-sidebar-item:hover,.dash-sidebar-item.active{
+  color:var(--white);background:rgba(255,255,255,0.04);
+}
+.dash-sidebar-item.active{
+  color:var(--gold);
+  border-left:2px solid var(--gold);
+}
+.sicon{font-size:14px;}
+.dash-main{flex:1;padding:24px;}
+.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;padding:16px;
+}
+.stat-label{font-size:10px;color:var(--muted2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.stat-value{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--white);}
+.stat-delta{font-size:11px;color:#4ade80;margin-top:4px;}
+.dash-calendar-preview{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;padding:16px;
+}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cal-month{font-size:13px;color:var(--white);letter-spacing:0.04em;}
+.cal-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:4px;
+  font-size:11px;text-align:center;
+}
+.cal-day-name{color:var(--muted2);padding:4px 0;letter-spacing:0.05em;}
+.cal-day{
+  padding:6px 2px;border-radius:6px;
+  color:var(--muted);cursor:none;transition:all 0.2s;
+}
+.cal-day.booked{
+  background:var(--gold-soft);color:var(--gold);
+  border:1px solid rgba(201,169,110,0.2);
+}
+.cal-day.today{
+  background:var(--gold);color:var(--black);font-weight:500;
+}
+
+/* STATS BAR */
+.stats-bar{
+  display:flex;align-items:center;justify-content:center;gap:0;
+  padding:40px 60px;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  position:relative;z-index:1;
+}
+.stat-item{
+  flex:1;text-align:center;padding:20px 40px;
+  border-right:1px solid var(--border);
+}
+.stat-item:last-child{border-right:none;}
+.stat-item-number{
+  font-family:'Cormorant Garamond',serif;
+  font-size:42px;font-weight:300;
+  color:var(--gold);margin-bottom:8px;
+}
+.stat-item-label{
+  font-size:12px;color:var(--muted2);
+  letter-spacing:0.1em;text-transform:uppercase;
+}
+
+/* SECTIONS */
+section{position:relative;z-index:1;}
+
+.section-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:20px;
+}
+.section-eyebrow::before{
+  content:'';width:24px;height:1px;background:var(--gold);
+}
+h2{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(36px,4vw,64px);
+  font-weight:300;line-height:1.1;
+  color:var(--white);
+  margin-bottom:20px;
+}
+h2 em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.section-sub{
+  font-size:16px;line-height:1.7;
+  color:var(--muted);max-width:480px;
+}
+
+/* FEATURES */
+.features{padding:120px 60px;}
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+  border:1px solid var(--border);
+  border-radius:24px;
+  overflow:hidden;
+  margin-top:80px;
+  background:var(--border);
+}
+.feature-card{
+  background:var(--deep);
+  padding:48px 40px;
+  transition:all 0.4s cubic-bezier(0.23,1,0.32,1);
+  position:relative;overflow:hidden;
+}
+.feature-card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transition:opacity 0.4s;
+}
+.feature-card:hover{background:var(--surface);}
+.feature-card:hover::before{opacity:1;}
+.feature-icon{
+  width:48px;height:48px;
+  background:var(--gold-soft);
+  border:1px solid rgba(201,169,110,0.2);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:28px;
+}
+.feature-title{
+  font-size:17px;font-weight:400;
+  color:var(--white);margin-bottom:12px;
+  letter-spacing:0.01em;
+}
+.feature-desc{
+  font-size:14px;line-height:1.7;
+  color:var(--muted);
+}
+
+/* PROFESSIONALS */
+.professionals{
+  padding:100px 60px;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+.prof-grid{
+  display:flex;flex-wrap:wrap;
+  justify-content:center;gap:12px;
+  margin-top:60px;max-width:900px;margin-left:auto;margin-right:auto;
+}
+.prof-chip{
+  padding:12px 24px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:50px;
+  font-size:13px;letter-spacing:0.04em;
+  color:var(--muted);
+  transition:all 0.3s;cursor:none;
+  display:flex;align-items:center;gap:8px;
+}
+.prof-chip:hover{
+  color:var(--gold);
+  border-color:rgba(201,169,110,0.35);
+  background:var(--gold-soft);
+}
+
+/* FLOW */
+.flow{padding:120px 60px;}
+.flow-container{
+  display:flex;align-items:center;gap:80px;
+  margin-top:80px;
+}
+.flow-visual{
+  flex:1;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:40px;
+  min-height:420px;
+  position:relative;overflow:hidden;
+}
+.flow-visual::before{
+  content:'';position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 70% 30%,rgba(201,169,110,0.06),transparent 60%);
+}
+.flow-steps{
+  display:flex;flex-direction:column;gap:0;
+}
+.flow-step{
+  display:flex;align-items:center;gap:20px;
+  padding:20px 0;
+  border-bottom:1px solid var(--border);
+}
+.flow-step:last-child{border-bottom:none;}
+.step-num{
+  width:36px;height:36px;flex-shrink:0;
+  background:var(--gold-soft);
+  border:1px solid rgba(201,169,110,0.25);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px;color:var(--gold);
+}
+.step-info h4{font-size:14px;color:var(--white);margin-bottom:4px;font-weight:400;}
+.step-info p{font-size:12px;color:var(--muted);line-height:1.5;}
+.flow-content{flex:1;}
+.flow-content .section-sub{max-width:100%;}
+.flow-list{margin-top:32px;display:flex;flex-direction:column;gap:16px;}
+.flow-list-item{
+  display:flex;align-items:center;gap:12px;
+  font-size:14px;color:var(--muted);
+}
+.flow-list-item::before{
+  content:'';width:5px;height:5px;
+  background:var(--gold);border-radius:50%;flex-shrink:0;
+}
+
+/* PLANS */
+.plans{
+  padding:120px 60px;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+}
+.plans-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  margin-top:80px;
+  max-width:1000px;margin-left:auto;margin-right:auto;
+}
+.plan-card{
+  background:var(--deep);
+  border:1px solid var(--border);
+  border-radius:20px;padding:40px 32px;
+  position:relative;overflow:hidden;
+  transition:transform 0.3s ease, border-color 0.3s;
+}
+.plan-card.featured{
+  border-color:rgba(201,169,110,0.35);
+  background:linear-gradient(160deg,rgba(201,169,110,0.06),transparent 60%),var(--deep);
+}
+.plan-card:hover{transform:translateY(-4px);}
+.plan-badge{
+  position:absolute;top:20px;right:20px;
+  padding:4px 12px;background:var(--gold);
+  color:var(--black);border-radius:20px;
+  font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+  font-weight:500;
+}
+.plan-name{
+  font-size:12px;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted2);margin-bottom:20px;
+}
+.plan-price{
+  display:flex;align-items:baseline;gap:4px;
+  margin-bottom:8px;
+}
+.price-curr{font-size:16px;color:var(--gold);}
+.price-value{
+  font-family:'Cormorant Garamond',serif;
+  font-size:52px;color:var(--white);line-height:1;
+}
+.price-period{font-size:12px;color:var(--muted2);}
+.plan-desc{font-size:13px;color:var(--muted);margin-bottom:32px;line-height:1.6;}
+.plan-features{display:flex;flex-direction:column;gap:12px;margin-bottom:36px;}
+.plan-feature{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;color:var(--muted);
+}
+.plan-feature::before{
+  content:'✓';color:var(--gold);font-size:11px;
+  flex-shrink:0;font-weight:500;
+}
+.btn-plan{
+  width:100%;padding:14px;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;letter-spacing:0.06em;text-transform:uppercase;
+  border-radius:40px;cursor:none;
+  transition:all 0.3s;
+}
+.btn-plan-outline{
+  background:transparent;color:var(--muted);
+  border:1px solid var(--border2);
+}
+.btn-plan-outline:hover{color:var(--white);border-color:var(--gold);}
+.btn-plan-gold{
+  background:var(--gold);color:var(--black);
+  border:none;font-weight:500;
+}
+.btn-plan-gold:hover{background:var(--gold2);box-shadow:0 8px 32px rgba(201,169,110,0.35);}
+
+/* TESTIMONIALS */
+.testimonials{padding:120px 60px;text-align:center;}
+.test-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:20px;margin-top:72px;
+}
+.test-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:36px;text-align:left;
+  transition:all 0.3s;
+}
+.test-card:hover{border-color:rgba(201,169,110,0.2);}
+.test-stars{color:var(--gold);font-size:14px;margin-bottom:20px;letter-spacing:2px;}
+.test-text{
+  font-size:14px;line-height:1.8;
+  color:var(--muted);margin-bottom:28px;
+  font-style:italic;
+}
+.test-author{display:flex;align-items:center;gap:14px;}
+.test-avatar{
+  width:40px;height:40px;border-radius:50%;
+  background:var(--gold-soft);
+  border:1px solid rgba(201,169,110,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.test-name{font-size:13px;color:var(--white);margin-bottom:2px;}
+.test-role{font-size:11px;color:var(--muted2);letter-spacing:0.06em;}
+
+/* CTA BOTTOM */
+.cta-section{
+  padding:120px 60px;
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:400px;
+  background:radial-gradient(ellipse,rgba(201,169,110,0.08),transparent 70%);
+  pointer-events:none;
+}
+.cta-section h2{margin-bottom:16px;}
+.cta-section .section-sub{
+  margin:0 auto 48px;text-align:center;max-width:520px;
+}
+
+/* FOOTER */
+footer{
+  padding:60px 60px 40px;
+  border-top:1px solid var(--border);
+  background:var(--surface);
+}
+.footer-top{
+  display:flex;justify-content:space-between;
+  align-items:flex-start;margin-bottom:60px;
+}
+.footer-brand p{
+  font-size:13px;color:var(--muted2);
+  max-width:280px;line-height:1.7;margin-top:12px;
+}
+.footer-links{
+  display:flex;gap:80px;
+}
+.footer-col h5{
+  font-size:11px;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--muted2);
+  margin-bottom:20px;
+}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-col a{
+  font-size:13px;color:var(--muted);
+  text-decoration:none;transition:color 0.3s;
+}
+.footer-col a:hover{color:var(--gold);}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:32px;border-top:1px solid var(--border);
+}
+.footer-copy{font-size:12px;color:var(--muted2);letter-spacing:0.04em;}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.3s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:24px;
+  padding:52px 48px;
+  width:100%;max-width:420px;
+  position:relative;
+  transform:translateY(16px);
+  transition:transform 0.3s cubic-bezier(0.23,1,0.32,1);
+}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-close{
+  position:absolute;top:20px;right:20px;
+  width:32px;height:32px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:50%;cursor:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:var(--muted);
+  transition:all 0.2s;
+}
+.modal-close:hover{color:var(--white);border-color:var(--border2);}
+.modal h3{
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px;font-weight:300;
+  color:var(--white);margin-bottom:8px;
+}
+.modal p{font-size:14px;color:var(--muted);margin-bottom:36px;line-height:1.6;}
+.form-group{margin-bottom:20px;}
+.form-group label{
+  display:block;font-size:11px;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--muted2);margin-bottom:8px;
+}
+.form-group input{
+  width:100%;padding:14px 18px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--white);font-family:'DM Sans',sans-serif;
+  font-size:14px;outline:none;
+  transition:border-color 0.3s;cursor:none;
+}
+.form-group input:focus{border-color:var(--gold);}
+.form-group input::placeholder{color:var(--muted2);}
+.btn-submit{
+  width:100%;padding:15px;margin-top:8px;
+  background:var(--gold);color:var(--black);
+  border:none;border-radius:40px;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:500;
+  letter-spacing:0.06em;text-transform:uppercase;
+  cursor:none;transition:all 0.3s;
+}
+.btn-submit:hover{background:var(--gold2);box-shadow:0 8px 32px rgba(201,169,110,0.35);}
+.modal-divider{
+  display:flex;align-items:center;gap:16px;
+  margin:24px 0;font-size:12px;color:var(--muted2);
+}
+.modal-divider::before,.modal-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+.modal-switch{
+  text-align:center;font-size:13px;color:var(--muted);margin-top:20px;
+}
+.modal-switch a{color:var(--gold);text-decoration:none;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.reveal{
+  opacity:0;transform:translateY(32px);
+  transition:all 0.8s cubic-bezier(0.23,1,0.32,1);
+}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--black);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(201,169,110,0.3);}
+
+/* MOBILE */
+@media(max-width:900px){
+  nav{padding:20px 24px;}
+  nav.scrolled{padding:16px 24px;}
+  .nav-links{display:none;}
+  .hero{padding:100px 24px 60px;}
+  .stats-bar{flex-direction:column;padding:32px 24px;gap:0;}
+  .stat-item{border-right:none;border-bottom:1px solid var(--border);padding:24px 0;}
+  .stat-item:last-child{border-bottom:none;}
+  .features{padding:80px 24px;}
+  .features-grid{grid-template-columns:1fr;}
+  .flow{padding:80px 24px;}
+  .flow-container{flex-direction:column;gap:40px;}
+  .plans{padding:80px 24px;}
+  .plans-grid{grid-template-columns:1fr;}
+  .testimonials{padding:80px 24px;}
+  .test-grid{grid-template-columns:1fr;}
+  .cta-section{padding:80px 24px;}
+  footer{padding:48px 24px 32px;}
+  .footer-top{flex-direction:column;gap:40px;}
+  .footer-links{gap:40px;flex-wrap:wrap;}
+  .footer-bottom{flex-direction:column;gap:16px;text-align:center;}
+  .dash-sidebar{display:none;}
+  .modal{padding:40px 28px;margin:20px;}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    AgendaPro
+  </div>
+  <ul class="nav-links">
+    <li><a href="#features">Funcionalidades</a></li>
+    <li><a href="#flow">Como funciona</a></li>
+    <li><a href="#plans">Planos</a></li>
+    <li><a href="#testimonials">Depoimentos</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-ghost" onclick="openModal('login')">Entrar</button>
+    <button class="btn-primary" onclick="openModal('register')">Criar Agenda</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-eyebrow">
+    <div class="eyebrow-dot"></div>
+    <span>Plataforma Premium de Agendamento</span>
+  </div>
+  <h1>Transforme seu negócio com agendamento <em>online premium</em></h1>
+  <p class="hero-sub">Organize clientes, horários, pagamentos e atendimentos em um único lugar. Elegante, moderno e extremamente fácil.</p>
+  <div class="hero-cta">
+    <button class="btn-hero" onclick="openModal('register')">
+      <span>Começar Agora</span>
+      <span>→</span>
+    </button>
+    <button class="btn-hero-ghost">
+      <span>▶</span>
+      <span>Ver demonstração</span>
+    </button>
+  </div>
+  <p class="hero-note">✦ Teste grátis por 14 dias · Sem cartão de crédito</p>
+
+  <div class="hero-dashboard">
+    <div class="dashboard-glow"></div>
+    <div class="dashboard-card">
+      <div class="dash-header">
+        <div class="dash-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="dash-title">AgendaPro Dashboard</div>
+        <div style="font-size:11px;color:var(--muted2)">Segunda, 19 Mai</div>
+      </div>
+      <div class="dash-body">
+        <div class="dash-sidebar">
+          <div class="dash-sidebar-item active"><span class="sicon">⬡</span> Dashboard</div>
+          <div class="dash-sidebar-item"><span class="sicon">◻</span> Agendamentos</div>
+          <div class="dash-sidebar-item"><span class="sicon">◎</span> Clientes</div>
+          <div class="dash-sidebar-item"><span class="sicon">◈</span> Financeiro</div>
+          <div class="dash-sidebar-item"><span class="sicon">◷</span> Serviços</div>
+          <div class="dash-sidebar-item"><span class="sicon">◉</span> Relatórios</div>
+        </div>
+        <div class="dash-main">
+          <div class="dash-stats">
+            <div class="stat-card">
+              <div class="stat-label">Hoje</div>
+              <div class="stat-value">12</div>
+              <div class="stat-delta">↑ 3 agendamentos</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Faturamento</div>
+              <div class="stat-value">R$2.4k</div>
+              <div class="stat-delta">↑ 18% este mês</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Clientes</div>
+              <div class="stat-value">248</div>
+              <div class="stat-delta">↑ 24 novos</div>
+            </div>
+          </div>
+          <div class="dash-calendar-preview">
+            <div class="cal-header">
+              <div class="cal-month">Maio 2026</div>
+              <div style="font-size:11px;color:var(--gold)">Ver completo →</div>
+            </div>
+            <div class="cal-grid">
+              <div class="cal-day-name">S</div><div class="cal-day-name">T</div><div class="cal-day-name">Q</div><div class="cal-day-name">Q</div><div class="cal-day-name">S</div><div class="cal-day-name">S</div><div class="cal-day-name">D</div>
+              <div class="cal-day">1</div><div class="cal-day booked">2</div><div class="cal-day booked">3</div><div class="cal-day">4</div><div class="cal-day booked">5</div><div class="cal-day">6</div><div class="cal-day">7</div>
+              <div class="cal-day booked">8</div><div class="cal-day">9</div><div class="cal-day booked">10</div><div class="cal-day booked">11</div><div class="cal-day booked">12</div><div class="cal-day">13</div><div class="cal-day">14</div>
+              <div class="cal-day">15</div><div class="cal-day booked">16</div><div class="cal-day booked">17</div><div class="cal-day booked">18</div><div class="cal-day today">19</div><div class="cal-day">20</div><div class="cal-day">21</div>
+              <div class="cal-day booked">22</div><div class="cal-day booked">23</div><div class="cal-day">24</div><div class="cal-day booked">25</div><div class="cal-day booked">26</div><div class="cal-day">27</div><div class="cal-day">28</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar reveal">
+  <div class="stat-item">
+    <div class="stat-item-number">50k+</div>
+    <div class="stat-item-label">Profissionais ativos</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-item-number">2M+</div>
+    <div class="stat-item-label">Agendamentos realizados</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-item-number">R$180M+</div>
+    <div class="stat-item-label">Movimentados na plataforma</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-item-number">99.9%</div>
+    <div class="stat-item-label">Disponibilidade garantida</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features" class="features">
+  <div class="reveal">
+    <div class="section-eyebrow">Funcionalidades</div>
+    <h2>Tudo que seu negócio<br><em>precisa para crescer</em></h2>
+  </div>
+  <div class="features-grid reveal">
+    <div class="feature-card">
+      <div class="feature-icon">◑</div>
+      <div class="feature-title">Agendamento Inteligente</div>
+      <div class="feature-desc">Seu cliente agenda em poucos cliques: serviço, profissional, data e horário. Confirmação automática por WhatsApp ou e-mail.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">◈</div>
+      <div class="feature-title">Dashboard Premium</div>
+      <div class="feature-desc">Visualize faturamento, clientes ativos, agendamentos do dia e gráficos de crescimento em um painel elegante e completo.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">◎</div>
+      <div class="feature-title">Gestão de Clientes</div>
+      <div class="feature-desc">Histórico completo, observações, fotos e todos os agendamentos de cada cliente organizados em cards premium.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">◷</div>
+      <div class="feature-title">Calendário Avançado</div>
+      <div class="feature-desc">Agenda por hora, visão semanal e mensal. Mova, cancele ou confirme agendamentos com arrastar e soltar.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">◰</div>
+      <div class="feature-title">Pagamentos Integrados</div>
+      <div class="feature-desc">Aceite PIX, cartão e cobre sinal no agendamento. Controle total do financeiro diretamente na plataforma.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">◉</div>
+      <div class="feature-title">Relatórios e Insights</div>
+      <div class="feature-desc">Serviços mais vendidos, clientes VIP, horários de pico e projeções. Dados que ajudam a tomar decisões.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFESSIONALS -->
+<section class="professionals">
+  <div class="reveal">
+    <div class="section-eyebrow" style="justify-content:center;">Para qualquer profissional</div>
+    <h2>Feito para <em>o seu segmento</em></h2>
+    <p class="section-sub" style="margin:0 auto;max-width:480px;text-align:center;">Uma plataforma que se adapta ao seu negócio, independente da sua área de atuação.</p>
+  </div>
+  <div class="prof-grid reveal">
+    <div class="prof-chip"><span>💅</span> Manicure & Nail</div>
+    <div class="prof-chip"><span>✂️</span> Salão de Beleza</div>
+    <div class="prof-chip"><span>🪒</span> Barbearia</div>
+    <div class="prof-chip"><span>👁</span> Lash Designer</div>
+    <div class="prof-chip"><span>🌿</span> Estética</div>
+    <div class="prof-chip"><span>🖋</span> Tatuadores</div>
+    <div class="prof-chip"><span>🏥</span> Clínicas</div>
+    <div class="prof-chip"><span>💪</span> Personal Trainer</div>
+    <div class="prof-chip"><span>🎵</span> Studios</div>
+    <div class="prof-chip"><span>⚖️</span> Advogados</div>
+    <div class="prof-chip"><span>📊</span> Consultores</div>
+    <div class="prof-chip"><span>🧘</span> Terapeutas</div>
+    <div class="prof-chip"><span>📸</span> Fotógrafos</div>
+    <div class="prof-chip"><span>🦷</span> Dentistas</div>
+    <div class="prof-chip"><span>+ qualquer profissional</span></div>
+  </div>
+</section>
+
+<!-- FLOW -->
+<section id="flow" class="flow">
+  <div style="display:flex;flex-direction:column;margin-bottom:0;" class="reveal">
+    <div class="section-eyebrow">Como funciona</div>
+    <h2>Simples para você,<br><em>incrível para o cliente</em></h2>
+  </div>
+  <div class="flow-container">
+    <div class="flow-visual reveal">
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <h4>Cliente acessa seu link</h4>
+            <p>Link personalizado com a sua marca e identidade visual</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <h4>Escolhe serviço e profissional</h4>
+            <p>Interface elegante com todos os seus serviços e preços</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <h4>Seleciona data e horário</h4>
+            <p>Calendário premium mostrando apenas os horários disponíveis</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <h4>Confirma e paga</h4>
+            <p>PIX ou cartão, com opção de cobrar sinal antecipado</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-num">5</div>
+          <div class="step-info">
+            <h4>Você recebe a notificação</h4>
+            <p>WhatsApp e e-mail automático para você e para o cliente</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-content reveal">
+      <div class="section-eyebrow">Experiência do cliente</div>
+      <h2 style="font-size:clamp(32px,3vw,52px);">Menos de <em>3 minutos</em> para agendar</h2>
+      <p class="section-sub">Seus clientes vão amar a experiência. Fluida, rápida e elegante. Zero fricção do início ao fim.</p>
+      <div class="flow-list">
+        <div class="flow-list-item">Funciona perfeitamente no celular</div>
+        <div class="flow-list-item">Lembrete automático 24h antes</div>
+        <div class="flow-list-item">Confirmação instantânea via WhatsApp</div>
+        <div class="flow-list-item">Histórico de agendamentos do cliente</div>
+        <div class="flow-list-item">Sem precisar criar conta para agendar</div>
+        <div class="flow-list-item">Integração com Google Calendar</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section id="plans" class="plans">
+  <div class="reveal" style="text-align:center;">
+    <div class="section-eyebrow" style="justify-content:center;">Planos</div>
+    <h2>Invista no crescimento<br>do seu <em>negócio</em></h2>
+    <p class="section-sub" style="margin:0 auto;text-align:center;">Comece grátis, sem cartão de crédito. Cancele quando quiser.</p>
+  </div>
+  <div class="plans-grid reveal">
+    <div class="plan-card">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">
+        <span class="price-curr">R$</span>
+        <span class="price-value">49</span>
+        <span class="price-period">/mês</span>
+      </div>
+      <div class="plan-desc">Perfeito para profissionais autônomos começando a organizar sua agenda.</div>
+      <div class="plan-features">
+        <div class="plan-feature">1 profissional</div>
+        <div class="plan-feature">Até 100 agendamentos/mês</div>
+        <div class="plan-feature">Notificações WhatsApp</div>
+        <div class="plan-feature">Calendário premium</div>
+        <div class="plan-feature">Link personalizado</div>
+      </div>
+      <button class="btn-plan btn-plan-outline" onclick="openModal('register')">Começar grátis</button>
+    </div>
+    <div class="plan-card featured">
+      <div class="plan-badge">Popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">
+        <span class="price-curr">R$</span>
+        <span class="price-value">97</span>
+        <span class="price-period">/mês</span>
+      </div>
+      <div class="plan-desc">Para negócios em crescimento que precisam de mais controle e recursos avançados.</div>
+      <div class="plan-features">
+        <div class="plan-feature">Até 5 profissionais</div>
+        <div class="plan-feature">Agendamentos ilimitados</div>
+        <div class="plan-feature">Pagamentos integrados (PIX/Cartão)</div>
+        <div class="plan-feature">Relatórios avançados</div>
+        <div class="plan-feature">Personalização completa</div>
+        <div class="plan-feature">Suporte prioritário</div>
+      </div>
+      <button class="btn-plan btn-plan-gold" onclick="openModal('register')">Assinar Pro</button>
+    </div>
+    <div class="plan-card">
+      <div class="plan-name">Business</div>
+      <div class="plan-price">
+        <span class="price-curr">R$</span>
+        <span class="price-value">197</span>
+        <span class="price-period">/mês</span>
+      </div>
+      <div class="plan-desc">Para clínicas, salões e negócios com múltiplos profissionais e alta demanda.</div>
+      <div class="plan-features">
+        <div class="plan-feature">Profissionais ilimitados</div>
+        <div class="plan-feature">Multi-unidades</div>
+        <div class="plan-feature">API e integrações</div>
+        <div class="plan-feature">Dashboard personalizado</div>
+        <div class="plan-feature">Gerente de conta dedicado</div>
+        <div class="plan-feature">SLA garantido 99.9%</div>
+      </div>
+      <button class="btn-plan btn-plan-outline" onclick="openModal('register')">Falar com especialista</button>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="testimonials">
+  <div class="reveal">
+    <div class="section-eyebrow" style="justify-content:center;">Depoimentos</div>
+    <h2>O que dizem nossos<br><em>clientes</em></h2>
+  </div>
+  <div class="test-grid reveal">
+    <div class="test-card">
+      <div class="test-stars">★★★★★</div>
+      <div class="test-text">"Meu salão ficou completamente diferente depois do AgendaPro. Os clientes adoram agendar pelo celular e eu consigo ver tudo no painel. Profissional de verdade."</div>
+      <div class="test-author">
+        <div class="test-avatar">💇</div>
+        <div>
+          <div class="test-name">Camila Santos</div>
+          <div class="test-role">Proprietária · Salão Lumière</div>
+        </div>
+      </div>
+    </div>
+    <div class="test-card">
+      <div class="test-stars">★★★★★</div>
+      <div class="test-text">"Aumentei meu faturamento em 40% no primeiro mês. Não perco mais cliente por falta de organização. O sistema simplesmente funciona."</div>
+      <div class="test-author">
+        <div class="test-avatar">🪒</div>
+        <div>
+          <div class="test-name">Rafael Costa</div>
+          <div class="test-role">Barbeiro · Barbearia Black</div>
+        </div>
+      </div>
+    </div>
+    <div class="test-card">
+      <div class="test-stars">★★★★★</div>
+      <div class="test-text">"A experiência que o cliente tem é absurdamente boa. Já recebi mensagens perguntando qual sistema eu uso porque ficou lindo. Nunca mais volto ao caderninho."</div>
+      <div class="test-author">
+        <div class="test-avatar">💆</div>
+        <div>
+          <div class="test-name">Juliana Ferreira</div>
+          <div class="test-role">Esteticista · Studio JF</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BOTTOM -->
+<section class="cta-section">
+  <div class="reveal">
+    <div class="section-eyebrow" style="justify-content:center;">Comece hoje</div>
+    <h2>Pronto para elevar seu<br>negócio a outro <em>nível</em>?</h2>
+    <p class="section-sub">Crie sua agenda em minutos. Teste grátis por 14 dias, sem precisar de cartão de crédito.</p>
+    <div class="hero-cta">
+      <button class="btn-hero" onclick="openModal('register')">
+        <span>Criar minha agenda grátis</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="logo"><div class="logo-dot"></div>AgendaPro</div>
+      <p>A plataforma mais elegante e completa para profissionais que levam o negócio a sério.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Produto</h5>
+        <ul>
+          <li><a href="#">Funcionalidades</a></li>
+          <li><a href="#">Planos</a></li>
+          <li><a href="#">Integrações</a></li>
+          <li><a href="#">API</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Empresa</h5>
+        <ul>
+          <li><a href="#">Sobre</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Carreiras</a></li>
+          <li><a href="#">Contato</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="#">Privacidade</a></li>
+          <li><a href="#">Termos</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 AgendaPro. Todos os direitos reservados.</div>
+    <div class="footer-copy">Feito com ✦ no Brasil</div>
+  </div>
+</footer>
+
+<!-- MODAL LOGIN -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle">Entrar</h3>
+    <p id="modalDesc">Bem-vindo de volta à sua agenda premium.</p>
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" placeholder="seu@email.com"/>
+    </div>
+    <div class="form-group" id="nameGroup" style="display:none;">
+      <label>Nome completo</label>
+      <input type="text" placeholder="Seu nome"/>
+    </div>
+    <div class="form-group" id="passGroup">
+      <label>Senha</label>
+      <input type="password" placeholder="••••••••"/>
+    </div>
+    <button class="btn-submit" id="submitBtn">Entrar</button>
+    <div class="modal-divider">ou</div>
+    <div class="modal-switch" id="modalSwitch">
+      Não tem conta? <a href="#" onclick="switchModal(); return false;">Criar grátis</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cursor.style.left=mx-4+'px';
+  cursor.style.top=my-4+'px';
+});
+setInterval(()=>{
+  rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+  ring.style.left=rx-16+'px';
+  ring.style.top=ry-16+'px';
+},16);
+document.querySelectorAll('button,a,.prof-chip,.feature-card,.plan-card,.test-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cursor.style.transform='scale(2.5)';
+    ring.style.transform='scale(1.5)';
+    ring.style.borderColor='rgba(201,169,110,0.7)';
+  });
+  el.addEventListener('mouseleave',()=>{
+    cursor.style.transform='scale(1)';
+    ring.style.transform='scale(1)';
+    ring.style.borderColor='rgba(201,169,110,0.4)';
+  });
+});
+
+// NAV SCROLL
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('scrolled',window.scrollY>60);
+});
+
+// REVEAL ON SCROLL
+const reveals=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting) e.target.classList.add('visible');
+  });
+},{threshold:0.1,rootMargin:'0px 0px -60px 0px'});
+reveals.forEach(r=>obs.observe(r));
+
+// MODAL
+let mode='login';
+function openModal(m){
+  mode=m;
+  updateModal();
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+function switchModal(){
+  mode=mode==='login'?'register':'login';
+  updateModal();
+}
+function updateModal(){
+  const isLogin=mode==='login';
+  document.getElementById('modalTitle').textContent=isLogin?'Entrar':'Criar conta grátis';
+  document.getElementById('modalDesc').textContent=isLogin?'Bem-vindo de volta à sua agenda premium.':'14 dias grátis. Sem cartão de crédito.';
+  document.getElementById('submitBtn').textContent=isLogin?'Entrar':'Criar conta';
+  document.getElementById('nameGroup').style.display=isLogin?'none':'block';
+  document.getElementById('modalSwitch').innerHTML=isLogin
+    ?'Não tem conta? <a href="#" onclick="switchModal();return false;">Criar grátis</a>'
+    :'Já tem conta? <a href="#" onclick="switchModal();return false;">Entrar</a>';
+}
+document.getElementById('modalOverlay').addEventListener('click',function(e){
+  if(e.target===this) closeModal();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+</script>
+</body>
+</html>
