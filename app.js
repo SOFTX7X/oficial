@@ -788,4 +788,3 @@ function voltarInicioPublico(){
 async function logout(){await db.auth.signOut();state.user=null;state.perfil=null;state.empresa=null;state.clientes=[];state.servicos=[];state.profissionais=[];state.agendamentos=[];state.pagamentos=[];location.href=location.pathname}
 
 window.addEventListener("hashchange",()=>{const slug=getPublicSlug();if(slug)loadPublic(slug)});
-
