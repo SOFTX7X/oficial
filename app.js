@@ -6,6 +6,49 @@ let state={
 };
 
 let agendaRealtimeChannel=null;
+let realtimeReloadTimer=null;
+let realtimeReady=false;
+
+function scheduleRealtimeReload(reason="Atualização"){
+  if(realtimeReloadTimer)clearTimeout(realtimeReloadTimer);
+  realtimeReloadTimer=setTimeout(async()=>{
+    if(!state?.empresa?.id)return;
+    await loadAll();
+  },350);
+}
+
+function notifyRealtime(payload,tabela){
+  const row=payload.new||payload.old||{};
+  const ev=payload.eventType;
+  if(tabela==="agenda_agendamentos"){
+    const nome=row.cliente_nome||"Cliente";
+    if(ev==="INSERT"){
+      incrNotif();
+      showNotif("Novo agendamento recebido!",`${nome} acabou de agendar.`,"new_ag",6000);
+      return;
+    }
+    if(ev==="UPDATE"){
+      const status=normStatus(row.status);
+      const typeMap={"Confirmado":"confirm","Recusado":"refuse","Reagendado":"reschedule","Concluído":"done","Excluído":"info"};
+      showNotif("Agenda atualizada",`${nome} — ${status}.`,typeMap[status]||"info",4200);
+      return;
+    }
+    if(ev==="DELETE"){
+      showNotif("Agenda atualizada","Um agendamento foi removido.","info",3500);
+      return;
+    }
+  }
+
+  const nomes={
+    agenda_clientes:"Clientes",
+    agenda_servicos:"Serviços",
+    agenda_profissionais:"Profissionais",
+    agenda_pagamentos:"Financeiro",
+    agenda_empresas:"Configurações"
+  };
+  if(nomes[tabela])showNotif(`${nomes[tabela]} atualizado`, "Dados sincronizados automaticamente.", "info", 2800);
+}
+
 
 /* ── normalizar status ── */
 function normStatus(s){
@@ -272,25 +315,47 @@ function setView(view){
 /* ── REALTIME ── */
 function setupRealtime(){
   if(!state?.empresa?.id||!db?.channel)return;
-  if(agendaRealtimeChannel){try{db.removeChannel(agendaRealtimeChannel)}catch(e){}agendaRealtimeChannel=null}
-  agendaRealtimeChannel=db.channel("agendapro-rt-"+state.empresa.id)
-    .on("postgres_changes",{event:"*",schema:"public",table:"agenda_agendamentos",filter:"empresa_id=eq."+state.empresa.id},async(payload)=>{
-      const row=payload.new||payload.old||{};
-      if(payload.eventType==="INSERT"){
-        incrNotif();
-        const nome=row.cliente_nome||"Cliente";
-        const serv=row.servico_nome||"agendamento";
-        const hora=row.hora?" às "+row.hora:"";
-        showNotif("Novo agendamento recebido!",`${nome} agendou ${serv}${hora}.`,"new_ag",6000);
-      }else if(payload.eventType==="UPDATE"){
-        const nome=row.cliente_nome||"Cliente";
-        const status=normStatus(row.status);
-        const typeMap={"Confirmado":"confirm","Recusado":"refuse","Reagendado":"reschedule","Concluído":"done"};
-        showNotif("Agendamento atualizado",`${nome} — ${status}.`,typeMap[status]||"info",4500);
+
+  if(agendaRealtimeChannel){
+    try{db.removeChannel(agendaRealtimeChannel)}catch(e){}
+    agendaRealtimeChannel=null;
+  }
+
+  const empresaId=state.empresa.id;
+  const tables=[
+    "agenda_agendamentos",
+    "agenda_clientes",
+    "agenda_servicos",
+    "agenda_profissionais",
+    "agenda_pagamentos",
+    "agenda_empresas"
+  ];
+
+  let channel=db.channel("agendapro-realtime-"+empresaId);
+
+  tables.forEach(table=>{
+    const filter=table==="agenda_empresas" ? "id=eq."+empresaId : "empresa_id=eq."+empresaId;
+
+    channel=channel.on(
+      "postgres_changes",
+      {event:"*",schema:"public",table,filter},
+      payload=>{
+        notifyRealtime(payload,table);
+        scheduleRealtimeReload(table);
       }
-      await loadAll();
-    })
-    .subscribe();
+    );
+  });
+
+  agendaRealtimeChannel=channel.subscribe((status)=>{
+    if(status==="SUBSCRIBED"&&!realtimeReady){
+      realtimeReady=true;
+      console.log("Realtime ativo para empresa:",empresaId);
+    }
+    if(status==="CHANNEL_ERROR"){
+      console.warn("Realtime com erro. Verifique Supabase > Database > Replication.");
+      showNotif("Realtime precisa de atenção","Ative Realtime/Replication nas tabelas do Supabase.","error",7000);
+    }
+  });
 }
 
 async function loadAll(){
@@ -320,7 +385,7 @@ function renderStats(){
   const total=ags.length;
   const taxa=total>0?Math.round((confirmados+concluidos)/total*100):0;
   const fatHoje=ags.filter(a=>a.data===hoje&&["Confirmado","Concluído"].includes(normStatus(a.status))).reduce((s,a)=>s+Number(a.valor||0),0);
-  const fatMes=ags.filter(a=>a.data&&a.data.startsWith(mes)&&!["Excluído","Recusado"].includes(normStatus(a.status))).reduce((s,a)=>s+Number(a.valor||0),0);
+  const fatMes=ags.filter(a=>a.data&&a.data.startsWith(mes)&&normStatus(a.status)!=="Recusado").reduce((s,a)=>s+Number(a.valor||0),0);
   safeSetText("statHoje",agHoje);safeSetText("statPendentes",pendentes);safeSetText("statConfirmados",confirmados);
   safeSetText("statReagendados",reagendados);safeSetText("statConcluidos",concluidos);safeSetText("statRecusados",recusados);
   safeSetText("statExcluidos",excluidos);safeSetText("statTaxaConf",taxa+"%");
@@ -389,7 +454,7 @@ function setAgendaFilter(filter,btn){
 function renderAgendaTimeline(){
   const el=document.getElementById("agendaTimeline");if(!el)return;
   if(!state.agendamentos.length){el.innerHTML=`<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>`;return}
-  let filtered=state.agendamentos;
+  let filtered=state.agendamentos.filter(a=>_agendaFilter==="excluido"||normStatus(a.status)!=="Excluído");
   if(_agendaFilter!=="todos"){
     const map={pendente:"Pendente",confirmado:"Confirmado",reagendado:"Reagendado",concluido:"Concluído",recusado:"Recusado",excluido:"Excluído"};
     const target=map[_agendaFilter]||"Pendente";
@@ -469,9 +534,10 @@ function renderClienteCards(){
 
 function renderServicosCards(){
   const el=document.getElementById("servicosCards");if(!el)return;
-  if(!state.servicos.length){el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">✦</div><p>Nenhum serviço ainda.</p></div>`;return}
+  const servicosVisiveis=state.servicos.filter(s=>s.status!=="excluido");
+  if(!servicosVisiveis.length){el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">✦</div><p>Nenhum serviço ainda.</p></div>`;return}
   el.innerHTML="";
-  state.servicos.forEach(s=>{
+  servicosVisiveis.forEach(s=>{
     const isAtivo=s.status==="ativo";
     const card=document.createElement("div");
     card.className="svc-card"+(isAtivo?"":" inactive-item");
@@ -493,9 +559,10 @@ function renderServicosCards(){
 
 function renderProfCards(){
   const el=document.getElementById("profCards");if(!el)return;
-  if(!state.profissionais.length){el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👤</div><p>Nenhum profissional ainda.</p></div>`;return}
+  const profVisiveis=state.profissionais.filter(p=>p.status!=="excluido");
+  if(!profVisiveis.length){el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👤</div><p>Nenhum profissional ainda.</p></div>`;return}
   el.innerHTML="";
-  state.profissionais.forEach(p=>{
+  profVisiveis.forEach(p=>{
     const isAtivo=p.status==="ativo";
     const card=document.createElement("div");
     card.className="prof-card"+(isAtivo?"":" inactive-item");
@@ -621,28 +688,40 @@ async function salvarAgendamento(){
   let clienteId=null;
   const{data:cli}=await db.from("agenda_clientes").insert({empresa_id:state.empresa.id,nome:agCliente.value,telefone:agTelefone.value,ativo:true}).select("*").single();
   if(cli)clienteId=cli.id;
-  const{error}=await db.from("agenda_agendamentos").insert({empresa_id:state.empresa.id,cliente_id:clienteId,servico_id:serv?.id,profissional_id:prof?.id,cliente_nome:agCliente.value,cliente_telefone:agTelefone.value,servico_nome:serv?.nome,profissional_nome:prof?.nome,data:agData.value,hora:agHora.value,status:agStatus.value,valor:Number(serv?.preco||0)});
+  const agDataValor=agData.value;
+  const agHoraValor=agHora.value;
+  const agStatusValor=agStatus.value;
+  const{error}=await db.from("agenda_agendamentos").insert({empresa_id:state.empresa.id,cliente_id:clienteId,servico_id:serv?.id,profissional_id:prof?.id,cliente_nome:agCliente.value,cliente_telefone:agTelefone.value,servico_nome:serv?.nome,profissional_nome:prof?.nome,data:agDataValor,hora:agHoraValor,status:agStatusValor,valor:Number(serv?.preco||0)});
   if(error){console.error(error);return toast("Erro ao salvar.","err")}
   agCliente.value=agTelefone.value=agData.value=agHora.value="";
-  await loadAll();showNotif("Agendamento criado!",`${agStatus.value} para ${formatDateBR(document.getElementById("agData")?.value||"")}.`,"new_ag");
+  await loadAll();showNotif("Agendamento criado!",`${agStatusValor} para ${formatDateBR(agDataValor)} às ${agHoraValor}.`,"new_ag");
 }
 
 async function salvarConfig(){
   const newSlug=slugify(cfgSlug.value);
-  const updates={nome:cfgNome.value,whatsapp:cfgWhatsapp.value,slug:newSlug};
-  const end=document.getElementById("cfgEndereco")?.value;const cid=document.getElementById("cfgCidade")?.value;
-  if(end)updates.endereco=end;if(cid)updates.cidade=cid;
+  const updates={
+    nome:(cfgNome.value||"").trim(),
+    whatsapp:(cfgWhatsapp.value||"").trim(),
+    slug:newSlug,
+    endereco:(document.getElementById("cfgEndereco")?.value||"").trim(),
+    cidade:(document.getElementById("cfgCidade")?.value||"").trim()
+  };
   const{data,error}=await db.from("agenda_empresas").update(updates).eq("id",state.empresa.id).select("*").single();
   if(error)return toast("Erro ao salvar. Talvez o slug já exista.","err");
   state.empresa=data;showDashboard();renderConfig();showNotif("Configurações salvas","","confirm");
 }
 
 async function salvarRedesSociais(){
-  const updates={};
-  const ig=document.getElementById("cfgInstagram")?.value;const fb=document.getElementById("cfgFacebook")?.value;
-  const tk=document.getElementById("cfgTiktok")?.value;const st=document.getElementById("cfgSite")?.value;
-  if(ig)updates.instagram=ig;if(fb)updates.facebook=fb;if(tk)updates.tiktok=tk;if(st)updates.site=st;
-  await db.from("agenda_empresas").update(updates).eq("id",state.empresa.id);
+  const updates={
+    instagram:(document.getElementById("cfgInstagram")?.value||"").trim(),
+    facebook:(document.getElementById("cfgFacebook")?.value||"").trim(),
+    tiktok:(document.getElementById("cfgTiktok")?.value||"").trim(),
+    site:(document.getElementById("cfgSite")?.value||"").trim()
+  };
+  const{data,error}=await db.from("agenda_empresas").update(updates).eq("id",state.empresa.id).select("*").single();
+  if(error)return toast("Erro ao salvar redes sociais.","err");
+  state.empresa=data||{...state.empresa,...updates};
+  renderConfig();
   showNotif("Redes sociais salvas","","confirm");
 }
 
