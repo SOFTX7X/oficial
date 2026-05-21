@@ -498,7 +498,27 @@ async function loadAll(){
   renderAll();
 }
 
-function renderAll(){renderStats();renderDashboardLists();renderCalendar();renderSelects();renderAgendaTimeline();renderClienteCards();renderServicosCards();renderProfCards();renderFinanceiro();renderConfig()}
+function isEditingConfig(){
+  const active=document.activeElement;
+  if(!active)return false;
+  return !!active.closest("#view-config");
+}
+
+function renderAll(){
+  renderStats();
+  renderDashboardLists();
+  renderCalendar();
+  renderSelects();
+  renderAgendaTimeline();
+  renderClienteCards();
+  renderServicosCards();
+  renderProfCards();
+  renderFinanceiro();
+
+  // Importante: não renderiza Configurações enquanto o usuário está digitando.
+  // Isso evita apagar Instagram, site, endereço, slug etc. durante o auto-sync.
+  if(!isEditingConfig())renderConfig();
+}
 
 function renderStats(){
   const hoje=hojeISO(),mes=mesPrefixo(),ags=state.agendamentos||[];
@@ -1064,7 +1084,7 @@ async function loadPublic(slug){
   safeSetText("pubDesc",(empresa.area_atuacao||"Agendamento Online")+" • WhatsApp: "+(empresa.whatsapp||"Não informado"));
 
   /* Instagram e Site — somente se existirem */
-  const pubSociais=document.getElementById("pubSociais");
+  const pubSociais=document.getElementById("pubSociais")||document.getElementById("pubSociais");
   if(pubSociais){
     let sociaisHtml="";
     if(empresa.instagram){
@@ -1109,10 +1129,10 @@ async function loadPublic(slug){
   state.profissionais=profissionais.data||[];
 
   const ps=document.getElementById("pubServicos");
-  if(ps)ps.innerHTML=state.servicos.map(s=>`<div class="choice" onclick="selectPubServico('${s.id}',this)"><div class="c-icon">✦</div><div><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos||60} min</div></div><div class="choice-right">${money(s.preco).replace(",00","")}</div></div>`).join()||`<div class="empty-state"><div class="es-icon">✦</div><p>Nenhum serviço disponível.</p></div>`;
+  if(ps)ps.innerHTML=state.servicos.map(s=>`<div class="choice" onclick="selectPubServico('${s.id}',this)"><div class="c-icon">✦</div><div><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos||60} min</div></div><div class="choice-right">${money(s.preco).replace(",00","")}</div></div>`).join("")||`<div class="empty-state"><div class="es-icon">✦</div><p>Nenhum serviço disponível.</p></div>`;
 
   const pp=document.getElementById("pubProfissionais");
-  if(pp)pp.innerHTML=state.profissionais.map(p=>`<div class="choice" onclick="selectPubProfissional('${p.id}',this)"><div class="c-icon">👤</div><div><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade||"Profissional"}</div></div></div>`).join()||`<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional.</p></div>`;
+  if(pp)pp.innerHTML=state.profissionais.map(p=>`<div class="choice" onclick="selectPubProfissional('${p.id}',this)"><div class="c-icon">👤</div><div><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade||"Profissional"}</div></div></div>`).join("")||`<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional.</p></div>`;
 }
 
 function selectPubServico(id,el){state.pubServico=state.servicos.find(s=>s.id===id);document.querySelectorAll("#pubServicos .choice").forEach(c=>c.classList.remove("active"));el.classList.add("active")}
