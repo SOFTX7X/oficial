@@ -1061,7 +1061,7 @@ async function loadPublic(slug){
   }
   state.pubEmpresa=empresa;
   safeSetText("pubEmpresa",empresa.nome);
-  safeSetText("pubDesc",(empresa.area_atuacao||"Agendamento online")+" · WhatsApp: "+(empresa.whatsapp||""));
+  safeSetText("pubDesc",(empresa.area_atuacao||"Agendamento Online")+" • WhatsApp: "+(empresa.whatsapp||"Não informado"));
 
   /* Instagram e Site — somente se existirem */
   const pubSociais=document.getElementById("pubSociais");
