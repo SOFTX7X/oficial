@@ -1,10 +1,11 @@
 const SUPABASE_URL = "https://wyjrjioipqfltdyupfna.supabase.co";
 
-const SUPABASE_ANON_KEY = "sb_publishable_PkDkt5S-_rdrT0HhANoPAw_ZWluV2_H";
+const SUPABASE_KEY =
+"sb_publishable_PkDkt5S-_rdrT0HhANoPAw_ZWluV2_H";
 
-const db = supabase.createClient(
+window.db = supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_ANON_KEY,
+  SUPABASE_KEY,
   {
     auth: {
       persistSession: true,
