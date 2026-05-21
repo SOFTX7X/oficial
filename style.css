@@ -1430,3 +1430,38 @@ button.btn,
   }
 }
 
+
+
+/* ═══════════════════════════════════════════════════════════════
+   FIX — REMOVER BARRA INFERIOR / BOTÃO NOVO DO MOBILE E PC
+═══════════════════════════════════════════════════════════════ */
+#mobileNav,
+.mobile-nav,
+.bottom-nav,
+.fab-center,
+.fab-main,
+.nav-fab{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+body,
+.view.active,
+.public-page{
+  padding-bottom:0!important;
+}
+
+@media(max-width:900px){
+  body,
+  .view.active,
+  .public-page{
+    padding-bottom:0!important;
+  }
+
+  #pubWaFab{
+    bottom:24px!important;
+  }
+}
+
