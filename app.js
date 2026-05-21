@@ -58,13 +58,6 @@ function notifyRealtime(payload,tabela){
   }
 }
 
-
-/* ── AUTO SYNC GARANTIDO ── */
-/* 
-  Isso não depende do Realtime do Supabase.
-  A cada poucos segundos, o painel verifica se entrou agendamento novo.
-  Se entrou pelo link público, aparece bolha e atualiza tudo sem F5.
-*/
 function rememberCurrentAgendaIds(){
   lastAgendaIds=new Set((state.agendamentos||[]).map(a=>String(a.id)));
 }
@@ -108,7 +101,6 @@ function startAutoSync(){
           );
         });
 
-        // Atualiza clientes também, pois link público cria cliente.
         const [cli,pag]=await Promise.all([
           db.from("agenda_clientes").select("*").eq("empresa_id",state.empresa.id).order("criado_em",{ascending:false}),
           db.from("agenda_pagamentos").select("*").eq("empresa_id",state.empresa.id).order("criado_em",{ascending:false})
@@ -127,8 +119,6 @@ function startAutoSync(){
   },4000);
 }
 
-
-/* ── normalizar status ── */
 function normStatus(s){
   const raw=(s||"pendente").toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
   if(raw==="confirmado"||raw==="confirmada")return"Confirmado";
@@ -151,7 +141,6 @@ const navItemsFlat=[
   ["config","⚙","Configurações","Dados do negócio"]
 ];
 
-/* ── utils ── */
 window.addEventListener("scroll",()=>{document.getElementById("navbar")?.classList.toggle("scrolled",scrollY>40)});
 function scrollToId(id){document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"})}
 function money(v){return Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
@@ -175,11 +164,8 @@ function isStatusExcluido(s){
   return normStatus(s)==="Excluído";
 }
 
-/* ── CORREÇÃO 3 e 4: faturamento conta Concluído mesmo se depois excluído ── */
 function isStatusFinanceiro(a){
-  // Conta se status atual é Concluído
   if(normStatus(a.status)==="Concluído")return true;
-  // Conta se foi excluído DEPOIS de ter sido concluído (financeiro_status preservado)
   if(normStatus(a.status)==="Excluído"&&a.financeiro_status==="Concluído")return true;
   return false;
 }
@@ -224,8 +210,6 @@ function renderAcoesAgendamento(a){
   </div>`;
 }
 
-
-/* ── NOTIFICAÇÕES LIVE ── */
 function showNotif(title,msg,type="gold",duration=5500){
   const stack=document.getElementById("liveNotifyStack");
   if(!stack){console.log("NOTIF:",title,msg,type);return;}
@@ -271,7 +255,6 @@ function clearNotifCount(){
   if(dot)dot.classList.remove("visible");
 }
 
-/* ── action menu ── */
 let _openMenu=null;
 function buildMenu(id,items){
   const wrap=document.createElement("div");wrap.className="action-menu-wrap";
@@ -291,7 +274,6 @@ function buildMenu(id,items){
 function closeAllMenus(){document.querySelectorAll(".action-menu-dropdown.open").forEach(d=>d.classList.remove("open"));_openMenu=null}
 document.addEventListener("click",closeAllMenus);
 
-/* ── confirm modal ── */
 let _confirmCb=null;
 function openConfirmModal({icon="⚠️",iconCls="danger",title="Tem certeza?",sub="Esta ação não pode ser desfeita.",btnLabel="Confirmar",btnStyle="danger",cb}){
   document.getElementById("confirmIcon").className="confirm-icon "+iconCls;
@@ -308,7 +290,6 @@ function closeConfirmModal(){document.getElementById("confirmOverlay").classList
 document.getElementById("confirmActionBtn").onclick=()=>{if(_confirmCb)_confirmCb();closeConfirmModal()};
 document.getElementById("confirmOverlay").addEventListener("click",e=>{if(e.target===document.getElementById("confirmOverlay"))closeConfirmModal()});
 
-/* ── edit modal ── */
 let _editSaveCb=null;
 function openEditModal(title,bodyHtml,saveCb){
   document.getElementById("editModalTitle").textContent=title;
@@ -320,14 +301,12 @@ function openEditModal(title,bodyHtml,saveCb){
 function closeEditModal(){document.getElementById("editOverlay").classList.remove("open");_editSaveCb=null}
 document.getElementById("editOverlay").addEventListener("click",e=>{if(e.target===document.getElementById("editOverlay"))closeEditModal()});
 
-/* ── auth ── */
 function openAuth(mode){document.getElementById("authOverlay").classList.add("open");document.body.style.overflow="hidden";if(mode==="login")showLoginOnly();else showCadastro()}
 function closeAuth(){document.getElementById("authOverlay").classList.remove("open");document.body.style.overflow=""}
 document.getElementById("authOverlay").addEventListener("click",e=>{if(e.target===document.getElementById("authOverlay"))closeAuth()});
 document.getElementById("modalRecusa").addEventListener("click",e=>{if(e.target===document.getElementById("modalRecusa"))closeModalRecusa()});
 document.getElementById("modalReagendar").addEventListener("click",e=>{if(e.target===document.getElementById("modalReagendar"))closeModalReagendar()});
 
-/* ── init ── */
 window.addEventListener("load",init);
 async function init(){
   buildMobileNav();
@@ -450,7 +429,6 @@ function setView(view){
   if(item){safeSetText("pageTitle",item[2]);safeSetText("pageSub",item[3])}
 }
 
-/* ── CORREÇÃO 6: REALTIME robusto ── */
 function setupRealtime(){
   if(!state?.empresa?.id||!db?.channel)return;
 
@@ -481,7 +459,6 @@ function setupRealtime(){
       {event:"*",schema:"public",table,filter},
       payload=>{
         notifyRealtime(payload,table);
-        // scheduleRealtimeReload já é chamado dentro de notifyRealtime
       }
     );
   });
@@ -523,12 +500,10 @@ async function loadAll(){
 
 function renderAll(){renderStats();renderDashboardLists();renderCalendar();renderSelects();renderAgendaTimeline();renderClienteCards();renderServicosCards();renderProfCards();renderFinanceiro();renderConfig()}
 
-/* ── CORREÇÃO 3: Stats com faturamento correto ── */
 function renderStats(){
   const hoje=hojeISO(),mes=mesPrefixo(),ags=state.agendamentos||[];
 
   const ativos=ags.filter(a=>!isStatusExcluido(a.status));
-  // CORREÇÃO: usa isStatusFinanceiro(a) passando o objeto inteiro
   const concluidos=ags.filter(a=>isStatusFinanceiro(a));
 
   const st=s=>ags.filter(a=>normStatus(a.status)===s).length;
@@ -542,7 +517,6 @@ function renderStats(){
   const baseTaxa=ativos.filter(a=>normStatus(a.status)!=="Recusado").length;
   const taxa=baseTaxa>0?Math.round(concluidosCount/baseTaxa*100):0;
 
-  // Faturamento: conta Concluído + Excluído-após-Concluído
   const fatHoje=concluidos.filter(a=>a.data===hoje).reduce((s,a)=>s+Number(a.valor||0),0);
   const fatMes=concluidos.filter(a=>a.data&&a.data.startsWith(mes)).reduce((s,a)=>s+Number(a.valor||0),0);
 
@@ -601,7 +575,6 @@ function renderSelects(){
   if(agP)agP.innerHTML=`<option value="">Selecione profissional</option>`+state.profissionais.filter(p=>p.status==="ativo").map(p=>`<option value="${p.id}">${p.nome}</option>`).join("");
 }
 
-/* ── Agenda Timeline ── */
 let _agendaFilter="todos";
 function setAgendaFilter(filter,btn){
   _agendaFilter=filter;
@@ -736,7 +709,6 @@ function renderProfCards(){
   });
 }
 
-/* ── Editar ── */
 function editServico(id){
   const s=state.servicos.find(x=>x.id===id);if(!s)return;
   openEditModal("Editar Serviço",`
@@ -814,23 +786,19 @@ function editAgendamento(id){
   });
 }
 
-/* ── Duplicar ── */
 async function duplicarServico(id){const s=state.servicos.find(x=>x.id===id);if(!s)return;const{error}=await db.from("agenda_servicos").insert({empresa_id:state.empresa.id,nome:s.nome+" (cópia)",preco:s.preco,duracao_minutos:s.duracao_minutos,status:"ativo",descricao:s.descricao||""});if(error)return toast("Erro.","err");await loadAll();showNotif("Serviço duplicado","","info")}
 async function duplicarProfissional(id){const p=state.profissionais.find(x=>x.id===id);if(!p)return;const{error}=await db.from("agenda_profissionais").insert({empresa_id:state.empresa.id,nome:p.nome+" (cópia)",especialidade:p.especialidade,telefone:p.telefone,status:"ativo"});if(error)return toast("Erro.","err");await loadAll();showNotif("Profissional duplicado","","info")}
 async function duplicarCliente(id){const c=state.clientes.find(x=>x.id===id);if(!c)return;const{error}=await db.from("agenda_clientes").insert({empresa_id:state.empresa.id,nome:c.nome+" (cópia)",telefone:c.telefone,email:c.email,status:"ativo"});if(error)return toast("Erro.","err");await loadAll();showNotif("Cliente duplicado","","info")}
 async function duplicarAgendamento(id){const a=state.agendamentos.find(x=>x.id===id);if(!a)return;const{error}=await db.from("agenda_agendamentos").insert({empresa_id:state.empresa.id,cliente_id:a.cliente_id,servico_id:a.servico_id,profissional_id:a.profissional_id,cliente_nome:a.cliente_nome,cliente_telefone:a.cliente_telefone,servico_nome:a.servico_nome,profissional_nome:a.profissional_nome,data:a.data,hora:a.hora,status:"Pendente",valor:a.valor,observacoes:a.observacoes});if(error)return toast("Erro.","err");await loadAll();showNotif("Agendamento duplicado como Pendente","","info")}
 
-/* ── Toggle ── */
 function toggleServico(id,ns){const s=state.servicos.find(x=>x.id===id);if(!s)return;openConfirmModal({icon:ns==="ativo"?"▶️":"⏸",iconCls:ns==="ativo"?"info":"warn",title:ns==="ativo"?"Ativar serviço?":"Desativar serviço?",sub:`"${s.nome}"`,btnLabel:ns==="ativo"?"▶ Ativar":"⏸ Desativar",btnStyle:ns==="ativo"?"primary":"danger",cb:async()=>{await db.from("agenda_servicos").update({status:ns}).eq("id",id);await loadAll();showNotif(ns==="ativo"?"Serviço ativado":"Serviço desativado","",ns==="ativo"?"confirm":"info")}})}
 function toggleProfissional(id,ns){const p=state.profissionais.find(x=>x.id===id);if(!p)return;openConfirmModal({icon:ns==="ativo"?"▶️":"⏸",iconCls:ns==="ativo"?"info":"warn",title:ns==="ativo"?"Ativar profissional?":"Desativar?",sub:`"${p.nome}"`,btnLabel:ns==="ativo"?"▶ Ativar":"⏸ Desativar",btnStyle:ns==="ativo"?"primary":"danger",cb:async()=>{await db.from("agenda_profissionais").update({status:ns}).eq("id",id);await loadAll();showNotif(ns==="ativo"?"Profissional ativado":"Profissional desativado","",ns==="ativo"?"confirm":"info")}})}
 function toggleCliente(id,ativar){const c=state.clientes.find(x=>x.id===id);if(!c)return;openConfirmModal({icon:ativar?"▶️":"⏸",iconCls:ativar?"info":"warn",title:ativar?"Ativar cliente?":"Desativar?",sub:`"${c.nome}"`,btnLabel:ativar?"▶ Ativar":"⏸ Desativar",btnStyle:ativar?"primary":"danger",cb:async()=>{await db.from("agenda_clientes").update(getClienteStatusPayload(ativar)).eq("id",id);await loadAll();showNotif(ativar?"Cliente ativado":"Cliente desativado","",ativar?"confirm":"info")}})}
 
-/* ── Excluir ── */
 function excluirServico(id){const s=state.servicos.find(x=>x.id===id);if(!s)return;openConfirmModal({icon:"🗑",iconCls:"danger",title:"Excluir serviço?",sub:`"${s.nome}" será removido.`,btnLabel:"Excluir",btnStyle:"danger",cb:async()=>{await db.from("agenda_servicos").update({status:"excluido"}).eq("id",id);await loadAll();showNotif("Serviço excluído","","info")}})}
 function excluirProfissional(id){const p=state.profissionais.find(x=>x.id===id);if(!p)return;openConfirmModal({icon:"🗑",iconCls:"danger",title:"Excluir profissional?",sub:`"${p.nome}" será removido.`,btnLabel:"Excluir",btnStyle:"danger",cb:async()=>{await db.from("agenda_profissionais").update({status:"excluido"}).eq("id",id);await loadAll();showNotif("Profissional excluído","","info")}})}
 function excluirCliente(id){const c=state.clientes.find(x=>x.id===id);if(!c)return;openConfirmModal({icon:"🗑",iconCls:"danger",title:"Excluir cliente?",sub:`"${c.nome}" será removido.`,btnLabel:"Excluir",btnStyle:"danger",cb:async()=>{await db.from("agenda_clientes").update(getClienteStatusPayload(false)).eq("id",id);await loadAll();showNotif("Cliente removido","","info")}})}
 
-/* ── CORREÇÃO 4: excluirAgendamento preserva faturamento se já foi Concluído ── */
 function excluirAgendamento(id){
   const a=state.agendamentos.find(x=>x.id===id);if(!a)return;
   const jaFoiConcluido=normStatus(a.status)==="Concluído"||a.financeiro_status==="Concluído";
@@ -844,7 +812,6 @@ function excluirAgendamento(id){
     btnLabel:jaFoiConcluido?"Arquivar":"Excluir",
     btnStyle:"danger",
     cb:async()=>{
-      // Se já foi concluído, preserva financeiro_status para manter o faturamento
       const payload=jaFoiConcluido
         ?{status:"Excluído",financeiro_status:"Concluído"}
         :{status:"Excluído"};
@@ -860,7 +827,6 @@ function excluirAgendamento(id){
   });
 }
 
-/* ── Salvar novo ── */
 async function salvarCliente(){
   const nome=(document.getElementById("cliNome")?.value||"").trim();
   const telefone=(document.getElementById("cliTel")?.value||"").trim();
@@ -898,7 +864,6 @@ async function salvarAgendamento(){
   await loadAll();showNotif("Agendamento criado!",`${agStatusValor} para ${formatDateBR(agDataValor)} às ${agHoraValor}.`,"new_ag");
 }
 
-/* ── CORREÇÃO 1: salvarConfig ── */
 async function salvarConfig(){
   if(!state?.empresa?.id)return toast("Empresa não carregada.","err");
 
@@ -915,7 +880,6 @@ async function salvarConfig(){
 
   const updates={nome,whatsapp,endereco,cidade};
 
-  // Só verifica duplicidade se o slug realmente mudou
   if(slugDigitado!==slugAtual){
     const{data:slugExiste,error:slugCheckErr}=await db
       .from("agenda_empresas")
@@ -958,7 +922,6 @@ async function salvarConfig(){
   showNotif("Dados da empresa salvos","Nome, WhatsApp, endereço, cidade e link atualizados.","confirm");
 }
 
-/* ── CORREÇÃO 2: salvarRedesSociais ── */
 async function salvarRedesSociais(){
   if(!state?.empresa?.id)return toast("Empresa não carregada.","err");
 
@@ -986,7 +949,6 @@ async function salvarRedesSociais(){
   showNotif("Redes sociais salvas","Instagram, Facebook, TikTok e site atualizados.","confirm");
 }
 
-/* ── Ações de agendamento ── */
 async function confirmarAg(id){
   const ag=state.agendamentos.find(a=>a.id===id);if(!ag)return;
   if(!agendamentoPodeTerAcoes(ag))return toast("Este agendamento não permite confirmação.","warn");
@@ -1014,7 +976,6 @@ function abrirWhatsappPadrao(id){
   const link=buildWaLink(tel,msg);if(link)window.open(link,"_blank");
 }
 
-/* ── Modais recusa / reagendar ── */
 let _recusaId=null,_recusaMotivo=null;
 function openModalRecusa(id){
   _recusaId=id;_recusaMotivo=null;
@@ -1064,9 +1025,7 @@ async function confirmarReagendar(){
   if(tel){const msg=`Olá, ${ag.cliente_nome}!\nSeu agendamento foi reagendado 📅\nServiço: ${ag.servico_nome||"—"}\nNova data: ${formatDateBR(novaData)}\nNovo horário: ${novaHora}\nAguardamos você! 😊`;const link=buildWaLink(tel,msg);if(link)window.open(link,"_blank")}
 }
 
-/* ── Financeiro / Config ── */
 function renderFinanceiro(){
-  // CORREÇÃO 3: usa isStatusFinanceiro(a) para incluir excluídos-após-concluídos
   const concluidos=(state.agendamentos||[]).filter(a=>isStatusFinanceiro(a));
   const total=concluidos.reduce((s,a)=>s+Number(a.valor||0),0);
   const ticket=concluidos.length?total/concluidos.length:0;
@@ -1088,28 +1047,77 @@ function renderConfig(){
   const fst=document.getElementById("cfgSite");if(fst)fst.value=state.empresa.site||"";
 }
 
-/* ── Página pública ── */
+/* ── PÁGINA PÚBLICA — NOVA VERSÃO COM INSTAGRAM, SITE E BOTÃO WA FLUTUANTE ── */
 async function loadPublic(slug){
   document.getElementById("landingView").style.display="none";
   document.getElementById("dashboardView").style.display="none";
   document.getElementById("publicView").style.display="block";
+
   const{data:empresa,error}=await db.from("agenda_empresas").select("*").eq("slug",slug).single();
-  if(error||!empresa){safeSetText("pubEmpresa","Agenda não encontrada");safeSetText("pubDesc","Verifique se o link está correto.");return}
+  if(error||!empresa){
+    safeSetText("pubEmpresa","Agenda não encontrada");
+    safeSetText("pubDesc","Verifique se o link está correto.");
+    return;
+  }
   state.pubEmpresa=empresa;
   safeSetText("pubEmpresa",empresa.nome);
   safeSetText("pubDesc",(empresa.area_atuacao||"Agendamento online")+" · WhatsApp: "+(empresa.whatsapp||""));
+
+  /* Instagram e Site — somente se existirem */
+  const pubSociais=document.getElementById("pubSociais");
+  if(pubSociais){
+    let sociaisHtml="";
+    if(empresa.instagram){
+      const instaHandle=empresa.instagram.replace("@","").replace(/.*instagram\.com\//,"");
+      const instaUrl="https://instagram.com/"+instaHandle;
+      sociaisHtml+=`<a href="${instaUrl}" target="_blank" rel="noopener" class="pub-social-link pub-social-insta">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        @${instaHandle}
+      </a>`;
+    }
+    if(empresa.site){
+      const siteUrl=empresa.site.startsWith("http")?empresa.site:"https://"+empresa.site;
+      const siteLbl=empresa.site.replace(/^https?:\/\//,"").replace(/\/$/,"");
+      sociaisHtml+=`<a href="${siteUrl}" target="_blank" rel="noopener" class="pub-social-link pub-social-site">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        ${siteLbl}
+      </a>`;
+    }
+    pubSociais.innerHTML=sociaisHtml;
+    pubSociais.style.display=sociaisHtml?"flex":"none";
+  }
+
+  /* Botão flutuante WhatsApp — Tirar dúvida */
+  const waFab=document.getElementById("pubWaFab");
+  if(waFab){
+    const telEmpresa=(empresa.whatsapp||"").replace(/\D/g,"");
+    if(telEmpresa){
+      const telFmt=telEmpresa.startsWith("55")?telEmpresa:"55"+telEmpresa;
+      const msgDuvida=encodeURIComponent("Olá, tenho uma dúvida antes de agendar.");
+      waFab.href="https://wa.me/"+telFmt+"?text="+msgDuvida;
+      waFab.style.display="flex";
+    } else {
+      waFab.style.display="none";
+    }
+  }
+
   const[servicos,profissionais]=await Promise.all([
     db.from("agenda_servicos").select("*").eq("empresa_id",empresa.id).eq("status","ativo").order("nome"),
     db.from("agenda_profissionais").select("*").eq("empresa_id",empresa.id).eq("status","ativo").order("nome")
   ]);
-  state.servicos=servicos.data||[];state.profissionais=profissionais.data||[];
+  state.servicos=servicos.data||[];
+  state.profissionais=profissionais.data||[];
+
   const ps=document.getElementById("pubServicos");
   if(ps)ps.innerHTML=state.servicos.map(s=>`<div class="choice" onclick="selectPubServico('${s.id}',this)"><div class="c-icon">✦</div><div><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos||60} min</div></div><div class="choice-right">${money(s.preco).replace(",00","")}</div></div>`).join()||`<div class="empty-state"><div class="es-icon">✦</div><p>Nenhum serviço disponível.</p></div>`;
+
   const pp=document.getElementById("pubProfissionais");
   if(pp)pp.innerHTML=state.profissionais.map(p=>`<div class="choice" onclick="selectPubProfissional('${p.id}',this)"><div class="c-icon">👤</div><div><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade||"Profissional"}</div></div></div>`).join()||`<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional.</p></div>`;
 }
+
 function selectPubServico(id,el){state.pubServico=state.servicos.find(s=>s.id===id);document.querySelectorAll("#pubServicos .choice").forEach(c=>c.classList.remove("active"));el.classList.add("active")}
 function selectPubProfissional(id,el){state.pubProfissional=state.profissionais.find(p=>p.id===id);document.querySelectorAll("#pubProfissionais .choice").forEach(c=>c.classList.remove("active"));el.classList.add("active")}
+
 async function confirmarAgendamentoPublico(){
   if(!state.pubEmpresa||!state.pubServico||!state.pubProfissional||!pubNome.value||!pubTelefone.value||!pubData.value||!pubHora.value)return toast("Preencha tudo para confirmar.","err");
   const{data:cli}=await db.from("agenda_clientes").insert({empresa_id:state.pubEmpresa.id,nome:pubNome.value.trim(),telefone:pubTelefone.value.trim(),status:"ativo"}).select("*").single();
@@ -1118,8 +1126,10 @@ async function confirmarAgendamentoPublico(){
   document.getElementById("pubMainBody").style.display="none";
   document.getElementById("pubConfirmScreen").style.display="block";
 }
+
 function resetPublic(){
-  document.getElementById("pubMainBody").style.display="grid";document.getElementById("pubConfirmScreen").style.display="none";
+  document.getElementById("pubMainBody").style.display="grid";
+  document.getElementById("pubConfirmScreen").style.display="none";
   pubNome.value=pubTelefone.value=pubData.value=pubHora.value=document.getElementById("pubObs").value="";
   state.pubServico=null;state.pubProfissional=null;
   document.querySelectorAll(".choice").forEach(c=>c.classList.remove("active"));
