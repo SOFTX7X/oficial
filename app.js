@@ -10,34 +10,48 @@ let realtimeReloadTimer=null;
 let realtimeReady=false;
 
 function scheduleRealtimeReload(reason="Atualização"){
+  console.log("Realtime reload solicitado:",reason);
   if(realtimeReloadTimer)clearTimeout(realtimeReloadTimer);
   realtimeReloadTimer=setTimeout(async()=>{
     if(!state?.empresa?.id)return;
-    await loadAll();
-  },350);
+    try{
+      await loadAll();
+      console.log("Painel atualizado pelo realtime:",reason);
+    }catch(e){
+      console.error("Erro ao atualizar pelo realtime:",e);
+    }
+  },250);
 }
 
 function notifyRealtime(payload,tabela){
   const row=payload.new||payload.old||{};
   const ev=payload.eventType;
+
   if(tabela==="agenda_agendamentos"){
     const nome=row.cliente_nome||"Cliente";
+    const servico=row.servico_nome||"agendamento";
+    const hora=row.hora?` às ${row.hora}`:"";
+
     if(ev==="INSERT"){
       incrNotif();
-      showNotif("Novo agendamento recebido!",`${nome} acabou de agendar.`,"new_ag",6000);
-      scheduleRealtimeReload("novo agendamento");
+      showNotif(
+        "Novo agendamento recebido!",
+        `${nome} agendou ${servico}${hora}.`,
+        "new_ag",
+        7000
+      );
       return;
     }
+
     if(ev==="UPDATE"){
       const status=normStatus(row.status);
       const typeMap={"Confirmado":"confirm","Recusado":"refuse","Reagendado":"reschedule","Concluído":"done","Excluído":"info"};
       showNotif("Agenda atualizada",`${nome} — ${status}.`,typeMap[status]||"info",4200);
-      scheduleRealtimeReload("agendamento atualizado");
       return;
     }
+
     if(ev==="DELETE"){
       showNotif("Agenda atualizada","Um agendamento foi removido.","info",3500);
-      scheduleRealtimeReload("agendamento removido");
       return;
     }
   }
@@ -49,9 +63,9 @@ function notifyRealtime(payload,tabela){
     agenda_pagamentos:"Financeiro",
     agenda_empresas:"Configurações"
   };
+
   if(nomes[tabela]){
     showNotif(`${nomes[tabela]} atualizado`,"Dados sincronizados automaticamente.","info",2800);
-    scheduleRealtimeReload(tabela);
   }
 }
 
@@ -155,6 +169,7 @@ function renderAcoesAgendamento(a){
 /* ── NOTIFICAÇÕES LIVE ── */
 function showNotif(title,msg,type="gold",duration=5500){
   const stack=document.getElementById("liveNotifyStack");
+  if(!stack){console.log("NOTIF:",title,msg,type);return;}
   const item=document.createElement("div");
   item.className="live-notify";
   const now=new Date();
@@ -268,6 +283,15 @@ async function init(){
   }
 }
 
+window.addEventListener("focus",()=>{
+  if(state?.empresa?.id)loadAll();
+});
+
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden&&state?.empresa?.id)loadAll();
+});
+
+
 async function carregarContaAutenticada(user){
   const{data:perfil,error:perfilErr}=await db.from("agenda_perfis").select("*").eq("auth_user_id",user.id).single();
   if(perfilErr||!perfil)return false;
@@ -375,57 +399,82 @@ function setView(view){
   if(item){safeSetText("pageTitle",item[2]);safeSetText("pageSub",item[3])}
 }
 
-/* ── CORREÇÃO 6: REALTIME robusto ── */
+/* ── REALTIME ROBUSTO ── */
 function setupRealtime(){
-  if(!state?.empresa?.id||!db?.channel)return;
+  if(!state?.empresa?.id){
+    console.warn("Realtime não iniciado: empresa ausente.");
+    return;
+  }
+
+  if(!db?.channel){
+    console.warn("Realtime não iniciado: db.channel indisponível.");
+    return;
+  }
 
   if(agendaRealtimeChannel){
-    try{db.removeChannel(agendaRealtimeChannel)}catch(e){}
+    try{db.removeChannel(agendaRealtimeChannel)}catch(e){console.warn(e)}
     agendaRealtimeChannel=null;
     realtimeReady=false;
   }
 
   const empresaId=state.empresa.id;
-  const tables=[
-    "agenda_agendamentos",
-    "agenda_clientes",
-    "agenda_servicos",
-    "agenda_profissionais",
-    "agenda_pagamentos",
-    "agenda_empresas"
-  ];
+  console.log("Iniciando realtime da empresa:",empresaId);
 
-  let channel=db.channel("agendapro-realtime-"+empresaId,{
-    config:{broadcast:{self:false},presence:{key:empresaId}}
-  });
+  const channel=db.channel("agendapro-live-"+empresaId);
 
-  tables.forEach(table=>{
-    const filter=table==="agenda_empresas"?"id=eq."+empresaId:"empresa_id=eq."+empresaId;
-    channel=channel.on(
-      "postgres_changes",
-      {event:"*",schema:"public",table,filter},
-      payload=>{
-        notifyRealtime(payload,table);
-        // scheduleRealtimeReload já é chamado dentro de notifyRealtime
-      }
-    );
-  });
+  channel.on(
+    "postgres_changes",
+    {event:"*",schema:"public",table:"agenda_agendamentos",filter:"empresa_id=eq."+empresaId},
+    (payload)=>{
+      console.log("Realtime agenda_agendamentos:",payload);
+      notifyRealtime(payload,"agenda_agendamentos");
+      scheduleRealtimeReload("agenda_agendamentos");
+    }
+  );
 
-  agendaRealtimeChannel=channel.subscribe((status,err)=>{
-    if(status==="SUBSCRIBED"&&!realtimeReady){
+  channel.on(
+    "postgres_changes",
+    {event:"*",schema:"public",table:"agenda_clientes",filter:"empresa_id=eq."+empresaId},
+    (payload)=>{
+      console.log("Realtime agenda_clientes:",payload);
+      notifyRealtime(payload,"agenda_clientes");
+      scheduleRealtimeReload("agenda_clientes");
+    }
+  );
+
+  channel.on(
+    "postgres_changes",
+    {event:"*",schema:"public",table:"agenda_empresas",filter:"id=eq."+empresaId},
+    (payload)=>{
+      console.log("Realtime agenda_empresas:",payload);
+      notifyRealtime(payload,"agenda_empresas");
+      scheduleRealtimeReload("agenda_empresas");
+    }
+  );
+
+  agendaRealtimeChannel=channel.subscribe((status)=>{
+    console.log("STATUS REALTIME:",status);
+
+    if(status==="SUBSCRIBED"){
       realtimeReady=true;
-      console.log("✅ Realtime ativo para empresa:",empresaId);
+      console.log("✅ Realtime conectado:",empresaId);
     }
+
     if(status==="CHANNEL_ERROR"){
-      console.warn("⚠️ Realtime com erro:",err);
-      showNotif("Realtime precisa de atenção","Ative Realtime/Replication nas tabelas do Supabase.","error",7000);
+      realtimeReady=false;
+      showNotif("Realtime com erro","Verifique se Realtime está ativo no Supabase.","error",6500);
     }
+
     if(status==="TIMED_OUT"){
-      console.warn("⚠️ Realtime timeout. Tentando reconectar...");
-      setTimeout(()=>setupRealtime(),3000);
+      realtimeReady=false;
+      console.warn("Realtime timeout. Reconectando...");
+      setTimeout(()=>setupRealtime(),2500);
     }
+
     if(status==="CLOSED"){
       realtimeReady=false;
+      console.warn("Realtime fechado. Reconectando...");
+      setTimeout(()=>setupRealtime(),2500);
     }
   });
 }
