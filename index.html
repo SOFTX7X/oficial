@@ -6,7 +6,6 @@
 <title>AgendaPro — Sistema Premium de Agendamento</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    AGENDAPRO V2 — DESIGN SYSTEM COMPLETO
@@ -1498,13 +1497,11 @@ Qualquer dúvida estamos aqui!</textarea></div>
 <!-- ══════════════════════════════════════════════════════
      JAVASCRIPT COMPLETO
 ══════════════════════════════════════════════════════ -->
-<script>
-const SUPABASE_URL="https://wyjrjioipqfltdyupfna.supabase.co";
-const SUPABASE_KEY="sb_publishable_PkDkt5S-_rdrT0HhANoPAw_ZWluV2_H";
-const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
-  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
-});
+<!-- Supabase separado: a conexão fica em supabase.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 
+<script>
 let state={
   user:null,empresa:null,perfil:null,categorias:[],
   clientes:[],servicos:[],profissionais:[],agendamentos:[],pagamentos:[],
@@ -2295,8 +2292,6 @@ function voltarInicioPublico(){
 async function logout(){await db.auth.signOut();state.user=null;state.perfil=null;state.empresa=null;state.clientes=[];state.servicos=[];state.profissionais=[];state.agendamentos=[];state.pagamentos=[];location.href=location.pathname}
 
 window.addEventListener("hashchange",()=>{const slug=getPublicSlug();if(slug)loadPublic(slug)});
-<script>
-console.log("script extra carregado sem quebrar");
 </script>
 </body>
 </html>
