@@ -87,6 +87,58 @@ function formatDateBR(d){if(!d)return"—";const[y,m,dd]=d.split("-");return dd+
 function buildWaLink(tel,msg){const n=(tel||"").replace(/\D/g,"");if(!n)return null;const f=n.startsWith("55")?n:"55"+n;return"https://wa.me/"+f+"?text="+encodeURIComponent(msg)}
 function safeSetText(id,v){const el=document.getElementById(id);if(el)el.textContent=v}
 
+function isStatusAtivoCliente(c){
+  const st=(c?.status||"").toLowerCase().trim();
+  if(st==="inativo"||st==="excluido"||st==="excluído")return false;
+  if(c?.ativo===false)return false;
+  return true;
+}
+function isStatusExcluido(s){
+  return normStatus(s)==="Excluído";
+}
+function isStatusFinanceiro(s){
+  return normStatus(s)==="Concluído";
+}
+function getClienteStatusPayload(ativo=true){
+  return {status:ativo?"ativo":"inativo"};
+}
+function agendamentoPodeTerAcoes(a){
+  const s=normStatus(a.status);
+  return !["Excluído","Recusado","Concluído"].includes(s);
+}
+function agendamentoPodeWhatsapp(a){
+  const s=normStatus(a.status);
+  return !["Excluído","Recusado"].includes(s);
+}
+function renderAcoesAgendamento(a){
+  const tel=(a.cliente_telefone||a.telefone||"").replace(/\D/g,"");
+  const s=normStatus(a.status);
+
+  if(s==="Excluído"){
+    return `<div class="apt-actions muted-actions"><span class="badge exc">🗑 Excluído</span></div>`;
+  }
+
+  if(s==="Recusado"){
+    return `<div class="apt-actions muted-actions"><span class="badge off">✕ Recusado</span></div>`;
+  }
+
+  if(s==="Concluído"){
+    return `<div class="apt-actions muted-actions">
+      <span class="badge done">✓ Concluído</span>
+      ${tel?`<button class="act-btn wa" onclick="abrirWhatsappPadrao('${a.id}')">💬 WA</button>`:""}
+    </div>`;
+  }
+
+  return `<div class="apt-actions">
+    ${s!=="Confirmado"?`<button class="act-btn confirm" onclick="confirmarAg('${a.id}')">✅ Confirmar</button>`:""}
+    <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">✕ Recusar</button>
+    <button class="act-btn reschedule" onclick="openModalReagendar('${a.id}')">📅 Reagendar</button>
+    <button class="act-btn done" onclick="concluirAg('${a.id}')">✓ Concluir</button>
+    ${tel?`<button class="act-btn wa" onclick="abrirWhatsappPadrao('${a.id}')">💬 WA</button>`:""}
+  </div>`;
+}
+
+
 /* ── NOTIFICAÇÕES LIVE — PREMIUM ── */
 function showNotif(title,msg,type="gold",duration=5500){
   const stack=document.getElementById("liveNotifyStack");
@@ -379,40 +431,38 @@ function renderAll(){renderStats();renderDashboardLists();renderCalendar();rende
 function renderStats(){
   const hoje=hojeISO(),mes=mesPrefixo(),ags=state.agendamentos||[];
 
-  // Lista ativa = tudo que ainda deve aparecer em "Todos" e no painel principal.
-  // Excluído continua salvo no banco, mas não entra em Todos/ativos.
-  const ativos=ags.filter(a=>normStatus(a.status)!=="Excluído");
+  const ativos=ags.filter(a=>!isStatusExcluido(a.status));
+  const concluidos=ags.filter(a=>isStatusFinanceiro(a.status));
 
   const st=s=>ags.filter(a=>normStatus(a.status)===s).length;
   const stAtivo=s=>ativos.filter(a=>normStatus(a.status)===s).length;
 
   const agHoje=ativos.filter(a=>a.data===hoje).length;
   const pendentes=stAtivo("Pendente"),confirmados=stAtivo("Confirmado"),reagendados=stAtivo("Reagendado");
-  const concluidos=stAtivo("Concluído"),recusados=stAtivo("Recusado"),excluidos=st("Excluído");
+  const concluidosCount=stAtivo("Concluído"),recusados=stAtivo("Recusado"),excluidos=st("Excluído");
 
   const totalAtivos=ativos.length;
   const baseTaxa=ativos.filter(a=>normStatus(a.status)!=="Recusado").length;
-  const taxa=baseTaxa>0?Math.round((confirmados+concluidos)/baseTaxa*100):0;
+  const taxa=baseTaxa>0?Math.round(concluidosCount/baseTaxa*100):0;
 
-  // Financeiro mantém histórico: excluídos continuam podendo contar no financeiro.
-  const fatHoje=ags.filter(a=>a.data===hoje&&["Confirmado","Concluído","Excluído"].includes(normStatus(a.status))).reduce((s,a)=>s+Number(a.valor||0),0);
-  const fatMes=ags.filter(a=>a.data&&a.data.startsWith(mes)&&normStatus(a.status)!=="Recusado").reduce((s,a)=>s+Number(a.valor||0),0);
+  // REGRA FINAL: faturamento só conta quando o atendimento foi CONCLUÍDO.
+  const fatHoje=concluidos.filter(a=>a.data===hoje).reduce((s,a)=>s+Number(a.valor||0),0);
+  const fatMes=concluidos.filter(a=>a.data&&a.data.startsWith(mes)).reduce((s,a)=>s+Number(a.valor||0),0);
 
   safeSetText("statHoje",agHoje);safeSetText("statPendentes",pendentes);safeSetText("statConfirmados",confirmados);
-  safeSetText("statReagendados",reagendados);safeSetText("statConcluidos",concluidos);safeSetText("statRecusados",recusados);
+  safeSetText("statReagendados",reagendados);safeSetText("statConcluidos",concluidosCount);safeSetText("statRecusados",recusados);
   safeSetText("statExcluidos",excluidos);safeSetText("statTaxaConf",taxa+"%");
   safeSetText("statFatHoje",money(fatHoje).replace(",00",""));safeSetText("statFatMes",money(fatMes).replace(",00",""));
-  safeSetText("statClientes",(state.clientes||[]).filter(c=>c.ativo!==false).length);
+  safeSetText("statClientes",(state.clientes||[]).filter(isStatusAtivoCliente).length);
   safeSetText("statServicos",(state.servicos||[]).filter(s=>s.status==="ativo").length);
   safeSetText("statProfissionais",(state.profissionais||[]).filter(p=>p.status==="ativo").length);
   safeSetText("statTotal",totalAtivos);
 
-  // Filtros da Agenda
   safeSetText("fc-todos",totalAtivos);
   safeSetText("fc-pendente",pendentes);
   safeSetText("fc-confirmado",confirmados);
   safeSetText("fc-reagendado",reagendados);
-  safeSetText("fc-concluido",concluidos);
+  safeSetText("fc-concluido",concluidosCount);
   safeSetText("fc-recusado",recusados);
   safeSetText("fc-excluido",excluidos);
 }
@@ -434,13 +484,7 @@ function renderDashboardLists(){
         </div>
         <span class="badge ${badgeClass(a.status)}">${normStatus(a.status)}</span>
       </div>
-      <div class="apt-actions">
-        <button class="act-btn confirm" onclick="confirmarAg('${a.id}')">✅ Confirmar</button>
-        <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">✕ Recusar</button>
-        <button class="act-btn reschedule" onclick="openModalReagendar('${a.id}')">📅 Reagendar</button>
-        <button class="act-btn done" onclick="concluirAg('${a.id}')">✓ Concluir</button>
-        ${tel?`<button class="act-btn wa" onclick="abrirWhatsappPadrao('${a.id}')">💬 WA</button>`:""}
-      </div>
+${renderAcoesAgendamento(a)}
     </div>`}).join("");
 }
 
@@ -497,13 +541,7 @@ function renderAgendaTimeline(){
             </div>
             <div class="tl-apt-status"><span class="badge ${badgeClass(a.status)}">${normStatus(a.status)}</span></div>
           </div>
-          <div class="apt-actions">
-            <button class="act-btn confirm" onclick="confirmarAg('${a.id}')">✅ Confirmar</button>
-            <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">✕ Recusar</button>
-            <button class="act-btn reschedule" onclick="openModalReagendar('${a.id}')">📅 Reagendar</button>
-            <button class="act-btn done" onclick="concluirAg('${a.id}')">✓ Concluir</button>
-            ${tel?`<button class="act-btn wa" onclick="abrirWhatsappPadrao('${a.id}')">💬 WA</button>`:""}
-          </div>
+${renderAcoesAgendamento(a)}
         </div>
       </div>`;
     const tlapt=block.querySelector(".tl-apt");
@@ -524,8 +562,8 @@ function renderClienteCards(){
   el.innerHTML="";
   state.clientes.forEach(c=>{
     const agts=state.agendamentos.filter(a=>a.cliente_nome===c.nome&&normStatus(a.status)!=="Excluído").length;
-    const gasto=state.agendamentos.filter(a=>a.cliente_nome===c.nome).reduce((s,a)=>s+Number(a.valor||0),0);
-    const isAtivo=c.ativo!==false;
+    const gasto=state.agendamentos.filter(a=>a.cliente_nome===c.nome&&isStatusFinanceiro(a.status)).reduce((s,a)=>s+Number(a.valor||0),0);
+    const isAtivo=isStatusAtivoCliente(c);
     const card=document.createElement("div");
     card.className="client-card"+(isAtivo?"":" inactive-item");
     card.innerHTML=`
@@ -682,29 +720,48 @@ function editAgendamento(id){
 /* ── Duplicar ── */
 async function duplicarServico(id){const s=state.servicos.find(x=>x.id===id);if(!s)return;const{error}=await db.from("agenda_servicos").insert({empresa_id:state.empresa.id,nome:s.nome+" (cópia)",preco:s.preco,duracao_minutos:s.duracao_minutos,status:"ativo",descricao:s.descricao||""});if(error)return toast("Erro.","err");await loadAll();showNotif("Serviço duplicado","","info")}
 async function duplicarProfissional(id){const p=state.profissionais.find(x=>x.id===id);if(!p)return;const{error}=await db.from("agenda_profissionais").insert({empresa_id:state.empresa.id,nome:p.nome+" (cópia)",especialidade:p.especialidade,telefone:p.telefone,status:"ativo"});if(error)return toast("Erro.","err");await loadAll();showNotif("Profissional duplicado","","info")}
-async function duplicarCliente(id){const c=state.clientes.find(x=>x.id===id);if(!c)return;const{error}=await db.from("agenda_clientes").insert({empresa_id:state.empresa.id,nome:c.nome+" (cópia)",telefone:c.telefone,email:c.email,ativo:true});if(error)return toast("Erro.","err");await loadAll();showNotif("Cliente duplicado","","info")}
+async function duplicarCliente(id){const c=state.clientes.find(x=>x.id===id);if(!c)return;const{error}=await db.from("agenda_clientes").insert({empresa_id:state.empresa.id,nome:c.nome+" (cópia)",telefone:c.telefone,email:c.email,status:"ativo"});if(error)return toast("Erro.","err");await loadAll();showNotif("Cliente duplicado","","info")}
 async function duplicarAgendamento(id){const a=state.agendamentos.find(x=>x.id===id);if(!a)return;const{error}=await db.from("agenda_agendamentos").insert({empresa_id:state.empresa.id,cliente_id:a.cliente_id,servico_id:a.servico_id,profissional_id:a.profissional_id,cliente_nome:a.cliente_nome,cliente_telefone:a.cliente_telefone,servico_nome:a.servico_nome,profissional_nome:a.profissional_nome,data:a.data,hora:a.hora,status:"Pendente",valor:a.valor,observacoes:a.observacoes});if(error)return toast("Erro.","err");await loadAll();showNotif("Agendamento duplicado como Pendente","","info")}
 
 /* ── Toggle ── */
 function toggleServico(id,ns){const s=state.servicos.find(x=>x.id===id);if(!s)return;openConfirmModal({icon:ns==="ativo"?"▶️":"⏸",iconCls:ns==="ativo"?"info":"warn",title:ns==="ativo"?"Ativar serviço?":"Desativar serviço?",sub:`"${s.nome}"`,btnLabel:ns==="ativo"?"▶ Ativar":"⏸ Desativar",btnStyle:ns==="ativo"?"primary":"danger",cb:async()=>{await db.from("agenda_servicos").update({status:ns}).eq("id",id);await loadAll();showNotif(ns==="ativo"?"Serviço ativado":"Serviço desativado","",ns==="ativo"?"confirm":"info")}})}
 function toggleProfissional(id,ns){const p=state.profissionais.find(x=>x.id===id);if(!p)return;openConfirmModal({icon:ns==="ativo"?"▶️":"⏸",iconCls:ns==="ativo"?"info":"warn",title:ns==="ativo"?"Ativar profissional?":"Desativar?",sub:`"${p.nome}"`,btnLabel:ns==="ativo"?"▶ Ativar":"⏸ Desativar",btnStyle:ns==="ativo"?"primary":"danger",cb:async()=>{await db.from("agenda_profissionais").update({status:ns}).eq("id",id);await loadAll();showNotif(ns==="ativo"?"Profissional ativado":"Profissional desativado","",ns==="ativo"?"confirm":"info")}})}
-function toggleCliente(id,ativar){const c=state.clientes.find(x=>x.id===id);if(!c)return;openConfirmModal({icon:ativar?"▶️":"⏸",iconCls:ativar?"info":"warn",title:ativar?"Ativar cliente?":"Desativar?",sub:`"${c.nome}"`,btnLabel:ativar?"▶ Ativar":"⏸ Desativar",btnStyle:ativar?"primary":"danger",cb:async()=>{await db.from("agenda_clientes").update({ativo:ativar}).eq("id",id);await loadAll();showNotif(ativar?"Cliente ativado":"Cliente desativado","",ativar?"confirm":"info")}})}
+function toggleCliente(id,ativar){const c=state.clientes.find(x=>x.id===id);if(!c)return;openConfirmModal({icon:ativar?"▶️":"⏸",iconCls:ativar?"info":"warn",title:ativar?"Ativar cliente?":"Desativar?",sub:`"${c.nome}"`,btnLabel:ativar?"▶ Ativar":"⏸ Desativar",btnStyle:ativar?"primary":"danger",cb:async()=>{await db.from("agenda_clientes").update(getClienteStatusPayload(ativar)).eq("id",id);await loadAll();showNotif(ativar?"Cliente ativado":"Cliente desativado","",ativar?"confirm":"info")}})}
 
 /* ── Excluir ── */
 function excluirServico(id){const s=state.servicos.find(x=>x.id===id);if(!s)return;openConfirmModal({icon:"🗑",iconCls:"danger",title:"Excluir serviço?",sub:`"${s.nome}" será removido.`,btnLabel:"Excluir",btnStyle:"danger",cb:async()=>{await db.from("agenda_servicos").update({status:"excluido"}).eq("id",id);await loadAll();showNotif("Serviço excluído","","info")}})}
 function excluirProfissional(id){const p=state.profissionais.find(x=>x.id===id);if(!p)return;openConfirmModal({icon:"🗑",iconCls:"danger",title:"Excluir profissional?",sub:`"${p.nome}" será removido.`,btnLabel:"Excluir",btnStyle:"danger",cb:async()=>{await db.from("agenda_profissionais").update({status:"excluido"}).eq("id",id);await loadAll();showNotif("Profissional excluído","","info")}})}
-function excluirCliente(id){const c=state.clientes.find(x=>x.id===id);if(!c)return;openConfirmModal({icon:"🗑",iconCls:"danger",title:"Excluir cliente?",sub:`"${c.nome}" será removido.`,btnLabel:"Excluir",btnStyle:"danger",cb:async()=>{await db.from("agenda_clientes").update({ativo:false}).eq("id",id);await loadAll();showNotif("Cliente removido","","info")}})}
+function excluirCliente(id){const c=state.clientes.find(x=>x.id===id);if(!c)return;openConfirmModal({icon:"🗑",iconCls:"danger",title:"Excluir cliente?",sub:`"${c.nome}" será removido.`,btnLabel:"Excluir",btnStyle:"danger",cb:async()=>{await db.from("agenda_clientes").update(getClienteStatusPayload(false)).eq("id",id);await loadAll();showNotif("Cliente removido","","info")}})}
 function excluirAgendamento(id){const a=state.agendamentos.find(x=>x.id===id);if(!a)return;openConfirmModal({icon:"🗑",iconCls:"danger",title:"Excluir agendamento?",sub:`"${a.cliente_nome}" em ${formatDateBR(a.data)}.`,btnLabel:"Excluir",btnStyle:"danger",cb:async()=>{await db.from("agenda_agendamentos").update({status:"Excluído"}).eq("id",id);await loadAll();showNotif("Agendamento excluído","","info")}})}
 
 /* ── Salvar novo ── */
-async function salvarCliente(){if(!cliNome.value)return toast("Digite o nome.","err");const{error}=await db.from("agenda_clientes").insert({empresa_id:state.empresa.id,nome:cliNome.value,telefone:cliTel.value,email:cliEmail.value,ativo:true});if(error)return toast("Erro.","err");cliNome.value=cliTel.value=cliEmail.value="";await loadAll();showNotif("Cliente adicionado","","confirm")}
+async function salvarCliente(){
+  const nome=(document.getElementById("cliNome")?.value||"").trim();
+  const telefone=(document.getElementById("cliTel")?.value||"").trim();
+  const email=(document.getElementById("cliEmail")?.value||"").trim();
+
+  if(!state?.empresa?.id)return toast("Empresa não carregada.","err");
+  if(!nome)return toast("Digite o nome do cliente.","err");
+
+  const payload={empresa_id:state.empresa.id,nome,telefone,email,status:"ativo"};
+  const{error}=await db.from("agenda_clientes").insert(payload);
+
+  if(error){
+    console.error(error);
+    return toast("Erro ao adicionar cliente. Verifique RLS/colunas da tabela agenda_clientes.","err");
+  }
+
+  cliNome.value=cliTel.value=cliEmail.value="";
+  await loadAll();
+  showNotif("Cliente adicionado",`${nome} foi salvo na base de clientes.`,"confirm");
+}
 async function salvarServico(){if(!srvNome.value)return toast("Digite o nome.","err");const{error}=await db.from("agenda_servicos").insert({empresa_id:state.empresa.id,nome:srvNome.value,preco:Number(srvPreco.value||0),duracao_minutos:Number(srvDur.value||60),status:"ativo"});if(error)return toast("Erro.","err");srvNome.value=srvPreco.value=srvDur.value="";await loadAll();showNotif("Serviço adicionado","","confirm")}
 async function salvarProfissional(){if(!proNome.value)return toast("Digite o nome.","err");const{error}=await db.from("agenda_profissionais").insert({empresa_id:state.empresa.id,nome:proNome.value,especialidade:proEsp.value,telefone:proTel.value,status:"ativo"});if(error)return toast("Erro.","err");proNome.value=proEsp.value=proTel.value="";await loadAll();showNotif("Profissional adicionado","","confirm")}
 async function salvarAgendamento(){
   if(!agCliente.value||!agServico.value||!agProfissional.value||!agData.value||!agHora.value)return toast("Preencha todos os campos.","err");
   const serv=state.servicos.find(s=>s.id===agServico.value);const prof=state.profissionais.find(p=>p.id===agProfissional.value);
   let clienteId=null;
-  const{data:cli}=await db.from("agenda_clientes").insert({empresa_id:state.empresa.id,nome:agCliente.value,telefone:agTelefone.value,ativo:true}).select("*").single();
+  const{data:cli}=await db.from("agenda_clientes").insert({empresa_id:state.empresa.id,nome:agCliente.value.trim(),telefone:agTelefone.value.trim(),status:"ativo"}).select("*").single();
   if(cli)clienteId=cli.id;
   const agDataValor=agData.value;
   const agHoraValor=agHora.value;
@@ -812,6 +869,7 @@ async function salvarRedesSociais(){
 /* ── Ações de agendamento ── */
 async function confirmarAg(id){
   const ag=state.agendamentos.find(a=>a.id===id);if(!ag)return;
+  if(!agendamentoPodeTerAcoes(ag))return toast("Este agendamento não permite confirmação.","warn");
   const{error}=await db.from("agenda_agendamentos").update({status:"Confirmado"}).eq("id",id);
   if(error)return toast("Erro ao confirmar.","err");
   ag.status="Confirmado";renderAll();
@@ -821,12 +879,14 @@ async function confirmarAg(id){
 }
 async function concluirAg(id){
   const ag=state.agendamentos.find(a=>a.id===id);if(!ag)return;
+  if(!agendamentoPodeTerAcoes(ag)&&normStatus(ag.status)!=="Confirmado")return toast("Este agendamento não permite conclusão.","warn");
   const{error}=await db.from("agenda_agendamentos").update({status:"Concluído"}).eq("id",id);
   if(error)return toast("Erro ao concluir.","err");
   ag.status="Concluído";renderAll();showNotif("Atendimento concluído!",`${ag.cliente_nome} — ${ag.servico_nome||"—"}.`,"done");
 }
 function abrirWhatsappPadrao(id){
   const ag=state.agendamentos.find(a=>a.id===id);if(!ag)return;
+  if(!agendamentoPodeWhatsapp(ag))return toast("Este status não permite WhatsApp automático.","warn");
   const tel=(ag.cliente_telefone||ag.telefone||"").replace(/\D/g,"");
   if(!tel){toast("Telefone não cadastrado.","err");return}
   const msg=`Olá, ${ag.cliente_nome}! 👋\nServiço: ${ag.servico_nome||"—"}\nProfissional: ${ag.profissional_nome||"—"}\nData: ${formatDateBR(ag.data)}\nHorário: ${ag.hora||"—"}\nAté lá! 😊`;
@@ -838,6 +898,7 @@ let _recusaId=null,_recusaMotivo=null;
 function openModalRecusa(id){
   _recusaId=id;_recusaMotivo=null;
   const ag=state.agendamentos.find(a=>a.id===id);if(!ag)return;
+  if(!agendamentoPodeTerAcoes(ag))return toast("Este agendamento não permite recusa.","warn");
   document.getElementById("recusaClienteInfo").textContent=`${ag.cliente_nome} · ${formatDateBR(ag.data)} às ${ag.hora||"—"}`;
   document.querySelectorAll(".motivo-opt").forEach(el=>{el.classList.remove("selected");el.querySelector(".mo-radio").innerHTML=""});
   document.getElementById("recusaMotivoCustom").value="";
@@ -862,6 +923,7 @@ async function confirmarRecusa(){
 let _reagendarId=null;
 function openModalReagendar(id){
   _reagendarId=id;const ag=state.agendamentos.find(a=>a.id===id);if(!ag)return;
+  if(!agendamentoPodeTerAcoes(ag))return toast("Este agendamento não permite reagendamento.","warn");
   document.getElementById("reagendarClienteInfo").textContent=`${ag.cliente_nome} · ${formatDateBR(ag.data)} às ${ag.hora||"—"}`;
   document.getElementById("reagendarData").value=ag.data||"";document.getElementById("reagendarHora").value=ag.hora||"";
   document.getElementById("modalReagendar").classList.add("open");
@@ -883,10 +945,13 @@ async function confirmarReagendar(){
 
 /* ── Financeiro / Config ── */
 function renderFinanceiro(){
-  const total=state.agendamentos.reduce((s,a)=>s+Number(a.valor||0),0);
-  const ticket=state.agendamentos.length?total/state.agendamentos.length:0;
-  safeSetText("finReceita",money(total).replace(",00",""));safeSetText("finTicket",money(ticket).replace(",00",""));
-  safeSetText("finPagos",state.pagamentos.length);safeSetText("finPlano",state.empresa.plano||"Grátis");
+  const concluidos=(state.agendamentos||[]).filter(a=>isStatusFinanceiro(a.status));
+  const total=concluidos.reduce((s,a)=>s+Number(a.valor||0),0);
+  const ticket=concluidos.length?total/concluidos.length:0;
+  safeSetText("finReceita",money(total).replace(",00",""));
+  safeSetText("finTicket",money(ticket).replace(",00",""));
+  safeSetText("finPagos",concluidos.length);
+  safeSetText("finPlano",state.empresa.plano||"Grátis");
 }
 function renderConfig(){
   const fn=document.getElementById("cfgNome");if(fn)fn.value=state.empresa.nome||"";
@@ -926,7 +991,7 @@ function selectPubServico(id,el){state.pubServico=state.servicos.find(s=>s.id===
 function selectPubProfissional(id,el){state.pubProfissional=state.profissionais.find(p=>p.id===id);document.querySelectorAll("#pubProfissionais .choice").forEach(c=>c.classList.remove("active"));el.classList.add("active")}
 async function confirmarAgendamentoPublico(){
   if(!state.pubEmpresa||!state.pubServico||!state.pubProfissional||!pubNome.value||!pubTelefone.value||!pubData.value||!pubHora.value)return toast("Preencha tudo para confirmar.","err");
-  const{data:cli}=await db.from("agenda_clientes").insert({empresa_id:state.pubEmpresa.id,nome:pubNome.value,telefone:pubTelefone.value,ativo:true}).select("*").single();
+  const{data:cli}=await db.from("agenda_clientes").insert({empresa_id:state.pubEmpresa.id,nome:pubNome.value.trim(),telefone:pubTelefone.value.trim(),status:"ativo"}).select("*").single();
   const{error}=await db.from("agenda_agendamentos").insert({empresa_id:state.pubEmpresa.id,cliente_id:cli?.id||null,servico_id:state.pubServico.id,profissional_id:state.pubProfissional.id,cliente_nome:pubNome.value,cliente_telefone:pubTelefone.value,servico_nome:state.pubServico.nome,profissional_nome:state.pubProfissional.nome,data:pubData.value,hora:pubHora.value,status:"Pendente",valor:Number(state.pubServico.preco||0),observacoes:document.getElementById("pubObs").value});
   if(error){console.error(error);return toast("Erro ao confirmar.","err")}
   document.getElementById("pubMainBody").style.display="none";
