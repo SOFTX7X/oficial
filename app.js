@@ -378,14 +378,26 @@ function renderAll(){renderStats();renderDashboardLists();renderCalendar();rende
 /* ── Stats ── */
 function renderStats(){
   const hoje=hojeISO(),mes=mesPrefixo(),ags=state.agendamentos||[];
+
+  // Lista ativa = tudo que ainda deve aparecer em "Todos" e no painel principal.
+  // Excluído continua salvo no banco, mas não entra em Todos/ativos.
+  const ativos=ags.filter(a=>normStatus(a.status)!=="Excluído");
+
   const st=s=>ags.filter(a=>normStatus(a.status)===s).length;
-  const agHoje=ags.filter(a=>a.data===hoje).length;
-  const pendentes=st("Pendente"),confirmados=st("Confirmado"),reagendados=st("Reagendado");
-  const concluidos=st("Concluído"),recusados=st("Recusado"),excluidos=st("Excluído");
-  const total=ags.length;
-  const taxa=total>0?Math.round((confirmados+concluidos)/total*100):0;
-  const fatHoje=ags.filter(a=>a.data===hoje&&["Confirmado","Concluído"].includes(normStatus(a.status))).reduce((s,a)=>s+Number(a.valor||0),0);
+  const stAtivo=s=>ativos.filter(a=>normStatus(a.status)===s).length;
+
+  const agHoje=ativos.filter(a=>a.data===hoje).length;
+  const pendentes=stAtivo("Pendente"),confirmados=stAtivo("Confirmado"),reagendados=stAtivo("Reagendado");
+  const concluidos=stAtivo("Concluído"),recusados=stAtivo("Recusado"),excluidos=st("Excluído");
+
+  const totalAtivos=ativos.length;
+  const baseTaxa=ativos.filter(a=>normStatus(a.status)!=="Recusado").length;
+  const taxa=baseTaxa>0?Math.round((confirmados+concluidos)/baseTaxa*100):0;
+
+  // Financeiro mantém histórico: excluídos continuam podendo contar no financeiro.
+  const fatHoje=ags.filter(a=>a.data===hoje&&["Confirmado","Concluído","Excluído"].includes(normStatus(a.status))).reduce((s,a)=>s+Number(a.valor||0),0);
   const fatMes=ags.filter(a=>a.data&&a.data.startsWith(mes)&&normStatus(a.status)!=="Recusado").reduce((s,a)=>s+Number(a.valor||0),0);
+
   safeSetText("statHoje",agHoje);safeSetText("statPendentes",pendentes);safeSetText("statConfirmados",confirmados);
   safeSetText("statReagendados",reagendados);safeSetText("statConcluidos",concluidos);safeSetText("statRecusados",recusados);
   safeSetText("statExcluidos",excluidos);safeSetText("statTaxaConf",taxa+"%");
@@ -393,10 +405,16 @@ function renderStats(){
   safeSetText("statClientes",(state.clientes||[]).filter(c=>c.ativo!==false).length);
   safeSetText("statServicos",(state.servicos||[]).filter(s=>s.status==="ativo").length);
   safeSetText("statProfissionais",(state.profissionais||[]).filter(p=>p.status==="ativo").length);
-  safeSetText("statTotal",total);
-  safeSetText("fc-todos",total);safeSetText("fc-pendente",pendentes);safeSetText("fc-confirmado",confirmados);
-  safeSetText("fc-reagendado",reagendados);safeSetText("fc-concluido",concluidos);
-  safeSetText("fc-recusado",recusados);safeSetText("fc-excluido",excluidos);
+  safeSetText("statTotal",totalAtivos);
+
+  // Filtros da Agenda
+  safeSetText("fc-todos",totalAtivos);
+  safeSetText("fc-pendente",pendentes);
+  safeSetText("fc-confirmado",confirmados);
+  safeSetText("fc-reagendado",reagendados);
+  safeSetText("fc-concluido",concluidos);
+  safeSetText("fc-recusado",recusados);
+  safeSetText("fc-excluido",excluidos);
 }
 
 function renderDashboardLists(){
@@ -428,7 +446,7 @@ function renderDashboardLists(){
 
 function renderCalendar(){
   const days=["S","T","Q","Q","S","S","D"];
-  const busy=new Set(state.agendamentos.map(a=>String(new Date(a.data+"T00:00:00").getDate())));
+  const busy=new Set(state.agendamentos.filter(a=>normStatus(a.status)!=="Excluído").map(a=>String(new Date(a.data+"T00:00:00").getDate())));
   let html=days.map(d=>`<div class="cal-label">${d}</div>`).join("");
   const today=String(new Date().getDate());
   for(let i=1;i<=28;i++){const d=String(i);html+=`<div class="cal-day${busy.has(d)?" busy":""}${d===today?" today":""}">${i}</div>`}
@@ -505,7 +523,7 @@ function renderClienteCards(){
   if(!state.clientes.length){el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente ainda.</p></div>`;return}
   el.innerHTML="";
   state.clientes.forEach(c=>{
-    const agts=state.agendamentos.filter(a=>a.cliente_nome===c.nome).length;
+    const agts=state.agendamentos.filter(a=>a.cliente_nome===c.nome&&normStatus(a.status)!=="Excluído").length;
     const gasto=state.agendamentos.filter(a=>a.cliente_nome===c.nome).reduce((s,a)=>s+Number(a.valor||0),0);
     const isAtivo=c.ativo!==false;
     const card=document.createElement("div");
