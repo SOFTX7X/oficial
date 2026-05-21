@@ -1,10 +1,17 @@
 const SUPABASE_URL = "https://wyjrjioipqfltdyupfna.supabase.co";
 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc2NrbmRpYmtidnh0cmJseXR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjIyNDQsImV4cCI6MjA5NDY5ODI0NH0.BN1cpl56RCa-Gts-iMC-F2mjqGHuic1MXvg-k7l2qiM";
+const SUPABASE_ANON_KEY = "sb_publishable_PkDkt5S-_rdrT0HhANoPAw_ZWluV2_H";
 
-const supabaseClient = supabase.createClient(
+const db = supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_ANON_KEY
+  SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: false
+    }
+  }
 );
 
 console.log("Supabase conectado!");
