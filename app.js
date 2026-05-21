@@ -716,31 +716,97 @@ async function salvarAgendamento(){
 }
 
 async function salvarConfig(){
-  const newSlug=slugify(cfgSlug.value);
+  if(!state?.empresa?.id)return toast("Empresa não carregada.","err");
+
+  const nome=(document.getElementById("cfgNome")?.value||"").trim();
+  const whatsapp=(document.getElementById("cfgWhatsapp")?.value||"").trim();
+  const slugAtual=slugify(state.empresa.slug||"");
+  const slugDigitado=slugify(document.getElementById("cfgSlug")?.value||slugAtual);
+  const endereco=(document.getElementById("cfgEndereco")?.value||"").trim();
+  const cidade=(document.getElementById("cfgCidade")?.value||"").trim();
+
+  if(!nome)return toast("Digite o nome da empresa.","err");
+  if(!whatsapp)return toast("Digite o WhatsApp da empresa.","err");
+  if(!slugDigitado)return toast("Digite o link público.","err");
+
   const updates={
-    nome:(cfgNome.value||"").trim(),
-    whatsapp:(cfgWhatsapp.value||"").trim(),
-    slug:newSlug,
-    endereco:(document.getElementById("cfgEndereco")?.value||"").trim(),
-    cidade:(document.getElementById("cfgCidade")?.value||"").trim()
+    nome,
+    whatsapp,
+    endereco,
+    cidade
   };
-  const{data,error}=await db.from("agenda_empresas").update(updates).eq("id",state.empresa.id).select("*").single();
-  if(error)return toast("Erro ao salvar. Talvez o slug já exista.","err");
-  state.empresa=data;showDashboard();renderConfig();showNotif("Configurações salvas","","confirm");
+
+  // Só altera o slug se a pessoa realmente mudou o link.
+  // Isso evita erro falso de "slug já existe" ao salvar apenas endereço/cidade.
+  if(slugDigitado!==slugAtual){
+    const {data:slugExiste,error:slugCheckErr}=await db
+      .from("agenda_empresas")
+      .select("id")
+      .eq("slug",slugDigitado)
+      .neq("id",state.empresa.id)
+      .maybeSingle();
+
+    if(slugCheckErr){
+      console.error(slugCheckErr);
+      return toast("Erro ao verificar o link público.","err");
+    }
+
+    if(slugExiste){
+      return toast("Esse link público já está em uso.","err");
+    }
+
+    updates.slug=slugDigitado;
+  }
+
+  const{data,error}=await db
+    .from("agenda_empresas")
+    .update(updates)
+    .eq("id",state.empresa.id)
+    .select("*")
+    .single();
+
+  if(error){
+    console.error(error);
+    return toast("Erro ao salvar os dados da empresa.","err");
+  }
+
+  state.empresa=data||{...state.empresa,...updates};
+  safeSetText("sideEmpresa",state.empresa.nome);
+  safeSetText("sideArea",state.empresa.area_atuacao||state.empresa.plano||"Premium");
+  safeSetText("avatarLetter",initial(state.empresa.nome));
+
+  const lb=document.getElementById("publicLinkBox");
+  if(lb)lb.textContent=publicUrl(state.empresa.slug);
+
+  renderConfig();
+  showNotif("Dados da empresa salvos","Endereço, cidade, WhatsApp e link atualizados.","confirm");
 }
 
 async function salvarRedesSociais(){
+  if(!state?.empresa?.id)return toast("Empresa não carregada.","err");
+
   const updates={
     instagram:(document.getElementById("cfgInstagram")?.value||"").trim(),
     facebook:(document.getElementById("cfgFacebook")?.value||"").trim(),
     tiktok:(document.getElementById("cfgTiktok")?.value||"").trim(),
     site:(document.getElementById("cfgSite")?.value||"").trim()
   };
-  const{data,error}=await db.from("agenda_empresas").update(updates).eq("id",state.empresa.id).select("*").single();
-  if(error)return toast("Erro ao salvar redes sociais.","err");
+
+  const{data,error}=await db
+    .from("agenda_empresas")
+    .update(updates)
+    .eq("id",state.empresa.id)
+    .select("*")
+    .single();
+
+  if(error){
+    console.error(error);
+    return toast("Erro ao salvar redes sociais. Verifique se as colunas instagram, facebook, tiktok e site existem na tabela agenda_empresas.","err");
+  }
+
   state.empresa=data||{...state.empresa,...updates};
   renderConfig();
-  showNotif("Redes sociais salvas","","confirm");
+  showNotif("Redes sociais salvas","Instagram, Facebook, TikTok e site atualizados.","confirm");
 }
 
 /* ── Ações de agendamento ── */
