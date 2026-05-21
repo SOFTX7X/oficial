@@ -962,3 +962,471 @@ body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM San
 
 img,svg,video,canvas{max-width:100%;height:auto}
 input,select,textarea,button{max-width:100%}
+
+
+
+/* ═══════════════════════════════════════════════════════════════
+   FIX FINAL — MOBILE/UX PREMIUM SEM QUEBRAR LÓGICA
+   - melhora celular e PC
+   - remove botões que atrapalham no topo mobile
+   - corrige inputs/selects no celular
+   - melhora página pública
+   - mantém realtime/agendamento intactos
+═══════════════════════════════════════════════════════════════ */
+
+html,body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden!important;
+}
+
+body{
+  touch-action:manipulation;
+}
+
+button,input,select,textarea{
+  font-family:'DM Sans',sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+
+input,select,textarea{
+  font-size:16px!important;
+  color:var(--text)!important;
+  caret-color:var(--gold2);
+}
+
+input::placeholder,
+textarea::placeholder{
+  color:rgba(242,236,224,.36)!important;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:rgba(201,169,110,.55)!important;
+  box-shadow:0 0 0 4px rgba(201,169,110,.10)!important;
+}
+
+/* Corrige bug visual em select/data/hora no mobile */
+select,
+input[type="date"],
+input[type="time"]{
+  min-height:56px;
+  background-color:rgba(14,14,23,.96)!important;
+}
+
+/* Evita zoom e sumiço estranho de texto */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+textarea{
+  min-height:56px;
+  line-height:1.25;
+}
+
+/* Botões mais sólidos */
+.btn,
+button.btn,
+.btn-primary,
+.btn-ghost{
+  min-height:48px;
+  border-radius:15px;
+}
+
+/* Página pública */
+.public-page{
+  min-height:100vh;
+}
+
+.pub-wrap{
+  width:min(100%,720px);
+  margin-inline:auto;
+}
+
+.pub-socials{
+  width:100%;
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:13px;
+}
+
+.pub-social-link{
+  min-height:38px;
+  max-width:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:8px 13px;
+  border-radius:999px;
+  text-decoration:none;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.pub-social-text{
+  width:100%;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+  margin-top:2px;
+}
+
+.pub-wa-fab{
+  position:fixed;
+  z-index:99999;
+  right:18px;
+  bottom:22px;
+  min-width:64px;
+  height:64px;
+  padding:0 18px;
+  border-radius:999px;
+  background:#25d366;
+  color:#fff;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  text-decoration:none;
+  font-weight:800;
+  box-shadow:0 18px 45px rgba(37,211,102,.36),0 10px 35px rgba(0,0,0,.55);
+}
+
+.pub-wa-fab svg{
+  flex:0 0 auto;
+}
+
+.pub-wa-fab span{
+  white-space:nowrap;
+}
+
+/* remove vírgula textual que sobrou se browser renderizar algo estranho */
+.choice-grid{
+  font-size:0;
+}
+.choice-grid .choice,
+.choice-grid .empty-state{
+  font-size:13.5px;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+
+  body{
+    padding-bottom:calc(var(--bottom-nav-h) + 26px)!important;
+  }
+
+  /* Topo do painel no celular: deixa limpo, sem botões duplicados e sem atrapalhar */
+  .topbar{
+    padding:20px 18px 14px!important;
+    min-height:auto!important;
+    align-items:flex-start!important;
+    gap:10px!important;
+  }
+
+  .topbar .top-actions{
+    display:none!important;
+  }
+
+  .topbar h1,
+  #pageTitle{
+    font-size:34px!important;
+    line-height:.95!important;
+    max-width:100%!important;
+    overflow:visible!important;
+  }
+
+  #pageSub{
+    font-size:13px!important;
+    color:var(--muted)!important;
+  }
+
+  .content,
+  .main,
+  .dashboard-main,
+  .dash-main,
+  .view{
+    width:100%!important;
+    max-width:100%!important;
+  }
+
+  .view{
+    padding-inline:14px!important;
+  }
+
+  .panel,
+  .card,
+  .stat-card,
+  .client-card,
+  .svc-card,
+  .prof-card,
+  .config-card,
+  .pub-hero,
+  .pub-section{
+    border-radius:24px!important;
+    padding:22px!important;
+  }
+
+  /* Grid vira coluna limpa */
+  .stats-grid,
+  .cards-grid,
+  .grid,
+  .form-grid,
+  .field-grid,
+  .config-grid,
+  .finance-grid{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:14px!important;
+  }
+
+  /* Inputs mais confortáveis */
+  .field{
+    width:100%!important;
+    margin-bottom:14px!important;
+  }
+
+  .field label{
+    margin-bottom:8px!important;
+    letter-spacing:.16em!important;
+  }
+
+  .field input,
+  .field select,
+  .field textarea,
+  input,
+  select,
+  textarea{
+    width:100%!important;
+    min-height:58px!important;
+    border-radius:18px!important;
+    padding:16px 18px!important;
+    background:rgba(14,14,23,.96)!important;
+    border:1px solid rgba(255,255,255,.085)!important;
+    color:var(--text)!important;
+  }
+
+  textarea{
+    min-height:118px!important;
+  }
+
+  /* Botões no celular */
+  .btn,
+  button.btn,
+  .btn-full,
+  .btn-primary,
+  .btn-ghost{
+    width:100%;
+    min-height:54px!important;
+    border-radius:18px!important;
+    font-size:15px!important;
+    font-weight:800!important;
+  }
+
+  /* Menu inferior mais limpo e menor */
+  #mobileNav,
+  .mobile-nav{
+    position:fixed!important;
+    z-index:99998!important;
+    left:14px!important;
+    right:14px!important;
+    bottom:12px!important;
+    height:72px!important;
+    padding:7px!important;
+    border-radius:24px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:4px!important;
+    background:rgba(7,7,12,.96)!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    backdrop-filter:blur(24px)!important;
+    box-shadow:0 20px 55px rgba(0,0,0,.68),0 0 35px rgba(201,169,110,.08)!important;
+  }
+
+  #mobileNav .nav-btn,
+  .mobile-nav .nav-btn{
+    flex:1!important;
+    height:58px!important;
+    min-height:58px!important;
+    padding:0!important;
+    border-radius:18px!important;
+    background:transparent!important;
+    color:var(--muted)!important;
+    border:0!important;
+    box-shadow:none!important;
+    font-size:10.8px!important;
+    font-weight:800!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:3px!important;
+    transform:none!important;
+  }
+
+  #mobileNav .nav-btn.active,
+  .mobile-nav .nav-btn.active{
+    background:rgba(201,169,110,.13)!important;
+    color:var(--gold2)!important;
+    border:1px solid rgba(201,169,110,.20)!important;
+  }
+
+  #mobileNav .nav-fab,
+  .mobile-nav .nav-fab{
+    flex:1!important;
+    width:auto!important;
+    height:58px!important;
+    min-height:58px!important;
+    margin:0!important;
+    border-radius:18px!important;
+    background:linear-gradient(135deg,var(--gold),var(--gold2))!important;
+    color:#080808!important;
+    box-shadow:0 10px 30px rgba(201,169,110,.28)!important;
+  }
+
+  #mobileNav .n-icon,
+  .mobile-nav .n-icon{
+    font-size:18px!important;
+    line-height:1!important;
+  }
+
+  /* Página pública: mais espaço e menos apertada */
+  .public-page{
+    padding:18px 14px 110px!important;
+  }
+
+  .pub-wrap{
+    width:100%!important;
+    max-width:100%!important;
+  }
+
+  .pub-back-btn{
+    margin-bottom:22px!important;
+  }
+
+  .pub-hero{
+    margin-bottom:18px!important;
+  }
+
+  .pub-hero h1,
+  #pubEmpresa{
+    font-size:38px!important;
+    line-height:1!important;
+    margin-bottom:9px!important;
+  }
+
+  #pubDesc{
+    font-size:14px!important;
+    line-height:1.45!important;
+  }
+
+  .pub-socials{
+    margin-top:14px!important;
+    gap:9px!important;
+  }
+
+  .pub-social-link{
+    max-width:100%!important;
+    min-height:39px!important;
+    padding:9px 13px!important;
+    font-size:13px!important;
+  }
+
+  .pub-social-link.pub-social-site{
+    max-width:100%!important;
+  }
+
+  .pub-body{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:18px!important;
+  }
+
+  .choice-grid{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:13px!important;
+  }
+
+  .choice{
+    width:100%!important;
+    min-height:86px!important;
+    border-radius:19px!important;
+    padding:16px!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:14px!important;
+  }
+
+  .choice-title{
+    font-size:16px!important;
+    line-height:1.2!important;
+  }
+
+  .choice-sub{
+    font-size:13px!important;
+  }
+
+  .choice-right{
+    margin-left:auto!important;
+    font-size:21px!important;
+    white-space:nowrap!important;
+  }
+
+  #pubWaFab{
+    right:18px!important;
+    bottom:94px!important;
+    width:64px!important;
+    min-width:64px!important;
+    height:64px!important;
+    padding:0!important;
+    border-radius:50%!important;
+  }
+
+  #pubWaFab span{
+    display:none!important;
+  }
+
+  /* Login */
+  .auth-modal{
+    width:calc(100vw - 24px)!important;
+    max-height:calc(100vh - 24px)!important;
+    overflow:auto!important;
+    border-radius:26px!important;
+  }
+
+  .auth-brand{
+    display:none!important;
+  }
+
+  .auth-form{
+    width:100%!important;
+    padding:24px!important;
+  }
+
+  /* Evita qualquer conteúdo ficar atrás da nav */
+  .view.active{
+    padding-bottom:105px!important;
+  }
+}
+
+/* DESKTOP refinado */
+@media(min-width:901px){
+  #mobileNav,
+  .mobile-nav{
+    display:none!important;
+  }
+
+  .top-actions .btn{
+    min-width:auto;
+  }
+
+  .pub-wa-fab{
+    bottom:28px;
+  }
+}
+
