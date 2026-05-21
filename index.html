@@ -836,6 +836,274 @@ img,svg,video,canvas{max-width:100%;height:auto;}
 input,select,textarea,button{max-width:100%;}
 .dashboard,.landing,.public-page,.main,.panel,.form-add,.command-hero,.mockup-frame{max-width:100vw;}
 
+
+/* ══════════════════════════════════════════════════════
+   AJUSTE FINAL ARLLISON — DASHBOARD COMPACTO + MOBILE APP
+   Mantém Supabase/JS principal e melhora organização visual.
+══════════════════════════════════════════════════════ */
+
+/* PC/NOTEBOOK: painel mais compacto, estilo SaaS */
+.main{padding:12px 16px 42px}
+.topbar{padding:10px 14px;border-radius:18px}
+.titleblock h2{font-size:25px}
+.titleblock p{font-size:11.5px}
+.command-hero{padding:22px 26px;border-radius:22px;margin-bottom:12px}
+.ch-inner h1{font-size:34px}
+.ch-inner p{font-size:13px;margin-top:6px}
+.dash-section-label{margin:4px 0 8px;font-size:8.8px}
+.stats-grid,.stats-grid-2,.stats-grid-3{gap:10px;margin-bottom:12px}
+.stat-card{min-height:92px;padding:14px;border-radius:16px}
+.sc-label{font-size:8.8px}
+.sc-value{font-size:30px;margin-top:6px}
+.sc-note{font-size:10.8px;margin-top:4px}
+.sc-icon{right:12px;top:12px;font-size:18px}
+.panel{padding:16px;border-radius:18px}
+.panel-head{margin-bottom:12px;padding-bottom:11px}
+.cards-grid{gap:11px}
+.form-add{padding:15px;border-radius:18px}
+.field input,.field select,.field textarea{padding:12px 14px;border-radius:12px}
+.btn{padding:11px 15px;border-radius:12px}
+
+/* notificações em tempo real */
+.live-notify-stack{
+  position:fixed;
+  right:20px;
+  top:82px;
+  z-index:9998;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  width:min(360px,calc(100vw - 32px));
+  pointer-events:none;
+}
+.live-notify{
+  border:1px solid rgba(201,169,110,.22);
+  background:rgba(8,8,16,.96);
+  backdrop-filter:blur(28px);
+  border-radius:18px;
+  box-shadow:0 28px 90px rgba(0,0,0,.65);
+  padding:13px 14px;
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+  animation:liveIn .22s ease;
+}
+.live-notify-icon{
+  width:34px;height:34px;border-radius:11px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#050505;font-weight:900;flex-shrink:0;
+}
+.live-notify-title{font-weight:800;font-size:13.5px;color:var(--text)}
+.live-notify-body{font-size:12px;color:var(--muted);line-height:1.45;margin-top:2px}
+@keyframes liveIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.notif-pill{
+  position:absolute;
+  min-width:17px;height:17px;
+  padding:0 5px;
+  border-radius:999px;
+  background:var(--red);
+  color:white;
+  font-size:10px;
+  font-weight:900;
+  display:none;
+  place-items:center;
+  transform:translate(12px,-12px);
+}
+.notif-open{position:relative}
+
+/* botão voltar da página pública */
+.public-back-btn{
+  margin:0 0 14px;
+  width:auto;
+  min-height:44px;
+  border-radius:14px;
+}
+
+/* CELULAR: vira experiência de app */
+@media(max-width:768px){
+  body{font-size:13.5px;padding-bottom:92px}
+  .sidebar{display:none!important}
+  .main{margin-left:0!important;padding:10px 10px 100px!important}
+  .topbar{
+    position:relative!important;
+    top:0!important;
+    margin:8px 0 10px!important;
+    padding:14px!important;
+    border-radius:22px!important;
+    display:block!important;
+  }
+  .titleblock h2{font-size:32px!important;line-height:.95}
+  .titleblock p{font-size:13px!important;margin-top:5px}
+  .top-actions{
+    margin-top:14px;
+    display:grid!important;
+    grid-template-columns:48px 48px 1fr;
+    gap:10px;
+  }
+  .top-actions .btn-icon{
+    width:48px;height:48px;border-radius:14px;
+  }
+  .top-actions .btn.btn-ghost{
+    grid-column:1/-1;
+    width:100%;
+    min-height:54px;
+    font-size:15px!important;
+  }
+  .top-actions .btn.btn-primary{
+    grid-column:1/-1;
+    width:100%;
+    min-height:56px;
+    font-size:15px!important;
+  }
+
+  /* menu horizontal antigo sai do topo e vira bottom nav */
+  .mobile-nav{
+    position:fixed!important;
+    left:12px!important;
+    right:12px!important;
+    bottom:12px!important;
+    z-index:9997!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,1fr)!important;
+    gap:6px!important;
+    margin:0!important;
+    padding:8px!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    border-radius:24px!important;
+    background:rgba(8,8,16,.96)!important;
+    backdrop-filter:blur(30px) saturate(1.25)!important;
+    box-shadow:0 18px 60px rgba(0,0,0,.75),0 0 0 1px rgba(201,169,110,.08)!important;
+    overflow:visible!important;
+  }
+  .mobile-nav .nav-btn{
+    min-width:0!important;
+    width:100%!important;
+    padding:7px 4px!important;
+    border-radius:17px!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:3px!important;
+    font-size:9.8px!important;
+    line-height:1.05!important;
+    text-align:center!important;
+    border:1px solid transparent!important;
+    background:transparent!important;
+    color:var(--muted)!important;
+  }
+  .mobile-nav .nav-btn.active{
+    background:rgba(201,169,110,.13)!important;
+    border-color:rgba(201,169,110,.18)!important;
+    color:var(--gold2)!important;
+  }
+  .mobile-nav .nav-btn .n-icon{
+    width:27px!important;height:27px!important;
+    font-size:13px!important;
+    border-radius:10px!important;
+  }
+  .mobile-nav .nav-fab{
+    transform:translateY(-17px);
+    background:linear-gradient(135deg,var(--gold),var(--gold2))!important;
+    color:#040404!important;
+    box-shadow:0 12px 36px rgba(201,169,110,.38)!important;
+    border-color:rgba(201,169,110,.38)!important;
+  }
+  .mobile-nav .nav-fab .n-icon{
+    background:rgba(0,0,0,.10)!important;
+    color:#040404!important;
+    width:36px!important;height:36px!important;
+    font-size:18px!important;
+  }
+
+  .view{margin-top:12px!important}
+  .command-hero{
+    padding:18px!important;
+    border-radius:22px!important;
+    margin-bottom:12px!important;
+  }
+  .ch-inner{display:block!important}
+  .ch-inner h1{font-size:34px!important;line-height:.95}
+  .ch-inner p{font-size:13.5px!important;line-height:1.55}
+  .ch-inner .btn{width:100%;margin-top:15px;min-height:52px}
+
+  .dash-section-label{
+    margin:14px 4px 8px!important;
+    font-size:9px!important;
+  }
+  .stats-grid,.stats-grid-2,.stats-grid-3{
+    grid-template-columns:repeat(2,1fr)!important;
+    gap:9px!important;
+    margin-bottom:10px!important;
+  }
+  .stat-card{
+    min-height:104px!important;
+    padding:14px!important;
+    border-radius:18px!important;
+  }
+  .sc-value{font-size:31px!important}
+  .sc-label{font-size:8.5px!important;letter-spacing:.15em}
+  .sc-note{font-size:10.8px!important}
+  .content-grid{grid-template-columns:1fr!important;gap:10px!important}
+  .panel{padding:16px!important;border-radius:20px!important}
+  .panel-title{font-size:22px!important}
+
+  .form-add{
+    padding:16px!important;
+    border-radius:22px!important;
+    gap:8px!important;
+  }
+  .form-add-row{grid-template-columns:1fr!important;gap:8px!important}
+  .field{margin-bottom:10px!important}
+  .field input,.field select,.field textarea{
+    min-height:54px!important;
+    font-size:15px!important;
+    border-radius:16px!important;
+  }
+  .btn{min-height:48px;font-size:14px}
+  .cards-grid{grid-template-columns:1fr!important;gap:10px!important}
+  .agenda-filters{padding-bottom:8px!important;margin-bottom:10px!important}
+  .af-btn{padding:9px 13px!important;border-radius:13px!important;font-size:12px!important}
+  .tl-block{gap:8px!important;padding:8px 0!important}
+  .tl-timestamp{min-width:42px!important;font-size:10.5px!important}
+  .tl-apt{padding:12px!important;border-radius:16px!important}
+  .apt-actions{gap:6px}
+  .act-btn{flex:1 1 calc(50% - 6px);justify-content:center;min-height:32px}
+
+  .public-page{padding:12px 10px 94px!important}
+  .pub-hero{padding:26px 22px!important;border-radius:26px!important;margin-bottom:12px!important}
+  .pub-hero h1{font-size:42px!important}
+  .pub-body{grid-template-columns:1fr!important;gap:12px!important}
+  .choice{padding:13px!important;border-radius:18px!important}
+  .choice .c-icon{width:48px!important;height:48px!important}
+  .choice-title{font-size:16px!important}
+  .choice-sub{font-size:13px!important}
+  .choice-right{font-size:22px!important}
+
+  .live-notify-stack{
+    left:12px;right:12px;top:12px;width:auto;
+  }
+}
+
+/* celular pequeno */
+@media(max-width:430px){
+  .topbar{padding:13px!important}
+  .titleblock h2{font-size:30px!important}
+  .command-hero{padding:16px!important}
+  .ch-inner h1{font-size:31px!important}
+  .stats-grid,.stats-grid-2,.stats-grid-3{gap:8px!important}
+  .stat-card{min-height:96px!important;padding:12px!important}
+  .sc-value{font-size:28px!important}
+  .sc-icon{font-size:17px!important;right:11px!important;top:11px!important}
+}
+
+/* celular muito estreito */
+@media(max-width:360px){
+  .stats-grid,.stats-grid-2,.stats-grid-3{grid-template-columns:1fr!important}
+  .mobile-nav .nav-btn{font-size:9px!important}
+}
+
 </style>
 </head>
 <body>
@@ -2382,6 +2650,207 @@ function resetPublic(){
 function copyPublicLink(){if(!state.empresa)return;const link=publicUrl(state.empresa.slug);navigator.clipboard?.writeText(link);toast("Link copiado: "+link,"ok");}
 function openPublic(){location.href="#agendar/"+state.empresa.slug;location.reload();}
 async function logout(){await db.auth.signOut();state.user=null;state.perfil=null;state.empresa=null;state.clientes=[];state.servicos=[];state.profissionais=[];state.agendamentos=[];state.pagamentos=[];location.href=location.pathname;}
+
+/* ══════════════════════════════════════════════════════
+   AJUSTE FINAL ARLLISON — JS OVERRIDES
+   Realtime, notificações, botão voltar público, bottom nav.
+══════════════════════════════════════════════════════ */
+
+let agendaRealtimeChannel=null;
+let notifCount=0;
+
+function safeSetText(id,value){
+  const el=document.getElementById(id);
+  if(el) el.textContent=value;
+}
+
+function ensureLiveStack(){
+  let stack=document.getElementById("liveNotifyStack");
+  if(!stack){
+    stack=document.createElement("div");
+    stack.id="liveNotifyStack";
+    stack.className="live-notify-stack";
+    document.body.appendChild(stack);
+  }
+  return stack;
+}
+
+function showLiveNotification(title,body,icon="🔔"){
+  const stack=ensureLiveStack();
+  const item=document.createElement("div");
+  item.className="live-notify";
+  item.innerHTML=`<div class="live-notify-icon">${icon}</div><div><div class="live-notify-title">${title}</div><div class="live-notify-body">${body||""}</div></div>`;
+  stack.prepend(item);
+  while(stack.children.length>3) stack.lastChild.remove();
+  setTimeout(()=>{item.style.opacity="0";item.style.transform="translateY(-8px) scale(.98)";},5200);
+  setTimeout(()=>item.remove(),5800);
+}
+
+function updateNotifBadge(){
+  let btn=document.querySelector(".top-actions .btn-icon[title='Notificações']");
+  if(!btn) return;
+  btn.classList.add("notif-open");
+  let badge=btn.querySelector(".notif-pill");
+  if(!badge){
+    badge=document.createElement("span");
+    badge.className="notif-pill";
+    btn.appendChild(badge);
+  }
+  badge.textContent=String(notifCount);
+  badge.style.display=notifCount>0?"grid":"none";
+}
+
+function setupRealtime(){
+  if(!state?.empresa?.id || !db?.channel) return;
+
+  if(agendaRealtimeChannel){
+    try{ db.removeChannel(agendaRealtimeChannel); }catch(e){}
+    agendaRealtimeChannel=null;
+  }
+
+  agendaRealtimeChannel=db.channel("agendapro-realtime-"+state.empresa.id)
+    .on("postgres_changes",{
+      event:"*",
+      schema:"public",
+      table:"agenda_agendamentos",
+      filter:"empresa_id=eq."+state.empresa.id
+    },async(payload)=>{
+      const row=payload.new || payload.old || {};
+      if(payload.eventType==="INSERT"){
+        notifCount++;
+        updateNotifBadge();
+        const nome=row.cliente_nome || "Cliente";
+        const serv=row.servico_nome || "agendamento";
+        const hora=row.hora ? " às "+row.hora : "";
+        showLiveNotification("Novo agendamento",`${nome} acabou de agendar ${serv}${hora}.`,"🔔");
+      }else if(payload.eventType==="UPDATE"){
+        const nome=row.cliente_nome || "Cliente";
+        const status=normStatus(row.status);
+        showLiveNotification("Agendamento atualizado",`${nome} agora está como ${status}.`,"✅");
+      }
+      await loadAll();
+    })
+    .subscribe();
+}
+
+function ensurePublicBackButton(){
+  const pub=document.getElementById("publicView");
+  const wrap=pub?.querySelector(".pub-wrap");
+  if(!wrap) return;
+  if(document.getElementById("publicBackBtn")) return;
+  const btn=document.createElement("button");
+  btn.id="publicBackBtn";
+  btn.className="btn btn-ghost public-back-btn";
+  btn.innerHTML="← Voltar para o início";
+  btn.onclick=voltarInicioPublico;
+  wrap.prepend(btn);
+}
+
+function voltarInicioPublico(){
+  history.pushState(null,"",location.pathname);
+  document.getElementById("publicView").style.display="none";
+  document.getElementById("dashboardView").style.display=state?.empresa?"block":"none";
+  document.getElementById("landingView").style.display=state?.empresa?"none":"block";
+  if(state?.empresa) setView("dashboard");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* substituir nav mobile: menu embaixo no celular, sidebar no PC */
+function buildMobileNav(){
+  const el=document.getElementById("mobileNav");
+  if(!el) return;
+  el.innerHTML=`
+    <button class="nav-btn" onclick="setView('dashboard')"><span class="n-icon">📊</span>Início</button>
+    <button class="nav-btn" onclick="setView('agenda')"><span class="n-icon">📅</span>Agenda</button>
+    <button class="nav-btn nav-fab" onclick="setView('agenda');setTimeout(()=>document.getElementById('agCliente')?.focus(),250)"><span class="n-icon">+</span>Novo</button>
+    <button class="nav-btn" onclick="setView('clientes')"><span class="n-icon">👥</span>Clientes</button>
+    <button class="nav-btn" onclick="setView('config')"><span class="n-icon">⚙</span>Config</button>
+  `;
+}
+
+/* abrir página pública sem sair/recarregar */
+function openPublic(){
+  if(!state?.empresa?.slug) return;
+  history.pushState(null,"","#agendar/"+state.empresa.slug);
+  loadPublic(state.empresa.slug);
+}
+
+/* dashboard seguro: não quebra se algum id não existir */
+function renderStats(){
+  const hoje=hojeISO();
+  const mes=mesPrefixo();
+  const ags=state.agendamentos||[];
+
+  const st=s=>ags.filter(a=>normStatus(a.status)===s).length;
+  const agHoje=ags.filter(a=>a.data===hoje).length;
+  const pendentes=st("Pendente");
+  const confirmados=st("Confirmado");
+  const reagendados=st("Reagendado");
+  const concluidos=st("Concluído");
+  const recusados=st("Recusado");
+  const excluidos=st("Excluído");
+  const total=ags.length;
+  const taxa=total>0?Math.round((confirmados+concluidos)/total*100):0;
+
+  const fatHoje=ags
+    .filter(a=>a.data===hoje && ["Confirmado","Concluído"].includes(normStatus(a.status)))
+    .reduce((s,a)=>s+Number(a.valor||0),0);
+  const fatMes=ags
+    .filter(a=>a.data && a.data.startsWith(mes) && normStatus(a.status)!=="Excluído" && normStatus(a.status)!=="Recusado")
+    .reduce((s,a)=>s+Number(a.valor||0),0);
+
+  safeSetText("statHoje",agHoje);
+  safeSetText("statPendentes",pendentes);
+  safeSetText("statConfirmados",confirmados);
+  safeSetText("statReagendados",reagendados);
+  safeSetText("statConcluidos",concluidos);
+  safeSetText("statRecusados",recusados);
+  safeSetText("statExcluidos",excluidos);
+  safeSetText("statTaxaConf",taxa+"%");
+  safeSetText("statFatHoje",money(fatHoje).replace(",00",""));
+  safeSetText("statFatMes",money(fatMes).replace(",00",""));
+  safeSetText("statClientes",(state.clientes||[]).filter(c=>c.ativo!==false).length);
+  safeSetText("statServicos",(state.servicos||[]).filter(s=>s.status==="ativo").length);
+  safeSetText("statProfissionais",(state.profissionais||[]).filter(p=>p.status==="ativo").length);
+  safeSetText("statTotal",total);
+
+  safeSetText("fc-todos",total);
+  safeSetText("fc-pendente",pendentes);
+  safeSetText("fc-confirmado",confirmados);
+  safeSetText("fc-reagendado",reagendados);
+  safeSetText("fc-concluido",concluidos);
+  safeSetText("fc-recusado",recusados);
+  safeSetText("fc-excluido",excluidos);
+
+  updateNotifBadge();
+}
+
+/* wrappers para ativar realtime e botão voltar sem quebrar o resto */
+const __oldShowDashboard=showDashboard;
+showDashboard=function(){
+  __oldShowDashboard();
+  buildMobileNav();
+  setupRealtime();
+  updateNotifBadge();
+};
+
+const __oldLoadPublic=loadPublic;
+loadPublic=async function(slug){
+  await __oldLoadPublic(slug);
+  ensurePublicBackButton();
+};
+
+const __oldLoadAll=loadAll;
+loadAll=async function(){
+  await __oldLoadAll();
+  updateNotifBadge();
+};
+
+window.addEventListener("hashchange",()=>{
+  const slug=getPublicSlug();
+  if(slug) loadPublic(slug);
+});
+
 </script>
 </body>
 </html>
