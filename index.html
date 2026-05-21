@@ -7,6 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* proteção inicial: evita X/modal aparecendo se o CSS externo atrasar */
+.auth-overlay,.action-overlay,.edit-overlay,.confirm-overlay,.dashboard,.public-page{display:none}
+.auth-overlay.open,.action-overlay.open,.edit-overlay.open,.confirm-overlay.open{display:flex}
+</style>
+
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
