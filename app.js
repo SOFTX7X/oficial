@@ -275,6 +275,44 @@ function showDashboard() {
   startAutoSync();
 }
 
+
+function openMobileMenu() {
+  const overlay = $('mobileMenuOverlay');
+  const drawer = $('mobileMenuDrawer');
+
+  if (overlay) overlay.classList.add('open');
+  if (drawer) drawer.classList.add('open');
+
+  document.body.classList.add('menu-open');
+}
+
+function closeMobileMenu() {
+  const overlay = $('mobileMenuOverlay');
+  const drawer = $('mobileMenuDrawer');
+
+  if (overlay) overlay.classList.remove('open');
+  if (drawer) drawer.classList.remove('open');
+
+  document.body.classList.remove('menu-open');
+}
+
+function menuOpenPublic() {
+  closeMobileMenu();
+  openPublic();
+}
+
+function menuCopyPublicLink() {
+  closeMobileMenu();
+  copyPublicLink();
+}
+
+function menuNotifications() {
+  closeMobileMenu();
+  clearNotifDot();
+  const stack = $('notifStack');
+  if (stack) stack.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 // ── VIEW NAVIGATION ──
 function setView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -623,6 +661,29 @@ function startAutoSync() {
   }, 5000);
 }
 
+
+function preserveAgendaFormValues(callback) {
+  const values = {
+    cliente: $('agCliente')?.value || '',
+    telefone: $('agTelefone')?.value || '',
+    servico: $('agServico')?.value || '',
+    profissional: $('agProfissional')?.value || '',
+    data: $('agData')?.value || '',
+    hora: $('agHora')?.value || '',
+    status: $('agStatus')?.value || ''
+  };
+
+  if (typeof callback === 'function') callback();
+
+  if ($('agCliente') && values.cliente) $('agCliente').value = values.cliente;
+  if ($('agTelefone') && values.telefone) $('agTelefone').value = values.telefone;
+  if ($('agServico') && values.servico && [...$('agServico').options].some(o => o.value === values.servico)) $('agServico').value = values.servico;
+  if ($('agProfissional') && values.profissional && [...$('agProfissional').options].some(o => o.value === values.profissional)) $('agProfissional').value = values.profissional;
+  if ($('agData') && values.data) $('agData').value = values.data;
+  if ($('agHora') && values.hora) $('agHora').value = values.hora;
+  if ($('agStatus') && values.status) $('agStatus').value = values.status;
+}
+
 // ── LOAD ALL ──
 async function loadAll() {
   if (!state.empresa) return;
@@ -654,21 +715,21 @@ function isEditingConfig(){
 }
 
 function renderAll() {
-  renderStats();
-  renderDashList();
-  renderCalendar();
-  renderSelects();
-  renderTimeline();
-  renderClientes();
-  renderServicos();
-  renderProfissionais();
-  renderFinanceiro();
+  preserveAgendaFormValues(() => {
+    renderStats();
+    renderDashList();
+    renderCalendar();
+    renderSelects();
+    renderTimeline();
+    renderClientes();
+    renderServicos();
+    renderProfissionais();
+    renderFinanceiro();
 
-  // Não recarrega Configurações enquanto o usuário está digitando.
-  // Evita apagar Instagram, site, endereço, cidade, slug etc. durante autosync/realtime.
-  if(!isEditingConfig()){
-    renderConfig();
-  }
+    const active = document.activeElement;
+    const editingConfig = active && active.closest && active.closest('#view-config');
+    if (!editingConfig) renderConfig();
+  });
 }
 
 // ── STATS ──
@@ -753,17 +814,36 @@ function renderCalendar() {
 
 // ── SELECTS ──
 function renderSelects() {
-  const svc = $('agServico');
-  if (svc) {
-    svc.innerHTML = '<option value="">Serviço</option>' +
-      (state.servicos || []).filter(s => s.status === 'ativo')
-        .map(s => `<option value="${s.id}">${s.nome} — ${money(s.preco)}</option>`).join('');
+  const agS = $('agServico');
+  const agP = $('agProfissional');
+
+  const selectedServico = agS ? agS.value : '';
+  const selectedProfissional = agP ? agP.value : '';
+
+  if (agS) {
+    agS.innerHTML =
+      '<option value="">Escolha serviço</option>' +
+      (state.servicos || [])
+        .filter(s => (s.status || 'ativo') === 'ativo')
+        .map(s => `<option value="${s.id}">${s.nome} — ${money(s.preco).replace(',00','')}</option>`)
+        .join('');
+
+    if (selectedServico && [...agS.options].some(o => o.value === selectedServico)) {
+      agS.value = selectedServico;
+    }
   }
-  const prof = $('agProfissional');
-  if (prof) {
-    prof.innerHTML = '<option value="">Profissional</option>' +
-      (state.profissionais || []).filter(p => p.status === 'ativo')
-        .map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+
+  if (agP) {
+    agP.innerHTML =
+      '<option value="">Escolha profissional</option>' +
+      (state.profissionais || [])
+        .filter(p => (p.status || 'ativo') === 'ativo')
+        .map(p => `<option value="${p.id}">${p.nome}</option>`)
+        .join('');
+
+    if (selectedProfissional && [...agP.options].some(o => o.value === selectedProfissional)) {
+      agP.value = selectedProfissional;
+    }
   }
 }
 
