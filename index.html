@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -21,7 +20,7 @@
 ══════════════════════════════════════ -->
 <div id="landingView">
   <nav class="land-nav" id="landNav">
-    <div class="nav-brand" onclick="scrollTo(0,0)">
+    <div class="nav-brand" onclick="window.scrollTo(0,0)">
       <div class="nav-dot">✦</div>
       AgendaPro
     </div>
@@ -253,9 +252,9 @@
       </div>
       <!-- CADASTRO -->
       <div id="formCadastro" style="display:none">
-        <div class="auth-form-title" id="cadTitle">Criar sua conta</div>
-        <p class="auth-form-sub" id="cadSub">Configure em 3 etapas simples.</p>
-        <div class="stepper" id="stepper">
+        <div class="auth-form-title">Criar sua conta</div>
+        <p class="auth-form-sub">Configure em 3 etapas simples.</p>
+        <div class="stepper">
           <div class="step-dot active" id="st1"></div>
           <div class="step-dot" id="st2"></div>
           <div class="step-dot" id="st3"></div>
@@ -275,7 +274,12 @@
           <div class="form-gap">
             <div class="field"><label>Nome do negócio</label><input id="empNome" placeholder="Ex: Nails da Ana" oninput="autoSlug()"></div>
             <div class="field-row">
-              <div class="field"><label>Área de atuação</label><select id="empCategoria"></select></div>
+              <div class="field">
+                <label>Área de atuação</label>
+                <select id="empCategoria">
+                  <option value="">Carregando...</option>
+                </select>
+              </div>
               <div class="field"><label>WhatsApp</label><input id="empWhatsapp" placeholder="(92) 99999-9999"></div>
             </div>
             <div class="field"><label>Link personalizado</label><input id="empSlug" placeholder="nails-da-ana"></div>
@@ -297,7 +301,7 @@
             <div class="field"><label>Especialidade</label><input id="profEsp" placeholder="Ex: Manicure"></div>
             <div class="form-actions">
               <button class="btn btn-ghost" onclick="goStep2()">← Voltar</button>
-              <button class="btn btn-primary" style="flex:1" onclick="finalizarCadastro()">Criar painel →</button>
+              <button class="btn btn-primary" style="flex:1" id="btnFinalizar" onclick="finalizarCadastro()">Criar painel →</button>
             </div>
           </div>
         </div>
@@ -309,7 +313,7 @@
 <!-- ══════════════════════════════════════
      DASHBOARD
 ══════════════════════════════════════ -->
-<section id="dashboardView">
+<section id="dashboardView" style="display:none">
   <aside class="sidebar" id="sidebar">
     <div class="side-brand"><div class="nav-dot">✦</div>AgendaPro</div>
     <div class="side-nav-section">
@@ -367,7 +371,7 @@
     <nav class="mobile-nav-bar" id="mobileNavBar">
       <button class="mob-nav-btn" onclick="setView('dashboard')"><span class="mni">📊</span>Início</button>
       <button class="mob-nav-btn" onclick="setView('agenda')"><span class="mni">📅</span>Agenda</button>
-      <button class="mob-nav-btn mob-nav-fab" onclick="setView('agenda');setTimeout(()=>document.getElementById('agCliente')?.focus(),200)"><span class="mni">+</span>Novo</button>
+      <button class="mob-nav-btn mob-nav-fab" onclick="setView('agenda');setTimeout(()=>{var el=document.getElementById('agCliente');if(el)el.focus()},200)"><span class="mni">+</span>Novo</button>
       <button class="mob-nav-btn" onclick="setView('clientes')"><span class="mni">👥</span>Clientes</button>
       <button class="mob-nav-btn" onclick="setView('config')"><span class="mni">⚙</span>Config</button>
     </nav>
@@ -577,7 +581,7 @@ Aguardamos você!</textarea></div>
 <!-- ══════════════════════════════════════
      PÁGINA PÚBLICA
 ══════════════════════════════════════ -->
-<section id="publicView">
+<section id="publicView" style="display:none">
   <div class="pub-wrap">
     <button class="pub-back" onclick="voltarDaPublica()">← Voltar</button>
     <div class="pub-hero">
@@ -586,7 +590,7 @@ Aguardamos você!</textarea></div>
       <p id="pubDescEmpresa">Escolha seu serviço, profissional, data e horário.</p>
       <div id="pubSociais" class="pub-socials" style="display:none"></div>
     </div>
-    <div id="pubConfirmScreen" class="pub-confirm-screen">
+    <div id="pubConfirmScreen" class="pub-confirm-screen" style="display:none">
       <div class="pub-tick">✓</div>
       <h2>Agendamento enviado!</h2>
       <p>Entraremos em contato pelo WhatsApp para confirmar seu horário.</p>
