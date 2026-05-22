@@ -1520,3 +1520,42 @@ body.menu-open { overflow:hidden!important; touch-action:none; }
   .agenda-meta-grid span{font-size:11px}
 }
 
+
+
+
+/* PATCH SEGURO FINAL — NÃO QUEBRA LÓGICA */
+html,body{max-width:100%!important;overflow-x:hidden!important}
+body.menu-open{overflow:hidden!important;touch-action:none}
+.view,.dash-main,.panel,.card,.cards-grid,.timeline,#agendaTimeline,#clientesCards,#servicosCards,#profCards,.client-card,.svc-card,.prof-card,.tl-card,.apt-card{overflow:visible!important}
+.topbar{gap:12px!important}
+.topbar-actions{flex-wrap:wrap!important;gap:8px!important;justify-content:flex-end!important}
+.topbar-actions .btn,.topbar-actions .btn-icon{min-height:38px!important}
+#notifStack,.notif-stack,.live-notify-stack{max-width:min(360px,calc(100vw - 24px))!important;right:12px!important;left:auto!important}
+#notifStack .notif-item:nth-child(n+3),.notif-stack .notif-item:nth-child(n+3){display:none!important}
+.action-menu,.action-menu-wrap{position:absolute!important;top:12px!important;right:12px!important;z-index:90!important}
+.action-menu-btn{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;border-radius:13px!important;display:grid!important;place-items:center!important;background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.13)!important;color:var(--text2)!important;font-size:22px!important;font-weight:900!important;line-height:1!important;padding:0!important}
+.action-dropdown,.action-menu-dropdown{position:absolute!important;top:46px!important;right:0!important;min-width:190px!important;max-width:calc(100vw - 24px)!important;z-index:99999!important;border-radius:16px!important;background:rgba(14,14,18,.98)!important;border:1px solid rgba(255,255,255,.13)!important;box-shadow:0 22px 70px rgba(0,0,0,.75)!important;overflow:hidden!important}
+.action-dropdown.open,.action-menu-dropdown.open{display:block!important}
+.action-item,.action-menu-item{min-height:40px!important;padding:10px 12px!important;border-radius:12px!important;font-size:13px!important}
+.client-card,.svc-card,.tl-card,.apt-card{padding-right:60px!important}
+.prof-card{padding-top:54px!important}
+#agendaTimeline{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))!important;gap:14px!important;align-items:stretch!important}
+.tl-block,.tl-card,.apt-card{border-radius:20px!important}
+.tl-content,.tl-apt,.apt-card{width:100%!important;min-width:0!important}
+.tl-apt-main,.apt-card>div:first-child{min-width:0!important}
+.apt-name,.tl-apt-info,.apt-meta{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.apt-actions{width:100%!important;display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+.act-btn{min-height:36px!important;border-radius:11px!important;padding:8px 11px!important;white-space:nowrap!important}
+.field input,.field select,.field textarea,input,select,textarea{max-width:100%!important;min-width:0!important}
+.mobile-menu-overlay{display:none;position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.mobile-menu-overlay.open{display:block}
+.mobile-menu-drawer{position:fixed!important;top:0!important;right:0!important;bottom:0!important;width:min(88vw,370px);height:100dvh!important;z-index:99991!important;background:rgba(14,14,18,.985);border-left:1px solid var(--border2);box-shadow:-30px 0 90px rgba(0,0,0,.72);transform:translateX(105%);transition:transform .22s ease;display:flex;flex-direction:column;overflow:hidden!important}
+.mobile-menu-drawer.open{transform:translateX(0)}
+.mobile-menu-header{min-height:76px;padding:18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0}
+.mobile-menu-close{width:42px;height:42px;border-radius:13px;border:1px solid var(--border2);background:rgba(255,255,255,.055);color:var(--text2);font-size:22px}
+.mobile-menu-body{flex:1;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch;padding:14px 18px 24px}
+.mobile-menu-label{margin:18px 0 9px;font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.16em}
+.mobile-menu-item{width:100%;min-height:54px;display:flex;align-items:center;gap:13px;padding:12px 14px;margin-bottom:7px;border-radius:15px;border:1px solid transparent;background:transparent;color:var(--text2);font-size:15px;font-weight:700;text-align:left}
+.mobile-menu-item span{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.045)}
+.mobile-menu-logout{width:100%;min-height:48px;margin-top:22px;border-radius:14px;border:1px solid var(--border2);background:rgba(255,255,255,.035);color:var(--text2);font-size:14px;font-weight:700}
+@media(max-width:768px){.dash-main{max-width:100%!important;overflow-x:hidden!important;padding-bottom:104px!important}.topbar{padding:16px!important;border-radius:20px!important}.topbar-actions{width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important}.topbar-actions .btn,.topbar-actions .btn-icon{width:100%!important}#agendaTimeline,#clientesCards,#servicosCards,#profCards{grid-template-columns:1fr!important}.client-card,.svc-card,.tl-card,.apt-card{padding-right:58px!important}.apt-actions{display:grid!important;grid-template-columns:1fr!important}.act-btn{width:100%!important;justify-content:center!important}}
