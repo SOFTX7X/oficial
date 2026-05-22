@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   AGENDAPRO — app.js COMPLETO
+   AGENDAPRO — app.js CORRIGIDO COMPLETO
 ═══════════════════════════════════════════════ */
 
 // ── STATE ──
@@ -23,15 +23,40 @@ let realtimeChannel = null;
 
 // ── UTILS ──
 function $(id) { return document.getElementById(id); }
-function setText(id, v) { const el = $(id); if (el) el.textContent = v; }
-function money(v) { return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-function slugify(s) { return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60); }
+
+function setText(id, v) {
+  const el = $(id);
+  if (el) el.textContent = v;
+}
+
+function money(v) {
+  return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function slugify(s) {
+  return (s || '').toString()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '').substring(0, 60);
+}
+
 function hojeISO() { return new Date().toISOString().slice(0, 10); }
 function mesPrefixo() { return new Date().toISOString().slice(0, 7); }
 function publicUrl(slug) { return location.origin + location.pathname + '#agendar/' + slug; }
 function initial(name) { return (name || '?').trim().substring(0, 1).toUpperCase(); }
-function formatDate(d) { if (!d) return '—'; const [y, m, dd] = d.split('-'); return `${dd}/${m}/${y}`; }
-function buildWaLink(tel, msg) { const n = (tel || '').replace(/\D/g, ''); if (!n) return null; const f = n.startsWith('55') ? n : '55' + n; return 'https://wa.me/' + f + '?text=' + encodeURIComponent(msg); }
+
+function formatDate(d) {
+  if (!d) return '—';
+  const [y, m, dd] = d.split('-');
+  return `${dd}/${m}/${y}`;
+}
+
+function buildWaLink(tel, msg) {
+  const n = (tel || '').replace(/\D/g, '');
+  if (!n) return null;
+  const f = n.startsWith('55') ? n : '55' + n;
+  return 'https://wa.me/' + f + '?text=' + encodeURIComponent(msg);
+}
 
 function normStatus(s) {
   const r = (s || 'pendente').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -46,7 +71,11 @@ function normStatus(s) {
 
 function badgeClass(s) {
   const n = normStatus(s);
-  const m = { Confirmado: 'badge-green', Pendente: 'badge-yellow', Concluído: 'badge-blue', Recusado: 'badge-red', Reagendado: 'badge-purple', Excluído: 'badge-gray' };
+  const m = {
+    Confirmado: 'badge-green', Pendente: 'badge-yellow',
+    'Concluído': 'badge-blue', Recusado: 'badge-red',
+    Reagendado: 'badge-purple', 'Excluído': 'badge-gray'
+  };
   return m[n] || 'badge-gray';
 }
 
@@ -69,7 +98,6 @@ function podeTerAcoes(a) {
 
 // ── TOAST / NOTIF ──
 function toast(msg, type = 'info') {
-  const iconMap = { ok: '✓', err: '✕', warn: '⚠', info: 'ℹ' };
   const typeMap = { ok: 'ok', err: 'err', warn: 'info', info: 'info' };
   showNotif(msg, '', typeMap[type] || 'info');
 }
@@ -95,9 +123,8 @@ function showNotif(title, msg = '', type = 'info', duration = 5000) {
   while (stack.children.length > 4) stack.lastChild.remove();
   setTimeout(() => {
     item.classList.add('out');
-    setTimeout(() => item.remove(), 450);
+    setTimeout(() => { if (item.parentElement) item.remove(); }, 450);
   }, duration);
-  // badge
   const dot = $('notifDot');
   if (dot) dot.classList.add('on');
 }
@@ -109,7 +136,8 @@ function clearNotifDot() {
 
 // ── SCROLL NAV ──
 window.addEventListener('scroll', () => {
-  $('landNav')?.classList.toggle('scrolled', scrollY > 40);
+  const nav = $('landNav');
+  if (nav) nav.classList.toggle('scrolled', scrollY > 40);
 });
 
 // ── HASH ROUTING ──
@@ -118,56 +146,129 @@ window.addEventListener('hashchange', () => {
   if (slug) loadPublic(slug);
 });
 
+// ── FECHAR MENUS AO CLICAR FORA ──
+document.addEventListener('click', closeAllMenus);
+
 // ── INIT ──
-window.addEventListener('load', init);
+window.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-  buildMobileNav();
-  const slug = getPublicSlug();
-  if (slug) { await loadPublic(slug); return; }
+  // Carrega categorias primeiro (para o select do cadastro)
   await loadCategorias();
-  const { data: { session } } = await db.auth.getSession();
-  if (session?.user) {
-    const ok = await carregarConta(session.user);
-    if (ok) return;
-    await db.auth.signOut();
+
+  const slug = getPublicSlug();
+  if (slug) {
+    await loadPublic(slug);
+    return;
+  }
+
+  // Verifica sessão ativa
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (session?.user) {
+      const ok = await carregarConta(session.user);
+      if (!ok) {
+        await db.auth.signOut();
+      }
+    }
+  } catch (e) {
+    console.error('Erro ao verificar sessão:', e);
   }
 }
 
 function getPublicSlug() {
-  if (location.hash.startsWith('#agendar/')) return location.hash.replace('#agendar/', '').trim();
+  if (location.hash.startsWith('#agendar/')) {
+    return location.hash.replace('#agendar/', '').trim();
+  }
   return null;
 }
 
 async function carregarConta(user) {
-  const { data: perfil, error: pe } = await db.from('agenda_perfis').select('*').eq('auth_user_id', user.id).single();
-  if (pe || !perfil) return false;
-  const { data: empresa, error: ee } = await db.from('agenda_empresas').select('*').eq('id', perfil.empresa_id).single();
-  if (ee || !empresa) return false;
-  state.user = user; state.perfil = perfil; state.empresa = empresa;
-  showDashboard();
-  await loadAll();
-  return true;
+  try {
+    const { data: perfil, error: pe } = await db.from('agenda_perfis')
+      .select('*').eq('auth_user_id', user.id).single();
+    if (pe || !perfil) { console.warn('Perfil não encontrado para', user.id); return false; }
+
+    const { data: empresa, error: ee } = await db.from('agenda_empresas')
+      .select('*').eq('id', perfil.empresa_id).single();
+    if (ee || !empresa) { console.warn('Empresa não encontrada para perfil', perfil.id); return false; }
+
+    state.user = user;
+    state.perfil = perfil;
+    state.empresa = empresa;
+    showDashboard();
+    await loadAll();
+    return true;
+  } catch (e) {
+    console.error('Erro em carregarConta:', e);
+    return false;
+  }
 }
 
+// ── CARREGAR CATEGORIAS ──
 async function loadCategorias() {
-  const { data } = await db.from('agenda_categorias').select('*').order('nome');
-  state.categorias = data || [];
+  try {
+    const { data, error } = await db.from('agenda_categorias').select('*').order('nome');
+    if (error) {
+      console.warn('Erro ao carregar categorias:', error.message);
+      state.categorias = [];
+    } else {
+      state.categorias = data || [];
+    }
+  } catch (e) {
+    console.warn('Exceção ao carregar categorias:', e);
+    state.categorias = [];
+  }
+  preencherSelectCategorias();
+}
+
+function preencherSelectCategorias() {
   const sel = $('empCategoria');
-  if (sel) sel.innerHTML = (state.categorias).map(c => `<option value="${c.id}">${c.icone || ''} ${c.nome}</option>`).join('');
+  if (!sel) return;
+
+  if (!state.categorias || state.categorias.length === 0) {
+    // Fallback com categorias padrão caso a tabela esteja vazia ou inacessível
+    const fallback = [
+      { id: 'beleza', nome: 'Beleza & Estética', icone: '💅' },
+      { id: 'saude', nome: 'Saúde', icone: '🏥' },
+      { id: 'barbearia', nome: 'Barbearia', icone: '✂️' },
+      { id: 'fitness', nome: 'Fitness & Bem-estar', icone: '🏋️' },
+      { id: 'tatuagem', nome: 'Tatuagem & Piercing', icone: '🎨' },
+      { id: 'pet', nome: 'Pet Shop', icone: '🐾' },
+      { id: 'educacao', nome: 'Educação', icone: '📚' },
+      { id: 'consultoria', nome: 'Consultoria', icone: '💼' },
+      { id: 'fotografia', nome: 'Fotografia', icone: '📸' },
+      { id: 'outro', nome: 'Outro', icone: '✦' }
+    ];
+    sel.innerHTML = fallback.map(c =>
+      `<option value="${c.id}">${c.icone} ${c.nome}</option>`
+    ).join('');
+  } else {
+    sel.innerHTML = state.categorias.map(c =>
+      `<option value="${c.id}">${c.icone || ''} ${c.nome}</option>`
+    ).join('');
+  }
 }
 
 // ── SHOW DASHBOARD ──
 function showDashboard() {
-  $('landingView').style.display = 'none';
-  $('dashboardView').style.display = 'block';
-  $('publicView').style.display = 'none';
+  const lv = $('landingView');
+  const dv = $('dashboardView');
+  const pv = $('publicView');
+  if (lv) lv.style.display = 'none';
+  if (dv) dv.style.display = 'block';
+  if (pv) pv.style.display = 'none';
+
   closeAuth();
-  setText('sideAvatar', initial(state.empresa.nome));
-  setText('sideNome', state.empresa.nome);
-  setText('sidePlan', state.empresa.plano || 'Grátis');
-  const lb = $('sideLinkBox');
-  if (lb) lb.textContent = publicUrl(state.empresa.slug);
+
+  if (state.empresa) {
+    setText('sideAvatar', initial(state.empresa.nome));
+    setText('sideNome', state.empresa.nome);
+    setText('sidePlan', state.empresa.plano || 'Grátis');
+    const lb = $('sideLinkBox');
+    if (lb) lb.textContent = publicUrl(state.empresa.slug);
+  }
+
   document.body.style.overflow = '';
   setView('dashboard');
   setupRealtime();
@@ -179,6 +280,7 @@ function setView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const target = $('view-' + view);
   if (target) target.classList.add('active');
+
   const navMap = {
     dashboard: ['Dashboard', 'Controle completo do seu negócio.'],
     agenda: ['Agenda', 'Criar e acompanhar horários.'],
@@ -192,43 +294,52 @@ function setView(view) {
   const info = navMap[view] || ['', ''];
   setText('pageTitle', info[0]);
   setText('pageSub', info[1]);
-  // sidebar active
+
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
   });
-  // mobile nav active
   document.querySelectorAll('.mob-nav-btn').forEach(b => {
     b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
   });
 }
 
-function buildMobileNav() {
-  // Already in HTML, just mark active states on click
-}
-
 // ── AUTH ──
 function openAuth(mode) {
-  $('authOverlay').classList.add('open');
+  const overlay = $('authOverlay');
+  if (!overlay) return;
+  overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
   if (mode === 'login') showLogin();
   else showCadastro();
 }
+
 function closeAuth() {
-  $('authOverlay').classList.remove('open');
+  const overlay = $('authOverlay');
+  if (overlay) overlay.classList.remove('open');
   document.body.style.overflow = '';
 }
+
 function showLogin() {
-  $('formLogin').style.display = 'block';
-  $('formCadastro').style.display = 'none';
+  const fl = $('formLogin');
+  const fc = $('formCadastro');
+  if (fl) fl.style.display = 'block';
+  if (fc) fc.style.display = 'none';
 }
+
 function showCadastro() {
-  $('formLogin').style.display = 'none';
-  $('formCadastro').style.display = 'block';
-  $('step1').style.display = 'block';
-  $('step2').style.display = 'none';
-  $('step3').style.display = 'none';
+  const fl = $('formLogin');
+  const fc = $('formCadastro');
+  if (fl) fl.style.display = 'none';
+  if (fc) fc.style.display = 'block';
+  const s1 = $('step1'), s2 = $('step2'), s3 = $('step3');
+  if (s1) s1.style.display = 'block';
+  if (s2) s2.style.display = 'none';
+  if (s3) s3.style.display = 'none';
   setStep(1);
+  // Garante que categorias estão preenchidas quando abre o modal
+  preencherSelectCategorias();
 }
+
 function setStep(n) {
   ['st1', 'st2', 'st3'].forEach((id, i) => {
     const el = $(id);
@@ -236,87 +347,223 @@ function setStep(n) {
     el.className = 'step-dot' + (i + 1 === n ? ' active' : i + 1 < n ? ' done' : '');
   });
 }
+
 function goStep2() {
-  const nome = $('cadNome')?.value, email = $('cadEmail')?.value, senha = $('cadSenha')?.value;
+  const nome = $('cadNome')?.value?.trim();
+  const email = $('cadEmail')?.value?.trim();
+  const senha = $('cadSenha')?.value?.trim();
   if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
   if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
-  $('step1').style.display = 'none';
-  $('step2').style.display = 'block';
+  const s1 = $('step1'), s2 = $('step2');
+  if (s1) s1.style.display = 'none';
+  if (s2) s2.style.display = 'block';
   setStep(2);
+  preencherSelectCategorias();
 }
+
 function goStep1() {
-  $('step2').style.display = 'none';
-  $('step1').style.display = 'block';
+  const s1 = $('step1'), s2 = $('step2');
+  if (s2) s2.style.display = 'none';
+  if (s1) s1.style.display = 'block';
   setStep(1);
 }
+
 function goStep3() {
-  if (!$('empNome')?.value || !$('empSlug')?.value || !$('empWhatsapp')?.value)
+  const empNome = $('empNome')?.value?.trim();
+  const empSlug = $('empSlug')?.value?.trim();
+  const empWhatsapp = $('empWhatsapp')?.value?.trim();
+  if (!empNome || !empSlug || !empWhatsapp) {
     return toast('Preencha nome, link e WhatsApp.', 'err');
-  $('step2').style.display = 'none';
-  $('step3').style.display = 'block';
+  }
+  const s2 = $('step2'), s3 = $('step3');
+  if (s2) s2.style.display = 'none';
+  if (s3) s3.style.display = 'block';
   setStep(3);
 }
+
 function autoSlug() {
   const el = $('empSlug');
   if (!el || el.dataset.manual === '1') return;
-  el.value = slugify($('empNome')?.value || '');
+  const nomeEl = $('empNome');
+  if (nomeEl) el.value = slugify(nomeEl.value || '');
 }
-$('empSlug')?.addEventListener && document.addEventListener('input', e => {
-  if (e.target?.id === 'empSlug') e.target.dataset.manual = '1';
+
+// Marca slug como manual quando o usuário edita
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.id === 'empSlug') {
+    e.target.dataset.manual = '1';
+  }
 });
 
+// ── LOGIN ──
 async function loginComSenha() {
   const email = ($('loginEmail')?.value || '').trim();
   const senha = ($('loginSenha')?.value || '').trim();
   if (!email || !senha) return toast('Digite e-mail e senha.', 'err');
-  const { data, error } = await db.auth.signInWithPassword({ email, password: senha });
-  if (error || !data.user) return toast(error?.message || 'E-mail ou senha incorretos.', 'err');
-  const ok = await carregarConta(data.user);
-  if (!ok) { await db.auth.signOut(); return toast('Perfil ou empresa não encontrado.', 'err'); }
-  showNotif('Login realizado!', 'Bem-vindo de volta.', 'ok', 4000);
+
+  try {
+    const { data, error } = await db.auth.signInWithPassword({ email, password: senha });
+    if (error || !data.user) return toast(error?.message || 'E-mail ou senha incorretos.', 'err');
+
+    const ok = await carregarConta(data.user);
+    if (!ok) {
+      await db.auth.signOut();
+      return toast('Perfil ou empresa não encontrado. Refaça o cadastro.', 'err');
+    }
+    showNotif('Login realizado!', 'Bem-vindo de volta.', 'ok', 4000);
+  } catch (e) {
+    console.error('Erro no login:', e);
+    toast('Erro ao fazer login. Tente novamente.', 'err');
+  }
 }
 
+// ── CADASTRO CORRIGIDO ──
 async function finalizarCadastro() {
-  if (!$('servNome')?.value || !$('servPreco')?.value || !$('servDuracao')?.value || !$('profNome')?.value)
+  const servNome = $('servNome')?.value?.trim();
+  const servPreco = $('servPreco')?.value;
+  const servDuracao = $('servDuracao')?.value;
+  const profNomeVal = $('profNome')?.value?.trim();
+
+  if (!servNome || !servPreco || !servDuracao || !profNomeVal) {
     return toast('Preencha serviço, preço, duração e profissional.', 'err');
-  const email = $('cadEmail').value.trim();
-  const senha = $('cadSenha').value.trim();
-  const nomeUser = $('cadNome').value.trim();
-  const { data: authData, error: authErr } = await db.auth.signUp({ email, password: senha });
-  if (authErr || !authData.user) return toast(authErr?.message || 'Erro ao criar conta.', 'err');
-  const user = authData.user;
-  const { data: empresa, error: errEmp } = await db.from('agenda_empresas').insert({
-    nome: $('empNome').value.trim(),
-    slug: slugify($('empSlug').value),
-    area_atuacao: $('empCategoria').options[$('empCategoria').selectedIndex]?.textContent?.trim() || 'Outro',
-    whatsapp: $('empWhatsapp').value.trim(),
-    email, plano: 'Grátis', onboarding_finalizado: true
-  }).select('*').single();
-  if (errEmp) { await db.auth.signOut(); return toast('Erro ao criar empresa.', 'err'); }
-  const { error: perfilErr } = await db.from('agenda_perfis').insert({
-    auth_user_id: user.id, empresa_id: empresa.id,
-    nome: nomeUser, email, whatsapp: $('empWhatsapp').value.trim(), cargo: 'Administrador'
-  });
-  if (perfilErr) { await db.auth.signOut(); return toast('Conta criada, mas perfil falhou.', 'err'); }
-  await db.from('agenda_servicos').insert({
-    empresa_id: empresa.id, nome: $('servNome').value.trim(),
-    preco: Number($('servPreco').value || 0),
-    duracao_minutos: Number($('servDuracao').value || 60),
-    status: 'ativo', descricao: 'Serviço inicial.'
-  });
-  await db.from('agenda_profissionais').insert({
-    empresa_id: empresa.id, nome: $('profNome').value.trim(),
-    especialidade: $('profEsp').value || 'Profissional',
-    telefone: $('empWhatsapp').value.trim(), status: 'ativo'
-  });
-  state.user = user; state.perfil = { auth_user_id: user.id, empresa_id: empresa.id, nome: nomeUser, email };
-  state.empresa = empresa;
-  showDashboard(); await loadAll();
-  showNotif('Bem-vindo ao AgendaPro!', 'Painel criado com sucesso.', 'ok', 6000);
+  }
+
+  const email = ($('cadEmail')?.value || '').trim();
+  const senha = ($('cadSenha')?.value || '').trim();
+  const nomeUser = ($('cadNome')?.value || '').trim();
+  const empNomeVal = ($('empNome')?.value || '').trim();
+  const empSlugVal = slugify($('empSlug')?.value || empNomeVal);
+  const empWhatsappVal = ($('empWhatsapp')?.value || '').trim();
+
+  // Pegar área de atuação do select
+  const catSelect = $('empCategoria');
+  const areaAtuacao = catSelect
+    ? (catSelect.options[catSelect.selectedIndex]?.textContent?.trim() || 'Outro')
+    : 'Outro';
+
+  // Desabilitar botão para evitar duplo clique
+  const btnFin = $('btnFinalizar');
+  if (btnFin) { btnFin.disabled = true; btnFin.textContent = 'Criando...'; }
+
+  try {
+    // PASSO 1: Criar usuário no Auth
+    const { data: authData, error: authErr } = await db.auth.signUp({
+      email,
+      password: senha,
+      options: { data: { nome: nomeUser } }
+    });
+
+    if (authErr) {
+      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+      // Se já existe, tenta fazer login e verificar se tem empresa
+      if (authErr.message && authErr.message.toLowerCase().includes('already registered')) {
+        return toast('Este e-mail já está cadastrado. Faça login.', 'err');
+      }
+      return toast('Erro ao criar conta: ' + authErr.message, 'err');
+    }
+
+    if (!authData?.user) {
+      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+      return toast('Erro ao criar conta. Tente novamente.', 'err');
+    }
+
+    const user = authData.user;
+
+    // PASSO 2: Verificar se slug já existe
+    const { data: slugExiste } = await db.from('agenda_empresas')
+      .select('id').eq('slug', empSlugVal).maybeSingle();
+    const slugFinal = slugExiste ? empSlugVal + '-' + Date.now().toString().slice(-4) : empSlugVal;
+
+    // PASSO 3: Criar empresa
+    const { data: empresa, error: errEmp } = await db.from('agenda_empresas').insert({
+      nome: empNomeVal,
+      slug: slugFinal,
+      area_atuacao: areaAtuacao,
+      whatsapp: empWhatsappVal,
+      email: email,
+      plano: 'Grátis',
+      onboarding_finalizado: true
+    }).select('*').single();
+
+    if (errEmp || !empresa) {
+      console.error('Erro ao criar empresa:', errEmp);
+      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+      return toast('Erro ao criar empresa: ' + (errEmp?.message || 'tente novamente.'), 'err');
+    }
+
+    // PASSO 4: Criar perfil
+    const { error: perfilErr } = await db.from('agenda_perfis').insert({
+      auth_user_id: user.id,
+      empresa_id: empresa.id,
+      nome: nomeUser,
+      email: email,
+      whatsapp: empWhatsappVal,
+      cargo: 'Administrador'
+    });
+
+    if (perfilErr) {
+      console.error('Erro ao criar perfil:', perfilErr);
+      // Continua mesmo assim pois empresa foi criada
+    }
+
+    // PASSO 5: Criar serviço inicial
+    await db.from('agenda_servicos').insert({
+      empresa_id: empresa.id,
+      nome: servNome,
+      preco: Number(servPreco || 0),
+      duracao_minutos: Number(servDuracao || 60),
+      status: 'ativo',
+      descricao: 'Serviço inicial.'
+    });
+
+    // PASSO 6: Criar profissional inicial
+    await db.from('agenda_profissionais').insert({
+      empresa_id: empresa.id,
+      nome: profNomeVal,
+      especialidade: ($('profEsp')?.value || 'Profissional').trim(),
+      telefone: empWhatsappVal,
+      status: 'ativo'
+    });
+
+    // PASSO 7: Fazer login automático
+    const { data: loginData, error: loginErr } = await db.auth.signInWithPassword({
+      email,
+      password: senha
+    });
+
+    if (loginErr || !loginData?.user) {
+      // Mesmo sem login automático, mostra sucesso e pede para logar
+      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+      closeAuth();
+      toast('Conta criada! Faça login para acessar.', 'ok');
+      setTimeout(() => openAuth('login'), 1500);
+      return;
+    }
+
+    // PASSO 8: Carregar dashboard
+    state.user = loginData.user;
+    state.perfil = { auth_user_id: loginData.user.id, empresa_id: empresa.id, nome: nomeUser, email };
+    state.empresa = empresa;
+    showDashboard();
+    await loadAll();
+    showNotif('Bem-vindo ao AgendaPro!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
+
+  } catch (e) {
+    console.error('Erro em finalizarCadastro:', e);
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+    toast('Erro inesperado. Verifique o console e tente novamente.', 'err');
+  }
 }
 
 async function logout() {
-  await db.auth.signOut();
+  try {
+    if (autoSyncTimer) { clearInterval(autoSyncTimer); autoSyncTimer = null; }
+    if (realtimeChannel) {
+      try { db.removeChannel(realtimeChannel); } catch(e) {}
+      realtimeChannel = null;
+    }
+    await db.auth.signOut();
+  } catch(e) {}
   state.user = null; state.perfil = null; state.empresa = null;
   state.clientes = []; state.servicos = []; state.profissionais = [];
   state.agendamentos = []; state.pagamentos = [];
@@ -326,12 +573,18 @@ async function logout() {
 // ── REALTIME ──
 function setupRealtime() {
   if (!state?.empresa?.id || !db?.channel) return;
-  if (realtimeChannel) { try { db.removeChannel(realtimeChannel); } catch(e) {} realtimeChannel = null; }
+  if (realtimeChannel) {
+    try { db.removeChannel(realtimeChannel); } catch(e) {}
+    realtimeChannel = null;
+  }
   const id = state.empresa.id;
-  const tables = ['agenda_agendamentos','agenda_clientes','agenda_servicos','agenda_profissionais'];
+  const tables = ['agenda_agendamentos', 'agenda_clientes', 'agenda_servicos', 'agenda_profissionais'];
   let ch = db.channel('ap-realtime-' + id);
   tables.forEach(table => {
-    ch = ch.on('postgres_changes', { event: '*', schema: 'public', table, filter: `empresa_id=eq.${id}` }, payload => {
+    ch = ch.on('postgres_changes', {
+      event: '*', schema: 'public', table,
+      filter: `empresa_id=eq.${id}`
+    }, payload => {
       if (table === 'agenda_agendamentos' && payload.eventType === 'INSERT') {
         showNotif('Novo agendamento!', `${payload.new?.cliente_nome || 'Cliente'} acabou de agendar.`, 'new', 6000);
       }
@@ -344,7 +597,9 @@ function setupRealtime() {
 let _reloadTimer = null;
 function scheduleReload() {
   if (_reloadTimer) clearTimeout(_reloadTimer);
-  _reloadTimer = setTimeout(async () => { if (state?.empresa?.id) await loadAll(); }, 400);
+  _reloadTimer = setTimeout(async () => {
+    if (state?.empresa?.id) await loadAll();
+  }, 400);
 }
 
 function startAutoSync() {
@@ -353,16 +608,18 @@ function startAutoSync() {
   autoSyncTimer = setInterval(async () => {
     if (!state?.empresa?.id) return;
     try {
-      const { data } = await db.from('agenda_agendamentos').select('*').eq('empresa_id', state.empresa.id)
-        .order('data', { ascending: true }).order('hora', { ascending: true });
+      const { data } = await db.from('agenda_agendamentos').select('*')
+        .eq('empresa_id', state.empresa.id)
+        .order('data', { ascending: true })
+        .order('hora', { ascending: true });
       const novos = (data || []).filter(a => !lastIds.has(String(a.id)));
       state.agendamentos = data || [];
       if (novos.length) {
         novos.forEach(a => showNotif('Novo agendamento!', `${a.cliente_nome || 'Cliente'} agendou.`, 'new', 6000));
       }
-      lastIds = new Set((state.agendamentos).map(a => String(a.id)));
+      lastIds = new Set(state.agendamentos.map(a => String(a.id)));
       renderAll();
-    } catch(e) {}
+    } catch (e) {}
   }, 5000);
 }
 
@@ -370,20 +627,24 @@ function startAutoSync() {
 async function loadAll() {
   if (!state.empresa) return;
   const id = state.empresa.id;
-  const [cli, svc, prof, ag, pag] = await Promise.all([
-    db.from('agenda_clientes').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
-    db.from('agenda_servicos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
-    db.from('agenda_profissionais').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
-    db.from('agenda_agendamentos').select('*').eq('empresa_id', id).order('data', { ascending: true }).order('hora', { ascending: true }),
-    db.from('agenda_pagamentos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false })
-  ]);
-  state.clientes = cli.data || [];
-  state.servicos = svc.data || [];
-  state.profissionais = prof.data || [];
-  state.agendamentos = ag.data || [];
-  state.pagamentos = pag.data || [];
-  lastIds = new Set(state.agendamentos.map(a => String(a.id)));
-  renderAll();
+  try {
+    const [cli, svc, prof, ag, pag] = await Promise.all([
+      db.from('agenda_clientes').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_servicos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_profissionais').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_agendamentos').select('*').eq('empresa_id', id).order('data', { ascending: true }).order('hora', { ascending: true }),
+      db.from('agenda_pagamentos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false })
+    ]);
+    state.clientes = cli.data || [];
+    state.servicos = svc.data || [];
+    state.profissionais = prof.data || [];
+    state.agendamentos = ag.data || [];
+    state.pagamentos = pag.data || [];
+    lastIds = new Set(state.agendamentos.map(a => String(a.id)));
+    renderAll();
+  } catch (e) {
+    console.error('Erro ao carregar dados:', e);
+  }
 }
 
 function renderAll() {
@@ -410,7 +671,7 @@ function renderStats() {
   const taxa = base > 0 ? Math.round(concluidos / base * 100) : 0;
   const fin = ags.filter(isFinanceiro);
   const fatHoje = fin.filter(a => a.data === hoje).reduce((s, a) => s + Number(a.valor || 0), 0);
-  const fatMes = fin.filter(a => a.data?.startsWith(mes)).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const fatMes = fin.filter(a => (a.data || '').startsWith(mes)).reduce((s, a) => s + Number(a.valor || 0), 0);
 
   setText('statHoje', ativos.filter(a => a.data === hoje).length);
   setText('statPendentes', st('Pendente'));
@@ -426,7 +687,6 @@ function renderStats() {
   setText('statServicos', (state.servicos || []).filter(s => s.status === 'ativo').length);
   setText('statProfissionais', (state.profissionais || []).filter(p => p.status === 'ativo').length);
   setText('statTotal', ativos.length);
-
   setText('fc-todos', ativos.length);
   setText('fc-pendente', st('Pendente'));
   setText('fc-confirmado', st('Confirmado'));
@@ -438,9 +698,15 @@ function renderStats() {
 
 // ── DASHBOARD LIST ──
 function renderDashList() {
-  const el = $('dashAptList'); if (!el) return;
-  const visibles = state.agendamentos.filter(a => ['Pendente','Confirmado','Reagendado'].includes(normStatus(a.status))).slice(0, 6);
-  if (!visibles.length) { el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento pendente.</p></div>'; return; }
+  const el = $('dashAptList');
+  if (!el) return;
+  const visibles = (state.agendamentos || [])
+    .filter(a => ['Pendente', 'Confirmado', 'Reagendado'].includes(normStatus(a.status)))
+    .slice(0, 6);
+  if (!visibles.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento pendente.</p></div>';
+    return;
+  }
   el.innerHTML = visibles.map(a => `
     <div class="apt-item">
       <div class="apt-row">
@@ -457,9 +723,14 @@ function renderDashList() {
 
 // ── CALENDAR ──
 function renderCalendar() {
-  const el = $('calGrid'); if (!el) return;
-  const days = ['S','T','Q','Q','S','S','D'];
-  const busy = new Set(state.agendamentos.filter(a => normStatus(a.status) !== 'Excluído').map(a => String(new Date(a.data + 'T00:00:00').getDate())));
+  const el = $('calGrid');
+  if (!el) return;
+  const days = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+  const busy = new Set(
+    (state.agendamentos || [])
+      .filter(a => normStatus(a.status) !== 'Excluído')
+      .map(a => String(new Date((a.data || '') + 'T00:00:00').getDate()))
+  );
   const today = String(new Date().getDate());
   let html = days.map(d => `<div class="cal-label">${d}</div>`).join('');
   for (let i = 1; i <= 28; i++) {
@@ -472,9 +743,17 @@ function renderCalendar() {
 // ── SELECTS ──
 function renderSelects() {
   const svc = $('agServico');
-  if (svc) svc.innerHTML = '<option value="">Serviço</option>' + state.servicos.filter(s => s.status === 'ativo').map(s => `<option value="${s.id}">${s.nome} — ${money(s.preco)}</option>`).join('');
+  if (svc) {
+    svc.innerHTML = '<option value="">Serviço</option>' +
+      (state.servicos || []).filter(s => s.status === 'ativo')
+        .map(s => `<option value="${s.id}">${s.nome} — ${money(s.preco)}</option>`).join('');
+  }
   const prof = $('agProfissional');
-  if (prof) prof.innerHTML = '<option value="">Profissional</option>' + state.profissionais.filter(p => p.status === 'ativo').map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+  if (prof) {
+    prof.innerHTML = '<option value="">Profissional</option>' +
+      (state.profissionais || []).filter(p => p.status === 'ativo')
+        .map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+  }
 }
 
 // ── FILTER ──
@@ -487,19 +766,30 @@ function setFilter(filter, btn) {
 
 // ── TIMELINE ──
 function renderTimeline() {
-  const el = $('agendaTimeline'); if (!el) return;
-  if (!state.agendamentos.length) { el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>'; return; }
-  const statusMap = { pendente: 'Pendente', confirmado: 'Confirmado', reagendado: 'Reagendado', concluido: 'Concluído', recusado: 'Recusado', excluido: 'Excluído' };
-  let filtered = state.agendamentos;
+  const el = $('agendaTimeline');
+  if (!el) return;
+  const ags = state.agendamentos || [];
+  if (!ags.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>';
+    return;
+  }
+  const statusMap = {
+    pendente: 'Pendente', confirmado: 'Confirmado', reagendado: 'Reagendado',
+    concluido: 'Concluído', recusado: 'Recusado', excluido: 'Excluído'
+  };
+  let filtered;
   if (_agendaFilter === 'excluido') {
-    filtered = state.agendamentos.filter(a => normStatus(a.status) === 'Excluído');
+    filtered = ags.filter(a => normStatus(a.status) === 'Excluído');
   } else if (_agendaFilter !== 'todos') {
     const target = statusMap[_agendaFilter];
-    filtered = state.agendamentos.filter(a => normStatus(a.status) === target);
+    filtered = ags.filter(a => normStatus(a.status) === target);
   } else {
-    filtered = state.agendamentos.filter(a => normStatus(a.status) !== 'Excluído');
+    filtered = ags.filter(a => normStatus(a.status) !== 'Excluído');
   }
-  if (!filtered.length) { el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento neste filtro.</p></div>'; return; }
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento neste filtro.</p></div>';
+    return;
+  }
   el.innerHTML = '';
   filtered.forEach(a => {
     const block = document.createElement('div');
@@ -522,13 +812,14 @@ function renderTimeline() {
         </div>
       </div>`;
     const card = block.querySelector('.tl-card');
+    const cardTop = block.querySelector('.tl-card-top');
     const menu = buildActionMenu(a.id, [
       { icon: '✏️', label: 'Editar', action: () => editAgendamento(a.id) },
       { icon: '📋', label: 'Duplicar', action: () => duplicarAgendamento(a.id) },
       'sep',
       { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirAgendamento(a.id) }
     ]);
-    card.querySelector('.tl-card-top').appendChild(menu);
+    if (cardTop) cardTop.appendChild(menu);
     el.appendChild(block);
   });
 }
@@ -537,13 +828,19 @@ function renderTimeline() {
 function renderAcoes(a) {
   const tel = (a.cliente_telefone || a.telefone || '').replace(/\D/g, '');
   const s = normStatus(a.status);
-  if (s === 'Excluído') return `<div class="apt-actions muted-actions"><span class="badge badge-gray">🗑 Excluído</span></div>`;
-  if (s === 'Recusado') return `<div class="apt-actions muted-actions"><span class="badge badge-red">✕ Recusado</span></div>`;
-  if (s === 'Concluído') return `<div class="apt-actions muted-actions">
-    <span class="badge badge-blue">✓ Concluído</span>
-    ${tel ? `<button class="act-btn whatsapp" onclick="abrirWA('${a.id}')">💬 WA</button>` : ''}
-    <button class="act-btn refuse" onclick="excluirAgendamento('${a.id}')">🗑 Arquivar</button>
-  </div>`;
+  if (s === 'Excluído') {
+    return `<div class="apt-actions muted-actions"><span class="badge badge-gray">🗑 Excluído</span></div>`;
+  }
+  if (s === 'Recusado') {
+    return `<div class="apt-actions muted-actions"><span class="badge badge-red">✕ Recusado</span></div>`;
+  }
+  if (s === 'Concluído') {
+    return `<div class="apt-actions muted-actions">
+      <span class="badge badge-blue">✓ Concluído</span>
+      ${tel ? `<button class="act-btn whatsapp" onclick="abrirWA('${a.id}')">💬 WA</button>` : ''}
+      <button class="act-btn refuse" onclick="excluirAgendamento('${a.id}')">🗑 Arquivar</button>
+    </div>`;
+  }
   return `<div class="apt-actions">
     ${s !== 'Confirmado' ? `<button class="act-btn confirm" onclick="confirmarAg('${a.id}')">✅ Confirmar</button>` : ''}
     <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">✕ Recusar</button>
@@ -564,7 +861,10 @@ function buildActionMenu(id, items) {
   drop.className = 'action-dropdown';
   items.forEach(item => {
     if (item === 'sep') {
-      const s = document.createElement('div'); s.className = 'action-sep'; drop.appendChild(s); return;
+      const s = document.createElement('div');
+      s.className = 'action-sep';
+      drop.appendChild(s);
+      return;
     }
     const el = document.createElement('button');
     el.className = 'action-item' + (item.cls ? ' ' + item.cls : '');
@@ -588,16 +888,20 @@ function closeAllMenus() {
   document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
   _openMenu = null;
 }
-document.addEventListener('click', closeAllMenus);
 
 // ── CLIENTES ──
 function renderClientes() {
-  const el = $('clientesGrid'); if (!el) return;
-  if (!state.clientes.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente ainda.</p></div>'; return; }
+  const el = $('clientesGrid');
+  if (!el) return;
+  const clientes = state.clientes || [];
+  if (!clientes.length) {
+    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente ainda.</p></div>';
+    return;
+  }
   el.innerHTML = '';
-  state.clientes.forEach(c => {
-    const agts = state.agendamentos.filter(a => a.cliente_nome === c.nome && normStatus(a.status) !== 'Excluído').length;
-    const gasto = state.agendamentos.filter(a => a.cliente_nome === c.nome && isFinanceiro(a)).reduce((s, a) => s + Number(a.valor || 0), 0);
+  clientes.forEach(c => {
+    const agts = (state.agendamentos || []).filter(a => a.cliente_nome === c.nome && normStatus(a.status) !== 'Excluído').length;
+    const gasto = (state.agendamentos || []).filter(a => a.cliente_nome === c.nome && isFinanceiro(a)).reduce((s, a) => s + Number(a.valor || 0), 0);
     const ativo = isAtivoCliente(c);
     const card = document.createElement('div');
     card.className = 'client-card' + (ativo ? '' : ' inactive');
@@ -610,7 +914,7 @@ function renderClientes() {
       <div style="margin-bottom:9px"><span class="badge ${ativo ? 'badge-green' : 'badge-gray'}">${ativo ? 'Ativo' : 'Inativo'}</span></div>
       <div class="cc-stats">
         <div class="cc-stat"><div class="cc-sl">Atendimentos</div><div class="cc-sv">${agts}</div></div>
-        <div class="cc-stat"><div class="cc-sl">Total gasto</div><div class="cc-sv" style="font-size:14px">${money(gasto).replace(',00','')}</div></div>
+        <div class="cc-stat"><div class="cc-sl">Total gasto</div><div class="cc-sv" style="font-size:14px">${money(gasto).replace(',00', '')}</div></div>
       </div>`;
     const menu = buildActionMenu(c.id, [
       { icon: '✏️', label: 'Editar', action: () => editCliente(c.id) },
@@ -628,16 +932,20 @@ function renderClientes() {
 
 // ── SERVIÇOS ──
 function renderServicos() {
-  const el = $('servicosGrid'); if (!el) return;
-  const vis = state.servicos.filter(s => s.status !== 'excluido');
-  if (!vis.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">✦</div><p>Nenhum serviço ainda.</p></div>'; return; }
+  const el = $('servicosGrid');
+  if (!el) return;
+  const vis = (state.servicos || []).filter(s => s.status !== 'excluido');
+  if (!vis.length) {
+    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">✦</div><p>Nenhum serviço ainda.</p></div>';
+    return;
+  }
   el.innerHTML = '';
   vis.forEach(s => {
     const ativo = s.status === 'ativo';
     const card = document.createElement('div');
     card.className = 'svc-card' + (ativo ? '' : ' inactive');
     card.innerHTML = `
-      <div class="svc-price">${money(s.preco).replace(',00','')}</div>
+      <div class="svc-price">${money(s.preco).replace(',00', '')}</div>
       <div class="svc-name">${s.nome}</div>
       <div class="svc-dur">⏱ ${s.duracao_minutos || 60} min</div>
       <div class="svc-status"><span class="badge ${ativo ? 'badge-green' : 'badge-gray'}">${ativo ? 'Ativo' : 'Inativo'}</span></div>`;
@@ -657,9 +965,13 @@ function renderServicos() {
 
 // ── PROFISSIONAIS ──
 function renderProfissionais() {
-  const el = $('profGrid'); if (!el) return;
-  const vis = state.profissionais.filter(p => p.status !== 'excluido');
-  if (!vis.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👤</div><p>Nenhum profissional ainda.</p></div>'; return; }
+  const el = $('profGrid');
+  if (!el) return;
+  const vis = (state.profissionais || []).filter(p => p.status !== 'excluido');
+  if (!vis.length) {
+    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👤</div><p>Nenhum profissional ainda.</p></div>';
+    return;
+  }
   el.innerHTML = '';
   vis.forEach(p => {
     const ativo = p.status === 'ativo';
@@ -690,8 +1002,8 @@ function renderFinanceiro() {
   const fin = (state.agendamentos || []).filter(isFinanceiro);
   const total = fin.reduce((s, a) => s + Number(a.valor || 0), 0);
   const ticket = fin.length ? total / fin.length : 0;
-  setText('finReceita', money(total).replace(',00',''));
-  setText('finTicket', money(ticket).replace(',00',''));
+  setText('finReceita', money(total).replace(',00', ''));
+  setText('finTicket', money(ticket).replace(',00', ''));
   setText('finPagos', fin.length);
   setText('finPlano', state.empresa?.plano || 'Grátis');
 }
@@ -700,10 +1012,14 @@ function renderFinanceiro() {
 function renderConfig() {
   const e = state.empresa || {};
   const set = (id, v) => { const el = $(id); if (el) el.value = v || ''; };
-  set('cfgNome', e.nome); set('cfgWhatsapp', e.whatsapp);
-  set('cfgSlug', e.slug); set('cfgEndereco', e.endereco);
-  set('cfgCidade', e.cidade); set('cfgInstagram', e.instagram);
-  set('cfgFacebook', e.facebook); set('cfgTiktok', e.tiktok);
+  set('cfgNome', e.nome);
+  set('cfgWhatsapp', e.whatsapp);
+  set('cfgSlug', e.slug);
+  set('cfgEndereco', e.endereco);
+  set('cfgCidade', e.cidade);
+  set('cfgInstagram', e.instagram);
+  set('cfgFacebook', e.facebook);
+  set('cfgTiktok', e.tiktok);
   set('cfgSite', e.site);
   const lb = $('cfgLinkBox');
   if (lb) lb.textContent = '🔗 ' + publicUrl(e.slug || '');
@@ -713,9 +1029,16 @@ function renderConfig() {
 async function salvarCliente() {
   const nome = ($('cliNome')?.value || '').trim();
   if (!nome) return toast('Digite o nome.', 'err');
-  const { error } = await db.from('agenda_clientes').insert({ empresa_id: state.empresa.id, nome, telefone: $('cliTel').value.trim(), email: $('cliEmail').value.trim(), status: 'ativo' });
-  if (error) return toast('Erro ao salvar.', 'err');
-  $('cliNome').value = $('cliTel').value = $('cliEmail').value = '';
+  const { error } = await db.from('agenda_clientes').insert({
+    empresa_id: state.empresa.id, nome,
+    telefone: ($('cliTel')?.value || '').trim(),
+    email: ($('cliEmail')?.value || '').trim(),
+    status: 'ativo'
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('cliNome')) $('cliNome').value = '';
+  if ($('cliTel')) $('cliTel').value = '';
+  if ($('cliEmail')) $('cliEmail').value = '';
   await loadAll();
   showNotif('Cliente adicionado', nome + ' salvo com sucesso.', 'ok');
 }
@@ -723,9 +1046,16 @@ async function salvarCliente() {
 async function salvarServico() {
   const nome = ($('srvNome')?.value || '').trim();
   if (!nome) return toast('Digite o nome.', 'err');
-  const { error } = await db.from('agenda_servicos').insert({ empresa_id: state.empresa.id, nome, preco: Number($('srvPreco').value || 0), duracao_minutos: Number($('srvDur').value || 60), status: 'ativo' });
-  if (error) return toast('Erro ao salvar.', 'err');
-  $('srvNome').value = $('srvPreco').value = $('srvDur').value = '';
+  const { error } = await db.from('agenda_servicos').insert({
+    empresa_id: state.empresa.id, nome,
+    preco: Number($('srvPreco')?.value || 0),
+    duracao_minutos: Number($('srvDur')?.value || 60),
+    status: 'ativo'
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('srvNome')) $('srvNome').value = '';
+  if ($('srvPreco')) $('srvPreco').value = '';
+  if ($('srvDur')) $('srvDur').value = '';
   await loadAll();
   showNotif('Serviço adicionado', '', 'ok');
 }
@@ -733,35 +1063,65 @@ async function salvarServico() {
 async function salvarProfissional() {
   const nome = ($('proNome')?.value || '').trim();
   if (!nome) return toast('Digite o nome.', 'err');
-  const { error } = await db.from('agenda_profissionais').insert({ empresa_id: state.empresa.id, nome, especialidade: $('proEsp').value.trim(), telefone: $('proTel').value.trim(), status: 'ativo' });
-  if (error) return toast('Erro ao salvar.', 'err');
-  $('proNome').value = $('proEsp').value = $('proTel').value = '';
+  const { error } = await db.from('agenda_profissionais').insert({
+    empresa_id: state.empresa.id, nome,
+    especialidade: ($('proEsp')?.value || '').trim(),
+    telefone: ($('proTel')?.value || '').trim(),
+    status: 'ativo'
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('proNome')) $('proNome').value = '';
+  if ($('proEsp')) $('proEsp').value = '';
+  if ($('proTel')) $('proTel').value = '';
   await loadAll();
   showNotif('Profissional adicionado', '', 'ok');
 }
 
 async function salvarAgendamento() {
-  if (!$('agCliente').value || !$('agServico').value || !$('agProfissional').value || !$('agData').value || !$('agHora').value)
+  const agCli = $('agCliente')?.value?.trim();
+  const agSvc = $('agServico')?.value;
+  const agProf = $('agProfissional')?.value;
+  const agData = $('agData')?.value;
+  const agHora = $('agHora')?.value;
+  if (!agCli || !agSvc || !agProf || !agData || !agHora) {
     return toast('Preencha todos os campos.', 'err');
-  const serv = state.servicos.find(s => s.id === $('agServico').value);
-  const prof = state.profissionais.find(p => p.id === $('agProfissional').value);
+  }
+  const serv = (state.servicos || []).find(s => s.id === agSvc);
+  const prof = (state.profissionais || []).find(p => p.id === agProf);
+
+  // Cria cliente automaticamente
   let clienteId = null;
-  const { data: cli } = await db.from('agenda_clientes').insert({ empresa_id: state.empresa.id, nome: $('agCliente').value.trim(), telefone: $('agTelefone').value.trim(), status: 'ativo' }).select('*').single();
-  if (cli) clienteId = cli.id;
+  try {
+    const { data: cli } = await db.from('agenda_clientes').insert({
+      empresa_id: state.empresa.id,
+      nome: agCli,
+      telefone: ($('agTelefone')?.value || '').trim(),
+      status: 'ativo'
+    }).select('*').single();
+    if (cli) clienteId = cli.id;
+  } catch(e) {}
+
   const { error } = await db.from('agenda_agendamentos').insert({
-    empresa_id: state.empresa.id, cliente_id: clienteId,
-    servico_id: serv?.id, profissional_id: prof?.id,
-    cliente_nome: $('agCliente').value.trim(),
-    cliente_telefone: $('agTelefone').value.trim(),
-    servico_nome: serv?.nome, profissional_nome: prof?.nome,
-    data: $('agData').value, hora: $('agHora').value,
-    status: $('agStatus').value,
+    empresa_id: state.empresa.id,
+    cliente_id: clienteId,
+    servico_id: serv?.id || null,
+    profissional_id: prof?.id || null,
+    cliente_nome: agCli,
+    cliente_telefone: ($('agTelefone')?.value || '').trim(),
+    servico_nome: serv?.nome || '',
+    profissional_nome: prof?.nome || '',
+    data: agData,
+    hora: agHora,
+    status: $('agStatus')?.value || 'Pendente',
     valor: Number(serv?.preco || 0)
   });
-  if (error) return toast('Erro ao salvar.', 'err');
-  $('agCliente').value = $('agTelefone').value = $('agData').value = $('agHora').value = '';
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('agCliente')) $('agCliente').value = '';
+  if ($('agTelefone')) $('agTelefone').value = '';
+  if ($('agData')) $('agData').value = '';
+  if ($('agHora')) $('agHora').value = '';
   await loadAll();
-  showNotif('Agendamento criado!', `${$('agStatus').value} para ${formatDate($('agData')?.value || '')}.`, 'ok');
+  showNotif('Agendamento criado!', `${agCli} — ${formatDate(agData)} às ${agHora}.`, 'ok');
 }
 
 async function salvarConfig() {
@@ -770,14 +1130,21 @@ async function salvarConfig() {
   if (!nome) return toast('Digite o nome.', 'err');
   const slugAtual = slugify(state.empresa.slug || '');
   const slugNovo = slugify($('cfgSlug')?.value || slugAtual);
-  const updates = { nome, whatsapp: $('cfgWhatsapp').value.trim(), endereco: $('cfgEndereco').value.trim(), cidade: $('cfgCidade').value.trim() };
+  const updates = {
+    nome,
+    whatsapp: ($('cfgWhatsapp')?.value || '').trim(),
+    endereco: ($('cfgEndereco')?.value || '').trim(),
+    cidade: ($('cfgCidade')?.value || '').trim()
+  };
   if (slugNovo !== slugAtual) {
-    const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', slugNovo).neq('id', state.empresa.id).maybeSingle();
+    const { data: slugExiste } = await db.from('agenda_empresas')
+      .select('id').eq('slug', slugNovo).neq('id', state.empresa.id).maybeSingle();
     if (slugExiste) return toast('Esse link já está em uso.', 'err');
     updates.slug = slugNovo;
   }
-  const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
-  if (error) return toast('Erro ao salvar.', 'err');
+  const { data, error } = await db.from('agenda_empresas')
+    .update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
   setText('sideNome', state.empresa.nome);
   setText('sideAvatar', initial(state.empresa.nome));
@@ -790,23 +1157,26 @@ async function salvarConfig() {
 async function salvarRedesSociais() {
   if (!state?.empresa?.id) return;
   const updates = {
-    instagram: $('cfgInstagram')?.value.trim() || '',
-    facebook: $('cfgFacebook')?.value.trim() || '',
-    tiktok: $('cfgTiktok')?.value.trim() || '',
-    site: $('cfgSite')?.value.trim() || ''
+    instagram: ($('cfgInstagram')?.value || '').trim(),
+    facebook: ($('cfgFacebook')?.value || '').trim(),
+    tiktok: ($('cfgTiktok')?.value || '').trim(),
+    site: ($('cfgSite')?.value || '').trim()
   };
-  const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
-  if (error) return toast('Erro ao salvar redes.', 'err');
+  const { data, error } = await db.from('agenda_empresas')
+    .update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar redes: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
   showNotif('Redes sociais salvas', '', 'ok');
 }
 
 // ── AÇÕES AGENDAMENTO ──
 async function confirmarAg(id) {
-  const ag = state.agendamentos.find(a => a.id === id); if (!ag) return;
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
   const { error } = await db.from('agenda_agendamentos').update({ status: 'Confirmado' }).eq('id', id);
   if (error) return toast('Erro ao confirmar.', 'err');
-  ag.status = 'Confirmado'; renderAll();
+  ag.status = 'Confirmado';
+  renderAll();
   showNotif('Confirmado!', ag.cliente_nome + ' — ' + formatDate(ag.data) + ' às ' + (ag.hora || '—'), 'ok');
   const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
   if (tel) {
@@ -817,15 +1187,19 @@ async function confirmarAg(id) {
 }
 
 async function concluirAg(id) {
-  const ag = state.agendamentos.find(a => a.id === id); if (!ag) return;
-  const { error } = await db.from('agenda_agendamentos').update({ status: 'Concluído', financeiro_status: 'Concluído' }).eq('id', id);
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
+  const { error } = await db.from('agenda_agendamentos')
+    .update({ status: 'Concluído', financeiro_status: 'Concluído' }).eq('id', id);
   if (error) return toast('Erro ao concluir.', 'err');
-  ag.status = 'Concluído'; ag.financeiro_status = 'Concluído'; renderAll();
+  ag.status = 'Concluído'; ag.financeiro_status = 'Concluído';
+  renderAll();
   showNotif('Concluído!', ag.cliente_nome + ' — ' + (ag.servico_nome || '—'), 'ok');
 }
 
 function abrirWA(id) {
-  const ag = state.agendamentos.find(a => a.id === id); if (!ag) return;
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
   const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
   if (!tel) return toast('Telefone não cadastrado.', 'err');
   const msg = `Olá, ${ag.cliente_nome}! 👋\nServiço: ${ag.servico_nome || '—'}\nData: ${formatDate(ag.data)} às ${ag.hora || '—'}\nAté lá! 😊`;
@@ -835,27 +1209,50 @@ function abrirWA(id) {
 
 // ── MODAL RECUSA ──
 function openModalRecusa(id) {
-  const ag = state.agendamentos.find(a => a.id === id); if (!ag) return;
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
   if (!podeTerAcoes(ag)) return toast('Este agendamento não permite recusa.', 'warn');
   _recusaId = id; _recusaMotivo = null;
-  $('recusaInfo').textContent = `${ag.cliente_nome} · ${formatDate(ag.data)} às ${ag.hora || '—'}`;
-  document.querySelectorAll('.motivo-item').forEach(el => { el.classList.remove('sel'); el.querySelector('.motivo-radio').innerHTML = ''; });
-  $('recusaMotivoCustom').value = '';
-  $('modalRecusaOverlay').classList.add('open');
+  setText('recusaInfo', `${ag.cliente_nome} · ${formatDate(ag.data)} às ${ag.hora || '—'}`);
+  document.querySelectorAll('.motivo-item').forEach(el => {
+    el.classList.remove('sel');
+    const r = el.querySelector('.motivo-radio');
+    if (r) r.innerHTML = '';
+  });
+  const rmc = $('recusaMotivoCustom');
+  if (rmc) rmc.value = '';
+  const overlay = $('modalRecusaOverlay');
+  if (overlay) overlay.classList.add('open');
 }
-function closeModalRecusa() { $('modalRecusaOverlay').classList.remove('open'); _recusaId = null; _recusaMotivo = null; }
+
+function closeModalRecusa() {
+  const overlay = $('modalRecusaOverlay');
+  if (overlay) overlay.classList.remove('open');
+  _recusaId = null; _recusaMotivo = null;
+}
+
 function selectMotivo(el, motivo) {
-  document.querySelectorAll('.motivo-item').forEach(o => { o.classList.remove('sel'); o.querySelector('.motivo-radio').innerHTML = ''; });
-  el.classList.add('sel'); _recusaMotivo = motivo;
+  document.querySelectorAll('.motivo-item').forEach(o => {
+    o.classList.remove('sel');
+    const r = o.querySelector('.motivo-radio');
+    if (r) r.innerHTML = '';
+  });
+  el.classList.add('sel');
+  _recusaMotivo = motivo;
 }
+
 async function confirmarRecusa() {
   if (!_recusaId) return;
-  const motivo = $('recusaMotivoCustom').value.trim() || _recusaMotivo;
+  const motivo = ($('recusaMotivoCustom')?.value || '').trim() || _recusaMotivo;
   if (!motivo) return toast('Escolha um motivo.', 'err');
-  const ag = state.agendamentos.find(a => a.id === _recusaId); if (!ag) return;
-  const { error } = await db.from('agenda_agendamentos').update({ status: 'Recusado', observacoes: motivo }).eq('id', _recusaId);
+  const ag = (state.agendamentos || []).find(a => a.id === _recusaId);
+  if (!ag) return;
+  const { error } = await db.from('agenda_agendamentos')
+    .update({ status: 'Recusado', observacoes: motivo }).eq('id', _recusaId);
   if (error) return toast('Erro ao recusar.', 'err');
-  ag.status = 'Recusado'; closeModalRecusa(); renderAll();
+  ag.status = 'Recusado';
+  closeModalRecusa();
+  renderAll();
   showNotif('Recusado', ag.cliente_nome + ' — ' + motivo, 'info');
   const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
   if (tel) {
@@ -868,24 +1265,36 @@ async function confirmarRecusa() {
 
 // ── MODAL REAGENDAR ──
 function openModalReagendar(id) {
-  const ag = state.agendamentos.find(a => a.id === id); if (!ag) return;
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
   if (!podeTerAcoes(ag)) return toast('Este agendamento não permite reagendamento.', 'warn');
   _reagendarId = id;
-  $('reagendarInfo').textContent = `${ag.cliente_nome} · ${formatDate(ag.data)} às ${ag.hora || '—'}`;
-  $('reagendarData').value = ag.data || '';
-  $('reagendarHora').value = ag.hora || '';
-  $('modalReagendarOverlay').classList.add('open');
+  setText('reagendarInfo', `${ag.cliente_nome} · ${formatDate(ag.data)} às ${ag.hora || '—'}`);
+  const rd = $('reagendarData'); if (rd) rd.value = ag.data || '';
+  const rh = $('reagendarHora'); if (rh) rh.value = ag.hora || '';
+  const overlay = $('modalReagendarOverlay');
+  if (overlay) overlay.classList.add('open');
 }
-function closeModalReagendar() { $('modalReagendarOverlay').classList.remove('open'); _reagendarId = null; }
+
+function closeModalReagendar() {
+  const overlay = $('modalReagendarOverlay');
+  if (overlay) overlay.classList.remove('open');
+  _reagendarId = null;
+}
+
 async function confirmarReagendar() {
   if (!_reagendarId) return;
-  const data = $('reagendarData').value; const hora = $('reagendarHora').value;
+  const data = $('reagendarData')?.value;
+  const hora = $('reagendarHora')?.value;
   if (!data || !hora) return toast('Escolha nova data e hora.', 'err');
-  const ag = state.agendamentos.find(a => a.id === _reagendarId); if (!ag) return;
-  const { error } = await db.from('agenda_agendamentos').update({ data, hora, status: 'Reagendado' }).eq('id', _reagendarId);
+  const ag = (state.agendamentos || []).find(a => a.id === _reagendarId);
+  if (!ag) return;
+  const { error } = await db.from('agenda_agendamentos')
+    .update({ data, hora, status: 'Reagendado' }).eq('id', _reagendarId);
   if (error) return toast('Erro ao reagendar.', 'err');
   ag.data = data; ag.hora = hora; ag.status = 'Reagendado';
-  closeModalReagendar(); renderAll();
+  closeModalReagendar();
+  renderAll();
   showNotif('Reagendado!', ag.cliente_nome + ' → ' + formatDate(data) + ' às ' + hora, 'ok');
   const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
   if (tel) {
@@ -902,30 +1311,82 @@ function openConfirmModal({ icon = '⚠️', type = 'danger', title = 'Tem certe
   setText('confirmTitle', title);
   setText('confirmBody', body);
   const btn = $('confirmActionBtn');
-  if (btn) { btn.textContent = btnLabel; btn.className = 'btn ' + (type === 'danger' ? 'btn-danger' : 'btn-primary'); }
+  if (btn) {
+    btn.textContent = btnLabel;
+    btn.className = 'btn ' + (type === 'danger' ? 'btn-danger' : 'btn-primary');
+  }
   _confirmCb = cb;
-  $('confirmOverlay').classList.add('open');
+  const overlay = $('confirmOverlay');
+  if (overlay) overlay.classList.add('open');
 }
-function closeConfirmModal() { $('confirmOverlay').classList.remove('open'); _confirmCb = null; }
-$('confirmActionBtn').onclick = () => { if (_confirmCb) _confirmCb(); closeConfirmModal(); };
-$('confirmOverlay').addEventListener('click', e => { if (e.target === $('confirmOverlay')) closeConfirmModal(); });
+
+function closeConfirmModal() {
+  const overlay = $('confirmOverlay');
+  if (overlay) overlay.classList.remove('open');
+  _confirmCb = null;
+}
+
+// Event listeners para modais — aguarda DOM
+document.addEventListener('DOMContentLoaded', function() {
+  const confirmBtn = $('confirmActionBtn');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', () => {
+      if (_confirmCb) _confirmCb();
+      closeConfirmModal();
+    });
+  }
+
+  const confirmOverlay = $('confirmOverlay');
+  if (confirmOverlay) {
+    confirmOverlay.addEventListener('click', e => {
+      if (e.target === confirmOverlay) closeConfirmModal();
+    });
+  }
+
+  const editOverlay = $('editOverlay');
+  if (editOverlay) {
+    editOverlay.addEventListener('click', e => {
+      if (e.target === editOverlay) closeEditModal();
+    });
+  }
+
+  const modalRecusaOverlay = $('modalRecusaOverlay');
+  if (modalRecusaOverlay) {
+    modalRecusaOverlay.addEventListener('click', e => {
+      if (e.target === modalRecusaOverlay) closeModalRecusa();
+    });
+  }
+
+  const modalReagendarOverlay = $('modalReagendarOverlay');
+  if (modalReagendarOverlay) {
+    modalReagendarOverlay.addEventListener('click', e => {
+      if (e.target === modalReagendarOverlay) closeModalReagendar();
+    });
+  }
+});
 
 // ── EDIT MODAL ──
 function openEditModal(title, bodyHtml, saveCb) {
   setText('editModalTitle', title);
-  $('editModalBody').innerHTML = bodyHtml;
+  const body = $('editModalBody');
+  if (body) body.innerHTML = bodyHtml;
   _editSaveCb = saveCb;
-  $('editSaveBtn').onclick = () => { if (_editSaveCb) _editSaveCb(); };
-  $('editOverlay').classList.add('open');
+  const saveBtn = $('editSaveBtn');
+  if (saveBtn) saveBtn.onclick = () => { if (_editSaveCb) _editSaveCb(); };
+  const overlay = $('editOverlay');
+  if (overlay) overlay.classList.add('open');
 }
-function closeEditModal() { $('editOverlay').classList.remove('open'); _editSaveCb = null; }
-$('editOverlay').addEventListener('click', e => { if (e.target === $('editOverlay')) closeEditModal(); });
-$('modalRecusaOverlay').addEventListener('click', e => { if (e.target === $('modalRecusaOverlay')) closeModalRecusa(); });
-$('modalReagendarOverlay').addEventListener('click', e => { if (e.target === $('modalReagendarOverlay')) closeModalReagendar(); });
+
+function closeEditModal() {
+  const overlay = $('editOverlay');
+  if (overlay) overlay.classList.remove('open');
+  _editSaveCb = null;
+}
 
 // ── EDITAR ──
 function editServico(id) {
-  const s = state.servicos.find(x => x.id === id); if (!s) return;
+  const s = (state.servicos || []).find(x => x.id === id);
+  if (!s) return;
   openEditModal('Editar Serviço', `
     <div class="form-gap">
       <div class="field"><label>Nome</label><input id="ed_sn" value="${s.nome || ''}"></div>
@@ -934,50 +1395,70 @@ function editServico(id) {
         <div class="field"><label>Duração (min)</label><input id="ed_sd" type="number" value="${s.duracao_minutos || 60}"></div>
       </div>
     </div>`, async () => {
-    const nome = $('ed_sn').value.trim();
+    const nome = ($('ed_sn')?.value || '').trim();
     if (!nome) return toast('Preencha o nome.', 'err');
-    const { error } = await db.from('agenda_servicos').update({ nome, preco: Number($('ed_sp').value || 0), duracao_minutos: Number($('ed_sd').value || 60) }).eq('id', id);
+    const { error } = await db.from('agenda_servicos').update({
+      nome,
+      preco: Number($('ed_sp')?.value || 0),
+      duracao_minutos: Number($('ed_sd')?.value || 60)
+    }).eq('id', id);
     if (error) return toast('Erro ao salvar.', 'err');
-    closeEditModal(); await loadAll(); showNotif('Serviço atualizado', '', 'ok');
+    closeEditModal(); await loadAll();
+    showNotif('Serviço atualizado', '', 'ok');
   });
 }
 
 function editProfissional(id) {
-  const p = state.profissionais.find(x => x.id === id); if (!p) return;
+  const p = (state.profissionais || []).find(x => x.id === id);
+  if (!p) return;
   openEditModal('Editar Profissional', `
     <div class="form-gap">
       <div class="field"><label>Nome</label><input id="ed_pn" value="${p.nome || ''}"></div>
       <div class="field"><label>Especialidade</label><input id="ed_pe" value="${p.especialidade || ''}"></div>
       <div class="field"><label>Telefone</label><input id="ed_pt" value="${p.telefone || ''}"></div>
     </div>`, async () => {
-    const nome = $('ed_pn').value.trim();
+    const nome = ($('ed_pn')?.value || '').trim();
     if (!nome) return toast('Preencha o nome.', 'err');
-    const { error } = await db.from('agenda_profissionais').update({ nome, especialidade: $('ed_pe').value.trim(), telefone: $('ed_pt').value.trim() }).eq('id', id);
+    const { error } = await db.from('agenda_profissionais').update({
+      nome,
+      especialidade: ($('ed_pe')?.value || '').trim(),
+      telefone: ($('ed_pt')?.value || '').trim()
+    }).eq('id', id);
     if (error) return toast('Erro ao salvar.', 'err');
-    closeEditModal(); await loadAll(); showNotif('Profissional atualizado', '', 'ok');
+    closeEditModal(); await loadAll();
+    showNotif('Profissional atualizado', '', 'ok');
   });
 }
 
 function editCliente(id) {
-  const c = state.clientes.find(x => x.id === id); if (!c) return;
+  const c = (state.clientes || []).find(x => x.id === id);
+  if (!c) return;
   openEditModal('Editar Cliente', `
     <div class="form-gap">
       <div class="field"><label>Nome</label><input id="ed_cn" value="${c.nome || ''}"></div>
       <div class="field"><label>Telefone</label><input id="ed_ct" value="${c.telefone || ''}"></div>
       <div class="field"><label>E-mail</label><input id="ed_ce" value="${c.email || ''}"></div>
     </div>`, async () => {
-    const nome = $('ed_cn').value.trim();
+    const nome = ($('ed_cn')?.value || '').trim();
     if (!nome) return toast('Preencha o nome.', 'err');
-    const { error } = await db.from('agenda_clientes').update({ nome, telefone: $('ed_ct').value.trim(), email: $('ed_ce').value.trim() }).eq('id', id);
+    const { error } = await db.from('agenda_clientes').update({
+      nome,
+      telefone: ($('ed_ct')?.value || '').trim(),
+      email: ($('ed_ce')?.value || '').trim()
+    }).eq('id', id);
     if (error) return toast('Erro ao salvar.', 'err');
-    closeEditModal(); await loadAll(); showNotif('Cliente atualizado', '', 'ok');
+    closeEditModal(); await loadAll();
+    showNotif('Cliente atualizado', '', 'ok');
   });
 }
 
 function editAgendamento(id) {
-  const a = state.agendamentos.find(x => x.id === id); if (!a) return;
-  const svcopts = state.servicos.filter(s => s.status === 'ativo').map(s => `<option value="${s.id}"${s.id === a.servico_id ? ' selected' : ''}>${s.nome}</option>`).join('');
-  const profopts = state.profissionais.filter(p => p.status === 'ativo').map(p => `<option value="${p.id}"${p.id === a.profissional_id ? ' selected' : ''}>${p.nome}</option>`).join('');
+  const a = (state.agendamentos || []).find(x => x.id === id);
+  if (!a) return;
+  const svcopts = (state.servicos || []).filter(s => s.status === 'ativo')
+    .map(s => `<option value="${s.id}"${s.id === a.servico_id ? ' selected' : ''}>${s.nome}</option>`).join('');
+  const profopts = (state.profissionais || []).filter(p => p.status === 'ativo')
+    .map(p => `<option value="${p.id}"${p.id === a.profissional_id ? ' selected' : ''}>${p.nome}</option>`).join('');
   openEditModal('Editar Agendamento', `
     <div class="form-gap">
       <div class="field-row">
@@ -993,96 +1474,186 @@ function editAgendamento(id) {
         <div class="field"><label>Hora</label><input id="ed_ah" type="time" value="${a.hora || ''}"></div>
       </div>
       <div class="field"><label>Status</label><select id="ed_ast">
-        <option${normStatus(a.status)==='Confirmado'?' selected':''}>Confirmado</option>
-        <option${normStatus(a.status)==='Pendente'?' selected':''}>Pendente</option>
-        <option${normStatus(a.status)==='Reagendado'?' selected':''}>Reagendado</option>
-        <option${normStatus(a.status)==='Concluído'?' selected':''}>Concluído</option>
-        <option${normStatus(a.status)==='Recusado'?' selected':''}>Recusado</option>
-        <option${normStatus(a.status)==='Excluído'?' selected':''}>Excluído</option>
+        <option${normStatus(a.status) === 'Confirmado' ? ' selected' : ''}>Confirmado</option>
+        <option${normStatus(a.status) === 'Pendente' ? ' selected' : ''}>Pendente</option>
+        <option${normStatus(a.status) === 'Reagendado' ? ' selected' : ''}>Reagendado</option>
+        <option${normStatus(a.status) === 'Concluído' ? ' selected' : ''}>Concluído</option>
+        <option${normStatus(a.status) === 'Recusado' ? ' selected' : ''}>Recusado</option>
+        <option${normStatus(a.status) === 'Excluído' ? ' selected' : ''}>Excluído</option>
       </select></div>
     </div>`, async () => {
-    const cli = $('ed_ac').value.trim();
-    const data = $('ed_ad').value; const hora = $('ed_ah').value;
+    const cli = ($('ed_ac')?.value || '').trim();
+    const data = $('ed_ad')?.value;
+    const hora = $('ed_ah')?.value;
     if (!cli || !data || !hora) return toast('Preencha cliente, data e hora.', 'err');
-    const serv = state.servicos.find(s => s.id === $('ed_as').value);
-    const prof = state.profissionais.find(p => p.id === $('ed_ap').value);
+    const serv = (state.servicos || []).find(s => s.id === $('ed_as')?.value);
+    const prof = (state.profissionais || []).find(p => p.id === $('ed_ap')?.value);
     const { error } = await db.from('agenda_agendamentos').update({
-      cliente_nome: cli, cliente_telefone: $('ed_atel').value.trim(),
-      servico_id: $('ed_as').value || null, profissional_id: $('ed_ap').value || null,
-      servico_nome: serv?.nome || a.servico_nome, profissional_nome: prof?.nome || a.profissional_nome,
-      data, hora, status: $('ed_ast').value,
+      cliente_nome: cli,
+      cliente_telefone: ($('ed_atel')?.value || '').trim(),
+      servico_id: $('ed_as')?.value || null,
+      profissional_id: $('ed_ap')?.value || null,
+      servico_nome: serv?.nome || a.servico_nome,
+      profissional_nome: prof?.nome || a.profissional_nome,
+      data, hora,
+      status: $('ed_ast')?.value || 'Pendente',
       valor: Number(serv?.preco || a.valor || 0)
     }).eq('id', id);
     if (error) return toast('Erro ao salvar.', 'err');
-    closeEditModal(); await loadAll(); showNotif('Agendamento atualizado', '', 'ok');
+    closeEditModal(); await loadAll();
+    showNotif('Agendamento atualizado', '', 'ok');
   });
 }
 
 // ── DUPLICAR ──
 async function duplicarServico(id) {
-  const s = state.servicos.find(x => x.id === id); if (!s) return;
-  await db.from('agenda_servicos').insert({ empresa_id: state.empresa.id, nome: s.nome + ' (cópia)', preco: s.preco, duracao_minutos: s.duracao_minutos, status: 'ativo' });
+  const s = (state.servicos || []).find(x => x.id === id);
+  if (!s) return;
+  await db.from('agenda_servicos').insert({
+    empresa_id: state.empresa.id, nome: s.nome + ' (cópia)',
+    preco: s.preco, duracao_minutos: s.duracao_minutos, status: 'ativo'
+  });
   await loadAll(); showNotif('Serviço duplicado', '', 'info');
 }
+
 async function duplicarProfissional(id) {
-  const p = state.profissionais.find(x => x.id === id); if (!p) return;
-  await db.from('agenda_profissionais').insert({ empresa_id: state.empresa.id, nome: p.nome + ' (cópia)', especialidade: p.especialidade, telefone: p.telefone, status: 'ativo' });
+  const p = (state.profissionais || []).find(x => x.id === id);
+  if (!p) return;
+  await db.from('agenda_profissionais').insert({
+    empresa_id: state.empresa.id, nome: p.nome + ' (cópia)',
+    especialidade: p.especialidade, telefone: p.telefone, status: 'ativo'
+  });
   await loadAll(); showNotif('Profissional duplicado', '', 'info');
 }
+
 async function duplicarCliente(id) {
-  const c = state.clientes.find(x => x.id === id); if (!c) return;
-  await db.from('agenda_clientes').insert({ empresa_id: state.empresa.id, nome: c.nome + ' (cópia)', telefone: c.telefone, email: c.email, status: 'ativo' });
+  const c = (state.clientes || []).find(x => x.id === id);
+  if (!c) return;
+  await db.from('agenda_clientes').insert({
+    empresa_id: state.empresa.id, nome: c.nome + ' (cópia)',
+    telefone: c.telefone, email: c.email, status: 'ativo'
+  });
   await loadAll(); showNotif('Cliente duplicado', '', 'info');
 }
+
 async function duplicarAgendamento(id) {
-  const a = state.agendamentos.find(x => x.id === id); if (!a) return;
-  await db.from('agenda_agendamentos').insert({ empresa_id: state.empresa.id, cliente_id: a.cliente_id, servico_id: a.servico_id, profissional_id: a.profissional_id, cliente_nome: a.cliente_nome, cliente_telefone: a.cliente_telefone, servico_nome: a.servico_nome, profissional_nome: a.profissional_nome, data: a.data, hora: a.hora, status: 'Pendente', valor: a.valor });
+  const a = (state.agendamentos || []).find(x => x.id === id);
+  if (!a) return;
+  await db.from('agenda_agendamentos').insert({
+    empresa_id: state.empresa.id,
+    cliente_id: a.cliente_id, servico_id: a.servico_id,
+    profissional_id: a.profissional_id,
+    cliente_nome: a.cliente_nome, cliente_telefone: a.cliente_telefone,
+    servico_nome: a.servico_nome, profissional_nome: a.profissional_nome,
+    data: a.data, hora: a.hora, status: 'Pendente', valor: a.valor
+  });
   await loadAll(); showNotif('Agendamento duplicado como Pendente', '', 'info');
 }
 
 // ── TOGGLE ──
 function toggleServico(id, ns) {
-  const s = state.servicos.find(x => x.id === id); if (!s) return;
-  openConfirmModal({ icon: ns === 'ativo' ? '▶️' : '⏸', type: ns === 'ativo' ? 'info' : 'danger', title: ns === 'ativo' ? 'Ativar serviço?' : 'Desativar serviço?', body: `"${s.nome}"`, btnLabel: ns === 'ativo' ? 'Ativar' : 'Desativar', cb: async () => { await db.from('agenda_servicos').update({ status: ns }).eq('id', id); await loadAll(); showNotif(ns === 'ativo' ? 'Serviço ativado' : 'Serviço desativado', '', 'ok'); } });
+  const s = (state.servicos || []).find(x => x.id === id); if (!s) return;
+  openConfirmModal({
+    icon: ns === 'ativo' ? '▶️' : '⏸', type: ns === 'ativo' ? 'info' : 'danger',
+    title: ns === 'ativo' ? 'Ativar serviço?' : 'Desativar serviço?',
+    body: `"${s.nome}"`, btnLabel: ns === 'ativo' ? 'Ativar' : 'Desativar',
+    cb: async () => {
+      await db.from('agenda_servicos').update({ status: ns }).eq('id', id);
+      await loadAll();
+      showNotif(ns === 'ativo' ? 'Serviço ativado' : 'Serviço desativado', '', 'ok');
+    }
+  });
 }
+
 function toggleProfissional(id, ns) {
-  const p = state.profissionais.find(x => x.id === id); if (!p) return;
-  openConfirmModal({ icon: ns === 'ativo' ? '▶️' : '⏸', type: ns === 'ativo' ? 'info' : 'danger', title: ns === 'ativo' ? 'Ativar profissional?' : 'Desativar?', body: `"${p.nome}"`, btnLabel: ns === 'ativo' ? 'Ativar' : 'Desativar', cb: async () => { await db.from('agenda_profissionais').update({ status: ns }).eq('id', id); await loadAll(); showNotif(ns === 'ativo' ? 'Profissional ativado' : 'Profissional desativado', '', 'ok'); } });
+  const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
+  openConfirmModal({
+    icon: ns === 'ativo' ? '▶️' : '⏸', type: ns === 'ativo' ? 'info' : 'danger',
+    title: ns === 'ativo' ? 'Ativar profissional?' : 'Desativar?',
+    body: `"${p.nome}"`, btnLabel: ns === 'ativo' ? 'Ativar' : 'Desativar',
+    cb: async () => {
+      await db.from('agenda_profissionais').update({ status: ns }).eq('id', id);
+      await loadAll();
+      showNotif(ns === 'ativo' ? 'Profissional ativado' : 'Profissional desativado', '', 'ok');
+    }
+  });
 }
+
 function toggleCliente(id, ativar) {
-  const c = state.clientes.find(x => x.id === id); if (!c) return;
-  openConfirmModal({ icon: ativar ? '▶️' : '⏸', type: ativar ? 'info' : 'danger', title: ativar ? 'Ativar cliente?' : 'Desativar?', body: `"${c.nome}"`, btnLabel: ativar ? 'Ativar' : 'Desativar', cb: async () => { await db.from('agenda_clientes').update({ status: ativar ? 'ativo' : 'inativo' }).eq('id', id); await loadAll(); showNotif(ativar ? 'Cliente ativado' : 'Cliente desativado', '', 'ok'); } });
+  const c = (state.clientes || []).find(x => x.id === id); if (!c) return;
+  openConfirmModal({
+    icon: ativar ? '▶️' : '⏸', type: ativar ? 'info' : 'danger',
+    title: ativar ? 'Ativar cliente?' : 'Desativar?',
+    body: `"${c.nome}"`, btnLabel: ativar ? 'Ativar' : 'Desativar',
+    cb: async () => {
+      await db.from('agenda_clientes').update({ status: ativar ? 'ativo' : 'inativo' }).eq('id', id);
+      await loadAll();
+      showNotif(ativar ? 'Cliente ativado' : 'Cliente desativado', '', 'ok');
+    }
+  });
 }
 
 // ── EXCLUIR ──
 function excluirServico(id) {
-  const s = state.servicos.find(x => x.id === id); if (!s) return;
-  openConfirmModal({ icon: '🗑', type: 'danger', title: 'Excluir serviço?', body: `"${s.nome}"`, btnLabel: 'Excluir', cb: async () => { await db.from('agenda_servicos').update({ status: 'excluido' }).eq('id', id); await loadAll(); showNotif('Serviço excluído', '', 'info'); } });
+  const s = (state.servicos || []).find(x => x.id === id); if (!s) return;
+  openConfirmModal({
+    icon: '🗑', type: 'danger', title: 'Excluir serviço?', body: `"${s.nome}"`, btnLabel: 'Excluir',
+    cb: async () => {
+      await db.from('agenda_servicos').update({ status: 'excluido' }).eq('id', id);
+      await loadAll(); showNotif('Serviço excluído', '', 'info');
+    }
+  });
 }
+
 function excluirProfissional(id) {
-  const p = state.profissionais.find(x => x.id === id); if (!p) return;
-  openConfirmModal({ icon: '🗑', type: 'danger', title: 'Excluir profissional?', body: `"${p.nome}"`, btnLabel: 'Excluir', cb: async () => { await db.from('agenda_profissionais').update({ status: 'excluido' }).eq('id', id); await loadAll(); showNotif('Profissional excluído', '', 'info'); } });
+  const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
+  openConfirmModal({
+    icon: '🗑', type: 'danger', title: 'Excluir profissional?', body: `"${p.nome}"`, btnLabel: 'Excluir',
+    cb: async () => {
+      await db.from('agenda_profissionais').update({ status: 'excluido' }).eq('id', id);
+      await loadAll(); showNotif('Profissional excluído', '', 'info');
+    }
+  });
 }
+
 function excluirCliente(id) {
-  const c = state.clientes.find(x => x.id === id); if (!c) return;
-  openConfirmModal({ icon: '🗑', type: 'danger', title: 'Excluir cliente?', body: `"${c.nome}"`, btnLabel: 'Excluir', cb: async () => { await db.from('agenda_clientes').update({ status: 'inativo' }).eq('id', id); await loadAll(); showNotif('Cliente removido', '', 'info'); } });
+  const c = (state.clientes || []).find(x => x.id === id); if (!c) return;
+  openConfirmModal({
+    icon: '🗑', type: 'danger', title: 'Excluir cliente?', body: `"${c.nome}"`, btnLabel: 'Excluir',
+    cb: async () => {
+      await db.from('agenda_clientes').update({ status: 'inativo' }).eq('id', id);
+      await loadAll(); showNotif('Cliente removido', '', 'info');
+    }
+  });
 }
+
 function excluirAgendamento(id) {
-  const a = state.agendamentos.find(x => x.id === id); if (!a) return;
+  const a = (state.agendamentos || []).find(x => x.id === id); if (!a) return;
   const jaFoi = normStatus(a.status) === 'Concluído' || a.financeiro_status === 'Concluído';
-  openConfirmModal({ icon: '🗑', type: 'danger', title: jaFoi ? 'Arquivar agendamento?' : 'Excluir agendamento?', body: `"${a.cliente_nome}" em ${formatDate(a.data)}.${jaFoi ? ' O faturamento será preservado.' : ''}`, btnLabel: jaFoi ? 'Arquivar' : 'Excluir', cb: async () => {
-    const payload = jaFoi ? { status: 'Excluído', financeiro_status: 'Concluído' } : { status: 'Excluído' };
-    const { error } = await db.from('agenda_agendamentos').update(payload).eq('id', id);
-    if (error) return toast('Erro ao excluir.', 'err');
-    await loadAll(); showNotif(jaFoi ? 'Agendamento arquivado' : 'Agendamento excluído', jaFoi ? 'Faturamento mantido.' : '', 'info');
-  }});
+  openConfirmModal({
+    icon: '🗑', type: 'danger',
+    title: jaFoi ? 'Arquivar agendamento?' : 'Excluir agendamento?',
+    body: `"${a.cliente_nome}" em ${formatDate(a.data)}.${jaFoi ? ' O faturamento será preservado.' : ''}`,
+    btnLabel: jaFoi ? 'Arquivar' : 'Excluir',
+    cb: async () => {
+      const payload = jaFoi
+        ? { status: 'Excluído', financeiro_status: 'Concluído' }
+        : { status: 'Excluído' };
+      const { error } = await db.from('agenda_agendamentos').update(payload).eq('id', id);
+      if (error) return toast('Erro ao excluir.', 'err');
+      await loadAll();
+      showNotif(jaFoi ? 'Agendamento arquivado' : 'Agendamento excluído', jaFoi ? 'Faturamento mantido.' : '', 'info');
+    }
+  });
 }
 
 // ── PUBLIC PAGE ──
 function copyPublicLink() {
   if (!state?.empresa?.slug) return;
   const link = publicUrl(state.empresa.slug);
-  navigator.clipboard?.writeText(link);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link).catch(() => {});
+  }
   showNotif('Link copiado!', link, 'ok', 3000);
 }
 
@@ -1093,15 +1664,22 @@ function openPublic() {
 }
 
 async function loadPublic(slug) {
-  $('landingView').style.display = 'none';
-  $('dashboardView').style.display = 'none';
-  $('publicView').style.display = 'block';
-  const { data: empresa, error } = await db.from('agenda_empresas').select('*').eq('slug', slug).single();
+  const lv = $('landingView');
+  const dv = $('dashboardView');
+  const pv = $('publicView');
+  if (lv) lv.style.display = 'none';
+  if (dv) dv.style.display = 'none';
+  if (pv) pv.style.display = 'block';
+
+  const { data: empresa, error } = await db.from('agenda_empresas')
+    .select('*').eq('slug', slug).single();
+
   if (error || !empresa) {
     setText('pubNomeEmpresa', 'Agenda não encontrada');
     setText('pubDescEmpresa', 'Verifique se o link está correto.');
     return;
   }
+
   state.pubEmpresa = empresa;
   setText('pubNomeEmpresa', empresa.nome);
   setText('pubDescEmpresa', (empresa.area_atuacao || 'Agendamento Online') + ' • WhatsApp: ' + (empresa.whatsapp || 'Não informado'));
@@ -1129,7 +1707,9 @@ async function loadPublic(slug) {
       const f = tel.startsWith('55') ? tel : '55' + tel;
       waFab.href = 'https://wa.me/' + f + '?text=' + encodeURIComponent('Olá, tenho uma dúvida antes de agendar.');
       waFab.style.display = 'flex';
-    } else { waFab.style.display = 'none'; }
+    } else {
+      waFab.style.display = 'none';
+    }
   }
 
   const [svcs, profs] = await Promise.all([
@@ -1140,66 +1720,110 @@ async function loadPublic(slug) {
   state.profissionais = profs.data || [];
 
   const ps = $('pubServicos');
-  if (ps) ps.innerHTML = state.servicos.map(s => `
-    <div class="choice" onclick="selectPubSvc('${s.id}',this)">
-      <div class="choice-icon">✦</div>
-      <div><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos || 60} min</div></div>
-      <div class="choice-price">${money(s.preco).replace(',00','')}</div>
-    </div>`).join('') || '<div class="empty-state"><div class="es-icon">✦</div><p>Nenhum serviço disponível.</p></div>';
+  if (ps) {
+    ps.innerHTML = state.servicos.map(s => `
+      <div class="choice" onclick="selectPubSvc('${s.id}',this)">
+        <div class="choice-icon">✦</div>
+        <div><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos || 60} min</div></div>
+        <div class="choice-price">${money(s.preco).replace(',00', '')}</div>
+      </div>`).join('') ||
+      '<div class="empty-state"><div class="es-icon">✦</div><p>Nenhum serviço disponível.</p></div>';
+  }
 
   const pp = $('pubProfissionais');
-  if (pp) pp.innerHTML = state.profissionais.map(p => `
-    <div class="choice" onclick="selectPubProf('${p.id}',this)">
-      <div class="choice-icon">👤</div>
-      <div><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade || 'Profissional'}</div></div>
-    </div>`).join('') || '<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional disponível.</p></div>';
+  if (pp) {
+    pp.innerHTML = state.profissionais.map(p => `
+      <div class="choice" onclick="selectPubProf('${p.id}',this)">
+        <div class="choice-icon">👤</div>
+        <div><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade || 'Profissional'}</div></div>
+      </div>`).join('') ||
+      '<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional disponível.</p></div>';
+  }
 }
 
 function selectPubSvc(id, el) {
-  state.pubServico = state.servicos.find(s => s.id === id);
+  state.pubServico = (state.servicos || []).find(s => s.id === id);
   document.querySelectorAll('#pubServicos .choice').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
+  if (el) el.classList.add('active');
 }
+
 function selectPubProf(id, el) {
-  state.pubProfissional = state.profissionais.find(p => p.id === id);
+  state.pubProfissional = (state.profissionais || []).find(p => p.id === id);
   document.querySelectorAll('#pubProfissionais .choice').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
+  if (el) el.classList.add('active');
 }
 
 async function confirmarAgendamentoPublico() {
-  if (!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !$('pubClienteNome')?.value || !$('pubClienteTel')?.value || !$('pubData')?.value || !$('pubHora')?.value)
+  const pubNome = $('pubClienteNome')?.value?.trim();
+  const pubTel = $('pubClienteTel')?.value?.trim();
+  const pubData = $('pubData')?.value;
+  const pubHora = $('pubHora')?.value;
+
+  if (!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !pubNome || !pubTel || !pubData || !pubHora) {
     return toast('Preencha tudo para confirmar.', 'err');
-  const { data: cli } = await db.from('agenda_clientes').insert({ empresa_id: state.pubEmpresa.id, nome: $('pubClienteNome').value.trim(), telefone: $('pubClienteTel').value.trim(), status: 'ativo' }).select('*').single();
-  const { error } = await db.from('agenda_agendamentos').insert({
-    empresa_id: state.pubEmpresa.id, cliente_id: cli?.id || null,
-    servico_id: state.pubServico.id, profissional_id: state.pubProfissional.id,
-    cliente_nome: $('pubClienteNome').value, cliente_telefone: $('pubClienteTel').value,
-    servico_nome: state.pubServico.nome, profissional_nome: state.pubProfissional.nome,
-    data: $('pubData').value, hora: $('pubHora').value, status: 'Pendente',
-    valor: Number(state.pubServico.preco || 0),
-    observacoes: $('pubObs').value
-  });
-  if (error) { console.error(error); return toast('Erro ao confirmar.', 'err'); }
-  $('pubMainBody').style.display = 'none';
-  $('pubConfirmScreen').style.display = 'block';
+  }
+
+  try {
+    let clienteId = null;
+    const { data: cli } = await db.from('agenda_clientes').insert({
+      empresa_id: state.pubEmpresa.id,
+      nome: pubNome,
+      telefone: pubTel,
+      status: 'ativo'
+    }).select('*').single();
+    if (cli) clienteId = cli.id;
+
+    const { error } = await db.from('agenda_agendamentos').insert({
+      empresa_id: state.pubEmpresa.id,
+      cliente_id: clienteId,
+      servico_id: state.pubServico.id,
+      profissional_id: state.pubProfissional.id,
+      cliente_nome: pubNome,
+      cliente_telefone: pubTel,
+      servico_nome: state.pubServico.nome,
+      profissional_nome: state.pubProfissional.nome,
+      data: pubData,
+      hora: pubHora,
+      status: 'Pendente',
+      valor: Number(state.pubServico.preco || 0),
+      observacoes: $('pubObs')?.value || ''
+    });
+
+    if (error) { console.error(error); return toast('Erro ao confirmar: ' + error.message, 'err'); }
+
+    const mb = $('pubMainBody');
+    const cs = $('pubConfirmScreen');
+    if (mb) mb.style.display = 'none';
+    if (cs) cs.style.display = 'block';
+  } catch (e) {
+    console.error('Erro ao confirmar agendamento público:', e);
+    toast('Erro inesperado. Tente novamente.', 'err');
+  }
 }
 
 function resetPublic() {
-  $('pubMainBody').style.display = 'flex';
-  $('pubConfirmScreen').style.display = 'none';
-  $('pubClienteNome').value = $('pubClienteTel').value = $('pubData').value = $('pubHora').value = $('pubObs').value = '';
-  state.pubServico = null; state.pubProfissional = null;
+  const mb = $('pubMainBody');
+  const cs = $('pubConfirmScreen');
+  if (mb) mb.style.display = 'flex';
+  if (cs) cs.style.display = 'none';
+  const campos = ['pubClienteNome', 'pubClienteTel', 'pubData', 'pubHora', 'pubObs'];
+  campos.forEach(id => { const el = $(id); if (el) el.value = ''; });
+  state.pubServico = null;
+  state.pubProfissional = null;
   document.querySelectorAll('.choice').forEach(c => c.classList.remove('active'));
 }
 
 function voltarDaPublica() {
   history.pushState(null, '', location.pathname);
-  $('publicView').style.display = 'none';
+  const pv = $('publicView');
+  if (pv) pv.style.display = 'none';
   if (state?.empresa) {
-    $('dashboardView').style.display = 'block';
+    const dv = $('dashboardView');
+    if (dv) dv.style.display = 'block';
     setView('dashboard');
   } else {
-    $('landingView').style.display = 'block';
+    const lv = $('landingView');
+    if (lv) lv.style.display = 'block';
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1222,5 +1846,6 @@ Object.assign(window, {
   copyPublicLink, openPublic, voltarDaPublica,
   selectPubSvc, selectPubProf, confirmarAgendamentoPublico, resetPublic,
   closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
-  toast, clearNotifDot
+  toast, clearNotifDot,
+  loadPublic
 });
