@@ -16,9 +16,6 @@
 <div class="bg-glow-tl"></div>
 <div class="bg-glow-br"></div>
 
-<!-- ══════════════════════════════════════
-     LANDING
-══════════════════════════════════════ -->
 <div id="landingView">
   <nav class="land-nav" id="landNav">
     <div class="nav-brand" onclick="window.scrollTo(0,0)">
@@ -218,9 +215,7 @@
   </footer>
 </div>
 
-<!-- ══════════════════════════════════════
-     AUTH MODAL
-══════════════════════════════════════ -->
+<!-- AUTH MODAL -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-modal">
     <button class="auth-close" onclick="closeAuth()">✕</button>
@@ -311,9 +306,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     DASHBOARD
-══════════════════════════════════════ -->
+<!-- DASHBOARD -->
 <section id="dashboardView" style="display:none">
   <aside class="sidebar" id="sidebar">
     <div class="side-brand"><div class="nav-dot">✦</div>AgendaPro</div>
@@ -374,8 +367,35 @@
       <button class="mob-nav-btn" onclick="setView('agenda')"><span class="mni">📅</span>Agenda</button>
       <button class="mob-nav-btn mob-nav-fab" onclick="setView('agenda');setTimeout(()=>{var el=document.getElementById('agCliente');if(el)el.focus()},200)"><span class="mni">+</span>Novo</button>
       <button class="mob-nav-btn" onclick="setView('clientes')"><span class="mni">👥</span>Clientes</button>
-      <button class="mob-nav-btn" onclick="setView('config')"><span class="mni">⚙</span>Config</button>
+      <button class="mob-nav-btn" onclick="openMobileMenu()"><span class="mni">☰</span>Menu</button>
     </nav>
+
+    <!-- MOBILE MENU DRAWER -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+    <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+      <div class="mobile-menu-header">
+        <div class="nav-brand" style="font-size:17px"><div class="nav-dot" style="width:24px;height:24px;font-size:10px">✦</div>AgendaPro</div>
+        <button class="modal-close" onclick="closeMobileMenu()" style="position:static">✕</button>
+      </div>
+      <div class="mobile-menu-body">
+        <div class="side-nav-label">Gestão</div>
+        <button class="nav-btn" onclick="setView('dashboard');closeMobileMenu()"><span class="ni">📊</span>Dashboard</button>
+        <button class="nav-btn" onclick="setView('agenda');closeMobileMenu()"><span class="ni">📅</span>Agenda</button>
+        <button class="nav-btn" onclick="setView('clientes');closeMobileMenu()"><span class="ni">👥</span>Clientes</button>
+        <button class="nav-btn" onclick="setView('servicos');closeMobileMenu()"><span class="ni">✦</span>Serviços</button>
+        <button class="nav-btn" onclick="setView('profissionais');closeMobileMenu()"><span class="ni">👤</span>Profissionais</button>
+        <div class="side-nav-sep"></div>
+        <div class="side-nav-label">Financeiro</div>
+        <button class="nav-btn" onclick="setView('financeiro');closeMobileMenu()"><span class="ni">💰</span>Financeiro</button>
+        <button class="nav-btn" onclick="setView('relatorios');closeMobileMenu()"><span class="ni">📈</span>Relatórios</button>
+        <div class="side-nav-sep"></div>
+        <div class="side-nav-label">Empresa</div>
+        <button class="nav-btn" onclick="openPublic();closeMobileMenu()"><span class="ni">🌐</span>Página Pública</button>
+        <button class="nav-btn" onclick="setView('config');closeMobileMenu()"><span class="ni">⚙</span>Configurações</button>
+        <div class="side-nav-sep"></div>
+        <button class="btn btn-ghost btn-full btn-sm" onclick="logout()" style="margin-top:8px">Sair da conta</button>
+      </div>
+    </div>
 
     <!-- VIEW: DASHBOARD -->
     <section class="view active" id="view-dashboard">
@@ -579,9 +599,7 @@ Aguardamos você!</textarea></div>
   </main>
 </section>
 
-<!-- ══════════════════════════════════════
-     PÁGINA PÚBLICA
-══════════════════════════════════════ -->
+<!-- PÁGINA PÚBLICA -->
 <section id="publicView" style="display:none">
   <div class="pub-wrap">
     <button class="pub-back" onclick="voltarDaPublica()">← Voltar</button>
@@ -626,9 +644,6 @@ Aguardamos você!</textarea></div>
   </a>
 </section>
 
-<!-- ══════════════════════════════════════
-     MODAIS
-══════════════════════════════════════ -->
 <!-- Modal Recusa -->
 <div class="modal-overlay" id="modalRecusaOverlay">
   <div class="modal">
@@ -697,5 +712,15 @@ Aguardamos você!</textarea></div>
 
 <script src="supabase.js"></script>
 <script src="app.js"></script>
+<script>
+function openMobileMenu(){
+  document.getElementById('mobileMenuOverlay').classList.add('open');
+  document.getElementById('mobileMenuDrawer').classList.add('open');
+}
+function closeMobileMenu(){
+  document.getElementById('mobileMenuOverlay').classList.remove('open');
+  document.getElementById('mobileMenuDrawer').classList.remove('open');
+}
+</script>
 </body>
 </html>
