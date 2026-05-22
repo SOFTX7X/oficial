@@ -105,19 +105,11 @@ function toast(msg, type = 'info') {
 function showNotif(title, msg = '', type = 'info', duration = 5000) {
   const stack = $('notifStack');
   if (!stack) return;
-
-  const key = String(title || '') + '|' + String(msg || '');
-  const nowMs = Date.now();
-  window.__notifCache = window.__notifCache || {};
-  if (window.__notifCache[key] && nowMs - window.__notifCache[key] < 5000) return;
-  window.__notifCache[key] = nowMs;
-
   const item = document.createElement('div');
   item.className = 'notif-item';
   const now = new Date();
   const t = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
   const icons = { new: '📅', ok: '✅', err: '⚠️', info: '💬' };
-
   item.innerHTML = `
     <div class="notif-icon ${type}">${icons[type] || '🔔'}</div>
     <div class="notif-body">
@@ -127,19 +119,14 @@ function showNotif(title, msg = '', type = 'info', duration = 5000) {
     </div>
     <button class="notif-close" onclick="this.parentElement.remove()">✕</button>
   `;
-
   stack.prepend(item);
-  while (stack.children.length > 2) stack.lastChild.remove();
-
+  while (stack.children.length > 4) stack.lastChild.remove();
   setTimeout(() => {
     item.classList.add('out');
     setTimeout(() => { if (item.parentElement) item.remove(); }, 450);
   }, duration);
-
   const dot = $('notifDot');
   if (dot) dot.classList.add('on');
-  const topText = $('topNotifyText');
-  if (topText) topText.textContent = title || 'Nova notificação';
 }
 
 function clearNotifDot() {
@@ -289,30 +276,23 @@ function showDashboard() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 function openMobileMenu() {
   const overlay = $('mobileMenuOverlay');
   const drawer = $('mobileMenuDrawer');
+
   if (overlay) overlay.classList.add('open');
   if (drawer) drawer.classList.add('open');
+
   document.body.classList.add('menu-open');
 }
 
 function closeMobileMenu() {
   const overlay = $('mobileMenuOverlay');
   const drawer = $('mobileMenuDrawer');
+
   if (overlay) overlay.classList.remove('open');
   if (drawer) drawer.classList.remove('open');
+
   document.body.classList.remove('menu-open');
 }
 
@@ -656,12 +636,8 @@ let _reloadTimer = null;
 function scheduleReload() {
   if (_reloadTimer) clearTimeout(_reloadTimer);
   _reloadTimer = setTimeout(async () => {
-    if (isAnyActionMenuOpen()) {
-      scheduleReload();
-      return;
-    }
     if (state?.empresa?.id) await loadAll();
-  }, 900);
+  }, 400);
 }
 
 function startAutoSync() {
@@ -680,7 +656,7 @@ function startAutoSync() {
         novos.forEach(a => showNotif('Novo agendamento!', `${a.cliente_nome || 'Cliente'} agendou.`, 'new', 6000));
       }
       lastIds = new Set(state.agendamentos.map(a => String(a.id)));
-      if (!isAnyActionMenuOpen()) renderAll();
+      renderAll();
     } catch (e) {}
   }, 5000);
 }
@@ -739,7 +715,6 @@ function isEditingConfig(){
 }
 
 function renderAll() {
-  if (isAnyActionMenuOpen()) return;
   preserveAgendaFormValues(() => {
     renderStats();
     renderDashList();
@@ -750,6 +725,7 @@ function renderAll() {
     renderServicos();
     renderProfissionais();
     renderFinanceiro();
+
     const active = document.activeElement;
     const editingConfig = active && active.closest && active.closest('#view-config');
     if (!editingConfig) renderConfig();
@@ -840,6 +816,7 @@ function renderCalendar() {
 function renderSelects() {
   const agS = $('agServico');
   const agP = $('agProfissional');
+
   const selectedServico = agS ? agS.value : '';
   const selectedProfissional = agP ? agP.value : '';
 
@@ -851,7 +828,9 @@ function renderSelects() {
         .map(s => `<option value="${s.id}">${s.nome} — ${money(s.preco).replace(',00','')}</option>`)
         .join('');
 
-    if (selectedServico && [...agS.options].some(o => o.value === selectedServico)) agS.value = selectedServico;
+    if (selectedServico && [...agS.options].some(o => o.value === selectedServico)) {
+      agS.value = selectedServico;
+    }
   }
 
   if (agP) {
@@ -862,7 +841,9 @@ function renderSelects() {
         .map(p => `<option value="${p.id}">${p.nome}</option>`)
         .join('');
 
-    if (selectedProfissional && [...agP.options].some(o => o.value === selectedProfissional)) agP.value = selectedProfissional;
+    if (selectedProfissional && [...agP.options].some(o => o.value === selectedProfissional)) {
+      agP.value = selectedProfissional;
+    }
   }
 }
 
@@ -878,54 +859,59 @@ function setFilter(filter, btn) {
 function renderTimeline() {
   const el = $('agendaTimeline');
   if (!el) return;
-
-  let list = state.agendamentos || [];
-  if (_agendaFilter !== 'todos') {
-    const map = { pendente: 'Pendente', confirmado: 'Confirmado', reagendado: 'Reagendado', concluido: 'Concluído', recusado: 'Recusado', excluido: 'Excluído' };
-    list = list.filter(a => normStatus(a.status) === map[_agendaFilter]);
-  } else {
-    list = list.filter(a => normStatus(a.status) !== 'Excluído');
-  }
-
-  if (!list.length) {
-    el.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">📅</div><p>Nenhum agendamento neste filtro.</p></div>`;
+  const ags = state.agendamentos || [];
+  if (!ags.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>';
     return;
   }
-
+  const statusMap = {
+    pendente: 'Pendente', confirmado: 'Confirmado', reagendado: 'Reagendado',
+    concluido: 'Concluído', recusado: 'Recusado', excluido: 'Excluído'
+  };
+  let filtered;
+  if (_agendaFilter === 'excluido') {
+    filtered = ags.filter(a => normStatus(a.status) === 'Excluído');
+  } else if (_agendaFilter !== 'todos') {
+    const target = statusMap[_agendaFilter];
+    filtered = ags.filter(a => normStatus(a.status) === target);
+  } else {
+    filtered = ags.filter(a => normStatus(a.status) !== 'Excluído');
+  }
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento neste filtro.</p></div>';
+    return;
+  }
   el.innerHTML = '';
-  list.forEach(a => {
-    const s = normStatus(a.status);
-    const card = document.createElement('div');
-    card.className = 'agenda-card-full';
-    card.id = 'ag-' + a.id;
-    card.innerHTML = `
-      <div class="agenda-time-pill">${a.hora || '--:--'}</div>
-      <div class="agenda-main-line">
-        <div class="agenda-avatar">${initial(a.cliente_nome)}</div>
-        <div class="agenda-info">
-          <div class="agenda-top-row">
-            <div class="agenda-client" title="${a.cliente_nome || 'Cliente'}">${a.cliente_nome || 'Cliente'}</div>
-            <span class="badge ${badgeClass(a.status)}">${s}</span>
+  filtered.forEach(a => {
+    const block = document.createElement('div');
+    block.className = 'tl-block';
+    block.id = 'ag-' + a.id;
+    block.innerHTML = `
+      <div class="tl-time">${a.hora || '—'}</div>
+      <div class="tl-line"></div>
+      <div class="tl-content">
+        <div class="tl-card">
+          <div class="tl-card-top">
+            <div class="apt-av" style="width:34px;height:34px;border-radius:9px;flex-shrink:0">${initial(a.cliente_nome)}</div>
+            <div class="tl-card-info">
+              <div class="tl-card-name">${a.cliente_nome || 'Cliente'}</div>
+              <div class="tl-card-meta">${a.servico_nome || '—'} · ${a.profissional_nome || '—'} · ${formatDate(a.data)}${a.cliente_telefone ? ' · ' + a.cliente_telefone : ''}</div>
+            </div>
+            <div class="tl-card-status"><span class="badge ${badgeClass(a.status)}">${normStatus(a.status)}</span></div>
           </div>
-          <div class="agenda-service" title="${a.servico_nome || 'Serviço'}">${a.servico_nome || 'Serviço'}</div>
-          <div class="agenda-meta-grid">
-            <span>👤 ${a.profissional_nome || 'Profissional'}</span>
-            <span>📅 ${formatDate(a.data)}</span>
-            ${a.cliente_telefone ? `<span>📱 ${a.cliente_telefone}</span>` : ''}
-            ${a.valor ? `<span>💰 ${money(a.valor).replace(',00','')}</span>` : ''}
-          </div>
+          ${renderAcoes(a)}
         </div>
-      </div>
-      ${renderAcoesAgenda(a)}
-    `;
-    const menu = buildMenu(a.id, [
+      </div>`;
+    const card = block.querySelector('.tl-card');
+    const cardTop = block.querySelector('.tl-card-top');
+    const menu = buildActionMenu(a.id, [
       { icon: '✏️', label: 'Editar', action: () => editAgendamento(a.id) },
       { icon: '📋', label: 'Duplicar', action: () => duplicarAgendamento(a.id) },
       'sep',
-      { icon: '🗑', label: s === 'Concluído' ? 'Arquivar' : 'Excluir', cls: 'danger', action: () => excluirAgendamento(a.id) }
+      { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirAgendamento(a.id) }
     ]);
-    card.appendChild(menu);
-    el.appendChild(card);
+    if (cardTop) cardTop.appendChild(menu);
+    el.appendChild(block);
   });
 }
 
@@ -990,7 +976,7 @@ function buildActionMenu(id, items) {
 }
 
 function closeAllMenus() {
-  document.querySelectorAll('.action-dropdown.open, .action-menu-dropdown.open, .ap-menu.open').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
   _openMenu = null;
 }
 
