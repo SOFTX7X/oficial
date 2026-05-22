@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    (function () {
+      var path = window.location.pathname;
+
+      if (path.includes("/oficial/agendar/")) {
+        var slug = path.split("/oficial/agendar/")[1].replace("/", "");
+        window.location.replace("https://agendaprosite.github.io/oficial/#agendar/" + slug);
+      } else {
+        window.location.replace("https://agendaprosite.github.io/oficial/");
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>
