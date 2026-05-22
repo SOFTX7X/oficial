@@ -1722,3 +1722,212 @@ textarea{
   }
 }
 
+
+/* ═══════════════════════════════════════════════
+   PATCH FINAL — MENU FIXO + SELECTS ESTÁVEIS + TOPO LIMPO
+═══════════════════════════════════════════════ */
+
+body.menu-open {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+.topbar-actions-clean {
+  display: flex !important;
+  justify-content: stretch !important;
+  width: 100%;
+}
+
+.top-notify-slot {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 13px;
+  border-radius: 14px;
+  color: var(--text3);
+  background: rgba(255,255,255,.035);
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.top-notify-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+  flex-shrink: 0;
+}
+
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  background: rgba(0,0,0,.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overscroll-behavior: contain;
+}
+
+.mobile-menu-overlay.open {
+  display: block;
+}
+
+.mobile-menu-drawer {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: min(86vw, 360px);
+  height: 100dvh !important;
+  z-index: 99991 !important;
+  background: rgba(14,14,18,.985);
+  border-left: 1px solid var(--border2);
+  box-shadow: -30px 0 90px rgba(0,0,0,.72);
+  transform: translateX(105%);
+  transition: transform .22s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important;
+}
+
+.mobile-menu-drawer.open {
+  transform: translateX(0);
+}
+
+.mobile-menu-header {
+  flex: 0 0 auto;
+  min-height: 76px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobile-menu-close {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  border: 1px solid var(--border2);
+  background: rgba(255,255,255,.055);
+  color: var(--text2);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.mobile-menu-body {
+  flex: 1 1 auto;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 18px 24px;
+}
+
+.mobile-menu-label {
+  margin: 18px 0 9px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .16em;
+}
+
+.mobile-menu-item {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 14px;
+  margin-bottom: 7px;
+  border-radius: 15px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text2);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mobile-menu-item span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(255,255,255,.045);
+}
+
+.mobile-menu-item:hover,
+.mobile-menu-item:focus {
+  background: var(--accent4);
+  color: var(--accent2);
+  border-color: var(--accent-border);
+}
+
+.mobile-menu-logout {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 22px;
+  border-radius: 14px;
+  border: 1px solid var(--border2);
+  background: rgba(255,255,255,.035);
+  color: var(--text2);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.field select,
+select {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.client-card,
+.svc-card,
+.prof-card,
+.tl-card,
+.apt-card,
+.cards-grid,
+.timeline,
+#agendaTimeline,
+#clientesCards,
+#servicosCards,
+#profCards,
+.view,
+.dash-main {
+  overflow: visible !important;
+}
+
+@media (max-width: 768px) {
+  .dash-main {
+    padding-bottom: 96px !important;
+  }
+
+  .topbar {
+    gap: 10px !important;
+  }
+
+  .topbar-actions-clean {
+    grid-template-columns: 1fr !important;
+  }
+
+  .top-notify-slot {
+    font-size: 12px;
+    min-height: 42px;
+  }
+
+  .mobile-menu-drawer {
+    width: min(88vw, 360px);
+  }
+}
+
