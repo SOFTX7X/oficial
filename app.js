@@ -647,6 +647,12 @@ async function loadAll() {
   }
 }
 
+function isEditingConfig(){
+  const active = document.activeElement;
+  if(!active) return false;
+  return !!active.closest('#view-config');
+}
+
 function renderAll() {
   renderStats();
   renderDashList();
@@ -657,7 +663,12 @@ function renderAll() {
   renderServicos();
   renderProfissionais();
   renderFinanceiro();
-  renderConfig();
+
+  // Não recarrega Configurações enquanto o usuário está digitando.
+  // Evita apagar Instagram, site, endereço, cidade, slug etc. durante autosync/realtime.
+  if(!isEditingConfig()){
+    renderConfig();
+  }
 }
 
 // ── STATS ──
