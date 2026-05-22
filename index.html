@@ -709,6 +709,17 @@ Aguardamos você!</textarea></div>
 <div class="notif-stack" id="notifStack"></div>
 
 <script src="supabase.js"></script>
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const agendar = params.get("agendar");
+
+  if (agendar) {
+    window.location.hash = "agendar/" + agendar;
+  }
+})();
+</script>
+
 <script src="app.js"></script>
 <script>
 function openMobileMenu(){
