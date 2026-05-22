@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>AgendaPro — Sistema de Agendamento</title>
 <link rel="stylesheet" href="style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -312,45 +312,6 @@
 </div>
 
 <!-- ══════════════════════════════════════
-     MOBILE DRAWER MENU
-══════════════════════════════════════ -->
-<div class="mobile-drawer-overlay" id="mobileDrawerOverlay" onclick="closeMobileDrawer()"></div>
-<div class="mobile-drawer" id="mobileDrawer">
-  <div class="mobile-drawer-header">
-    <div class="side-brand"><div class="nav-dot">✦</div>AgendaPro</div>
-    <button class="mobile-drawer-close" onclick="closeMobileDrawer()">✕</button>
-  </div>
-  <div class="mobile-drawer-user">
-    <div class="side-avatar" id="drawerAvatar">A</div>
-    <div>
-      <div class="side-name" id="drawerNome">Empresa</div>
-      <div class="side-plan">Plano Grátis</div>
-    </div>
-  </div>
-  <div class="mobile-drawer-nav">
-    <div class="side-nav-label">Gestão</div>
-    <button class="drawer-nav-btn" onclick="setView('dashboard');closeMobileDrawer()"><span class="ni">📊</span>Dashboard</button>
-    <button class="drawer-nav-btn" onclick="setView('agenda');closeMobileDrawer()"><span class="ni">📅</span>Agenda</button>
-    <button class="drawer-nav-btn" onclick="setView('clientes');closeMobileDrawer()"><span class="ni">👥</span>Clientes</button>
-    <button class="drawer-nav-btn" onclick="setView('servicos');closeMobileDrawer()"><span class="ni">✦</span>Serviços</button>
-    <button class="drawer-nav-btn" onclick="setView('profissionais');closeMobileDrawer()"><span class="ni">👤</span>Profissionais</button>
-    <div class="side-nav-sep"></div>
-    <div class="side-nav-label">Financeiro</div>
-    <button class="drawer-nav-btn" onclick="setView('financeiro');closeMobileDrawer()"><span class="ni">💰</span>Financeiro</button>
-    <button class="drawer-nav-btn" onclick="setView('relatorios');closeMobileDrawer()"><span class="ni">📈</span>Relatórios</button>
-    <div class="side-nav-sep"></div>
-    <div class="side-nav-label">Empresa</div>
-    <button class="drawer-nav-btn" onclick="openPublic();closeMobileDrawer()"><span class="ni">🌐</span>Página Pública</button>
-    <button class="drawer-nav-btn" onclick="setView('config');closeMobileDrawer()"><span class="ni">⚙</span>Configurações</button>
-    <div class="side-nav-sep"></div>
-    <button class="drawer-nav-btn danger" onclick="logout()"><span class="ni">🚪</span>Sair da conta</button>
-  </div>
-  <div class="mobile-drawer-link" id="drawerLinkBox" onclick="copyPublicLink()">
-    <span>🔗</span><span id="drawerLinkText">Link público...</span>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
      DASHBOARD
 ══════════════════════════════════════ -->
 <section id="dashboardView" style="display:none">
@@ -393,22 +354,17 @@
 
   <main class="dash-main">
     <div class="topbar">
-      <div class="topbar-left">
-        <button class="btn-hamburger" id="btnHamburger" onclick="openMobileDrawer()">
-          <span></span><span></span><span></span>
-        </button>
-        <div class="topbar-title">
-          <h2 id="pageTitle">Dashboard</h2>
-          <p id="pageSub" class="topbar-sub">Controle completo do seu negócio.</p>
-        </div>
+      <div class="topbar-title">
+        <h2 id="pageTitle">Dashboard</h2>
+        <p id="pageSub">Controle completo do seu negócio.</p>
       </div>
       <div class="topbar-actions">
         <button class="btn btn-icon" onclick="copyPublicLink()" title="Copiar link">🔗</button>
         <div class="notif-wrap">
           <button class="btn btn-icon" onclick="clearNotifDot()" title="Notificações">🔔<span class="notif-dot" id="notifDot"></span></button>
         </div>
-        <button class="btn btn-ghost btn-sm hide-mobile" onclick="openPublic()">Ver página pública</button>
-        <button class="btn btn-primary btn-sm" onclick="setView('agenda')">+ Novo</button>
+        <button class="btn btn-ghost btn-sm" onclick="openPublic()">Ver página pública</button>
+        <button class="btn btn-primary btn-sm" onclick="setView('agenda')">+ Agendamento</button>
       </div>
     </div>
 
@@ -418,7 +374,7 @@
       <button class="mob-nav-btn" onclick="setView('agenda')"><span class="mni">📅</span>Agenda</button>
       <button class="mob-nav-btn mob-nav-fab" onclick="setView('agenda');setTimeout(()=>{var el=document.getElementById('agCliente');if(el)el.focus()},200)"><span class="mni">+</span>Novo</button>
       <button class="mob-nav-btn" onclick="setView('clientes')"><span class="mni">👥</span>Clientes</button>
-      <button class="mob-nav-btn" onclick="openMobileDrawer()"><span class="mni">☰</span>Menu</button>
+      <button class="mob-nav-btn" onclick="setView('config')"><span class="mni">⚙</span>Config</button>
     </nav>
 
     <!-- VIEW: DASHBOARD -->
@@ -673,6 +629,7 @@ Aguardamos você!</textarea></div>
 <!-- ══════════════════════════════════════
      MODAIS
 ══════════════════════════════════════ -->
+<!-- Modal Recusa -->
 <div class="modal-overlay" id="modalRecusaOverlay">
   <div class="modal">
     <button class="modal-close" onclick="closeModalRecusa()">✕</button>
@@ -692,6 +649,7 @@ Aguardamos você!</textarea></div>
   </div>
 </div>
 
+<!-- Modal Reagendar -->
 <div class="modal-overlay" id="modalReagendarOverlay">
   <div class="modal">
     <button class="modal-close" onclick="closeModalReagendar()">✕</button>
@@ -708,6 +666,7 @@ Aguardamos você!</textarea></div>
   </div>
 </div>
 
+<!-- Modal Editar -->
 <div class="edit-overlay" id="editOverlay">
   <div class="edit-modal">
     <button class="modal-close" onclick="closeEditModal()">✕</button>
@@ -720,6 +679,7 @@ Aguardamos você!</textarea></div>
   </div>
 </div>
 
+<!-- Modal Confirm -->
 <div class="modal-overlay" id="confirmOverlay">
   <div class="modal confirm-modal">
     <div class="confirm-icon-wrap danger" id="confirmIconWrap">⚠️</div>
@@ -732,37 +692,8 @@ Aguardamos você!</textarea></div>
   </div>
 </div>
 
+<!-- Notif Stack -->
 <div class="notif-stack" id="notifStack"></div>
-
-<script>
-// Bloquear zoom por double tap e pinch
-document.addEventListener('touchstart', function(e) {
-  if (e.touches.length > 1) e.preventDefault();
-}, { passive: false });
-
-var lastTouchEnd = 0;
-document.addEventListener('touchend', function(e) {
-  var now = Date.now();
-  if (now - lastTouchEnd <= 300) e.preventDefault();
-  lastTouchEnd = now;
-}, false);
-
-document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, false);
-document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, false);
-document.addEventListener('gestureend', function(e) { e.preventDefault(); }, false);
-
-// Mobile drawer
-function openMobileDrawer() {
-  document.getElementById('mobileDrawer').classList.add('open');
-  document.getElementById('mobileDrawerOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeMobileDrawer() {
-  document.getElementById('mobileDrawer').classList.remove('open');
-  document.getElementById('mobileDrawerOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-</script>
 
 <script src="supabase.js"></script>
 <script src="app.js"></script>
