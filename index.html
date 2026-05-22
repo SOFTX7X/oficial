@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>AgendaPro — Sistema de Agendamento</title>
 <link rel="stylesheet" href="style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -714,12 +714,16 @@ Aguardamos você!</textarea></div>
 <script src="app.js"></script>
 <script>
 function openMobileMenu(){
-  document.getElementById('mobileMenuOverlay').classList.add('open');
-  document.getElementById('mobileMenuDrawer').classList.add('open');
+  const overlay = document.getElementById('mobileMenuOverlay');
+  const drawer = document.getElementById('mobileMenuDrawer');
+  if(overlay) overlay.classList.add('open');
+  if(drawer) drawer.classList.add('open');
 }
 function closeMobileMenu(){
-  document.getElementById('mobileMenuOverlay').classList.remove('open');
-  document.getElementById('mobileMenuDrawer').classList.remove('open');
+  const overlay = document.getElementById('mobileMenuOverlay');
+  const drawer = document.getElementById('mobileMenuDrawer');
+  if(overlay) overlay.classList.remove('open');
+  if(drawer) drawer.classList.remove('open');
 }
 </script>
 </body>
