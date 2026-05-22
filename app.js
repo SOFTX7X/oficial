@@ -17,6 +17,7 @@ let _recusaId = null;
 let _recusaMotivo = null;
 let _reagendarId = null;
 let _openMenu = null;
+let _openMenuBtn = null;
 let autoSyncTimer = null;
 let lastIds = new Set();
 let realtimeChannel = null;
@@ -147,13 +148,24 @@ window.addEventListener('hashchange', () => {
 });
 
 // ── FECHAR MENUS AO CLICAR FORA ──
-document.addEventListener('click', closeAllMenus);
+// FIX: só fecha se o clique NÃO foi dentro do dropdown aberto
+document.addEventListener('click', function(e) {
+  if (_openMenu) {
+    // Se clicou no próprio botão que abriu — o handler do btn já trata
+    if (_openMenuBtn && _openMenuBtn.contains(e.target)) return;
+    // Se clicou dentro do dropdown — não fecha
+    if (_openMenu.contains(e.target)) return;
+    closeAllMenus();
+  }
+});
+
+// Fecha menus ao rolar (evita dropdown desalinhado)
+document.addEventListener('scroll', closeAllMenus, { passive: true });
 
 // ── INIT ──
 window.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-  // Carrega categorias primeiro (para o select do cadastro)
   await loadCategorias();
 
   const slug = getPublicSlug();
@@ -162,7 +174,6 @@ async function init() {
     return;
   }
 
-  // Verifica sessão ativa
   try {
     const { data: { session } } = await db.auth.getSession();
     if (session?.user) {
@@ -227,7 +238,6 @@ function preencherSelectCategorias() {
   if (!sel) return;
 
   if (!state.categorias || state.categorias.length === 0) {
-    // Fallback com categorias padrão caso a tabela esteja vazia ou inacessível
     const fallback = [
       { id: 'beleza', nome: 'Beleza & Estética', icone: '💅' },
       { id: 'saude', nome: 'Saúde', icone: '🏥' },
@@ -275,40 +285,26 @@ function showDashboard() {
   startAutoSync();
 }
 
-
 function openMobileMenu() {
   const overlay = $('mobileMenuOverlay');
   const drawer = $('mobileMenuDrawer');
-
   if (overlay) overlay.classList.add('open');
   if (drawer) drawer.classList.add('open');
-
   document.body.classList.add('menu-open');
 }
 
 function closeMobileMenu() {
   const overlay = $('mobileMenuOverlay');
   const drawer = $('mobileMenuDrawer');
-
   if (overlay) overlay.classList.remove('open');
   if (drawer) drawer.classList.remove('open');
-
   document.body.classList.remove('menu-open');
 }
 
-function menuOpenPublic() {
-  closeMobileMenu();
-  openPublic();
-}
-
-function menuCopyPublicLink() {
-  closeMobileMenu();
-  copyPublicLink();
-}
-
+function menuOpenPublic() { closeMobileMenu(); openPublic(); }
+function menuCopyPublicLink() { closeMobileMenu(); copyPublicLink(); }
 function menuNotifications() {
-  closeMobileMenu();
-  clearNotifDot();
+  closeMobileMenu(); clearNotifDot();
   const stack = $('notifStack');
   if (stack) stack.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -374,7 +370,6 @@ function showCadastro() {
   if (s2) s2.style.display = 'none';
   if (s3) s3.style.display = 'none';
   setStep(1);
-  // Garante que categorias estão preenchidas quando abre o modal
   preencherSelectCategorias();
 }
 
@@ -426,7 +421,6 @@ function autoSlug() {
   if (nomeEl) el.value = slugify(nomeEl.value || '');
 }
 
-// Marca slug como manual quando o usuário edita
 document.addEventListener('input', function(e) {
   if (e.target && e.target.id === 'empSlug') {
     e.target.dataset.manual = '1';
@@ -455,7 +449,7 @@ async function loginComSenha() {
   }
 }
 
-// ── CADASTRO CORRIGIDO ──
+// ── CADASTRO ──
 async function finalizarCadastro() {
   const servNome = $('servNome')?.value?.trim();
   const servPreco = $('servPreco')?.value;
@@ -473,18 +467,15 @@ async function finalizarCadastro() {
   const empSlugVal = slugify($('empSlug')?.value || empNomeVal);
   const empWhatsappVal = ($('empWhatsapp')?.value || '').trim();
 
-  // Pegar área de atuação do select
   const catSelect = $('empCategoria');
   const areaAtuacao = catSelect
     ? (catSelect.options[catSelect.selectedIndex]?.textContent?.trim() || 'Outro')
     : 'Outro';
 
-  // Desabilitar botão para evitar duplo clique
   const btnFin = $('btnFinalizar');
   if (btnFin) { btnFin.disabled = true; btnFin.textContent = 'Criando...'; }
 
   try {
-    // PASSO 1: Criar usuário no Auth
     const { data: authData, error: authErr } = await db.auth.signUp({
       email,
       password: senha,
@@ -493,7 +484,6 @@ async function finalizarCadastro() {
 
     if (authErr) {
       if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
-      // Se já existe, tenta fazer login e verificar se tem empresa
       if (authErr.message && authErr.message.toLowerCase().includes('already registered')) {
         return toast('Este e-mail já está cadastrado. Faça login.', 'err');
       }
@@ -507,12 +497,10 @@ async function finalizarCadastro() {
 
     const user = authData.user;
 
-    // PASSO 2: Verificar se slug já existe
     const { data: slugExiste } = await db.from('agenda_empresas')
       .select('id').eq('slug', empSlugVal).maybeSingle();
     const slugFinal = slugExiste ? empSlugVal + '-' + Date.now().toString().slice(-4) : empSlugVal;
 
-    // PASSO 3: Criar empresa
     const { data: empresa, error: errEmp } = await db.from('agenda_empresas').insert({
       nome: empNomeVal,
       slug: slugFinal,
@@ -529,7 +517,6 @@ async function finalizarCadastro() {
       return toast('Erro ao criar empresa: ' + (errEmp?.message || 'tente novamente.'), 'err');
     }
 
-    // PASSO 4: Criar perfil
     const { error: perfilErr } = await db.from('agenda_perfis').insert({
       auth_user_id: user.id,
       empresa_id: empresa.id,
@@ -541,10 +528,8 @@ async function finalizarCadastro() {
 
     if (perfilErr) {
       console.error('Erro ao criar perfil:', perfilErr);
-      // Continua mesmo assim pois empresa foi criada
     }
 
-    // PASSO 5: Criar serviço inicial
     await db.from('agenda_servicos').insert({
       empresa_id: empresa.id,
       nome: servNome,
@@ -554,7 +539,6 @@ async function finalizarCadastro() {
       descricao: 'Serviço inicial.'
     });
 
-    // PASSO 6: Criar profissional inicial
     await db.from('agenda_profissionais').insert({
       empresa_id: empresa.id,
       nome: profNomeVal,
@@ -563,14 +547,12 @@ async function finalizarCadastro() {
       status: 'ativo'
     });
 
-    // PASSO 7: Fazer login automático
     const { data: loginData, error: loginErr } = await db.auth.signInWithPassword({
       email,
       password: senha
     });
 
     if (loginErr || !loginData?.user) {
-      // Mesmo sem login automático, mostra sucesso e pede para logar
       if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
       closeAuth();
       toast('Conta criada! Faça login para acessar.', 'ok');
@@ -578,7 +560,6 @@ async function finalizarCadastro() {
       return;
     }
 
-    // PASSO 8: Carregar dashboard
     state.user = loginData.user;
     state.perfil = { auth_user_id: loginData.user.id, empresa_id: empresa.id, nome: nomeUser, email };
     state.empresa = empresa;
@@ -661,7 +642,6 @@ function startAutoSync() {
   }, 5000);
 }
 
-
 function preserveAgendaFormValues(callback) {
   const values = {
     cliente: $('agCliente')?.value || '',
@@ -708,9 +688,9 @@ async function loadAll() {
   }
 }
 
-function isEditingConfig(){
+function isEditingConfig() {
   const active = document.activeElement;
-  if(!active) return false;
+  if (!active) return false;
   return !!active.closest('#view-config');
 }
 
@@ -910,7 +890,7 @@ function renderTimeline() {
       'sep',
       { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirAgendamento(a.id) }
     ]);
-    if (cardTop) cardTop.appendChild(menu);
+    if (card) card.appendChild(menu);
     el.appendChild(block);
   });
 }
@@ -941,15 +921,21 @@ function renderAcoes(a) {
   </div>`;
 }
 
-// ── ACTION MENU ──
+// ── ACTION MENU — FIX COMPLETO ──
+// Usa position:fixed com coordenadas calculadas do getBoundingClientRect
+// para que o dropdown nunca seja cortado por qualquer overflow:hidden do pai
 function buildActionMenu(id, items) {
   const wrap = document.createElement('div');
   wrap.className = 'action-menu';
+
   const btn = document.createElement('button');
   btn.className = 'action-menu-btn';
   btn.innerHTML = '⋮';
+  btn.type = 'button';
+
   const drop = document.createElement('div');
   drop.className = 'action-dropdown';
+
   items.forEach(item => {
     if (item === 'sep') {
       const s = document.createElement('div');
@@ -958,26 +944,80 @@ function buildActionMenu(id, items) {
       return;
     }
     const el = document.createElement('button');
+    el.type = 'button';
     el.className = 'action-item' + (item.cls ? ' ' + item.cls : '');
     el.innerHTML = `<span class="action-item-icon">${item.icon}</span>${item.label}`;
-    el.onclick = e => { e.stopPropagation(); closeAllMenus(); item.action(); };
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      closeAllMenus();
+      // Pequeno delay para garantir que o menu fechou antes da ação
+      setTimeout(() => item.action(), 50);
+    });
     drop.appendChild(el);
   });
-  btn.onclick = e => {
+
+  btn.addEventListener('click', e => {
     e.stopPropagation();
-    if (_openMenu === drop) { closeAllMenus(); return; }
+    e.preventDefault();
+
+    if (_openMenu === drop) {
+      closeAllMenus();
+      return;
+    }
+
     closeAllMenus();
+
+    // FIX CRÍTICO: posiciona o dropdown via fixed usando coordenadas reais do botão
+    const rect = btn.getBoundingClientRect();
+    const dropW = 200;
+    const viewportW = window.innerWidth;
+    const viewportH = window.innerHeight;
+
+    // Calcula posição: tenta abrir à direita do botão, alinhado pela direita
+    let left = rect.right - dropW;
+    let top = rect.bottom + 6;
+
+    // Se sair pela esquerda, abre pela esquerda do botão
+    if (left < 8) left = rect.left;
+    // Se sair pela direita, recua
+    if (left + dropW > viewportW - 8) left = viewportW - dropW - 8;
+    // Se sair por baixo, abre para cima
+    if (top + 200 > viewportH - 8) top = rect.top - 210;
+
+    drop.style.top = top + 'px';
+    drop.style.left = left + 'px';
+    drop.style.minWidth = dropW + 'px';
+
+    // Adiciona ao body para escapar de qualquer overflow:hidden
+    document.body.appendChild(drop);
     drop.classList.add('open');
     _openMenu = drop;
-  };
+    _openMenuBtn = btn;
+  });
+
   wrap.appendChild(btn);
+  // drop fica no body quando aberto, não dentro do wrap
+  // mas começa dentro para não poluir o DOM
   wrap.appendChild(drop);
   return wrap;
 }
 
 function closeAllMenus() {
-  document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
-  _openMenu = null;
+  if (_openMenu) {
+    _openMenu.classList.remove('open');
+    // Remove do body se foi movido para lá
+    if (_openMenu.parentElement === document.body) {
+      document.body.removeChild(_openMenu);
+    }
+    _openMenu = null;
+    _openMenuBtn = null;
+  }
+  // Limpa qualquer dropdown órfão
+  document.querySelectorAll('body > .action-dropdown').forEach(d => {
+    d.classList.remove('open');
+    if (d.parentElement === document.body) document.body.removeChild(d);
+  });
 }
 
 // ── CLIENTES ──
@@ -999,9 +1039,9 @@ function renderClientes() {
     card.innerHTML = `
       <div class="cc-top">
         <div class="cc-av">${initial(c.nome)}</div>
-        <div><div class="cc-name">${c.nome}</div><div class="cc-phone">${c.telefone || '—'}</div></div>
+        <div style="flex:1;min-width:0"><div class="cc-name">${c.nome}</div><div class="cc-phone">${c.telefone || '—'}</div></div>
       </div>
-      ${c.email ? `<div style="font-size:11.5px;color:var(--text4);margin-bottom:8px">✉ ${c.email}</div>` : ''}
+      ${c.email ? `<div style="font-size:11.5px;color:var(--text4);margin-bottom:8px;word-break:break-all">✉ ${c.email}</div>` : ''}
       <div style="margin-bottom:9px"><span class="badge ${ativo ? 'badge-green' : 'badge-gray'}">${ativo ? 'Ativo' : 'Inativo'}</span></div>
       <div class="cc-stats">
         <div class="cc-stat"><div class="cc-sl">Atendimentos</div><div class="cc-sv">${agts}</div></div>
@@ -1180,7 +1220,6 @@ async function salvarAgendamento() {
   const serv = (state.servicos || []).find(s => s.id === agSvc);
   const prof = (state.profissionais || []).find(p => p.id === agProf);
 
-  // Cria cliente automaticamente
   let clienteId = null;
   try {
     const { data: cli } = await db.from('agenda_clientes').insert({
@@ -1417,7 +1456,6 @@ function closeConfirmModal() {
   _confirmCb = null;
 }
 
-// Event listeners para modais — aguarda DOM
 document.addEventListener('DOMContentLoaded', function() {
   const confirmBtn = $('confirmActionBtn');
   if (confirmBtn) {
@@ -1815,7 +1853,7 @@ async function loadPublic(slug) {
     ps.innerHTML = state.servicos.map(s => `
       <div class="choice" onclick="selectPubSvc('${s.id}',this)">
         <div class="choice-icon">✦</div>
-        <div><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos || 60} min</div></div>
+        <div style="flex:1;min-width:0"><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos || 60} min</div></div>
         <div class="choice-price">${money(s.preco).replace(',00', '')}</div>
       </div>`).join('') ||
       '<div class="empty-state"><div class="es-icon">✦</div><p>Nenhum serviço disponível.</p></div>';
@@ -1826,7 +1864,7 @@ async function loadPublic(slug) {
     pp.innerHTML = state.profissionais.map(p => `
       <div class="choice" onclick="selectPubProf('${p.id}',this)">
         <div class="choice-icon">👤</div>
-        <div><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade || 'Profissional'}</div></div>
+        <div style="flex:1;min-width:0"><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade || 'Profissional'}</div></div>
       </div>`).join('') ||
       '<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional disponível.</p></div>';
   }
@@ -1937,6 +1975,6 @@ Object.assign(window, {
   copyPublicLink, openPublic, voltarDaPublica,
   selectPubSvc, selectPubProf, confirmarAgendamentoPublico, resetPublic,
   closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
-  toast, clearNotifDot,
-  loadPublic
+  toast, clearNotifDot, loadPublic,
+  openMobileMenu, closeMobileMenu
 });
