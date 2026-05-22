@@ -43,7 +43,8 @@ function slugify(s) {
 
 function hojeISO() { return new Date().toISOString().slice(0, 10); }
 function mesPrefixo() { return new Date().toISOString().slice(0, 7); }
-function publicUrl(slug) { return location.origin + location.pathname + '#agendar/' + slug; }
+function publicUrl(slug) { 
+return location.origin + location.pathname + 'agendar/' + slug + '/'; }
 function initial(name) { return (name || '?').trim().substring(0, 1).toUpperCase(); }
 
 function formatDate(d) {
