@@ -104,84 +104,94 @@ document.addEventListener("DOMContentLoaded", () => {
         scrollToActive(col);
     }
 
-    /* ── Wheel controlado: 1 item por vez ── */
+    /* ── Wheel: 1 item por vez ── */
     function attachWheel(colId, getList, getVal, setVal, rebuild) {
         const col = document.getElementById(colId);
-
-        let wheelTimer = null;
         let accumulated = 0;
+        let wheelTimer  = null;
 
         col.addEventListener("wheel", e => {
             e.preventDefault();
             e.stopPropagation();
-
             accumulated += e.deltaY;
-
             if (Math.abs(accumulated) >= 40) {
-                const dir = accumulated > 0 ? 1 : -1;
+                const dir  = accumulated > 0 ? 1 : -1;
                 accumulated = 0;
-
                 const list = getList();
                 const cur  = getVal();
                 const idx  = list.indexOf(cur);
                 const next = list[Math.max(0, Math.min(list.length - 1, idx + dir))];
-
-                if (next !== cur) {
-                    setVal(next);
-                    rebuild();
-                    updatePreview();
-                }
+                if (next !== cur) { setVal(next); rebuild(); updatePreview(); }
             }
-
             clearTimeout(wheelTimer);
             wheelTimer = setTimeout(() => { accumulated = 0; }, 200);
-
         }, { passive: false });
     }
 
-    /* ── Touch: só o col rola, bloqueia página ── */
-    function attachTouch(colId, getList, getVal, setVal, rebuild) {
-        const col = document.getElementById(colId);
-        let startY   = 0;
-        let lastY    = 0;
-        let moved    = 0;
+    /* ── Touch: cola o col, bloqueia a página ── */
+    function attachTouch(col, getList, getVal, setVal, rebuild) {
+        let startY = 0;
+        let lastY  = 0;
+        let moved  = 0;
+        let locked = false;
 
         col.addEventListener("touchstart", e => {
             startY = e.touches[0].clientY;
             lastY  = startY;
             moved  = 0;
+            locked = false;
         }, { passive: true });
 
         col.addEventListener("touchmove", e => {
-            e.preventDefault();
-            e.stopPropagation();
-
             const y     = e.touches[0].clientY;
             const delta = lastY - y;
             lastY = y;
+
+            /* determina direção predominante na primeira movimentação */
+            if (!locked) {
+                const absX = Math.abs(e.touches[0].clientX - e.touches[0].clientX);
+                const absY = Math.abs(delta);
+                if (absY > 2) locked = true;
+            }
+
+            /* bloqueia scroll da página sempre que estiver no col */
+            e.preventDefault();
+            e.stopPropagation();
+
             moved += delta;
 
-            // a cada 44px (altura de 1 célula) muda 1 item
             if (Math.abs(moved) >= 44) {
                 const dir  = moved > 0 ? 1 : -1;
                 moved = 0;
-
                 const list = getList();
                 const cur  = getVal();
                 const idx  = list.indexOf(cur);
                 const next = list[Math.max(0, Math.min(list.length - 1, idx + dir))];
-
-                if (next !== cur) {
-                    setVal(next);
-                    rebuild();
-                    updatePreview();
-                }
+                if (next !== cur) { setVal(next); rebuild(); updatePreview(); }
             }
         }, { passive: false });
 
         col.addEventListener("touchend", () => {
-            moved = 0;
+            moved  = 0;
+            locked = false;
         }, { passive: true });
+    }
+
+    /* ── Bloqueia scroll nativo do body no iOS ── */
+    function blockBodyScroll() {
+        document.body.style.overflow   = "hidden";
+        document.body.style.position   = "fixed";
+        document.body.style.width      = "100%";
+        document.body.style.top        = `-${window.scrollY}px`;
+    }
+
+    function unblockBodyScroll() {
+        const scrollY = document.body.style.top;
+        document.body.style.overflow   = "";
+        document.body.style.position   = "";
+        document.body.style.width      = "";
+        document.body.style.top        = "";
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
     }
 
     function openPicker(input) {
@@ -192,40 +202,33 @@ document.addEventListener("DOMContentLoaded", () => {
         const rawMin = parseInt(parts[1]) || 0;
         selMin  = MINUTES.includes(rawMin) ? rawMin : 0;
 
-        /* bloqueia scroll da página inteira */
-        document.body.style.overflow   = "hidden";
-        document.body.style.touchAction = "none";
+        blockBodyScroll();
 
         buildHours();
         buildMins();
         updatePreview();
         overlay.classList.add("open");
 
-        /* Attach após build */
+        /* Attach direto no elemento (não pelo ID) para evitar duplicatas */
         setTimeout(() => {
+            const colH = document.getElementById("tpHours");
+            const colM = document.getElementById("tpMins");
+
             attachWheel("tpHours",
-                () => HOURS, () => selHour,
-                v => { selHour = v; }, buildHours
-            );
+                () => HOURS,   () => selHour, v => { selHour = v; }, buildHours);
             attachWheel("tpMins",
-                () => MINUTES, () => selMin,
-                v => { selMin = v; }, buildMins
-            );
-            attachTouch("tpHours",
-                () => HOURS, () => selHour,
-                v => { selHour = v; }, buildHours
-            );
-            attachTouch("tpMins",
-                () => MINUTES, () => selMin,
-                v => { selMin = v; }, buildMins
-            );
+                () => MINUTES, () => selMin,  v => { selMin  = v; }, buildMins);
+
+            attachTouch(colH,
+                () => HOURS,   () => selHour, v => { selHour = v; }, buildHours);
+            attachTouch(colM,
+                () => MINUTES, () => selMin,  v => { selMin  = v; }, buildMins);
         }, 80);
     }
 
     function closePicker() {
         overlay.classList.remove("open");
-        document.body.style.overflow    = "";
-        document.body.style.touchAction = "";
+        unblockBodyScroll();
         currentInput = null;
     }
 
@@ -242,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === overlay) closePicker();
     });
 
-    /* bloqueia scroll do overlay mas não do modal */
+    /* Bloqueia scroll no fundo do overlay */
     overlay.addEventListener("wheel",     e => { if (e.target === overlay) e.preventDefault(); }, { passive: false });
     overlay.addEventListener("touchmove", e => { if (e.target === overlay) e.preventDefault(); }, { passive: false });
 
