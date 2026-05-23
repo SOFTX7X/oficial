@@ -1,792 +1,2076 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>AgendaPro — Sistema de Agendamento</title>
-<link rel="stylesheet" href="style.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+/* PATCH CLIQUES LANDING/AUTH — GARANTE BOTÕES ENTRAR/CRIAR CONTA */
+window.__authOpenMode = null;
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="calendar.css">
+window.openAuth = function(mode) {
+  window.__authOpenMode = mode || 'login';
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+  const overlay = document.getElementById('authOverlay');
+  if (overlay) overlay.classList.add('open');
 
-<script src="calendar.js"></script>
+  document.body.style.overflow = 'hidden';
 
-</head> 
-<body>
-
-<div class="bg-noise"></div>
-<div class="bg-grid"></div>
-<div class="bg-glow-tl"></div>
-<div class="bg-glow-br"></div>
-
-<div id="landingView">
-  <nav class="land-nav" id="landNav">
-    <div class="nav-brand" onclick="window.scrollTo(0,0)">
-      <div class="nav-dot">✦</div>
-      AgendaPro
-    </div>
-    <div class="nav-links">
-      <button class="nav-link" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Como funciona</button>
-      <button class="nav-link" onclick="document.getElementById('sec-features').scrollIntoView({behavior:'smooth'})">Funcionalidades</button>
-      <button class="nav-link" onclick="document.getElementById('sec-depo').scrollIntoView({behavior:'smooth'})">Depoimentos</button>
-    </div>
-    <div class="nav-actions">
-      <button class="btn btn-ghost btn-sm" onclick="openAuth('login')">Entrar</button>
-      <button class="btn btn-primary btn-sm" onclick="openAuth('register')">Criar conta →</button>
-    </div>
-  </nav>
-
-  <section class="land-hero">
-    <div class="hero-eyebrow"><span class="live-dot"></span> Plataforma de Agendamento Premium</div>
-    <h1 class="hero-title">
-      Sua agenda online,<br><em>organizada e elegante.</em>
-    </h1>
-    <p class="hero-sub">Receba agendamentos, gerencie equipe, clientes e faturamento — tudo em um painel profissional.</p>
-    <div class="hero-cta">
-      <button class="btn btn-primary btn-lg" onclick="openAuth('register')">✦ Criar minha agenda grátis</button>
-      <button class="btn btn-ghost btn-lg" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Ver como funciona →</button>
-    </div>
-    <div class="hero-trust">
-      <span>★★★★★ 4.9/5</span>
-      <span class="trust-sep"></span>
-      <span>+2.400 profissionais</span>
-      <span class="trust-sep"></span>
-      <span>Pronto em 3 minutos</span>
-      <span class="trust-sep"></span>
-      <span>Grátis para começar</span>
-    </div>
-  </section>
-
-  <div class="hero-mockup">
-    <div class="mockup-glow"></div>
-    <div class="mockup-window">
-      <div class="mockup-bar">
-        <div class="mockup-dots">
-          <div class="mockup-dot r"></div>
-          <div class="mockup-dot y"></div>
-          <div class="mockup-dot g"></div>
-        </div>
-        <div class="mockup-bar-title">AgendaPro — Dashboard</div>
-      </div>
-      <div class="mockup-body">
-        <div class="mockup-sidebar">
-          <div class="ms-label">Gestão</div>
-          <div class="ms-item active"><div class="ms-icon">📊</div>Dashboard</div>
-          <div class="ms-item"><div class="ms-icon">📅</div>Agenda</div>
-          <div class="ms-item"><div class="ms-icon">👥</div>Clientes</div>
-          <div class="ms-item"><div class="ms-icon">✦</div>Serviços</div>
-          <div class="ms-label" style="margin-top:8px">Financeiro</div>
-          <div class="ms-item"><div class="ms-icon">💰</div>Financeiro</div>
-          <div class="ms-item"><div class="ms-icon">⚙</div>Config</div>
-        </div>
-        <div class="mockup-content">
-          <div class="mc-stats">
-            <div class="mc-stat"><div class="mc-sl">Hoje</div><div class="mc-sv">18</div><div class="mc-sg">↑ 12%</div></div>
-            <div class="mc-stat"><div class="mc-sl">Clientes</div><div class="mc-sv">248</div><div class="mc-sg">↑ 24 novos</div></div>
-            <div class="mc-stat"><div class="mc-sl">Receita</div><div class="mc-sv">R$4.2k</div><div class="mc-sg">↑ 18%</div></div>
-            <div class="mc-stat"><div class="mc-sl">Serviços</div><div class="mc-sv">7</div><div class="mc-sg">Ativos</div></div>
-          </div>
-          <div class="mc-list-title">Próximos agendamentos</div>
-          <div class="mc-rows">
-            <div class="mc-row"><div class="mc-av">A</div><div><div class="mc-name">Ana Caroline</div><div class="mc-meta">Gel · 09:00</div></div><span class="badge badge-green" style="margin-left:auto;font-size:9.5px">Confirmado</span></div>
-            <div class="mc-row"><div class="mc-av">J</div><div><div class="mc-name">Juliana Dias</div><div class="mc-meta">Sobrancelha · 10:30</div></div><span class="badge badge-yellow" style="margin-left:auto;font-size:9.5px">Pendente</span></div>
-            <div class="mc-row"><div class="mc-av">M</div><div><div class="mc-name">Mariana Lima</div><div class="mc-meta">Pedicure · 13:00</div></div><span class="badge badge-green" style="margin-left:auto;font-size:9.5px">Confirmado</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <section class="land-section" id="sec-como">
-    <div class="section-wrap">
-      <div class="section-header">
-        <div class="section-tag">✦ Como funciona</div>
-        <h2 class="section-title">Comece a receber agendamentos <em>em minutos.</em></h2>
-        <p class="section-sub">Sem complicação. Sem mensalidade obrigatória. Tudo online.</p>
-      </div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <div class="step-num">01</div>
-          <div class="step-icon">🏢</div>
-          <div class="step-title">Crie sua conta e configure seu negócio</div>
-          <p class="step-desc">Preencha nome, área e link personalizado. Em 3 minutos seu painel está pronto.</p>
-        </div>
-        <div class="step-card">
-          <div class="step-num">02</div>
-          <div class="step-icon">✦</div>
-          <div class="step-title">Cadastre serviços, profissionais e horários</div>
-          <p class="step-desc">Adicione catálogo com preços, duração e profissionais responsáveis.</p>
-        </div>
-        <div class="step-card">
-          <div class="step-num">03</div>
-          <div class="step-icon">🔗</div>
-          <div class="step-title">Compartilhe seu link e receba agendamentos</div>
-          <p class="step-desc">Link exclusivo no WhatsApp, stories e bio. Clientes agendam sozinhos, 24h.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="land-section" id="sec-features" style="padding-top:40px">
-    <div class="section-wrap">
-      <div class="section-header">
-        <div class="section-tag">✦ Funcionalidades</div>
-        <h2 class="section-title">Tudo que você precisa para <em>crescer.</em></h2>
-      </div>
-      <div class="features-grid">
-        <div class="feat-card"><div class="feat-icon">📅</div><div class="feat-title">Agenda online</div><p class="feat-desc">Painel completo por data e profissional.</p></div>
-        <div class="feat-card"><div class="feat-icon">🔗</div><div class="feat-title">Link exclusivo</div><p class="feat-desc">Compartilhe onde quiser, sem app.</p></div>
-        <div class="feat-card"><div class="feat-icon">👥</div><div class="feat-title">Gestão de clientes</div><p class="feat-desc">Histórico, total gasto e contatos.</p></div>
-        <div class="feat-card"><div class="feat-icon">✦</div><div class="feat-title">Catálogo de serviços</div><p class="feat-desc">Preços, duração e profissionais.</p></div>
-        <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">Dashboard em tempo real</div><p class="feat-desc">Métricas completas e precisas.</p></div>
-        <div class="feat-card"><div class="feat-icon">💰</div><div class="feat-title">Controle financeiro</div><p class="feat-desc">Receita, ticket médio e histórico.</p></div>
-        <div class="feat-card"><div class="feat-icon">📱</div><div class="feat-title">WhatsApp integrado</div><p class="feat-desc">Confirme agendamentos em segundos.</p></div>
-        <div class="feat-card"><div class="feat-icon">🌐</div><div class="feat-title">Página pública</div><p class="feat-desc">Página elegante de auto-agendamento.</p></div>
-        <div class="feat-card"><div class="feat-icon">🔔</div><div class="feat-title">Notificações em tempo real</div><p class="feat-desc">Alertas instantâneos de novos pedidos.</p></div>
-        <div class="feat-card"><div class="feat-icon">📲</div><div class="feat-title">100% mobile</div><p class="feat-desc">Funciona perfeitamente no celular.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="land-section" style="padding-top:40px">
-    <div class="section-wrap">
-      <div class="section-header">
-        <div class="section-tag">✦ Para quem é</div>
-        <h2 class="section-title">Para todo profissional que <em>trabalha com hora marcada.</em></h2>
-      </div>
-      <div class="segs-wrap">
-        <div class="seg-pill">💅 Nail Designer</div>
-        <div class="seg-pill">✂️ Barbearia</div>
-        <div class="seg-pill">💇 Salão de Beleza</div>
-        <div class="seg-pill">🧖 Estética</div>
-        <div class="seg-pill">🏥 Clínica de Saúde</div>
-        <div class="seg-pill">🏋️ Personal Trainer</div>
-        <div class="seg-pill">🎨 Tatuador</div>
-        <div class="seg-pill">💆 Massoterapia</div>
-        <div class="seg-pill">🦷 Odontologia</div>
-        <div class="seg-pill">👁️ Sobrancelha &amp; Cílios</div>
-        <div class="seg-pill">🧘 Yoga &amp; Pilates</div>
-        <div class="seg-pill">💼 Consultor</div>
-        <div class="seg-pill">📸 Fotógrafo</div>
-        <div class="seg-pill">🐾 Pet Shop</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="land-section" id="sec-depo" style="padding-top:40px">
-    <div class="section-wrap">
-      <div class="section-header">
-        <div class="section-tag">✦ Depoimentos</div>
-        <h2 class="section-title">O que nossos clientes <em>dizem.</em></h2>
-      </div>
-      <div class="test-grid">
-        <div class="test-card">
-          <div class="test-stars">★★★★★</div>
-          <p class="test-quote">Antes anotava tudo no WhatsApp e me perdia toda semana. Agora minhas clientes agendam sozinhas e minha agenda fica organizada.</p>
-          <div class="test-author"><div class="test-av">C</div><div><div class="test-name">Camila Ferreira</div><div class="test-role">Nail Designer · Manaus, AM</div></div></div>
-        </div>
-        <div class="test-card">
-          <div class="test-stars">★★★★★</div>
-          <p class="test-quote">O sistema passa uma imagem muito mais profissional. Parece que minha barbearia ficou maior do dia para a noite. Recomendo demais.</p>
-          <div class="test-author"><div class="test-av">R</div><div><div class="test-name">Rafael Costa</div><div class="test-role">Barbearia Black · Fortaleza, CE</div></div></div>
-        </div>
-        <div class="test-card">
-          <div class="test-stars">★★★★★</div>
-          <p class="test-quote">A página de agendamento ficou linda. Minhas clientes elogiaram muito a facilidade. Deixei de perder horários por falta de confirmação.</p>
-          <div class="test-author"><div class="test-av">J</div><div><div class="test-name">Juliana Lima</div><div class="test-role">Estética Premium · São Paulo, SP</div></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="land-cta">
-    <div class="cta-inner">
-      <div class="section-tag" style="display:inline-flex;margin:0 auto 20px">✦ Comece agora</div>
-      <h2 class="cta-title">Sua agenda profissional<br>começa <em>agora.</em></h2>
-      <p class="cta-sub">Crie sua conta em menos de 3 minutos e receba seu link exclusivo na hora.</p>
-      <div class="cta-actions">
-        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">✦ Criar minha agenda grátis</button>
-        <button class="btn btn-ghost btn-lg" onclick="openAuth('login')">Já tenho uma conta</button>
-      </div>
-    </div>
-  </section>
-
-  <footer class="land-footer">
-    <div class="nav-brand"><div class="nav-dot" style="width:24px;height:24px;font-size:10px">✦</div>AgendaPro</div>
-    <div>© 2025 AgendaPro · Plataforma de Agendamento</div>
-    <div style="color:var(--text4)">Feito com ❤️ para profissionais brasileiros</div>
-  </footer>
-</div>
-
-<!-- AUTH MODAL -->
-<div class="auth-overlay" id="authOverlay">
-  <div class="auth-modal">
-    <button class="auth-close" onclick="closeAuth()">✕</button>
-    <div class="auth-panel-left">
-      <div>
-        <div class="auth-left-brand"><div class="nav-dot">✦</div>AgendaPro</div>
-        <h2 class="auth-left-title">Seu painel<br><em>premium</em><br>em minutos.</h2>
-        <p class="auth-left-desc">Login real com e-mail e senha. Dados protegidos por empresa com RLS.</p>
-        <div class="auth-left-perks">
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Login com e-mail e senha</div>
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Mesmo login no site e app</div>
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Sessão salva no dispositivo</div>
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Dados isolados por empresa</div>
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Protegido por Supabase Auth</div>
-        </div>
-      </div>
-      <p class="auth-left-footer">🔒 Supabase Auth · RLS · Dispositivo confiável</p>
-    </div>
-    <div class="auth-form-area">
-      <!-- LOGIN -->
-      <div id="formLogin" style="display:none">
-        <div class="auth-form-title">Entrar no painel</div>
-        <p class="auth-form-sub">Use o mesmo e-mail e senha criados no cadastro.</p>
-        <div class="form-gap">
-          <div class="field"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
-          <div class="field"><label>Senha</label><input id="loginSenha" type="password" placeholder="Sua senha" autocomplete="current-password"></div>
-          <button class="btn btn-primary btn-full" onclick="loginComSenha()">Entrar →</button>
-        </div>
-        <div class="auth-switch">Não tenho conta. <button onclick="showCadastro()">Criar cadastro</button></div>
-      </div>
-      <!-- CADASTRO -->
-      <div id="formCadastro" style="display:none">
-        <div class="auth-form-title">Criar sua conta</div>
-        <p class="auth-form-sub">Configure em 3 etapas simples.</p>
-        <div class="stepper">
-          <div class="step-dot active" id="st1"></div>
-          <div class="step-dot" id="st2"></div>
-          <div class="step-dot" id="st3"></div>
-        </div>
-        <!-- Step 1 -->
-        <div id="step1">
-          <div class="form-gap">
-            <div class="field"><label>Seu nome</label><input id="cadNome" placeholder="Ex: Ana Caroline" autocomplete="name"></div>
-            <div class="field"><label>E-mail</label><input id="cadEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
-            <div class="field"><label>Senha</label><input id="cadSenha" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"></div>
-            <button class="btn btn-primary btn-full" onclick="goStep2()">Continuar →</button>
-          </div>
-          <div class="auth-switch">Já tenho conta. <button onclick="showLogin()">Entrar</button></div>
-        </div>
-        <!-- Step 2 -->
-        <div id="step2" style="display:none">
-          <div class="form-gap">
-            <div class="field"><label>Nome do negócio</label><input id="empNome" placeholder="Ex: Nails da Ana" oninput="autoSlug()"></div>
-            <div class="field-row">
-              <div class="field">
-                <label>Área de atuação</label>
-                <select id="empCategoria">
-                  <option value="">Carregando...</option>
-                </select>
-              </div>
-              <div class="field"><label>WhatsApp</label><input id="empWhatsapp" placeholder="(92) 99999-9999"></div>
-            </div>
-            <div class="field"><label>Link personalizado</label><input id="empSlug" placeholder="nails-da-ana"></div>
-            <div class="form-actions">
-              <button class="btn btn-ghost" onclick="goStep1()">← Voltar</button>
-              <button class="btn btn-primary" style="flex:1" onclick="goStep3()">Continuar →</button>
-            </div>
-          </div>
-        </div>
-        <!-- Step 3 -->
-        <div id="step3" style="display:none">
-          <div class="form-gap">
-            <div class="field"><label>Primeiro serviço</label><input id="servNome" placeholder="Ex: Alongamento em Gel"></div>
-            <div class="field-row">
-              <div class="field"><label>Preço (R$)</label><input id="servPreco" type="number" placeholder="80"></div>
-              <div class="field"><label>Duração (min)</label><input id="servDuracao" type="number" placeholder="90"></div>
-            </div>
-            <div class="field"><label>Primeiro profissional</label><input id="profNome" placeholder="Ex: Ana Caroline"></div>
-            <div class="field"><label>Especialidade</label><input id="profEsp" placeholder="Ex: Manicure"></div>
-            <div class="form-actions">
-              <button class="btn btn-ghost" onclick="goStep2()">← Voltar</button>
-              <button class="btn btn-primary" style="flex:1" id="btnFinalizar" onclick="finalizarCadastro()">Criar painel →</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- DASHBOARD -->
-<section id="dashboardView" style="display:none">
-  <aside class="sidebar" id="sidebar">
-    <div class="side-brand"><div class="nav-dot">✦</div>AgendaPro</div>
-    <div class="side-nav-section">
-      <div class="side-nav-label">Gestão</div>
-      <button class="nav-btn" onclick="setView('dashboard')"><span class="ni">📊</span>Dashboard</button>
-      <button class="nav-btn" onclick="setView('agenda')"><span class="ni">📅</span>Agenda</button>
-      <button class="nav-btn" onclick="setView('clientes')"><span class="ni">👥</span>Clientes</button>
-      <button class="nav-btn" onclick="setView('servicos')"><span class="ni">✦</span>Serviços</button>
-      <button class="nav-btn" onclick="setView('profissionais')"><span class="ni">👤</span>Profissionais</button>
-    </div>
-    <div class="side-nav-sep"></div>
-    <div class="side-nav-section">
-      <div class="side-nav-label">Financeiro</div>
-      <button class="nav-btn" onclick="setView('financeiro')"><span class="ni">💰</span>Financeiro</button>
-      <button class="nav-btn" onclick="setView('relatorios')"><span class="ni">📈</span>Relatórios</button>
-    </div>
-    <div class="side-nav-sep"></div>
-    <div class="side-nav-section">
-      <div class="side-nav-label">Empresa</div>
-      <button class="nav-btn" onclick="openPublic()"><span class="ni">🌐</span>Página Pública</button>
-      <button class="nav-btn" onclick="setView('config')"><span class="ni">⚙</span>Configurações</button>
-    </div>
-    <div class="side-bottom">
-      <div class="side-user-card">
-        <div class="side-user-row">
-          <div class="side-avatar" id="sideAvatar">A</div>
-          <div>
-            <div class="side-name" id="sideNome">Empresa</div>
-            <div class="side-plan" id="sidePlan">Grátis</div>
-          </div>
-        </div>
-        <div class="side-link-box" id="sideLinkBox" onclick="copyPublicLink()">Link público...</div>
-      </div>
-      <button class="btn btn-ghost btn-full btn-sm" onclick="logout()">Sair da conta</button>
-    </div>
-  </aside>
-
-  <main class="dash-main">
-    <div class="topbar">
-      <div class="topbar-title">
-        <h2 id="pageTitle">Dashboard</h2>
-        <p id="pageSub">Controle completo do seu negócio.</p>
-      </div>
-      <div class="topbar-actions topbar-actions-clean">
-        <div class="top-notify-slot">
-          <span class="top-notify-dot"></span>
-          <span>Notificações aparecem aqui em tempo real</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- MOBILE NAV -->
-    <nav class="mobile-nav-bar" id="mobileNavBar">
-      <button class="mob-nav-btn" onclick="setView('dashboard')"><span class="mni">📊</span>Início</button>
-      <button class="mob-nav-btn" onclick="setView('agenda')"><span class="mni">📅</span>Agenda</button>
-      <button class="mob-nav-btn mob-nav-fab" onclick="setView('agenda');setTimeout(()=>{var el=document.getElementById('agCliente');if(el)el.focus()},200)"><span class="mni">+</span>Novo</button>
-      <button class="mob-nav-btn" onclick="setView('clientes')"><span class="mni">👥</span>Clientes</button>
-      <button class="mob-nav-btn" onclick="openMobileMenu()"><span class="mni">☰</span>Menu</button>
-    </nav>
-
-    <!-- MOBILE MENU DRAWER -->
-    <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
-    <div class="mobile-menu-drawer" id="mobileMenuDrawer">
-      <div class="mobile-menu-header">
-        <div class="nav-brand" style="font-size:17px"><div class="nav-dot" style="width:24px;height:24px;font-size:10px">✦</div>AgendaPro</div>
-        <button class="modal-close" onclick="closeMobileMenu()" style="position:static">✕</button>
-      </div>
-      <div class="mobile-menu-body">
-        <div class="side-nav-label">Gestão</div>
-        <button class="nav-btn" onclick="setView('dashboard');closeMobileMenu()"><span class="ni">📊</span>Dashboard</button>
-        <button class="nav-btn" onclick="setView('agenda');closeMobileMenu()"><span class="ni">📅</span>Agenda</button>
-        <button class="nav-btn" onclick="setView('clientes');closeMobileMenu()"><span class="ni">👥</span>Clientes</button>
-        <button class="nav-btn" onclick="setView('servicos');closeMobileMenu()"><span class="ni">✦</span>Serviços</button>
-        <button class="nav-btn" onclick="setView('profissionais');closeMobileMenu()"><span class="ni">👤</span>Profissionais</button>
-        <div class="side-nav-sep"></div>
-        <div class="side-nav-label">Financeiro</div>
-        <button class="nav-btn" onclick="setView('financeiro');closeMobileMenu()"><span class="ni">💰</span>Financeiro</button>
-        <button class="nav-btn" onclick="setView('relatorios');closeMobileMenu()"><span class="ni">📈</span>Relatórios</button>
-        <div class="side-nav-sep"></div>
-        <div class="side-nav-label">Empresa</div>
-        <button class="nav-btn" onclick="openPublic();closeMobileMenu()"><span class="ni">🌐</span>Página Pública</button>
-        <button class="nav-btn" onclick="setView('config');closeMobileMenu()"><span class="ni">⚙</span>Configurações</button>
-        <div class="side-nav-sep"></div>
-        <button class="btn btn-ghost btn-full btn-sm" onclick="logout()" style="margin-top:8px">Sair da conta</button>
-      </div>
-    </div>
-
-    <!-- VIEW: DASHBOARD -->
-    <section class="view active" id="view-dashboard">
-      <div class="dash-hero">
-        <div class="dash-hero-inner">
-          <div>
-            <h1>Centro de <em>comando.</em></h1>
-            <p>Visão completa do seu negócio em tempo real.</p>
-          </div>
-          <button class="btn btn-primary" onclick="copyPublicLink()">🔗 Copiar link</button>
-        </div>
-      </div>
-      <div class="section-label">Agendamentos</div>
-      <div class="stats-grid stats-grid-4" style="margin-bottom:10px">
-        <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">Hoje</div><div class="stat-value" id="statHoje">0</div><div class="stat-note up">Tempo real</div></div>
-        <div class="stat-card"><span class="stat-icon">⏳</span><div class="stat-label">Pendentes</div><div class="stat-value yellow" id="statPendentes">0</div><div class="stat-note">Aguardando</div></div>
-        <div class="stat-card"><span class="stat-icon">✅</span><div class="stat-label">Confirmados</div><div class="stat-value green" id="statConfirmados">0</div><div class="stat-note up">Prontos</div></div>
-        <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">Reagendados</div><div class="stat-value purple" id="statReagendados">0</div><div class="stat-note">Nova data</div></div>
-      </div>
-      <div class="stats-grid stats-grid-4" style="margin-bottom:10px">
-        <div class="stat-card"><span class="stat-icon">🎯</span><div class="stat-label">Concluídos</div><div class="stat-value blue" id="statConcluidos">0</div></div>
-        <div class="stat-card"><span class="stat-icon">✕</span><div class="stat-label">Recusados</div><div class="stat-value red" id="statRecusados">0</div></div>
-        <div class="stat-card"><span class="stat-icon">🗑</span><div class="stat-label">Excluídos</div><div class="stat-value" id="statExcluidos">0</div></div>
-        <div class="stat-card"><span class="stat-icon">📊</span><div class="stat-label">Taxa confirmação</div><div class="stat-value green" id="statTaxa">0%</div></div>
-      </div>
-      <div class="section-label">Financeiro e base</div>
-      <div class="stats-grid stats-grid-6" style="margin-bottom:20px">
-        <div class="stat-card"><span class="stat-icon">💵</span><div class="stat-label">Fat. hoje</div><div class="stat-value" id="statFatHoje">R$0</div></div>
-        <div class="stat-card"><span class="stat-icon">💰</span><div class="stat-label">Fat. mês</div><div class="stat-value" id="statFatMes">R$0</div></div>
-        <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div></div>
-        <div class="stat-card"><span class="stat-icon">✦</span><div class="stat-label">Serviços</div><div class="stat-value" id="statServicos">0</div></div>
-        <div class="stat-card"><span class="stat-icon">👤</span><div class="stat-label">Profissionais</div><div class="stat-value" id="statProfissionais">0</div></div>
-        <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">Total ags.</div><div class="stat-value" id="statTotal">0</div></div>
-      </div>
-      <div class="content-grid">
-        <div class="panel">
-          <div class="panel-head">
-            <div><div class="panel-title">Próximos agendamentos</div><div class="panel-sub">Pendentes e confirmados</div></div>
-            <button class="panel-action" onclick="setView('agenda')">Ver todos →</button>
-          </div>
-          <div class="panel-body"><div class="apt-list" id="dashAptList"></div></div>
-        </div>
-        <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Calendário</div><div class="panel-sub">Dias com agendamentos</div></div></div>
-          <div class="panel-body"><div class="cal-grid" id="calGrid"></div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- VIEW: AGENDA -->
-    <section class="view" id="view-agenda">
-      <div class="form-panel">
-        <div class="form-panel-title">Criar agendamento</div>
-        <div class="form-grid">
-          <div class="field"><label>Cliente</label><input id="agCliente" placeholder="Nome do cliente"></div>
-          <div class="field"><label>Telefone</label><input id="agTelefone" placeholder="WhatsApp"></div>
-          <div class="field"><label>Serviço</label><select id="agServico"></select></div>
-          <div class="field"><label>Profissional</label><select id="agProfissional"></select></div>
-          <div class="field"><label>Data</label><input id="agData" type="date"></div>
-          <div class="field"><label>Hora</label><input id="agHora" type="time"></div>
-          <div class="field"><label>Status</label><select id="agStatus"><option>Confirmado</option><option>Pendente</option></select></div>
-          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary btn-full" onclick="salvarAgendamento()">Salvar</button></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-head">
-          <div><div class="panel-title">Agenda</div><div class="panel-sub">Todos os agendamentos</div></div>
-        </div>
-        <div class="panel-body">
-          <div class="filter-bar" id="filterBar">
-            <button class="filter-btn active" onclick="setFilter('todos',this)">Todos <span class="filter-count" id="fc-todos">0</span></button>
-            <button class="filter-btn" onclick="setFilter('pendente',this)">⏳ Pendentes <span class="filter-count" id="fc-pendente">0</span></button>
-            <button class="filter-btn" onclick="setFilter('confirmado',this)">✅ Confirmados <span class="filter-count" id="fc-confirmado">0</span></button>
-            <button class="filter-btn" onclick="setFilter('reagendado',this)">📅 Reagendados <span class="filter-count" id="fc-reagendado">0</span></button>
-            <button class="filter-btn" onclick="setFilter('concluido',this)">🎯 Concluídos <span class="filter-count" id="fc-concluido">0</span></button>
-            <button class="filter-btn" onclick="setFilter('recusado',this)">✕ Recusados <span class="filter-count" id="fc-recusado">0</span></button>
-            <button class="filter-btn" onclick="setFilter('excluido',this)">🗑 Excluídos <span class="filter-count" id="fc-excluido">0</span></button>
-          </div>
-          <div class="timeline" id="agendaTimeline"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- VIEW: CLIENTES -->
-    <section class="view" id="view-clientes">
-      <div class="form-panel">
-        <div class="form-panel-title">Adicionar cliente</div>
-        <div class="form-grid">
-          <div class="field"><label>Nome</label><input id="cliNome" placeholder="Nome completo"></div>
-          <div class="field"><label>Telefone</label><input id="cliTel" placeholder="WhatsApp"></div>
-          <div class="field"><label>E-mail</label><input id="cliEmail" placeholder="E-mail"></div>
-          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary btn-full" onclick="salvarCliente()">Adicionar</button></div>
-        </div>
-      </div>
-      <div class="cards-grid" id="clientesGrid"></div>
-    </section>
-
-    <!-- VIEW: SERVIÇOS -->
-    <section class="view" id="view-servicos">
-      <div class="form-panel">
-        <div class="form-panel-title">Adicionar serviço</div>
-        <div class="form-grid">
-          <div class="field"><label>Nome</label><input id="srvNome" placeholder="Nome do serviço"></div>
-          <div class="field"><label>Preço (R$)</label><input id="srvPreco" type="number" placeholder="80"></div>
-          <div class="field"><label>Duração (min)</label><input id="srvDur" type="number" placeholder="60"></div>
-          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary btn-full" onclick="salvarServico()">Adicionar</button></div>
-        </div>
-      </div>
-      <div class="cards-grid" id="servicosGrid"></div>
-    </section>
-
-    <!-- VIEW: PROFISSIONAIS -->
-    <section class="view" id="view-profissionais">
-      <div class="form-panel">
-        <div class="form-panel-title">Adicionar profissional</div>
-        <div class="form-grid">
-          <div class="field"><label>Nome</label><input id="proNome" placeholder="Nome"></div>
-          <div class="field"><label>Especialidade</label><input id="proEsp" placeholder="Ex: Manicure"></div>
-          <div class="field"><label>Telefone</label><input id="proTel" placeholder="Telefone"></div>
-          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary btn-full" onclick="salvarProfissional()">Adicionar</button></div>
-        </div>
-      </div>
-      <div class="cards-grid" id="profGrid"></div>
-    </section>
-
-    <!-- VIEW: FINANCEIRO -->
-    <section class="view" id="view-financeiro">
-      <div class="dash-hero" style="margin-bottom:20px">
-        <div class="dash-hero-inner"><div><h1>Resultados <em>financeiros.</em></h1><p>Receita, ticket médio e histórico.</p></div></div>
-      </div>
-      <div class="fin-grid">
-        <div class="fin-card"><div class="fin-label">Receita total</div><div class="fin-value" id="finReceita">R$0</div><div class="fin-sub">Todos os concluídos</div></div>
-        <div class="fin-card"><div class="fin-label">Ticket médio</div><div class="fin-value" id="finTicket">R$0</div><div class="fin-sub">Média por atendimento</div></div>
-        <div class="fin-card"><div class="fin-label">Total de pagamentos</div><div class="fin-value" id="finPagos">0</div><div class="fin-sub">Registros concluídos</div></div>
-        <div class="fin-card"><div class="fin-label">Plano atual</div><div class="fin-value" style="font-size:28px" id="finPlano">Grátis</div><div class="fin-sub">Status ativo</div></div>
-      </div>
-    </section>
-
-    <!-- VIEW: RELATÓRIOS -->
-    <section class="view" id="view-relatorios">
-      <div class="dash-hero" style="margin-bottom:20px">
-        <div class="dash-hero-inner"><div><h1>Relatórios <em>e métricas.</em></h1><p>Acompanhe o desempenho detalhado.</p></div></div>
-      </div>
-      <div class="empty-state"><div class="es-icon">📈</div><p>Relatórios avançados em breve.</p></div>
-    </section>
-
-    <!-- VIEW: CONFIG -->
-    <section class="view" id="view-config">
-      <div class="dash-hero" style="margin-bottom:20px">
-        <div class="dash-hero-inner"><div><h1>Configurações <em>da empresa.</em></h1><p>Dados, identidade e preferências.</p></div></div>
-      </div>
-      <div class="config-grid">
-        <div class="config-section">
-          <div class="config-title"><div class="config-icon">🏢</div>Dados da empresa</div>
-          <div class="form-gap">
-            <div class="field"><label>Nome da empresa</label><input id="cfgNome"></div>
-            <div class="field"><label>WhatsApp</label><input id="cfgWhatsapp"></div>
-            <div class="field"><label>Slug / link</label><input id="cfgSlug"></div>
-            <div class="field"><label>Endereço</label><input id="cfgEndereco" placeholder="Rua, número, bairro"></div>
-            <div class="field"><label>Cidade / Estado</label><input id="cfgCidade" placeholder="Ex: Manaus, AM"></div>
-            <button class="btn btn-primary btn-full" onclick="salvarConfig()">Salvar alterações</button>
-            <div id="cfgLinkBox" style="font-size:10.5px;color:var(--text4);padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);word-break:break-all"></div>
-          </div>
-        </div>
-        <div class="config-section">
-          <div class="config-title"><div class="config-icon">📱</div>Redes sociais</div>
-          <div class="form-gap">
-            <div class="field"><label>Instagram</label><input id="cfgInstagram" placeholder="@seuinstagram"></div>
-            <div class="field"><label>Facebook</label><input id="cfgFacebook" placeholder="facebook.com/sua-pagina"></div>
-            <div class="field"><label>TikTok</label><input id="cfgTiktok" placeholder="@seutiktok"></div>
-            <div class="field"><label>Site / Link bio</label><input id="cfgSite" placeholder="https://seusite.com"></div>
-            <button class="btn btn-ghost btn-full" onclick="salvarRedesSociais()">Salvar redes sociais</button>
-          </div>
-        </div>
-        <div class="config-section">
-          <div class="config-title"><div class="config-icon">🕐</div>Horários de funcionamento</div>
-          <div class="schedule-grid">
-            <div class="sch-day"><div class="sch-day-name">Seg</div><input type="checkbox" id="diaSeg" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Ter</div><input type="checkbox" id="diaTer" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Qua</div><input type="checkbox" id="diaQua" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Qui</div><input type="checkbox" id="diaQui" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Sex</div><input type="checkbox" id="diaSex" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Sáb</div><input type="checkbox" id="diaSab" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox" id="diaDom"></div>
-          </div>
-          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="salvarHorarios()">Salvar horários</button>
-        </div>
-        <div class="config-section">
-          <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
-          <div class="form-gap">
-            <div class="field"><label>Confirmação</label><textarea id="msgConfirmacao">Olá, {nome}! Seu agendamento foi confirmado ✅
-Serviço: {servico} · Data: {data} às {hora}
-Aguardamos você!</textarea></div>
-            <div class="field"><label>Lembrete</label><textarea id="msgLembrete">Olá, {nome}! Lembrando do seu agendamento amanhã 📅
-{servico} às {hora}. Qualquer dúvida estamos aqui!</textarea></div>
-            <button class="btn btn-ghost btn-full" onclick="toast('Mensagens salvas!','ok')">Salvar mensagens</button>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-</section>
-
-<!-- PÁGINA PÚBLICA -->
-<section id="publicView" style="display:none">
-  <div class="pub-wrap">
-    <button class="pub-back" onclick="voltarDaPublica()">← Voltar</button>
-    <div class="pub-hero">
-      <div class="pub-hero-brand"><div class="nav-dot" style="width:20px;height:20px;font-size:9px">✦</div>AgendaPro</div>
-      <h1 id="pubNomeEmpresa">Agendamento Online</h1>
-      <p id="pubDescEmpresa">Escolha seu serviço, profissional, data e horário.</p>
-      <div id="pubSociais" class="pub-socials" style="display:none"></div>
-    </div>
-    <div id="pubConfirmScreen" class="pub-confirm-screen" style="display:none">
-      <div class="pub-tick">✓</div>
-      <h2>Agendamento enviado!</h2>
-      <p>Entraremos em contato pelo WhatsApp para confirmar seu horário.</p>
-      <button class="btn btn-primary" style="margin-top:20px" onclick="resetPublic()">Fazer novo agendamento</button>
-    </div>
-    <div class="pub-body" id="pubMainBody">
-      <div class="pub-panel">
-        <div class="pub-panel-title">Escolha o serviço</div>
-        <div class="choices" id="pubServicos"></div>
-        <div style="height:16px"></div>
-        <div class="pub-panel-title" style="font-size:15px;margin-bottom:10px">Escolha o profissional</div>
-        <div class="choices" id="pubProfissionais"></div>
-      </div>
-      <div class="pub-panel">
-        <div class="pub-panel-title">Seus dados</div>
-        <div class="form-gap">
-          <div class="field"><label>Nome completo</label><input id="pubClienteNome" placeholder="Seu nome"></div>
-          <div class="field"><label>WhatsApp</label><input id="pubClienteTel" placeholder="(92) 99999-9999"></div>
-          <div class="field-row">
-            <div class="field"><label>Data</label><input id="pubData" type="date"></div>
-            <div class="field"><label>Hora</label><input id="pubHora" type="time"></div>
-          </div>
-          <div class="field"><label>Observação</label><textarea id="pubObs" placeholder="Alguma observação?"></textarea></div>
-          <button class="btn btn-primary btn-full btn-lg" onclick="confirmarAgendamentoPublico()">Confirmar agendamento ✓</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <a id="pubWaFab" class="pub-wa-fab" href="#" target="_blank" rel="noopener" style="display:none">
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-    <span>Tirar dúvida</span>
-  </a>
-</section>
-
-<!-- Modal Recusa -->
-<div class="modal-overlay" id="modalRecusaOverlay">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModalRecusa()">✕</button>
-    <div class="modal-title">Recusar agendamento</div>
-    <div class="modal-sub" id="recusaInfo">Cliente · data · hora</div>
-    <div class="motivo-list">
-      <div class="motivo-item" onclick="selectMotivo(this,'Horário indisponível')"><div class="motivo-radio"></div>Horário indisponível</div>
-      <div class="motivo-item" onclick="selectMotivo(this,'Profissional indisponível')"><div class="motivo-radio"></div>Profissional indisponível</div>
-      <div class="motivo-item" onclick="selectMotivo(this,'Serviço indisponível')"><div class="motivo-radio"></div>Serviço indisponível</div>
-      <div class="motivo-item" onclick="selectMotivo(this,'Outro motivo')"><div class="motivo-radio"></div>Outro motivo</div>
-    </div>
-    <div class="field"><label>Motivo personalizado (opcional)</label><textarea id="recusaMotivoCustom" placeholder="Descreva o motivo..." style="min-height:68px"></textarea></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModalRecusa()">Cancelar</button>
-      <button class="btn btn-danger" onclick="confirmarRecusa()">✕ Recusar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Reagendar -->
-<div class="modal-overlay" id="modalReagendarOverlay">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModalReagendar()">✕</button>
-    <div class="modal-title">Reagendar horário</div>
-    <div class="modal-sub" id="reagendarInfo">Cliente · data · hora</div>
-    <div class="field-row">
-      <div class="field"><label>Nova data</label><input id="reagendarData" type="date"></div>
-      <div class="field"><label>Novo horário</label><input id="reagendarHora" type="time"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModalReagendar()">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmarReagendar()">📅 Reagendar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Editar -->
-<div class="edit-overlay" id="editOverlay">
-  <div class="edit-modal">
-    <button class="modal-close" onclick="closeEditModal()">✕</button>
-    <div class="edit-title" id="editModalTitle">Editar</div>
-    <div id="editModalBody"></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeEditModal()">Cancelar</button>
-      <button class="btn btn-primary" style="flex:1" id="editSaveBtn">Salvar alterações</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Confirm -->
-<div class="modal-overlay" id="confirmOverlay">
-  <div class="modal confirm-modal">
-    <div class="confirm-icon-wrap danger" id="confirmIconWrap">⚠️</div>
-    <div class="confirm-title" id="confirmTitle">Tem certeza?</div>
-    <p class="confirm-body" id="confirmBody">Esta ação não pode ser desfeita.</p>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeConfirmModal()">Cancelar</button>
-      <button class="btn btn-danger" id="confirmActionBtn">Confirmar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Notif Stack -->
-<div class="notif-stack" id="notifStack"></div>
-
-<script src="supabase.js"></script>
-<script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  const agendar = params.get("agendar");
-  if (agendar) {
-    window.location.hash = "agendar/" + agendar;
+  if (window.__authOpenMode === 'login') {
+    if (typeof window.showLogin === 'function') window.showLogin();
+  } else {
+    if (typeof window.showCadastro === 'function') window.showCadastro();
   }
-})();
-</script>
+};
 
-<script src="app.js"></script>
-<script>
-function salvarHorarios() {
-  var dias = ['diaSeg','diaTer','diaQua','diaQui','diaSex','diaSab','diaDom'];
-  var estado = {};
-  dias.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) estado[id] = el.checked;
-  });
-  localStorage.setItem('horariosFuncionamento', JSON.stringify(estado));
-  if (typeof toast === 'function') toast('Horários salvos!', 'ok');
+window.closeAuth = function() {
+  const overlay = document.getElementById('authOverlay');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+
+/* ═══════════════════════════════════════════════
+   AGENDAPRO — app.js CORRIGIDO COMPLETO
+═══════════════════════════════════════════════ */
+
+// ── STATE ──
+let state = {
+  user: null, empresa: null, perfil: null,
+  categorias: [], clientes: [], servicos: [],
+  profissionais: [], agendamentos: [], pagamentos: [],
+  pubEmpresa: null, pubServico: null, pubProfissional: null
+};
+
+let _agendaFilter = 'todos';
+let _confirmCb = null;
+let _editSaveCb = null;
+let _recusaId = null;
+let _recusaMotivo = null;
+let _reagendarId = null;
+let _openMenu = null;
+let _openMenuBtn = null;
+let autoSyncTimer = null;
+let lastIds = new Set();
+let realtimeChannel = null;
+
+// ── UTILS ──
+function $(id) { return document.getElementById(id); }
+
+function setText(id, v) {
+  const el = $(id);
+  if (el) el.textContent = v;
 }
 
-function carregarHorarios() {
+function money(v) {
+  return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function slugify(s) {
+  return (s || '').toString()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '').substring(0, 60);
+}
+
+function hojeISO() { return new Date().toISOString().slice(0, 10); }
+function mesPrefixo() { return new Date().toISOString().slice(0, 7); }
+function publicUrl(slug) { 
+return location.origin + location.pathname + 'agendar/' + slug + '/'; }
+function initial(name) { return (name || '?').trim().substring(0, 1).toUpperCase(); }
+
+function formatDate(d) {
+  if (!d) return '—';
+  const [y, m, dd] = d.split('-');
+  return `${dd}/${m}/${y}`;
+}
+
+function buildWaLink(tel, msg) {
+  const n = (tel || '').replace(/\D/g, '');
+  if (!n) return null;
+  const f = n.startsWith('55') ? n : '55' + n;
+  return 'https://wa.me/' + f + '?text=' + encodeURIComponent(msg);
+}
+
+function normStatus(s) {
+  const r = (s || 'pendente').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (r === 'confirmado' || r === 'confirmada') return 'Confirmado';
+  if (r === 'pendente') return 'Pendente';
+  if (r === 'concluido' || r === 'concluida') return 'Concluído';
+  if (r === 'recusado' || r === 'recusada' || r === 'cancelado') return 'Recusado';
+  if (r === 'reagendado' || r === 'reagendada') return 'Reagendado';
+  if (r === 'excluido' || r === 'excluida') return 'Excluído';
+  return s || 'Pendente';
+}
+
+function badgeClass(s) {
+  const n = normStatus(s);
+  const m = {
+    Confirmado: 'badge-green', Pendente: 'badge-yellow',
+    'Concluído': 'badge-blue', Recusado: 'badge-red',
+    Reagendado: 'badge-purple', 'Excluído': 'badge-gray'
+  };
+  return m[n] || 'badge-gray';
+}
+
+function isFinanceiro(a) {
+  if (normStatus(a.status) === 'Concluído') return true;
+  if (normStatus(a.status) === 'Excluído' && a.financeiro_status === 'Concluído') return true;
+  return false;
+}
+
+function isAtivoCliente(c) {
+  const st = (c?.status || '').toLowerCase().trim();
+  if (st === 'inativo' || st === 'excluido' || st === 'excluído') return false;
+  if (c?.ativo === false) return false;
+  return true;
+}
+
+function podeTerAcoes(a) {
+  return !['Excluído', 'Recusado', 'Concluído'].includes(normStatus(a.status));
+}
+
+// ── TOAST / NOTIF ──
+function toast(msg, type = 'info') {
+  const typeMap = { ok: 'ok', err: 'err', warn: 'info', info: 'info' };
+  showNotif(msg, '', typeMap[type] || 'info');
+}
+
+function showNotif(title, msg = '', type = 'info', duration = 5000) {
+  const stack = $('notifStack');
+  if (!stack) return;
+  const item = document.createElement('div');
+  item.className = 'notif-item';
+  const now = new Date();
+  const t = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+  const icons = { new: '📅', ok: '✅', err: '⚠️', info: '💬' };
+  item.innerHTML = `
+    <div class="notif-icon ${type}">${icons[type] || '🔔'}</div>
+    <div class="notif-body">
+      <div class="notif-title">${title}</div>
+      ${msg ? `<div class="notif-msg">${msg}</div>` : ''}
+      <div class="notif-time">${t}</div>
+    </div>
+    <button class="notif-close" onclick="this.parentElement.remove()">✕</button>
+  `;
+  stack.prepend(item);
+  while (stack.children.length > 4) stack.lastChild.remove();
+  setTimeout(() => {
+    item.classList.add('out');
+    setTimeout(() => { if (item.parentElement) item.remove(); }, 450);
+  }, duration);
+  const dot = $('notifDot');
+  if (dot) dot.classList.add('on');
+}
+
+function clearNotifDot() {
+  const dot = $('notifDot');
+  if (dot) dot.classList.remove('on');
+}
+
+// ── SCROLL NAV ──
+window.addEventListener('scroll', () => {
+  const nav = $('landNav');
+  if (nav) nav.classList.toggle('scrolled', scrollY > 40);
+});
+
+// ── HASH ROUTING ──
+window.addEventListener('hashchange', () => {
+  const slug = getPublicSlug();
+  if (slug) loadPublic(slug);
+});
+
+// ── FECHAR MENUS AO CLICAR FORA ──
+// FIX: só fecha se o clique NÃO foi dentro do dropdown aberto
+document.addEventListener('click', function(e) {
+  if (_openMenu) {
+    // Se clicou no próprio botão que abriu — o handler do btn já trata
+    if (_openMenuBtn && _openMenuBtn.contains(e.target)) return;
+    // Se clicou dentro do dropdown — não fecha
+    if (_openMenu.contains(e.target)) return;
+    closeAllMenus();
+  }
+});
+
+// Fecha menus ao rolar (evita dropdown desalinhado)
+document.addEventListener('scroll', closeAllMenus, { passive: true });
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  await loadCategorias();
+
+  const slug = getPublicSlug();
+  if (slug) {
+    await loadPublic(slug);
+    return;
+  }
+
   try {
-    var raw = localStorage.getItem('horariosFuncionamento');
-    if (!raw) return;
-    var estado = JSON.parse(raw);
-    var dias = ['diaSeg','diaTer','diaQua','diaQui','diaSex','diaSab','diaDom'];
-    dias.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el && typeof estado[id] === 'boolean') el.checked = estado[id];
+    const { data: { session } } = await db.auth.getSession();
+    if (session?.user) {
+      const ok = await carregarConta(session.user);
+      if (!ok) {
+        await db.auth.signOut();
+      }
+    }
+  } catch (e) {
+    console.error('Erro ao verificar sessão:', e);
+  }
+}
+
+function getPublicSlug() {
+  if (location.hash.startsWith('#agendar/')) {
+    return location.hash.replace('#agendar/', '').trim();
+  }
+  return null;
+}
+
+async function carregarConta(user) {
+  try {
+    const { data: perfil, error: pe } = await db.from('agenda_perfis')
+      .select('*').eq('auth_user_id', user.id).single();
+    if (pe || !perfil) { console.warn('Perfil não encontrado para', user.id); return false; }
+
+    const { data: empresa, error: ee } = await db.from('agenda_empresas')
+      .select('*').eq('id', perfil.empresa_id).single();
+    if (ee || !empresa) { console.warn('Empresa não encontrada para perfil', perfil.id); return false; }
+
+    state.user = user;
+    state.perfil = perfil;
+    state.empresa = empresa;
+    showDashboard();
+    await loadAll();
+    return true;
+  } catch (e) {
+    console.error('Erro em carregarConta:', e);
+    return false;
+  }
+}
+
+// ── CARREGAR CATEGORIAS ──
+async function loadCategorias() {
+  try {
+    const { data, error } = await db.from('agenda_categorias').select('*').order('nome');
+    if (error) {
+      console.warn('Erro ao carregar categorias:', error.message);
+      state.categorias = [];
+    } else {
+      state.categorias = data || [];
+    }
+  } catch (e) {
+    console.warn('Exceção ao carregar categorias:', e);
+    state.categorias = [];
+  }
+  preencherSelectCategorias();
+}
+
+function preencherSelectCategorias() {
+  const sel = $('empCategoria');
+  if (!sel) return;
+
+  if (!state.categorias || state.categorias.length === 0) {
+    const fallback = [
+      { id: 'beleza', nome: 'Beleza & Estética', icone: '💅' },
+      { id: 'saude', nome: 'Saúde', icone: '🏥' },
+      { id: 'barbearia', nome: 'Barbearia', icone: '✂️' },
+      { id: 'fitness', nome: 'Fitness & Bem-estar', icone: '🏋️' },
+      { id: 'tatuagem', nome: 'Tatuagem & Piercing', icone: '🎨' },
+      { id: 'pet', nome: 'Pet Shop', icone: '🐾' },
+      { id: 'educacao', nome: 'Educação', icone: '📚' },
+      { id: 'consultoria', nome: 'Consultoria', icone: '💼' },
+      { id: 'fotografia', nome: 'Fotografia', icone: '📸' },
+      { id: 'outro', nome: 'Outro', icone: '✦' }
+    ];
+    sel.innerHTML = fallback.map(c =>
+      `<option value="${c.id}">${c.icone} ${c.nome}</option>`
+    ).join('');
+  } else {
+    sel.innerHTML = state.categorias.map(c =>
+      `<option value="${c.id}">${c.icone || ''} ${c.nome}</option>`
+    ).join('');
+  }
+}
+
+// ── SHOW DASHBOARD ──
+function showDashboard() {
+  const lv = $('landingView');
+  const dv = $('dashboardView');
+  const pv = $('publicView');
+  if (lv) lv.style.display = 'none';
+  if (dv) dv.style.display = 'block';
+  if (pv) pv.style.display = 'none';
+
+  closeAuth();
+
+  if (state.empresa) {
+    setText('sideAvatar', initial(state.empresa.nome));
+    setText('sideNome', state.empresa.nome);
+    setText('sidePlan', state.empresa.plano || 'Grátis');
+    const lb = $('sideLinkBox');
+    if (lb) lb.textContent = publicUrl(state.empresa.slug);
+  }
+
+  document.body.style.overflow = '';
+  setView('dashboard');
+  setupRealtime();
+  startAutoSync();
+}
+
+function openMobileMenu() {
+  const overlay = $('mobileMenuOverlay');
+  const drawer = $('mobileMenuDrawer');
+  if (overlay) overlay.classList.add('open');
+  if (drawer) drawer.classList.add('open');
+  document.body.classList.add('menu-open');
+}
+
+function closeMobileMenu() {
+  const overlay = $('mobileMenuOverlay');
+  const drawer = $('mobileMenuDrawer');
+  if (overlay) overlay.classList.remove('open');
+  if (drawer) drawer.classList.remove('open');
+  document.body.classList.remove('menu-open');
+}
+
+function menuOpenPublic() { closeMobileMenu(); openPublic(); }
+function menuCopyPublicLink() { closeMobileMenu(); copyPublicLink(); }
+function menuNotifications() {
+  closeMobileMenu(); clearNotifDot();
+  const stack = $('notifStack');
+  if (stack) stack.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── VIEW NAVIGATION ──
+function setView(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const target = $('view-' + view);
+  if (target) target.classList.add('active');
+
+  const navMap = {
+    dashboard: ['Dashboard', 'Controle completo do seu negócio.'],
+    agenda: ['Agenda', 'Criar e acompanhar horários.'],
+    clientes: ['Clientes', 'Cadastro de clientes.'],
+    servicos: ['Serviços', 'Catálogo e preços.'],
+    profissionais: ['Profissionais', 'Equipe de atendimento.'],
+    financeiro: ['Financeiro', 'Valores e resultados.'],
+    relatorios: ['Relatórios', 'Dados e métricas.'],
+    config: ['Configurações', 'Dados do negócio.']
+  };
+  const info = navMap[view] || ['', ''];
+  setText('pageTitle', info[0]);
+  setText('pageSub', info[1]);
+
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
+  });
+  document.querySelectorAll('.mob-nav-btn').forEach(b => {
+    b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
+  });
+}
+
+// ── AUTH ──
+function openAuth(mode) {
+  window.__authOpenMode = mode || 'login';
+
+  const overlay = $('authOverlay');
+  if (!overlay) return;
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  if (mode === 'login') showLogin();
+  else showCadastro();
+}
+
+function closeAuth() {
+  const overlay = $('authOverlay');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function showLogin() {
+  const fl = $('formLogin');
+  const fc = $('formCadastro');
+
+  if (fc) fc.style.display = 'none';
+  if (fl) fl.style.display = 'block';
+}
+
+function showCadastro() {
+  const fl = $('formLogin');
+  const fc = $('formCadastro');
+
+  if (fl) fl.style.display = 'none';
+  if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
+
+  if (typeof _mostrarStep === 'function') _mostrarStep(1);
+  preencherSelectCategorias();
+}
+
+
+// ═══════════════════════════════════════════════
+// CORREÇÃO DEFINITIVA DOS STEPS DO CADASTRO
+// ═══════════════════════════════════════════════
+function _mostrarStep(n) {
+  ['step1', 'step2', 'step3'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.cssText = 'display:none !important; visibility:hidden !important;';
+      el.classList.remove('active');
+    }
+  });
+
+  const alvo = document.getElementById('step' + n);
+  if (alvo) {
+    alvo.style.cssText = 'display:block !important; visibility:visible !important;';
+    alvo.classList.add('active');
+  }
+
+  ['st1', 'st2', 'st3'].forEach(function(id, i) {
+    const dot = document.getElementById(id);
+    if (!dot) return;
+    dot.className = 'step-dot' + (i + 1 === n ? ' active' : (i + 1 < n ? ' done' : ''));
+  });
+}
+
+function setStep(n) {
+  _mostrarStep(n);
+}
+
+function goStep1() {
+  _mostrarStep(1);
+}
+
+function goStep2() {
+  const nome = $('cadNome')?.value?.trim();
+  const email = $('cadEmail')?.value?.trim();
+  const senha = $('cadSenha')?.value?.trim();
+
+  if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
+  if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
+
+  preencherSelectCategorias();
+  _mostrarStep(2);
+}
+
+function goStep3() {
+  const empNome = $('empNome')?.value?.trim();
+  const empSlug = $('empSlug')?.value?.trim();
+  const empWhatsapp = $('empWhatsapp')?.value?.trim();
+
+  if (!empNome || !empSlug || !empWhatsapp) {
+    return toast('Preencha nome, link e WhatsApp.', 'err');
+  }
+
+  _mostrarStep(3);
+}
+
+
+function autoSlug() {
+  const el = $('empSlug');
+  if (!el || el.dataset.manual === '1') return;
+  const nomeEl = $('empNome');
+  if (nomeEl) el.value = slugify(nomeEl.value || '');
+}
+
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.id === 'empSlug') {
+    e.target.dataset.manual = '1';
+  }
+});
+
+// ── LOGIN ──
+async function loginComSenha() {
+  const email = ($('loginEmail')?.value || '').trim();
+  const senha = ($('loginSenha')?.value || '').trim();
+  if (!email || !senha) return toast('Digite e-mail e senha.', 'err');
+
+  try {
+    const { data, error } = await db.auth.signInWithPassword({ email, password: senha });
+    if (error || !data.user) return toast(error?.message || 'E-mail ou senha incorretos.', 'err');
+
+    const ok = await carregarConta(data.user);
+    if (!ok) {
+      await db.auth.signOut();
+      return toast('Perfil ou empresa não encontrado. Refaça o cadastro.', 'err');
+    }
+    showNotif('Login realizado!', 'Bem-vindo de volta.', 'ok', 4000);
+  } catch (e) {
+    console.error('Erro no login:', e);
+    toast('Erro ao fazer login. Tente novamente.', 'err');
+  }
+}
+
+// ── CADASTRO ──
+async function finalizarCadastro() {
+  const servNome = $('servNome')?.value?.trim();
+  const servPreco = $('servPreco')?.value;
+  const servDuracao = $('servDuracao')?.value;
+  const profNomeVal = $('profNome')?.value?.trim();
+
+  if (!servNome || !servPreco || !servDuracao || !profNomeVal) {
+    return toast('Preencha serviço, preço, duração e profissional.', 'err');
+  }
+
+  const email = ($('cadEmail')?.value || '').trim();
+  const senha = ($('cadSenha')?.value || '').trim();
+  const nomeUser = ($('cadNome')?.value || '').trim();
+  const empNomeVal = ($('empNome')?.value || '').trim();
+  const empSlugVal = slugify($('empSlug')?.value || empNomeVal);
+  const empWhatsappVal = ($('empWhatsapp')?.value || '').trim();
+
+  const catSelect = $('empCategoria');
+  const areaAtuacao = catSelect
+    ? (catSelect.options[catSelect.selectedIndex]?.textContent?.trim() || 'Outro')
+    : 'Outro';
+
+  const btnFin = $('btnFinalizar');
+  if (btnFin) { btnFin.disabled = true; btnFin.textContent = 'Criando...'; }
+
+  try {
+    const { data: authData, error: authErr } = await db.auth.signUp({
+      email,
+      password: senha,
+      options: { data: { nome: nomeUser } }
     });
+
+    if (authErr) {
+      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+      if (authErr.message && authErr.message.toLowerCase().includes('already registered')) {
+        return toast('Este e-mail já está cadastrado. Faça login.', 'err');
+      }
+      return toast('Erro ao criar conta: ' + authErr.message, 'err');
+    }
+
+    if (!authData?.user) {
+      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+      return toast('Erro ao criar conta. Tente novamente.', 'err');
+    }
+
+    const user = authData.user;
+
+    const { data: slugExiste } = await db.from('agenda_empresas')
+      .select('id').eq('slug', empSlugVal).maybeSingle();
+    const slugFinal = slugExiste ? empSlugVal + '-' + Date.now().toString().slice(-4) : empSlugVal;
+
+    const { data: empresa, error: errEmp } = await db.from('agenda_empresas').insert({
+      nome: empNomeVal,
+      slug: slugFinal,
+      area_atuacao: areaAtuacao,
+      whatsapp: empWhatsappVal,
+      email: email,
+      plano: 'Grátis',
+      onboarding_finalizado: true
+    }).select('*').single();
+
+    if (errEmp || !empresa) {
+      console.error('Erro ao criar empresa:', errEmp);
+      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+      return toast('Erro ao criar empresa: ' + (errEmp?.message || 'tente novamente.'), 'err');
+    }
+
+    const { error: perfilErr } = await db.from('agenda_perfis').insert({
+      auth_user_id: user.id,
+      empresa_id: empresa.id,
+      nome: nomeUser,
+      email: email,
+      whatsapp: empWhatsappVal,
+      cargo: 'Administrador'
+    });
+
+    if (perfilErr) {
+      console.error('Erro ao criar perfil:', perfilErr);
+    }
+
+    await db.from('agenda_servicos').insert({
+      empresa_id: empresa.id,
+      nome: servNome,
+      preco: Number(servPreco || 0),
+      duracao_minutos: Number(servDuracao || 60),
+      status: 'ativo',
+      descricao: 'Serviço inicial.'
+    });
+
+    await db.from('agenda_profissionais').insert({
+      empresa_id: empresa.id,
+      nome: profNomeVal,
+      especialidade: ($('profEsp')?.value || 'Profissional').trim(),
+      telefone: empWhatsappVal,
+      status: 'ativo'
+    });
+
+    const { data: loginData, error: loginErr } = await db.auth.signInWithPassword({
+      email,
+      password: senha
+    });
+
+    if (loginErr || !loginData?.user) {
+      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+      closeAuth();
+      toast('Conta criada! Faça login para acessar.', 'ok');
+      setTimeout(() => openAuth('login'), 1500);
+      return;
+    }
+
+    state.user = loginData.user;
+    state.perfil = { auth_user_id: loginData.user.id, empresa_id: empresa.id, nome: nomeUser, email };
+    state.empresa = empresa;
+    showDashboard();
+    await loadAll();
+    showNotif('Bem-vindo ao AgendaPro!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
+
+  } catch (e) {
+    console.error('Erro em finalizarCadastro:', e);
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+    toast('Erro inesperado. Verifique o console e tente novamente.', 'err');
+  }
+}
+
+async function logout() {
+  try {
+    if (autoSyncTimer) { clearInterval(autoSyncTimer); autoSyncTimer = null; }
+    if (realtimeChannel) {
+      try { db.removeChannel(realtimeChannel); } catch(e) {}
+      realtimeChannel = null;
+    }
+    await db.auth.signOut();
   } catch(e) {}
+  state.user = null; state.perfil = null; state.empresa = null;
+  state.clientes = []; state.servicos = []; state.profissionais = [];
+  state.agendamentos = []; state.pagamentos = [];
+  location.href = location.pathname;
+}
+
+// ── REALTIME ──
+function setupRealtime() {
+  if (!state?.empresa?.id || !db?.channel) return;
+  if (realtimeChannel) {
+    try { db.removeChannel(realtimeChannel); } catch(e) {}
+    realtimeChannel = null;
+  }
+  const id = state.empresa.id;
+  const tables = ['agenda_agendamentos', 'agenda_clientes', 'agenda_servicos', 'agenda_profissionais'];
+  let ch = db.channel('ap-realtime-' + id);
+  tables.forEach(table => {
+    ch = ch.on('postgres_changes', {
+      event: '*', schema: 'public', table,
+      filter: `empresa_id=eq.${id}`
+    }, payload => {
+      if (table === 'agenda_agendamentos' && payload.eventType === 'INSERT') {
+        showNotif('Novo agendamento!', `${payload.new?.cliente_nome || 'Cliente'} acabou de agendar.`, 'new', 6000);
+      }
+      scheduleReload();
+    });
+  });
+  realtimeChannel = ch.subscribe();
+}
+
+let _reloadTimer = null;
+function scheduleReload() {
+  if (_reloadTimer) clearTimeout(_reloadTimer);
+  _reloadTimer = setTimeout(async () => {
+    if (state?.empresa?.id) await loadAll();
+  }, 400);
+}
+
+function startAutoSync() {
+  if (autoSyncTimer) clearInterval(autoSyncTimer);
+  lastIds = new Set((state.agendamentos || []).map(a => String(a.id)));
+  autoSyncTimer = setInterval(async () => {
+    if (!state?.empresa?.id) return;
+    try {
+      const { data } = await db.from('agenda_agendamentos').select('*')
+        .eq('empresa_id', state.empresa.id)
+        .order('data', { ascending: true })
+        .order('hora', { ascending: true });
+      const novos = (data || []).filter(a => !lastIds.has(String(a.id)));
+      state.agendamentos = data || [];
+      if (novos.length) {
+        novos.forEach(a => showNotif('Novo agendamento!', `${a.cliente_nome || 'Cliente'} agendou.`, 'new', 6000));
+      }
+      lastIds = new Set(state.agendamentos.map(a => String(a.id)));
+      renderAll();
+    } catch (e) {}
+  }, 5000);
+}
+
+function preserveAgendaFormValues(callback) {
+  const values = {
+    cliente: $('agCliente')?.value || '',
+    telefone: $('agTelefone')?.value || '',
+    servico: $('agServico')?.value || '',
+    profissional: $('agProfissional')?.value || '',
+    data: $('agData')?.value || '',
+    hora: $('agHora')?.value || '',
+    status: $('agStatus')?.value || ''
+  };
+
+  if (typeof callback === 'function') callback();
+
+  if ($('agCliente') && values.cliente) $('agCliente').value = values.cliente;
+  if ($('agTelefone') && values.telefone) $('agTelefone').value = values.telefone;
+  if ($('agServico') && values.servico && [...$('agServico').options].some(o => o.value === values.servico)) $('agServico').value = values.servico;
+  if ($('agProfissional') && values.profissional && [...$('agProfissional').options].some(o => o.value === values.profissional)) $('agProfissional').value = values.profissional;
+  if ($('agData') && values.data) $('agData').value = values.data;
+  if ($('agHora') && values.hora) $('agHora').value = values.hora;
+  if ($('agStatus') && values.status) $('agStatus').value = values.status;
+}
+
+// ── LOAD ALL ──
+async function loadAll() {
+  if (!state.empresa) return;
+  const id = state.empresa.id;
+  try {
+    const [cli, svc, prof, ag, pag] = await Promise.all([
+      db.from('agenda_clientes').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_servicos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_profissionais').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_agendamentos').select('*').eq('empresa_id', id).order('data', { ascending: true }).order('hora', { ascending: true }),
+      db.from('agenda_pagamentos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false })
+    ]);
+    state.clientes = cli.data || [];
+    state.servicos = svc.data || [];
+    state.profissionais = prof.data || [];
+    state.agendamentos = ag.data || [];
+    state.pagamentos = pag.data || [];
+    lastIds = new Set(state.agendamentos.map(a => String(a.id)));
+    renderAll();
+  } catch (e) {
+    console.error('Erro ao carregar dados:', e);
+  }
+}
+
+function isEditingConfig() {
+  const active = document.activeElement;
+  if (!active) return false;
+  return !!active.closest('#view-config');
+}
+
+function renderAll() {
+  preserveAgendaFormValues(() => {
+    renderStats();
+    renderDashList();
+    renderCalendar();
+    renderSelects();
+    renderTimeline();
+    renderClientes();
+    renderServicos();
+    renderProfissionais();
+    renderFinanceiro();
+
+    const active = document.activeElement;
+    const editingConfig = active && active.closest && active.closest('#view-config');
+    if (!editingConfig) renderConfig();
+  });
+}
+
+// ── STATS ──
+function renderStats() {
+  const hoje = hojeISO(), mes = mesPrefixo(), ags = state.agendamentos || [];
+  const ativos = ags.filter(a => normStatus(a.status) !== 'Excluído');
+  const st = s => ativos.filter(a => normStatus(a.status) === s).length;
+  const stAll = s => ags.filter(a => normStatus(a.status) === s).length;
+  const concluidos = st('Concluído');
+  const base = ativos.filter(a => normStatus(a.status) !== 'Recusado').length;
+  const taxa = base > 0 ? Math.round(concluidos / base * 100) : 0;
+  const fin = ags.filter(isFinanceiro);
+  const fatHoje = fin.filter(a => a.data === hoje).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const fatMes = fin.filter(a => (a.data || '').startsWith(mes)).reduce((s, a) => s + Number(a.valor || 0), 0);
+
+  setText('statHoje', ativos.filter(a => a.data === hoje).length);
+  setText('statPendentes', st('Pendente'));
+  setText('statConfirmados', st('Confirmado'));
+  setText('statReagendados', st('Reagendado'));
+  setText('statConcluidos', concluidos);
+  setText('statRecusados', st('Recusado'));
+  setText('statExcluidos', stAll('Excluído'));
+  setText('statTaxa', taxa + '%');
+  setText('statFatHoje', money(fatHoje).replace(',00', ''));
+  setText('statFatMes', money(fatMes).replace(',00', ''));
+  setText('statClientes', (state.clientes || []).filter(isAtivoCliente).length);
+  setText('statServicos', (state.servicos || []).filter(s => s.status === 'ativo').length);
+  setText('statProfissionais', (state.profissionais || []).filter(p => p.status === 'ativo').length);
+  setText('statTotal', ativos.length);
+  setText('fc-todos', ativos.length);
+  setText('fc-pendente', st('Pendente'));
+  setText('fc-confirmado', st('Confirmado'));
+  setText('fc-reagendado', st('Reagendado'));
+  setText('fc-concluido', concluidos);
+  setText('fc-recusado', st('Recusado'));
+  setText('fc-excluido', stAll('Excluído'));
+}
+
+// ── DASHBOARD LIST ──
+function renderDashList() {
+  const el = $('dashAptList');
+  if (!el) return;
+  const visibles = (state.agendamentos || [])
+    .filter(a => ['Pendente', 'Confirmado', 'Reagendado'].includes(normStatus(a.status)))
+    .slice(0, 6);
+  if (!visibles.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento pendente.</p></div>';
+    return;
+  }
+  el.innerHTML = visibles.map(a => `
+    <div class="apt-item">
+      <div class="apt-row">
+        <div class="apt-av">${initial(a.cliente_nome)}</div>
+        <div class="apt-info">
+          <div class="apt-name">${a.cliente_nome || 'Cliente'}</div>
+          <div class="apt-meta">${a.servico_nome || '—'} · ${a.profissional_nome || '—'} · ${formatDate(a.data)} ${a.hora || ''}</div>
+        </div>
+        <span class="badge ${badgeClass(a.status)}">${normStatus(a.status)}</span>
+      </div>
+      ${renderAcoes(a)}
+    </div>`).join('');
+}
+
+// ── CALENDAR ──
+function renderCalendar() {
+  const el = $('calGrid');
+  if (!el) return;
+  const days = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+  const busy = new Set(
+    (state.agendamentos || [])
+      .filter(a => normStatus(a.status) !== 'Excluído')
+      .map(a => String(new Date((a.data || '') + 'T00:00:00').getDate()))
+  );
+  const today = String(new Date().getDate());
+  let html = days.map(d => `<div class="cal-label">${d}</div>`).join('');
+  for (let i = 1; i <= 28; i++) {
+    const d = String(i);
+    html += `<div class="cal-day${busy.has(d) ? ' busy' : ''}${d === today ? ' today' : ''}">${i}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ── SELECTS ──
+function renderSelects() {
+  const agS = $('agServico');
+  const agP = $('agProfissional');
+
+  const selectedServico = agS ? agS.value : '';
+  const selectedProfissional = agP ? agP.value : '';
+
+  if (agS) {
+    agS.innerHTML =
+      '<option value="">Escolha serviço</option>' +
+      (state.servicos || [])
+        .filter(s => (s.status || 'ativo') === 'ativo')
+        .map(s => `<option value="${s.id}">${s.nome} — ${money(s.preco).replace(',00','')}</option>`)
+        .join('');
+
+    if (selectedServico && [...agS.options].some(o => o.value === selectedServico)) {
+      agS.value = selectedServico;
+    }
+  }
+
+  if (agP) {
+    agP.innerHTML =
+      '<option value="">Escolha profissional</option>' +
+      (state.profissionais || [])
+        .filter(p => (p.status || 'ativo') === 'ativo')
+        .map(p => `<option value="${p.id}">${p.nome}</option>`)
+        .join('');
+
+    if (selectedProfissional && [...agP.options].some(o => o.value === selectedProfissional)) {
+      agP.value = selectedProfissional;
+    }
+  }
+}
+
+// ── FILTER ──
+function setFilter(filter, btn) {
+  _agendaFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTimeline();
+}
+
+// ── TIMELINE ──
+function renderTimeline() {
+  const el = $('agendaTimeline');
+  if (!el) return;
+  const ags = state.agendamentos || [];
+  if (!ags.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>';
+    return;
+  }
+  const statusMap = {
+    pendente: 'Pendente', confirmado: 'Confirmado', reagendado: 'Reagendado',
+    concluido: 'Concluído', recusado: 'Recusado', excluido: 'Excluído'
+  };
+  let filtered;
+  if (_agendaFilter === 'excluido') {
+    filtered = ags.filter(a => normStatus(a.status) === 'Excluído');
+  } else if (_agendaFilter !== 'todos') {
+    const target = statusMap[_agendaFilter];
+    filtered = ags.filter(a => normStatus(a.status) === target);
+  } else {
+    filtered = ags.filter(a => normStatus(a.status) !== 'Excluído');
+  }
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento neste filtro.</p></div>';
+    return;
+  }
+  el.innerHTML = '';
+  filtered.forEach(a => {
+    const block = document.createElement('div');
+    block.className = 'tl-block';
+    block.id = 'ag-' + a.id;
+    block.innerHTML = `
+      <div class="tl-time">${a.hora || '—'}</div>
+      <div class="tl-line"></div>
+      <div class="tl-content">
+        <div class="tl-card">
+          <div class="tl-card-top">
+            <div class="apt-av" style="width:34px;height:34px;border-radius:9px;flex-shrink:0">${initial(a.cliente_nome)}</div>
+            <div class="tl-card-info">
+              <div class="tl-card-name">${a.cliente_nome || 'Cliente'}</div>
+              <div class="tl-card-meta">${a.servico_nome || '—'} · ${a.profissional_nome || '—'} · ${formatDate(a.data)}${a.cliente_telefone ? ' · ' + a.cliente_telefone : ''}</div>
+            </div>
+            <div class="tl-card-status"><span class="badge ${badgeClass(a.status)}">${normStatus(a.status)}</span></div>
+          </div>
+          ${renderAcoes(a)}
+        </div>
+      </div>`;
+    const card = block.querySelector('.tl-card');
+    const cardTop = block.querySelector('.tl-card-top');
+    const menu = buildActionMenu(a.id, [
+      { icon: '✏️', label: 'Editar', action: () => editAgendamento(a.id) },
+      { icon: '📋', label: 'Duplicar', action: () => duplicarAgendamento(a.id) },
+      'sep',
+      { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirAgendamento(a.id) }
+    ]);
+    if (card) card.appendChild(menu);
+    el.appendChild(block);
+  });
+}
+
+// ── RENDER ACOES ──
+function renderAcoes(a) {
+  const tel = (a.cliente_telefone || a.telefone || '').replace(/\D/g, '');
+  const s = normStatus(a.status);
+  if (s === 'Excluído') {
+    return `<div class="apt-actions muted-actions"><span class="badge badge-gray">🗑 Excluído</span></div>`;
+  }
+  if (s === 'Recusado') {
+    return `<div class="apt-actions muted-actions"><span class="badge badge-red">✕ Recusado</span></div>`;
+  }
+  if (s === 'Concluído') {
+    return `<div class="apt-actions muted-actions">
+      <span class="badge badge-blue">✓ Concluído</span>
+      ${tel ? `<button class="act-btn whatsapp" onclick="abrirWA('${a.id}')">💬 WA</button>` : ''}
+      <button class="act-btn refuse" onclick="excluirAgendamento('${a.id}')">🗑 Arquivar</button>
+    </div>`;
+  }
+  return `<div class="apt-actions">
+    ${s !== 'Confirmado' ? `<button class="act-btn confirm" onclick="confirmarAg('${a.id}')">✅ Confirmar</button>` : ''}
+    <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">✕ Recusar</button>
+    <button class="act-btn reschedule" onclick="openModalReagendar('${a.id}')">📅 Reagendar</button>
+    <button class="act-btn conclude" onclick="concluirAg('${a.id}')">✓ Concluir</button>
+    ${tel ? `<button class="act-btn whatsapp" onclick="abrirWA('${a.id}')">💬 WA</button>` : ''}
+  </div>`;
+}
+
+// ── ACTION MENU — FIX COMPLETO ──
+// Usa position:fixed com coordenadas calculadas do getBoundingClientRect
+// para que o dropdown nunca seja cortado por qualquer overflow:hidden do pai
+function buildActionMenu(id, items) {
+  const wrap = document.createElement('div');
+  wrap.className = 'action-menu';
+
+  const btn = document.createElement('button');
+  btn.className = 'action-menu-btn';
+  btn.innerHTML = '⋮';
+  btn.type = 'button';
+
+  const drop = document.createElement('div');
+  drop.className = 'action-dropdown';
+
+  items.forEach(item => {
+    if (item === 'sep') {
+      const s = document.createElement('div');
+      s.className = 'action-sep';
+      drop.appendChild(s);
+      return;
+    }
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'action-item' + (item.cls ? ' ' + item.cls : '');
+    el.innerHTML = `<span class="action-item-icon">${item.icon}</span>${item.label}`;
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      closeAllMenus();
+      // Pequeno delay para garantir que o menu fechou antes da ação
+      setTimeout(() => item.action(), 50);
+    });
+    drop.appendChild(el);
+  });
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (_openMenu === drop) {
+      closeAllMenus();
+      return;
+    }
+
+    closeAllMenus();
+
+    // FIX CRÍTICO: posiciona o dropdown via fixed usando coordenadas reais do botão
+    const rect = btn.getBoundingClientRect();
+    const dropW = 200;
+    const viewportW = window.innerWidth;
+    const viewportH = window.innerHeight;
+
+    // Calcula posição: tenta abrir à direita do botão, alinhado pela direita
+    let left = rect.right - dropW;
+    let top = rect.bottom + 6;
+
+    // Se sair pela esquerda, abre pela esquerda do botão
+    if (left < 8) left = rect.left;
+    // Se sair pela direita, recua
+    if (left + dropW > viewportW - 8) left = viewportW - dropW - 8;
+    // Se sair por baixo, abre para cima
+    if (top + 200 > viewportH - 8) top = rect.top - 210;
+
+    drop.style.top = top + 'px';
+    drop.style.left = left + 'px';
+    drop.style.minWidth = dropW + 'px';
+
+    // Adiciona ao body para escapar de qualquer overflow:hidden
+    document.body.appendChild(drop);
+    drop.classList.add('open');
+    _openMenu = drop;
+    _openMenuBtn = btn;
+  });
+
+  wrap.appendChild(btn);
+  // drop fica no body quando aberto, não dentro do wrap
+  // mas começa dentro para não poluir o DOM
+  wrap.appendChild(drop);
+  return wrap;
+}
+
+function closeAllMenus() {
+  if (_openMenu) {
+    _openMenu.classList.remove('open');
+    // Remove do body se foi movido para lá
+    if (_openMenu.parentElement === document.body) {
+      document.body.removeChild(_openMenu);
+    }
+    _openMenu = null;
+    _openMenuBtn = null;
+  }
+  // Limpa qualquer dropdown órfão
+  document.querySelectorAll('body > .action-dropdown').forEach(d => {
+    d.classList.remove('open');
+    if (d.parentElement === document.body) document.body.removeChild(d);
+  });
+}
+
+// ── CLIENTES ──
+function renderClientes() {
+  const el = $('clientesGrid');
+  if (!el) return;
+  const clientes = state.clientes || [];
+  if (!clientes.length) {
+    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente ainda.</p></div>';
+    return;
+  }
+  el.innerHTML = '';
+  clientes.forEach(c => {
+    const agts = (state.agendamentos || []).filter(a => a.cliente_nome === c.nome && normStatus(a.status) !== 'Excluído').length;
+    const gasto = (state.agendamentos || []).filter(a => a.cliente_nome === c.nome && isFinanceiro(a)).reduce((s, a) => s + Number(a.valor || 0), 0);
+    const ativo = isAtivoCliente(c);
+    const card = document.createElement('div');
+    card.className = 'client-card' + (ativo ? '' : ' inactive');
+    card.innerHTML = `
+      <div class="cc-top">
+        <div class="cc-av">${initial(c.nome)}</div>
+        <div style="flex:1;min-width:0"><div class="cc-name">${c.nome}</div><div class="cc-phone">${c.telefone || '—'}</div></div>
+      </div>
+      ${c.email ? `<div style="font-size:11.5px;color:var(--text4);margin-bottom:8px;word-break:break-all">✉ ${c.email}</div>` : ''}
+      <div style="margin-bottom:9px"><span class="badge ${ativo ? 'badge-green' : 'badge-gray'}">${ativo ? 'Ativo' : 'Inativo'}</span></div>
+      <div class="cc-stats">
+        <div class="cc-stat"><div class="cc-sl">Atendimentos</div><div class="cc-sv">${agts}</div></div>
+        <div class="cc-stat"><div class="cc-sl">Total gasto</div><div class="cc-sv" style="font-size:14px">${money(gasto).replace(',00', '')}</div></div>
+      </div>`;
+    const menu = buildActionMenu(c.id, [
+      { icon: '✏️', label: 'Editar', action: () => editCliente(c.id) },
+      { icon: '📋', label: 'Duplicar', action: () => duplicarCliente(c.id) },
+      'sep',
+      ativo
+        ? { icon: '⏸', label: 'Desativar', cls: 'danger', action: () => toggleCliente(c.id, false) }
+        : { icon: '▶️', label: 'Ativar', cls: 'success', action: () => toggleCliente(c.id, true) },
+      { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirCliente(c.id) }
+    ]);
+    card.appendChild(menu);
+    el.appendChild(card);
+  });
+}
+
+// ── SERVIÇOS ──
+function renderServicos() {
+  const el = $('servicosGrid');
+  if (!el) return;
+  const vis = (state.servicos || []).filter(s => s.status !== 'excluido');
+  if (!vis.length) {
+    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">✦</div><p>Nenhum serviço ainda.</p></div>';
+    return;
+  }
+  el.innerHTML = '';
+  vis.forEach(s => {
+    const ativo = s.status === 'ativo';
+    const card = document.createElement('div');
+    card.className = 'svc-card' + (ativo ? '' : ' inactive');
+    card.innerHTML = `
+      <div class="svc-price">${money(s.preco).replace(',00', '')}</div>
+      <div class="svc-name">${s.nome}</div>
+      <div class="svc-dur">⏱ ${s.duracao_minutos || 60} min</div>
+      <div class="svc-status"><span class="badge ${ativo ? 'badge-green' : 'badge-gray'}">${ativo ? 'Ativo' : 'Inativo'}</span></div>`;
+    const menu = buildActionMenu(s.id, [
+      { icon: '✏️', label: 'Editar', action: () => editServico(s.id) },
+      { icon: '📋', label: 'Duplicar', action: () => duplicarServico(s.id) },
+      'sep',
+      ativo
+        ? { icon: '⏸', label: 'Desativar', cls: 'danger', action: () => toggleServico(s.id, 'inativo') }
+        : { icon: '▶️', label: 'Ativar', cls: 'success', action: () => toggleServico(s.id, 'ativo') },
+      { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirServico(s.id) }
+    ]);
+    card.appendChild(menu);
+    el.appendChild(card);
+  });
+}
+
+// ── PROFISSIONAIS ──
+function renderProfissionais() {
+  const el = $('profGrid');
+  if (!el) return;
+  const vis = (state.profissionais || []).filter(p => p.status !== 'excluido');
+  if (!vis.length) {
+    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👤</div><p>Nenhum profissional ainda.</p></div>';
+    return;
+  }
+  el.innerHTML = '';
+  vis.forEach(p => {
+    const ativo = p.status === 'ativo';
+    const card = document.createElement('div');
+    card.className = 'prof-card' + (ativo ? '' : ' inactive');
+    card.innerHTML = `
+      <div class="prof-av">${initial(p.nome)}</div>
+      <div class="prof-name">${p.nome}</div>
+      <div class="prof-esp">${p.especialidade || 'Profissional'}</div>
+      ${p.telefone ? `<div class="prof-phone">📱 ${p.telefone}</div>` : ''}
+      <div class="online-dot${ativo ? '' : ' off'}">${ativo ? 'Online' : 'Offline'}</div>`;
+    const menu = buildActionMenu(p.id, [
+      { icon: '✏️', label: 'Editar', action: () => editProfissional(p.id) },
+      { icon: '📋', label: 'Duplicar', action: () => duplicarProfissional(p.id) },
+      'sep',
+      ativo
+        ? { icon: '⏸', label: 'Desativar', cls: 'danger', action: () => toggleProfissional(p.id, 'inativo') }
+        : { icon: '▶️', label: 'Ativar', cls: 'success', action: () => toggleProfissional(p.id, 'ativo') },
+      { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirProfissional(p.id) }
+    ]);
+    card.appendChild(menu);
+    el.appendChild(card);
+  });
+}
+
+// ── FINANCEIRO ──
+function renderFinanceiro() {
+  const fin = (state.agendamentos || []).filter(isFinanceiro);
+  const total = fin.reduce((s, a) => s + Number(a.valor || 0), 0);
+  const ticket = fin.length ? total / fin.length : 0;
+  setText('finReceita', money(total).replace(',00', ''));
+  setText('finTicket', money(ticket).replace(',00', ''));
+  setText('finPagos', fin.length);
+  setText('finPlano', state.empresa?.plano || 'Grátis');
+}
+
+// ── CONFIG ──
+function renderConfig() {
+  const e = state.empresa || {};
+  const set = (id, v) => { const el = $(id); if (el) el.value = v || ''; };
+  set('cfgNome', e.nome);
+  set('cfgWhatsapp', e.whatsapp);
+  set('cfgSlug', e.slug);
+  set('cfgEndereco', e.endereco);
+  set('cfgCidade', e.cidade);
+  set('cfgInstagram', e.instagram);
+  set('cfgFacebook', e.facebook);
+  set('cfgTiktok', e.tiktok);
+  set('cfgSite', e.site);
+  const lb = $('cfgLinkBox');
+  if (lb) lb.textContent = '🔗 ' + publicUrl(e.slug || '');
+}
+
+// ── SALVAR ──
+async function salvarCliente() {
+  const nome = ($('cliNome')?.value || '').trim();
+  if (!nome) return toast('Digite o nome.', 'err');
+  const { error } = await db.from('agenda_clientes').insert({
+    empresa_id: state.empresa.id, nome,
+    telefone: ($('cliTel')?.value || '').trim(),
+    email: ($('cliEmail')?.value || '').trim(),
+    status: 'ativo'
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('cliNome')) $('cliNome').value = '';
+  if ($('cliTel')) $('cliTel').value = '';
+  if ($('cliEmail')) $('cliEmail').value = '';
+  await loadAll();
+  showNotif('Cliente adicionado', nome + ' salvo com sucesso.', 'ok');
+}
+
+async function salvarServico() {
+  const nome = ($('srvNome')?.value || '').trim();
+  if (!nome) return toast('Digite o nome.', 'err');
+  const { error } = await db.from('agenda_servicos').insert({
+    empresa_id: state.empresa.id, nome,
+    preco: Number($('srvPreco')?.value || 0),
+    duracao_minutos: Number($('srvDur')?.value || 60),
+    status: 'ativo'
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('srvNome')) $('srvNome').value = '';
+  if ($('srvPreco')) $('srvPreco').value = '';
+  if ($('srvDur')) $('srvDur').value = '';
+  await loadAll();
+  showNotif('Serviço adicionado', '', 'ok');
+}
+
+async function salvarProfissional() {
+  const nome = ($('proNome')?.value || '').trim();
+  if (!nome) return toast('Digite o nome.', 'err');
+  const { error } = await db.from('agenda_profissionais').insert({
+    empresa_id: state.empresa.id, nome,
+    especialidade: ($('proEsp')?.value || '').trim(),
+    telefone: ($('proTel')?.value || '').trim(),
+    status: 'ativo'
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('proNome')) $('proNome').value = '';
+  if ($('proEsp')) $('proEsp').value = '';
+  if ($('proTel')) $('proTel').value = '';
+  await loadAll();
+  showNotif('Profissional adicionado', '', 'ok');
+}
+
+async function salvarAgendamento() {
+  const agCli = $('agCliente')?.value?.trim();
+  const agSvc = $('agServico')?.value;
+  const agProf = $('agProfissional')?.value;
+  const agData = $('agData')?.value;
+  const agHora = $('agHora')?.value;
+  if (!agCli || !agSvc || !agProf || !agData || !agHora) {
+    return toast('Preencha todos os campos.', 'err');
+  }
+  const serv = (state.servicos || []).find(s => s.id === agSvc);
+  const prof = (state.profissionais || []).find(p => p.id === agProf);
+
+  let clienteId = null;
+  try {
+    const { data: cli } = await db.from('agenda_clientes').insert({
+      empresa_id: state.empresa.id,
+      nome: agCli,
+      telefone: ($('agTelefone')?.value || '').trim(),
+      status: 'ativo'
+    }).select('*').single();
+    if (cli) clienteId = cli.id;
+  } catch(e) {}
+
+  const { error } = await db.from('agenda_agendamentos').insert({
+    empresa_id: state.empresa.id,
+    cliente_id: clienteId,
+    servico_id: serv?.id || null,
+    profissional_id: prof?.id || null,
+    cliente_nome: agCli,
+    cliente_telefone: ($('agTelefone')?.value || '').trim(),
+    servico_nome: serv?.nome || '',
+    profissional_nome: prof?.nome || '',
+    data: agData,
+    hora: agHora,
+    status: $('agStatus')?.value || 'Pendente',
+    valor: Number(serv?.preco || 0)
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('agCliente')) $('agCliente').value = '';
+  if ($('agTelefone')) $('agTelefone').value = '';
+  if ($('agData')) $('agData').value = '';
+  if ($('agHora')) $('agHora').value = '';
+  await loadAll();
+  showNotif('Agendamento criado!', `${agCli} — ${formatDate(agData)} às ${agHora}.`, 'ok');
+}
+
+async function salvarConfig() {
+  if (!state?.empresa?.id) return;
+  const nome = ($('cfgNome')?.value || '').trim();
+  if (!nome) return toast('Digite o nome.', 'err');
+  const slugAtual = slugify(state.empresa.slug || '');
+  const slugNovo = slugify($('cfgSlug')?.value || slugAtual);
+  const updates = {
+    nome,
+    whatsapp: ($('cfgWhatsapp')?.value || '').trim(),
+    endereco: ($('cfgEndereco')?.value || '').trim(),
+    cidade: ($('cfgCidade')?.value || '').trim()
+  };
+  if (slugNovo !== slugAtual) {
+    const { data: slugExiste } = await db.from('agenda_empresas')
+      .select('id').eq('slug', slugNovo).neq('id', state.empresa.id).maybeSingle();
+    if (slugExiste) return toast('Esse link já está em uso.', 'err');
+    updates.slug = slugNovo;
+  }
+  const { data, error } = await db.from('agenda_empresas')
+    .update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  state.empresa = data || { ...state.empresa, ...updates };
+  setText('sideNome', state.empresa.nome);
+  setText('sideAvatar', initial(state.empresa.nome));
+  const lb = $('sideLinkBox');
+  if (lb) lb.textContent = publicUrl(state.empresa.slug);
+  renderConfig();
+  showNotif('Configurações salvas', '', 'ok');
+}
+
+async function salvarRedesSociais() {
+  if (!state?.empresa?.id) return;
+  const updates = {
+    instagram: ($('cfgInstagram')?.value || '').trim(),
+    facebook: ($('cfgFacebook')?.value || '').trim(),
+    tiktok: ($('cfgTiktok')?.value || '').trim(),
+    site: ($('cfgSite')?.value || '').trim()
+  };
+  const { data, error } = await db.from('agenda_empresas')
+    .update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar redes: ' + error.message, 'err');
+  state.empresa = data || { ...state.empresa, ...updates };
+  showNotif('Redes sociais salvas', '', 'ok');
+}
+
+// ── AÇÕES AGENDAMENTO ──
+async function confirmarAg(id) {
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
+  const { error } = await db.from('agenda_agendamentos').update({ status: 'Confirmado' }).eq('id', id);
+  if (error) return toast('Erro ao confirmar.', 'err');
+  ag.status = 'Confirmado';
+  renderAll();
+  showNotif('Confirmado!', ag.cliente_nome + ' — ' + formatDate(ag.data) + ' às ' + (ag.hora || '—'), 'ok');
+  const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
+  if (tel) {
+    const msg = `Olá, ${ag.cliente_nome}! Seu agendamento foi confirmado ✅\nServiço: ${ag.servico_nome || '—'}\nData: ${formatDate(ag.data)} às ${ag.hora || '—'}\nAguardamos você!`;
+    const link = buildWaLink(tel, msg);
+    if (link) window.open(link, '_blank');
+  }
+}
+
+async function concluirAg(id) {
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
+  const { error } = await db.from('agenda_agendamentos')
+    .update({ status: 'Concluído', financeiro_status: 'Concluído' }).eq('id', id);
+  if (error) return toast('Erro ao concluir.', 'err');
+  ag.status = 'Concluído'; ag.financeiro_status = 'Concluído';
+  renderAll();
+  showNotif('Concluído!', ag.cliente_nome + ' — ' + (ag.servico_nome || '—'), 'ok');
+}
+
+function abrirWA(id) {
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
+  const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
+  if (!tel) return toast('Telefone não cadastrado.', 'err');
+  const msg = `Olá, ${ag.cliente_nome}! 👋\nServiço: ${ag.servico_nome || '—'}\nData: ${formatDate(ag.data)} às ${ag.hora || '—'}\nAté lá! 😊`;
+  const link = buildWaLink(tel, msg);
+  if (link) window.open(link, '_blank');
+}
+
+// ── MODAL RECUSA ──
+function openModalRecusa(id) {
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
+  if (!podeTerAcoes(ag)) return toast('Este agendamento não permite recusa.', 'warn');
+  _recusaId = id; _recusaMotivo = null;
+  setText('recusaInfo', `${ag.cliente_nome} · ${formatDate(ag.data)} às ${ag.hora || '—'}`);
+  document.querySelectorAll('.motivo-item').forEach(el => {
+    el.classList.remove('sel');
+    const r = el.querySelector('.motivo-radio');
+    if (r) r.innerHTML = '';
+  });
+  const rmc = $('recusaMotivoCustom');
+  if (rmc) rmc.value = '';
+  const overlay = $('modalRecusaOverlay');
+  if (overlay) overlay.classList.add('open');
+}
+
+function closeModalRecusa() {
+  const overlay = $('modalRecusaOverlay');
+  if (overlay) overlay.classList.remove('open');
+  _recusaId = null; _recusaMotivo = null;
+}
+
+function selectMotivo(el, motivo) {
+  document.querySelectorAll('.motivo-item').forEach(o => {
+    o.classList.remove('sel');
+    const r = o.querySelector('.motivo-radio');
+    if (r) r.innerHTML = '';
+  });
+  el.classList.add('sel');
+  _recusaMotivo = motivo;
+}
+
+async function confirmarRecusa() {
+  if (!_recusaId) return;
+  const motivo = ($('recusaMotivoCustom')?.value || '').trim() || _recusaMotivo;
+  if (!motivo) return toast('Escolha um motivo.', 'err');
+  const ag = (state.agendamentos || []).find(a => a.id === _recusaId);
+  if (!ag) return;
+  const { error } = await db.from('agenda_agendamentos')
+    .update({ status: 'Recusado', observacoes: motivo }).eq('id', _recusaId);
+  if (error) return toast('Erro ao recusar.', 'err');
+  ag.status = 'Recusado';
+  closeModalRecusa();
+  renderAll();
+  showNotif('Recusado', ag.cliente_nome + ' — ' + motivo, 'info');
+  const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
+  if (tel) {
+    const pubLink = state.empresa ? publicUrl(state.empresa.slug) : '';
+    const msg = `Olá, ${ag.cliente_nome}!\nInfelizmente não conseguimos confirmar seu agendamento para ${formatDate(ag.data)}.\nMotivo: ${motivo}\nEscolha outro horário: ${pubLink}`;
+    const link = buildWaLink(tel, msg);
+    if (link) window.open(link, '_blank');
+  }
+}
+
+// ── MODAL REAGENDAR ──
+function openModalReagendar(id) {
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
+  if (!podeTerAcoes(ag)) return toast('Este agendamento não permite reagendamento.', 'warn');
+  _reagendarId = id;
+  setText('reagendarInfo', `${ag.cliente_nome} · ${formatDate(ag.data)} às ${ag.hora || '—'}`);
+  const rd = $('reagendarData'); if (rd) rd.value = ag.data || '';
+  const rh = $('reagendarHora'); if (rh) rh.value = ag.hora || '';
+  const overlay = $('modalReagendarOverlay');
+  if (overlay) overlay.classList.add('open');
+}
+
+function closeModalReagendar() {
+  const overlay = $('modalReagendarOverlay');
+  if (overlay) overlay.classList.remove('open');
+  _reagendarId = null;
+}
+
+async function confirmarReagendar() {
+  if (!_reagendarId) return;
+  const data = $('reagendarData')?.value;
+  const hora = $('reagendarHora')?.value;
+  if (!data || !hora) return toast('Escolha nova data e hora.', 'err');
+  const ag = (state.agendamentos || []).find(a => a.id === _reagendarId);
+  if (!ag) return;
+  const { error } = await db.from('agenda_agendamentos')
+    .update({ data, hora, status: 'Reagendado' }).eq('id', _reagendarId);
+  if (error) return toast('Erro ao reagendar.', 'err');
+  ag.data = data; ag.hora = hora; ag.status = 'Reagendado';
+  closeModalReagendar();
+  renderAll();
+  showNotif('Reagendado!', ag.cliente_nome + ' → ' + formatDate(data) + ' às ' + hora, 'ok');
+  const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
+  if (tel) {
+    const msg = `Olá, ${ag.cliente_nome}!\nSeu agendamento foi reagendado 📅\nNova data: ${formatDate(data)} às ${hora}\nAguardamos você! 😊`;
+    const link = buildWaLink(tel, msg);
+    if (link) window.open(link, '_blank');
+  }
+}
+
+// ── CONFIRM MODAL ──
+function openConfirmModal({ icon = '⚠️', type = 'danger', title = 'Tem certeza?', body = 'Esta ação não pode ser desfeita.', btnLabel = 'Confirmar', cb }) {
+  const wrap = $('confirmIconWrap');
+  if (wrap) { wrap.className = 'confirm-icon-wrap ' + type; wrap.textContent = icon; }
+  setText('confirmTitle', title);
+  setText('confirmBody', body);
+  const btn = $('confirmActionBtn');
+  if (btn) {
+    btn.textContent = btnLabel;
+    btn.className = 'btn ' + (type === 'danger' ? 'btn-danger' : 'btn-primary');
+  }
+  _confirmCb = cb;
+  const overlay = $('confirmOverlay');
+  if (overlay) overlay.classList.add('open');
+}
+
+function closeConfirmModal() {
+  const overlay = $('confirmOverlay');
+  if (overlay) overlay.classList.remove('open');
+  _confirmCb = null;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  carregarHorarios();
+  const confirmBtn = $('confirmActionBtn');
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', () => {
+      if (_confirmCb) _confirmCb();
+      closeConfirmModal();
+    });
+  }
+
+  const confirmOverlay = $('confirmOverlay');
+  if (confirmOverlay) {
+    confirmOverlay.addEventListener('click', e => {
+      if (e.target === confirmOverlay) closeConfirmModal();
+    });
+  }
+
+  const editOverlay = $('editOverlay');
+  if (editOverlay) {
+    editOverlay.addEventListener('click', e => {
+      if (e.target === editOverlay) closeEditModal();
+    });
+  }
+
+  const modalRecusaOverlay = $('modalRecusaOverlay');
+  if (modalRecusaOverlay) {
+    modalRecusaOverlay.addEventListener('click', e => {
+      if (e.target === modalRecusaOverlay) closeModalRecusa();
+    });
+  }
+
+  const modalReagendarOverlay = $('modalReagendarOverlay');
+  if (modalReagendarOverlay) {
+    modalReagendarOverlay.addEventListener('click', e => {
+      if (e.target === modalReagendarOverlay) closeModalReagendar();
+    });
+  }
 });
 
-function openMobileMenu(){
-  var overlay = document.getElementById('mobileMenuOverlay');
-  var drawer = document.getElementById('mobileMenuDrawer');
-  if(overlay) overlay.classList.add('open');
-  if(drawer) drawer.classList.add('open');
+// ── EDIT MODAL ──
+function openEditModal(title, bodyHtml, saveCb) {
+  setText('editModalTitle', title);
+  const body = $('editModalBody');
+  if (body) body.innerHTML = bodyHtml;
+  _editSaveCb = saveCb;
+  const saveBtn = $('editSaveBtn');
+  if (saveBtn) saveBtn.onclick = () => { if (_editSaveCb) _editSaveCb(); };
+  const overlay = $('editOverlay');
+  if (overlay) overlay.classList.add('open');
 }
-function closeMobileMenu(){
-  var overlay = document.getElementById('mobileMenuOverlay');
-  var drawer = document.getElementById('mobileMenuDrawer');
-  if(overlay) overlay.classList.remove('open');
-  if(drawer) drawer.classList.remove('open');
+
+function closeEditModal() {
+  const overlay = $('editOverlay');
+  if (overlay) overlay.classList.remove('open');
+  _editSaveCb = null;
 }
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  flatpickr("#data", {
-    locale: "pt",
-    dateFormat: "d/m/Y",
-    disableMobile: true
+
+// ── EDITAR ──
+function editServico(id) {
+  const s = (state.servicos || []).find(x => x.id === id);
+  if (!s) return;
+  openEditModal('Editar Serviço', `
+    <div class="form-gap">
+      <div class="field"><label>Nome</label><input id="ed_sn" value="${s.nome || ''}"></div>
+      <div class="field-row">
+        <div class="field"><label>Preço (R$)</label><input id="ed_sp" type="number" value="${s.preco || 0}"></div>
+        <div class="field"><label>Duração (min)</label><input id="ed_sd" type="number" value="${s.duracao_minutos || 60}"></div>
+      </div>
+    </div>`, async () => {
+    const nome = ($('ed_sn')?.value || '').trim();
+    if (!nome) return toast('Preencha o nome.', 'err');
+    const { error } = await db.from('agenda_servicos').update({
+      nome,
+      preco: Number($('ed_sp')?.value || 0),
+      duracao_minutos: Number($('ed_sd')?.value || 60)
+    }).eq('id', id);
+    if (error) return toast('Erro ao salvar.', 'err');
+    closeEditModal(); await loadAll();
+    showNotif('Serviço atualizado', '', 'ok');
   });
-  flatpickr("#hora", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",
-    time_24hr: true,
-    minuteIncrement: 5,
-    disableMobile: true
+}
+
+function editProfissional(id) {
+  const p = (state.profissionais || []).find(x => x.id === id);
+  if (!p) return;
+  openEditModal('Editar Profissional', `
+    <div class="form-gap">
+      <div class="field"><label>Nome</label><input id="ed_pn" value="${p.nome || ''}"></div>
+      <div class="field"><label>Especialidade</label><input id="ed_pe" value="${p.especialidade || ''}"></div>
+      <div class="field"><label>Telefone</label><input id="ed_pt" value="${p.telefone || ''}"></div>
+    </div>`, async () => {
+    const nome = ($('ed_pn')?.value || '').trim();
+    if (!nome) return toast('Preencha o nome.', 'err');
+    const { error } = await db.from('agenda_profissionais').update({
+      nome,
+      especialidade: ($('ed_pe')?.value || '').trim(),
+      telefone: ($('ed_pt')?.value || '').trim()
+    }).eq('id', id);
+    if (error) return toast('Erro ao salvar.', 'err');
+    closeEditModal(); await loadAll();
+    showNotif('Profissional atualizado', '', 'ok');
+  });
+}
+
+function editCliente(id) {
+  const c = (state.clientes || []).find(x => x.id === id);
+  if (!c) return;
+  openEditModal('Editar Cliente', `
+    <div class="form-gap">
+      <div class="field"><label>Nome</label><input id="ed_cn" value="${c.nome || ''}"></div>
+      <div class="field"><label>Telefone</label><input id="ed_ct" value="${c.telefone || ''}"></div>
+      <div class="field"><label>E-mail</label><input id="ed_ce" value="${c.email || ''}"></div>
+    </div>`, async () => {
+    const nome = ($('ed_cn')?.value || '').trim();
+    if (!nome) return toast('Preencha o nome.', 'err');
+    const { error } = await db.from('agenda_clientes').update({
+      nome,
+      telefone: ($('ed_ct')?.value || '').trim(),
+      email: ($('ed_ce')?.value || '').trim()
+    }).eq('id', id);
+    if (error) return toast('Erro ao salvar.', 'err');
+    closeEditModal(); await loadAll();
+    showNotif('Cliente atualizado', '', 'ok');
+  });
+}
+
+function editAgendamento(id) {
+  const a = (state.agendamentos || []).find(x => x.id === id);
+  if (!a) return;
+  const svcopts = (state.servicos || []).filter(s => s.status === 'ativo')
+    .map(s => `<option value="${s.id}"${s.id === a.servico_id ? ' selected' : ''}>${s.nome}</option>`).join('');
+  const profopts = (state.profissionais || []).filter(p => p.status === 'ativo')
+    .map(p => `<option value="${p.id}"${p.id === a.profissional_id ? ' selected' : ''}>${p.nome}</option>`).join('');
+  openEditModal('Editar Agendamento', `
+    <div class="form-gap">
+      <div class="field-row">
+        <div class="field"><label>Cliente</label><input id="ed_ac" value="${a.cliente_nome || ''}"></div>
+        <div class="field"><label>Telefone</label><input id="ed_atel" value="${a.cliente_telefone || ''}"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Serviço</label><select id="ed_as">${svcopts}</select></div>
+        <div class="field"><label>Profissional</label><select id="ed_ap">${profopts}</select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Data</label><input id="ed_ad" type="date" value="${a.data || ''}"></div>
+        <div class="field"><label>Hora</label><input id="ed_ah" type="time" value="${a.hora || ''}"></div>
+      </div>
+      <div class="field"><label>Status</label><select id="ed_ast">
+        <option${normStatus(a.status) === 'Confirmado' ? ' selected' : ''}>Confirmado</option>
+        <option${normStatus(a.status) === 'Pendente' ? ' selected' : ''}>Pendente</option>
+        <option${normStatus(a.status) === 'Reagendado' ? ' selected' : ''}>Reagendado</option>
+        <option${normStatus(a.status) === 'Concluído' ? ' selected' : ''}>Concluído</option>
+        <option${normStatus(a.status) === 'Recusado' ? ' selected' : ''}>Recusado</option>
+        <option${normStatus(a.status) === 'Excluído' ? ' selected' : ''}>Excluído</option>
+      </select></div>
+    </div>`, async () => {
+    const cli = ($('ed_ac')?.value || '').trim();
+    const data = $('ed_ad')?.value;
+    const hora = $('ed_ah')?.value;
+    if (!cli || !data || !hora) return toast('Preencha cliente, data e hora.', 'err');
+    const serv = (state.servicos || []).find(s => s.id === $('ed_as')?.value);
+    const prof = (state.profissionais || []).find(p => p.id === $('ed_ap')?.value);
+    const { error } = await db.from('agenda_agendamentos').update({
+      cliente_nome: cli,
+      cliente_telefone: ($('ed_atel')?.value || '').trim(),
+      servico_id: $('ed_as')?.value || null,
+      profissional_id: $('ed_ap')?.value || null,
+      servico_nome: serv?.nome || a.servico_nome,
+      profissional_nome: prof?.nome || a.profissional_nome,
+      data, hora,
+      status: $('ed_ast')?.value || 'Pendente',
+      valor: Number(serv?.preco || a.valor || 0)
+    }).eq('id', id);
+    if (error) return toast('Erro ao salvar.', 'err');
+    closeEditModal(); await loadAll();
+    showNotif('Agendamento atualizado', '', 'ok');
+  });
+}
+
+// ── DUPLICAR ──
+async function duplicarServico(id) {
+  const s = (state.servicos || []).find(x => x.id === id);
+  if (!s) return;
+  await db.from('agenda_servicos').insert({
+    empresa_id: state.empresa.id, nome: s.nome + ' (cópia)',
+    preco: s.preco, duracao_minutos: s.duracao_minutos, status: 'ativo'
+  });
+  await loadAll(); showNotif('Serviço duplicado', '', 'info');
+}
+
+async function duplicarProfissional(id) {
+  const p = (state.profissionais || []).find(x => x.id === id);
+  if (!p) return;
+  await db.from('agenda_profissionais').insert({
+    empresa_id: state.empresa.id, nome: p.nome + ' (cópia)',
+    especialidade: p.especialidade, telefone: p.telefone, status: 'ativo'
+  });
+  await loadAll(); showNotif('Profissional duplicado', '', 'info');
+}
+
+async function duplicarCliente(id) {
+  const c = (state.clientes || []).find(x => x.id === id);
+  if (!c) return;
+  await db.from('agenda_clientes').insert({
+    empresa_id: state.empresa.id, nome: c.nome + ' (cópia)',
+    telefone: c.telefone, email: c.email, status: 'ativo'
+  });
+  await loadAll(); showNotif('Cliente duplicado', '', 'info');
+}
+
+async function duplicarAgendamento(id) {
+  const a = (state.agendamentos || []).find(x => x.id === id);
+  if (!a) return;
+  await db.from('agenda_agendamentos').insert({
+    empresa_id: state.empresa.id,
+    cliente_id: a.cliente_id, servico_id: a.servico_id,
+    profissional_id: a.profissional_id,
+    cliente_nome: a.cliente_nome, cliente_telefone: a.cliente_telefone,
+    servico_nome: a.servico_nome, profissional_nome: a.profissional_nome,
+    data: a.data, hora: a.hora, status: 'Pendente', valor: a.valor
+  });
+  await loadAll(); showNotif('Agendamento duplicado como Pendente', '', 'info');
+}
+
+// ── TOGGLE ──
+function toggleServico(id, ns) {
+  const s = (state.servicos || []).find(x => x.id === id); if (!s) return;
+  openConfirmModal({
+    icon: ns === 'ativo' ? '▶️' : '⏸', type: ns === 'ativo' ? 'info' : 'danger',
+    title: ns === 'ativo' ? 'Ativar serviço?' : 'Desativar serviço?',
+    body: `"${s.nome}"`, btnLabel: ns === 'ativo' ? 'Ativar' : 'Desativar',
+    cb: async () => {
+      await db.from('agenda_servicos').update({ status: ns }).eq('id', id);
+      await loadAll();
+      showNotif(ns === 'ativo' ? 'Serviço ativado' : 'Serviço desativado', '', 'ok');
+    }
+  });
+}
+
+function toggleProfissional(id, ns) {
+  const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
+  openConfirmModal({
+    icon: ns === 'ativo' ? '▶️' : '⏸', type: ns === 'ativo' ? 'info' : 'danger',
+    title: ns === 'ativo' ? 'Ativar profissional?' : 'Desativar?',
+    body: `"${p.nome}"`, btnLabel: ns === 'ativo' ? 'Ativar' : 'Desativar',
+    cb: async () => {
+      await db.from('agenda_profissionais').update({ status: ns }).eq('id', id);
+      await loadAll();
+      showNotif(ns === 'ativo' ? 'Profissional ativado' : 'Profissional desativado', '', 'ok');
+    }
+  });
+}
+
+function toggleCliente(id, ativar) {
+  const c = (state.clientes || []).find(x => x.id === id); if (!c) return;
+  openConfirmModal({
+    icon: ativar ? '▶️' : '⏸', type: ativar ? 'info' : 'danger',
+    title: ativar ? 'Ativar cliente?' : 'Desativar?',
+    body: `"${c.nome}"`, btnLabel: ativar ? 'Ativar' : 'Desativar',
+    cb: async () => {
+      await db.from('agenda_clientes').update({ status: ativar ? 'ativo' : 'inativo' }).eq('id', id);
+      await loadAll();
+      showNotif(ativar ? 'Cliente ativado' : 'Cliente desativado', '', 'ok');
+    }
+  });
+}
+
+// ── EXCLUIR ──
+function excluirServico(id) {
+  const s = (state.servicos || []).find(x => x.id === id); if (!s) return;
+  openConfirmModal({
+    icon: '🗑', type: 'danger', title: 'Excluir serviço?', body: `"${s.nome}"`, btnLabel: 'Excluir',
+    cb: async () => {
+      await db.from('agenda_servicos').update({ status: 'excluido' }).eq('id', id);
+      await loadAll(); showNotif('Serviço excluído', '', 'info');
+    }
+  });
+}
+
+function excluirProfissional(id) {
+  const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
+  openConfirmModal({
+    icon: '🗑', type: 'danger', title: 'Excluir profissional?', body: `"${p.nome}"`, btnLabel: 'Excluir',
+    cb: async () => {
+      await db.from('agenda_profissionais').update({ status: 'excluido' }).eq('id', id);
+      await loadAll(); showNotif('Profissional excluído', '', 'info');
+    }
+  });
+}
+
+function excluirCliente(id) {
+  const c = (state.clientes || []).find(x => x.id === id); if (!c) return;
+  openConfirmModal({
+    icon: '🗑', type: 'danger', title: 'Excluir cliente?', body: `"${c.nome}"`, btnLabel: 'Excluir',
+    cb: async () => {
+      await db.from('agenda_clientes').update({ status: 'inativo' }).eq('id', id);
+      await loadAll(); showNotif('Cliente removido', '', 'info');
+    }
+  });
+}
+
+function excluirAgendamento(id) {
+  const a = (state.agendamentos || []).find(x => x.id === id); if (!a) return;
+  const jaFoi = normStatus(a.status) === 'Concluído' || a.financeiro_status === 'Concluído';
+  openConfirmModal({
+    icon: '🗑', type: 'danger',
+    title: jaFoi ? 'Arquivar agendamento?' : 'Excluir agendamento?',
+    body: `"${a.cliente_nome}" em ${formatDate(a.data)}.${jaFoi ? ' O faturamento será preservado.' : ''}`,
+    btnLabel: jaFoi ? 'Arquivar' : 'Excluir',
+    cb: async () => {
+      const payload = jaFoi
+        ? { status: 'Excluído', financeiro_status: 'Concluído' }
+        : { status: 'Excluído' };
+      const { error } = await db.from('agenda_agendamentos').update(payload).eq('id', id);
+      if (error) return toast('Erro ao excluir.', 'err');
+      await loadAll();
+      showNotif(jaFoi ? 'Agendamento arquivado' : 'Agendamento excluído', jaFoi ? 'Faturamento mantido.' : '', 'info');
+    }
+  });
+}
+
+// ── PUBLIC PAGE ──
+function copyPublicLink() {
+  if (!state?.empresa?.slug) return;
+  const link = publicUrl(state.empresa.slug);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link).catch(() => {});
+  }
+  showNotif('Link copiado!', link, 'ok', 3000);
+}
+
+function openPublic() {
+  if (!state?.empresa?.slug) return;
+  history.pushState(null, '', '#agendar/' + state.empresa.slug);
+  loadPublic(state.empresa.slug);
+}
+
+async function loadPublic(slug) {
+  const lv = $('landingView');
+  const dv = $('dashboardView');
+  const pv = $('publicView');
+  if (lv) lv.style.display = 'none';
+  if (dv) dv.style.display = 'none';
+  if (pv) pv.style.display = 'block';
+
+  const { data: empresa, error } = await db.from('agenda_empresas')
+    .select('*').eq('slug', slug).single();
+
+  if (error || !empresa) {
+    setText('pubNomeEmpresa', 'Agenda não encontrada');
+    setText('pubDescEmpresa', 'Verifique se o link está correto.');
+    return;
+  }
+
+  state.pubEmpresa = empresa;
+  setText('pubNomeEmpresa', empresa.nome);
+  setText('pubDescEmpresa', (empresa.area_atuacao || 'Agendamento Online') + ' • WhatsApp: ' + (empresa.whatsapp || 'Não informado'));
+
+  const sociais = $('pubSociais');
+  if (sociais) {
+    let html = '';
+    if (empresa.instagram) {
+      const h = empresa.instagram.replace('@', '').replace(/.*instagram\.com\//, '');
+      html += `<a href="https://instagram.com/${h}" target="_blank" rel="noopener" class="pub-social">📸 @${h}</a>`;
+    }
+    if (empresa.site) {
+      const url = empresa.site.startsWith('http') ? empresa.site : 'https://' + empresa.site;
+      const lbl = empresa.site.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      html += `<a href="${url}" target="_blank" rel="noopener" class="pub-social">🌐 ${lbl}</a>`;
+    }
+    sociais.innerHTML = html;
+    sociais.style.display = html ? 'flex' : 'none';
+  }
+
+  const waFab = $('pubWaFab');
+  if (waFab) {
+    const tel = (empresa.whatsapp || '').replace(/\D/g, '');
+    if (tel) {
+      const f = tel.startsWith('55') ? tel : '55' + tel;
+      waFab.href = 'https://wa.me/' + f + '?text=' + encodeURIComponent('Olá, tenho uma dúvida antes de agendar.');
+      waFab.style.display = 'flex';
+    } else {
+      waFab.style.display = 'none';
+    }
+  }
+
+  const [svcs, profs] = await Promise.all([
+    db.from('agenda_servicos').select('*').eq('empresa_id', empresa.id).eq('status', 'ativo').order('nome'),
+    db.from('agenda_profissionais').select('*').eq('empresa_id', empresa.id).eq('status', 'ativo').order('nome')
+  ]);
+  state.servicos = svcs.data || [];
+  state.profissionais = profs.data || [];
+
+  const ps = $('pubServicos');
+  if (ps) {
+    ps.innerHTML = state.servicos.map(s => `
+      <div class="choice" onclick="selectPubSvc('${s.id}',this)">
+        <div class="choice-icon">✦</div>
+        <div style="flex:1;min-width:0"><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos || 60} min</div></div>
+        <div class="choice-price">${money(s.preco).replace(',00', '')}</div>
+      </div>`).join('') ||
+      '<div class="empty-state"><div class="es-icon">✦</div><p>Nenhum serviço disponível.</p></div>';
+  }
+
+  const pp = $('pubProfissionais');
+  if (pp) {
+    pp.innerHTML = state.profissionais.map(p => `
+      <div class="choice" onclick="selectPubProf('${p.id}',this)">
+        <div class="choice-icon">👤</div>
+        <div style="flex:1;min-width:0"><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade || 'Profissional'}</div></div>
+      </div>`).join('') ||
+      '<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional disponível.</p></div>';
+  }
+}
+
+function selectPubSvc(id, el) {
+  state.pubServico = (state.servicos || []).find(s => s.id === id);
+  document.querySelectorAll('#pubServicos .choice').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function selectPubProf(id, el) {
+  state.pubProfissional = (state.profissionais || []).find(p => p.id === id);
+  document.querySelectorAll('#pubProfissionais .choice').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+async function confirmarAgendamentoPublico() {
+  const pubNome = $('pubClienteNome')?.value?.trim();
+  const pubTel = $('pubClienteTel')?.value?.trim();
+  const pubData = $('pubData')?.value;
+  const pubHora = $('pubHora')?.value;
+
+  if (!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !pubNome || !pubTel || !pubData || !pubHora) {
+    return toast('Preencha tudo para confirmar.', 'err');
+  }
+
+  try {
+    let clienteId = null;
+    const { data: cli } = await db.from('agenda_clientes').insert({
+      empresa_id: state.pubEmpresa.id,
+      nome: pubNome,
+      telefone: pubTel,
+      status: 'ativo'
+    }).select('*').single();
+    if (cli) clienteId = cli.id;
+
+    const { error } = await db.from('agenda_agendamentos').insert({
+      empresa_id: state.pubEmpresa.id,
+      cliente_id: clienteId,
+      servico_id: state.pubServico.id,
+      profissional_id: state.pubProfissional.id,
+      cliente_nome: pubNome,
+      cliente_telefone: pubTel,
+      servico_nome: state.pubServico.nome,
+      profissional_nome: state.pubProfissional.nome,
+      data: pubData,
+      hora: pubHora,
+      status: 'Pendente',
+      valor: Number(state.pubServico.preco || 0),
+      observacoes: $('pubObs')?.value || ''
+    });
+
+    if (error) { console.error(error); return toast('Erro ao confirmar: ' + error.message, 'err'); }
+
+    const mb = $('pubMainBody');
+    const cs = $('pubConfirmScreen');
+    if (mb) mb.style.display = 'none';
+    if (cs) cs.style.display = 'block';
+  } catch (e) {
+    console.error('Erro ao confirmar agendamento público:', e);
+    toast('Erro inesperado. Tente novamente.', 'err');
+  }
+}
+
+function resetPublic() {
+  const mb = $('pubMainBody');
+  const cs = $('pubConfirmScreen');
+  if (mb) mb.style.display = 'flex';
+  if (cs) cs.style.display = 'none';
+  const campos = ['pubClienteNome', 'pubClienteTel', 'pubData', 'pubHora', 'pubObs'];
+  campos.forEach(id => { const el = $(id); if (el) el.value = ''; });
+  state.pubServico = null;
+  state.pubProfissional = null;
+  document.querySelectorAll('.choice').forEach(c => c.classList.remove('active'));
+}
+
+function voltarDaPublica() {
+  history.pushState(null, '', location.pathname);
+  const pv = $('publicView');
+  if (pv) pv.style.display = 'none';
+  if (state?.empresa) {
+    const dv = $('dashboardView');
+    if (dv) dv.style.display = 'block';
+    setView('dashboard');
+  } else {
+    const lv = $('landingView');
+    if (lv) lv.style.display = 'block';
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── EXPOSE GLOBALS ──
+Object.assign(window, {
+  openAuth, closeAuth, showLogin, showCadastro,
+  goStep1, goStep2, goStep3, autoSlug,
+  loginComSenha, finalizarCadastro, logout,
+  setView, setFilter,
+  salvarCliente, salvarServico, salvarProfissional, salvarAgendamento,
+  salvarConfig, salvarRedesSociais,
+  confirmarAg, concluirAg, abrirWA,
+  openModalRecusa, closeModalRecusa, selectMotivo, confirmarRecusa,
+  openModalReagendar, closeModalReagendar, confirmarReagendar,
+  editCliente, editServico, editProfissional, editAgendamento,
+  duplicarCliente, duplicarServico, duplicarProfissional, duplicarAgendamento,
+  toggleCliente, toggleServico, toggleProfissional,
+  excluirCliente, excluirServico, excluirProfissional, excluirAgendamento,
+  copyPublicLink, openPublic, voltarDaPublica,
+  selectPubSvc, selectPubProf, confirmarAgendamentoPublico, resetPublic,
+  closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
+  toast, clearNotifDot, loadPublic,
+  openMobileMenu, closeMobileMenu
+});
+
+
+
+/* PATCH FINAL — proteção da página pública */
+(function(){
+  function forcePublicIsolation(){
+    if(!location.hash || !location.hash.startsWith('#agendar/')) return;
+    const landing = document.getElementById('landingView');
+    const dashboard = document.getElementById('dashboardView');
+    const publicView = document.getElementById('publicView');
+    if(landing) landing.style.display = 'none';
+    if(dashboard) dashboard.style.display = 'none';
+    if(publicView) publicView.style.display = 'block';
+    document.body.classList.add('public-mode');
+  }
+  window.addEventListener('hashchange', forcePublicIsolation);
+  window.addEventListener('DOMContentLoaded', forcePublicIsolation);
+  setTimeout(forcePublicIsolation, 300);
+  setTimeout(forcePublicIsolation, 1000);
+})();
+
+
+
+/* PATCH FINAL CLIQUES — REEXPÕE FUNÇÕES APÓS CARREGAR */
+Object.assign(window, {
+  openAuth,
+  closeAuth,
+  showLogin,
+  showCadastro,
+  goStep1,
+  goStep2,
+  goStep3,
+  loginComSenha,
+  finalizarCadastro
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  Object.assign(window, {
+    openAuth,
+    closeAuth,
+    showLogin,
+    showCadastro,
+    goStep1,
+    goStep2,
+    goStep3,
+    loginComSenha,
+    finalizarCadastro
   });
 });
-</script>
-</body>
-</html>
