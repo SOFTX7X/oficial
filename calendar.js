@@ -39,50 +39,28 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ══════════════════════════════════════
-     DETECTA SE É CELULAR OU PC
-  ══════════════════════════════════════ */
-  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)
-    || ('ontouchstart' in window && navigator.maxTouchPoints > 1);
-
-  /* ══════════════════════════════════════
-     CELULAR — usa input type="time" nativo
-     O sistema já abre o relógio bonito do iOS/Android
-  ══════════════════════════════════════ */
-  if (isMobile) {
-    ["#agHora", "#pubHora", "#reagendarHora"].forEach(sel => {
-      const el = document.querySelector(sel);
-      if (!el) return;
-      el.type = "time";
-      el.readOnly = false;
-      el.style.cursor = "pointer";
-      // Garante que o valor salvo está no formato HH:MM
-      el.addEventListener("change", () => {
-        // já vem HH:MM do input nativo, não precisa tratar
-      });
-    });
-    return; // para aqui no celular, não monta o picker premium
-  }
-
-  /* ══════════════════════════════════════
-     PC — TIME PICKER PREMIUM DRAG + WHEEL
+     TIME PICKER — RODINHA INFINITA
+     Igual relógio de alarme Android
   ══════════════════════════════════════ */
 
   const HOURS   = Array.from({length: 24}, (_, i) => i);
-  const MINUTES = [0,5,10,15,20,25,30,35,40,45,50,55];
+  const MINUTES = Array.from({length: 60}, (_, i) => i);
   const CELL_H  = 56;
   const VISIBLE = 5;
   const COL_H   = CELL_H * VISIBLE;
+  const REPEAT  = 20; // quantas vezes repete para criar ilusão de infinito
 
   let currentInput = null;
   let selHour = 8;
   let selMin  = 0;
 
+  /* ── ESTILOS ── */
   const style = document.createElement("style");
   style.textContent = `
     .tp-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.82);
+      background: rgba(0,0,0,.85);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       z-index: 99999;
@@ -173,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
       content: '';
       position: absolute;
       left: 0; right: 0;
-      height: ${CELL_H * 1.6}px;
+      height: ${CELL_H * 1.8}px;
       z-index: 2;
       pointer-events: none;
     }
@@ -189,11 +167,9 @@ document.addEventListener("DOMContentLoaded", () => {
       position: absolute;
       left: 0; right: 0;
       top: 0;
-      transition: top .18s cubic-bezier(.25,.8,.25,1);
+      transition: top .2s cubic-bezier(.25,.8,.25,1);
     }
-    .tp-col-inner.dragging {
-      transition: none;
-    }
+    .tp-col-inner.instant { transition: none; }
     .tp-cell {
       height: ${CELL_H}px;
       display: flex;
@@ -202,22 +178,21 @@ document.addEventListener("DOMContentLoaded", () => {
       font-size: 20px;
       font-weight: 700;
       color: rgba(255,255,255,.18);
-      transition: color .15s, font-size .15s;
+      transition: color .12s, font-size .12s;
       position: relative;
       z-index: 3;
     }
-    .tp-cell.near1 { color: rgba(255,255,255,.45); font-size: 22px; }
-    .tp-cell.near2 { color: rgba(255,255,255,.28); font-size: 20px; }
-    .tp-cell.sel   { color: #fff; font-size: 30px; }
+    .tp-cell.near1 { color: rgba(255,255,255,.45); font-size: 23px; }
+    .tp-cell.near2 { color: rgba(255,255,255,.25); font-size: 20px; }
+    .tp-cell.sel   { color: #fff; font-size: 30px; font-weight: 800; }
     .tp-divider {
       font-size: 34px;
       font-weight: 800;
       color: rgba(108,124,255,.8);
-      padding: 0 2px;
-      position: relative;
-      z-index: 5;
       width: 40px;
       text-align: center;
+      position: relative;
+      z-index: 5;
     }
     .tp-preview-bar {
       display: flex;
@@ -245,42 +220,27 @@ document.addEventListener("DOMContentLoaded", () => {
       text-transform: uppercase;
       letter-spacing: .1em;
     }
-    .tp-actions {
-      display: flex;
-      gap: 10px;
-    }
+    .tp-actions { display: flex; gap: 10px; }
     .tp-cancel {
-      flex: 1;
-      padding: 14px;
-      border-radius: 16px;
+      flex: 1; padding: 14px; border-radius: 16px;
       border: 1px solid rgba(108,124,255,.25);
-      background: transparent;
-      color: rgba(255,255,255,.6);
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .18s;
-      font-family: inherit;
+      background: transparent; color: rgba(255,255,255,.6);
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background .18s; font-family: inherit;
     }
     .tp-cancel:hover { background: rgba(108,124,255,.12); }
     .tp-ok {
-      flex: 2;
-      padding: 14px;
-      border-radius: 16px;
-      border: none;
+      flex: 2; padding: 14px; border-radius: 16px; border: none;
       background: linear-gradient(135deg,#6c7cff,#9b59ff);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
+      color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
       box-shadow: 0 4px 20px rgba(108,124,255,.45);
-      transition: opacity .18s, transform .1s;
-      font-family: inherit;
+      transition: opacity .18s, transform .1s; font-family: inherit;
     }
     .tp-ok:active { transform: scale(.97); }
   `;
   document.head.appendChild(style);
 
+  /* ── OVERLAY HTML ── */
   const overlay = document.createElement("div");
   overlay.className = "tp-overlay";
   overlay.innerHTML = `
@@ -312,147 +272,185 @@ document.addEventListener("DOMContentLoaded", () => {
   `;
   document.body.appendChild(overlay);
 
+  /* ── UTILS ── */
   function pad(n) { return String(n).padStart(2,"0"); }
-
   function updatePreview() {
     const el = document.getElementById("tpPreview");
     if (el) el.textContent = pad(selHour) + ":" + pad(selMin);
   }
+  function mod(n, m) { return ((n % m) + m) % m; }
 
-  function idxToTop(idx) {
-    return (COL_H / 2) - (idx * CELL_H) - (CELL_H / 2);
-  }
+  /* ══════════════════════════════════════
+     COLUNA INFINITA
+  ══════════════════════════════════════ */
+  function makeInfiniteCol(inner, items, initVal, onSelect) {
+    const len = items.length;
+    const totalCells = len * REPEAT;
+    const midBlock = Math.floor(REPEAT / 2);
 
-  function clampIdx(idx, items) {
-    return Math.max(0, Math.min(idx, items.length - 1));
-  }
+    // Índice real atual dentro do array
+    let currentRealIdx = items.indexOf(initVal);
+    if (currentRealIdx < 0) currentRealIdx = 0;
 
-  function topToIdx(top, items) {
-    return clampIdx(Math.round(((COL_H / 2) - (CELL_H / 2) - top) / CELL_H), items);
-  }
+    // Índice absoluto no inner (começa no bloco do meio)
+    let absIdx = midBlock * len + currentRealIdx;
 
-  function renderInner(inner, items, selVal) {
-    inner.innerHTML = "";
-    items.forEach(val => {
-      const cell = document.createElement("div");
-      cell.className = "tp-cell";
-      cell.textContent = pad(val);
-      cell.dataset.val = String(val);
-      inner.appendChild(cell);
-    });
-    updateClasses(inner, items, selVal);
-  }
+    // Gera células
+    function build() {
+      inner.innerHTML = "";
+      for (let i = 0; i < totalCells; i++) {
+        const val = items[mod(i, len)];
+        const cell = document.createElement("div");
+        cell.className = "tp-cell";
+        cell.textContent = pad(val);
+        cell.dataset.abs = String(i);
+        inner.appendChild(cell);
+      }
+    }
 
-  function updateClasses(inner, items, selVal) {
-    const selIdx = items.indexOf(selVal);
-    inner.querySelectorAll(".tp-cell").forEach((cell, i) => {
-      const diff = Math.abs(i - selIdx);
-      cell.className = "tp-cell" +
-        (diff === 0 ? " sel" : diff === 1 ? " near1" : diff === 2 ? " near2" : "");
-    });
-  }
+    // Posição top para um absIdx
+    function topFor(idx) {
+      return (COL_H / 2) - (idx * CELL_H) - (CELL_H / 2);
+    }
 
-  function setTop(inner, idx, animate) {
-    if (!animate) inner.classList.add("dragging");
-    else inner.classList.remove("dragging");
-    inner.style.top = idxToTop(idx) + "px";
-  }
+    // Aplica top
+    function applyTop(idx, instant) {
+      if (instant) {
+        inner.classList.add("instant");
+        inner.style.top = topFor(idx) + "px";
+        inner.offsetHeight; // force reflow
+        inner.classList.remove("instant");
+      } else {
+        inner.classList.remove("instant");
+        inner.style.top = topFor(idx) + "px";
+      }
+    }
 
-  function bindCol(wrap, inner, items, getVal, setVal) {
-    let startY = 0, startTop = 0, isDragging = false;
-    let lastY = 0, velocity = 0, lastTime = 0;
+    // Atualiza classes visuais
+    function updateClasses(centerAbs) {
+      const cells = inner.querySelectorAll(".tp-cell");
+      cells.forEach((cell, i) => {
+        const diff = Math.abs(i - centerAbs);
+        cell.className = "tp-cell" +
+          (diff === 0 ? " sel" : diff === 1 ? " near1" : diff === 2 ? " near2" : "");
+      });
+    }
 
-    function currentIdx() { return clampIdx(items.indexOf(getVal()), items); }
+    // Snap para absIdx com recentramento se precisar
+    function snapTo(idx, instant) {
+      // Recentra se chegou perto das bordas
+      if (idx < len * 2) idx += len * Math.floor(REPEAT / 2);
+      if (idx > totalCells - len * 2) idx -= len * Math.floor(REPEAT / 2);
 
-    function snapToIdx(idx) {
-      idx = clampIdx(idx, items);
-      const val = items[idx];
-      setVal(val);
-      setTop(inner, idx, true);
-      updateClasses(inner, items, val);
+      absIdx = idx;
+      currentRealIdx = mod(absIdx, len);
+      const val = items[currentRealIdx];
+
+      applyTop(absIdx, instant);
+      updateClasses(absIdx);
+      onSelect(val);
       updatePreview();
     }
 
-    // MOUSE DRAG
-    wrap.addEventListener("mousedown", e => {
-      e.preventDefault();
-      startY = e.clientY;
-      lastY = startY;
+    build();
+    applyTop(absIdx, true);
+    updateClasses(absIdx);
+
+    /* ── DRAG ── */
+    let startY = 0, startTop = 0, isDragging = false;
+    let lastY = 0, velocity = 0, lastTime = 0;
+
+    function getWrap() { return inner.parentElement; }
+
+    function startDrag(clientY) {
+      startY = clientY;
+      lastY = clientY;
       lastTime = Date.now();
       velocity = 0;
-      startTop = parseFloat(inner.style.top) || idxToTop(currentIdx());
-      inner.classList.add("dragging");
+      startTop = parseFloat(inner.style.top) || topFor(absIdx);
       isDragging = true;
+    }
 
-      function onMove(ev) {
-        if (!isDragging) return;
-        const now = Date.now();
-        velocity = (ev.clientY - lastY) / Math.max(1, now - lastTime);
-        lastY = ev.clientY;
-        lastTime = now;
-        inner.style.top = (startTop + (ev.clientY - startY)) + "px";
-      }
+    function moveDrag(clientY) {
+      if (!isDragging) return;
+      const now = Date.now();
+      velocity = (clientY - lastY) / Math.max(1, now - lastTime);
+      lastY = clientY;
+      lastTime = now;
+      inner.classList.add("instant");
+      inner.style.top = (startTop + (clientY - startY)) + "px";
+    }
 
+    function endDrag() {
+      if (!isDragging) return;
+      isDragging = false;
+      inner.classList.remove("instant");
+      const top = parseFloat(inner.style.top) + velocity * 80;
+      const idx = Math.round((topFor(0) - top) / CELL_H);
+      snapTo(Math.max(0, Math.min(idx, totalCells - 1)), false);
+    }
+
+    // Touch
+    const wrap = inner.parentElement;
+    wrap.addEventListener("touchstart", e => {
+      startDrag(e.touches[0].clientY);
+    }, { passive: true });
+    wrap.addEventListener("touchmove", e => {
+      moveDrag(e.touches[0].clientY);
+      e.preventDefault();
+    }, { passive: false });
+    wrap.addEventListener("touchend", endDrag);
+
+    // Mouse
+    wrap.addEventListener("mousedown", e => {
+      e.preventDefault();
+      startDrag(e.clientY);
+      function onMove(ev) { moveDrag(ev.clientY); }
       function onUp() {
-        if (!isDragging) return;
-        isDragging = false;
-        inner.classList.remove("dragging");
-        const top = parseFloat(inner.style.top) + velocity * 60;
-        snapToIdx(topToIdx(top, items));
+        endDrag();
         document.removeEventListener("mousemove", onMove);
         document.removeEventListener("mouseup", onUp);
       }
-
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup", onUp);
     });
 
-    // MOUSE WHEEL — 1 tick = 1 item, sem delay
+    // Wheel
     wrap.addEventListener("wheel", e => {
       e.preventDefault();
       const dir = e.deltaY > 0 ? 1 : -1;
-      snapToIdx(clampIdx(currentIdx() + dir, items));
+      snapTo(absIdx + dir, false);
     }, { passive: false });
 
-    // CLIQUE NA CÉLULA
-    inner.addEventListener("click", e => {
-      const cell = e.target.closest(".tp-cell");
-      if (!cell) return;
-      const val = parseInt(cell.dataset.val);
-      if (!isNaN(val)) snapToIdx(items.indexOf(val));
-    });
+    // Retorna função para setar valor externamente
+    return function setValue(val) {
+      const idx = items.indexOf(val);
+      if (idx < 0) return;
+      const newAbs = midBlock * len + idx;
+      snapTo(newAbs, true);
+    };
   }
+
+  /* ── ABRIR ── */
+  let setHourFn = null;
+  let setMinFn  = null;
 
   function openTP(input) {
     currentInput = input;
     const raw = (input.value || "08:00").split(":");
     selHour = Math.min(23, Math.max(0, parseInt(raw[0]) || 8));
-    const rawMin = parseInt(raw[1]) || 0;
-    selMin = MINUTES.includes(rawMin)
-      ? rawMin
-      : MINUTES.reduce((a,b) => Math.abs(b-rawMin) < Math.abs(a-rawMin) ? b : a);
+    selMin  = Math.min(59, Math.max(0, parseInt(raw[1]) || 0));
 
     const hInner = document.getElementById("tpHours");
     const mInner = document.getElementById("tpMins");
-    const hWrap  = document.getElementById("tpWrapH");
-    const mWrap  = document.getElementById("tpWrapM");
 
-    renderInner(hInner, HOURS,   selHour);
-    renderInner(mInner, MINUTES, selMin);
+    hInner.innerHTML = "";
+    mInner.innerHTML = "";
+    hInner.style.transition = "none";
+    mInner.style.transition = "none";
 
-    setTop(hInner, HOURS.indexOf(selHour),   false);
-    setTop(mInner, MINUTES.indexOf(selMin),  false);
-
-    // Recria bind a cada abertura (evita listeners duplicados)
-    const hWrapNew = hWrap.cloneNode(false);
-    const mWrapNew = mWrap.cloneNode(false);
-    hWrapNew.appendChild(hInner);
-    mWrapNew.appendChild(mInner);
-    hWrap.replaceWith(hWrapNew);
-    mWrap.replaceWith(mWrapNew);
-
-    bindCol(hWrapNew, hInner, HOURS,   () => selHour, v => { selHour = v; });
-    bindCol(mWrapNew, mInner, MINUTES, () => selMin,  v => { selMin  = v; });
+    setHourFn = makeInfiniteCol(hInner, HOURS,   selHour, v => { selHour = v; });
+    setMinFn  = makeInfiniteCol(mInner, MINUTES, selMin,  v => { selMin  = v; });
 
     updatePreview();
     overlay.classList.add("open");
@@ -477,6 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("tpOk").addEventListener("click", confirmTP);
   overlay.addEventListener("click", e => { if (e.target === overlay) closeTP(); });
 
+  /* ── BIND NOS INPUTS ── */
   ["#agHora", "#pubHora", "#reagendarHora"].forEach(sel => {
     const el = document.querySelector(sel);
     if (!el) return;
