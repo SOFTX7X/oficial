@@ -1,3 +1,29 @@
+
+/* PATCH CLIQUES LANDING/AUTH — GARANTE BOTÕES ENTRAR/CRIAR CONTA */
+window.__authOpenMode = null;
+
+window.openAuth = function(mode) {
+  window.__authOpenMode = mode || 'login';
+
+  const overlay = document.getElementById('authOverlay');
+  if (overlay) overlay.classList.add('open');
+
+  document.body.style.overflow = 'hidden';
+
+  if (window.__authOpenMode === 'login') {
+    if (typeof window.showLogin === 'function') window.showLogin();
+  } else {
+    if (typeof window.showCadastro === 'function') window.showCadastro();
+  }
+};
+
+window.closeAuth = function() {
+  const overlay = document.getElementById('authOverlay');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+
 /* ═══════════════════════════════════════════════
    AGENDAPRO — app.js CORRIGIDO COMPLETO
 ═══════════════════════════════════════════════ */
@@ -340,10 +366,14 @@ function setView(view) {
 
 // ── AUTH ──
 function openAuth(mode) {
+  window.__authOpenMode = mode || 'login';
+
   const overlay = $('authOverlay');
   if (!overlay) return;
+
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+
   if (mode === 'login') showLogin();
   else showCadastro();
 }
@@ -357,69 +387,46 @@ function closeAuth() {
 function showLogin() {
   const fl = $('formLogin');
   const fc = $('formCadastro');
-  if (fl) fl.style.display = 'block';
-  if (fc) fc.style.display = 'none';
-}
 
-// ═══════════════════════════════════════════════
-// CORREÇÃO DEFINITIVA DOS STEPS
-// Esta é a ÚNICA função que controla visibilidade dos steps.
-// Esconde TUDO antes de mostrar o step correto.
-// Nunca chame display diretamente em outro lugar.
-// ═══════════════════════════════════════════════
-function _mostrarStep(n) {
-  var ids = ['step1', 'step2', 'step3'];
-  // Esconde TODOS sem exceção
-  for (var i = 0; i < ids.length; i++) {
-    var el = document.getElementById(ids[i]);
-    if (el) {
-      el.style.cssText = 'display:none !important; visibility:hidden !important;';
-    }
-  }
-  // Mostra apenas o correto
-  var alvo = document.getElementById('step' + n);
-  if (alvo) {
-    alvo.style.cssText = 'display:block !important; visibility:visible !important;';
-  }
-  // Atualiza indicadores de progresso
-  var dots = ['st1', 'st2', 'st3'];
-  for (var j = 0; j < dots.length; j++) {
-    var dot = document.getElementById(dots[j]);
-    if (!dot) continue;
-    if (j + 1 === n) dot.className = 'step-dot active';
-    else if (j + 1 < n) dot.className = 'step-dot done';
-    else dot.className = 'step-dot';
-  }
+  if (fc) fc.style.display = 'none';
+  if (fl) fl.style.display = 'block';
 }
 
 function showCadastro() {
-  var fl = $('formLogin');
-  var fc = $('formCadastro');
+  const fl = $('formLogin');
+  const fc = $('formCadastro');
 
-  // Esconde login
   if (fl) fl.style.display = 'none';
+  if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
 
-  // Mostra formulário de cadastro
-  if (fc) {
-    fc.style.cssText = 'display:block !important; visibility:visible !important;';
-  }
-
-  // Limpa campos
-  var campos = ['cadNome','cadEmail','cadSenha','empNome','empSlug','empWhatsapp',
-                'servNome','servPreco','servDuracao','profNome','profEsp'];
-  for (var i = 0; i < campos.length; i++) {
-    var el = document.getElementById(campos[i]);
-    if (el) {
-      el.value = '';
-      if (el.dataset) el.dataset.manual = '';
-    }
-  }
-
-  // Mostra step 1 e esconde todos os outros
-  _mostrarStep(1);
-
-  // Carrega categorias
+  if (typeof _mostrarStep === 'function') _mostrarStep(1);
   preencherSelectCategorias();
+}
+
+
+// ═══════════════════════════════════════════════
+// CORREÇÃO DEFINITIVA DOS STEPS DO CADASTRO
+// ═══════════════════════════════════════════════
+function _mostrarStep(n) {
+  ['step1', 'step2', 'step3'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.cssText = 'display:none !important; visibility:hidden !important;';
+      el.classList.remove('active');
+    }
+  });
+
+  const alvo = document.getElementById('step' + n);
+  if (alvo) {
+    alvo.style.cssText = 'display:block !important; visibility:visible !important;';
+    alvo.classList.add('active');
+  }
+
+  ['st1', 'st2', 'st3'].forEach(function(id, i) {
+    const dot = document.getElementById(id);
+    if (!dot) return;
+    dot.className = 'step-dot' + (i + 1 === n ? ' active' : (i + 1 < n ? ' done' : ''));
+  });
 }
 
 function setStep(n) {
@@ -431,24 +438,29 @@ function goStep1() {
 }
 
 function goStep2() {
-  var nome = ($('cadNome') ? $('cadNome').value : '').trim();
-  var email = ($('cadEmail') ? $('cadEmail').value : '').trim();
-  var senha = ($('cadSenha') ? $('cadSenha').value : '').trim();
+  const nome = $('cadNome')?.value?.trim();
+  const email = $('cadEmail')?.value?.trim();
+  const senha = $('cadSenha')?.value?.trim();
+
   if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
   if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
+
   preencherSelectCategorias();
   _mostrarStep(2);
 }
 
 function goStep3() {
-  var empNome = ($('empNome') ? $('empNome').value : '').trim();
-  var empSlug = ($('empSlug') ? $('empSlug').value : '').trim();
-  var empWhatsapp = ($('empWhatsapp') ? $('empWhatsapp').value : '').trim();
+  const empNome = $('empNome')?.value?.trim();
+  const empSlug = $('empSlug')?.value?.trim();
+  const empWhatsapp = $('empWhatsapp')?.value?.trim();
+
   if (!empNome || !empSlug || !empWhatsapp) {
     return toast('Preencha nome, link e WhatsApp.', 'err');
   }
+
   _mostrarStep(3);
 }
+
 
 function autoSlug() {
   const el = $('empSlug');
@@ -2034,3 +2046,32 @@ Object.assign(window, {
   setTimeout(forcePublicIsolation, 300);
   setTimeout(forcePublicIsolation, 1000);
 })();
+
+
+
+/* PATCH FINAL CLIQUES — REEXPÕE FUNÇÕES APÓS CARREGAR */
+Object.assign(window, {
+  openAuth,
+  closeAuth,
+  showLogin,
+  showCadastro,
+  goStep1,
+  goStep2,
+  goStep3,
+  loginComSenha,
+  finalizarCadastro
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  Object.assign(window, {
+    openAuth,
+    closeAuth,
+    showLogin,
+    showCadastro,
+    goStep1,
+    goStep2,
+    goStep3,
+    loginComSenha,
+    finalizarCadastro
+  });
+});
