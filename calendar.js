@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const HOURS   = Array.from({length: 24}, (_, i) => i);
     const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
     const CELL_H  = 48;
+    const COL_H   = 220; /* altura fixa do tp-body no CSS */
 
     let currentInput = null;
     let selHour = 8;
@@ -62,38 +63,31 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("tpPreview").textContent = `${pad(selHour)}:${pad(selMin)}`;
     }
 
+    /* spacer fixo baseado na altura conhecida do CSS */
+    const SPACER_H = COL_H / 2 - CELL_H / 2;
+
     function getValFromScroll(col, list) {
-        const half = col.clientHeight / 2;
-        const idx  = Math.round((col.scrollTop + half - CELL_H / 2) / CELL_H);
+        const idx = Math.round((col.scrollTop) / CELL_H);
         return list[Math.max(0, Math.min(list.length - 1, idx))];
     }
 
     function highlightCenter(col, list) {
-        const half   = col.clientHeight / 2;
-        const center = col.scrollTop + half;
+        const centerIdx = Math.round(col.scrollTop / CELL_H);
         col.querySelectorAll(".tp-cell").forEach((btn, i) => {
-            const btnCenter = CELL_H * i + CELL_H / 2;
-            btn.classList.toggle("active", Math.abs(center - btnCenter) < CELL_H / 2);
+            btn.classList.toggle("active", i === centerIdx);
         });
     }
 
     function scrollToIdx(col, idx, smooth) {
-        /* spacer = metade da coluna, então o centro do item fica no centro da coluna */
-        const half   = col.clientHeight / 2;
-        const target = idx * CELL_H + CELL_H / 2 - half;
-        col.scrollTo({ top: Math.max(0, target), behavior: smooth ? "smooth" : "instant" });
+        col.scrollTo({ top: idx * CELL_H, behavior: smooth ? "smooth" : "instant" });
     }
 
-    /* spacer dinâmico: calculado depois que o modal está visível */
     function buildCol(col, list, getVal) {
         col.innerHTML = "";
 
-        /* spacer = metade da altura real da coluna */
-        const spacerH = col.clientHeight / 2 - CELL_H / 2;
-
         const mkSpacer = () => {
             const d = document.createElement("div");
-            d.style.cssText = `height:${spacerH}px;flex-shrink:0;width:100%;`;
+            d.style.cssText = `height:${SPACER_H}px;flex-shrink:0;width:100%;pointer-events:none;`;
             return d;
         };
 
@@ -147,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => highlightCenter(colM, MINUTES), 300);
     });
 
-    /* ── PC wheel — recriado com AbortController a cada abertura ── */
+    /* ── PC wheel — AbortController a cada abertura ── */
     function attachWheel() {
         if (wheelAbort) wheelAbort.abort();
         wheelAbort = new AbortController();
@@ -170,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
             selHour = HOURS[next];
             updatePreview();
             scrollToIdx(colH, next, true);
-            setTimeout(() => highlightCenter(colH, HOURS), 300);
+            setTimeout(() => highlightCenter(colH, HOURS), 200);
         }, { passive: false, signal });
 
         colM.addEventListener("wheel", e => {
@@ -187,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
             selMin = MINUTES[next];
             updatePreview();
             scrollToIdx(colM, next, true);
-            setTimeout(() => highlightCenter(colM, MINUTES), 300);
+            setTimeout(() => highlightCenter(colM, MINUTES), 200);
         }, { passive: false, signal });
     }
 
@@ -215,13 +209,12 @@ document.addEventListener("DOMContentLoaded", () => {
         selMin  = MINUTES.includes(rm) ? rm : 0;
 
         blockBody();
+        buildCol(colH, HOURS,   () => selHour);
+        buildCol(colM, MINUTES, () => selMin);
+        updatePreview();
         overlay.classList.add("open");
 
-        /* aguarda o modal estar visível para pegar clientHeight correto */
         setTimeout(() => {
-            buildCol(colH, HOURS,   () => selHour);
-            buildCol(colM, MINUTES, () => selMin);
-            updatePreview();
             scrollToIdx(colH, HOURS.indexOf(selHour),  false);
             scrollToIdx(colM, MINUTES.indexOf(selMin), false);
             highlightCenter(colH, HOURS);
