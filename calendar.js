@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentInput = null;
     let selHour = 8;
     let selMin  = 0;
+    let wheelAbort = null;
 
     const overlay = document.createElement("div");
     overlay.className = "tp-overlay";
@@ -61,14 +62,12 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("tpPreview").textContent = `${pad(selHour)}:${pad(selMin)}`;
     }
 
-    /* Pega o valor central visível da coluna */
     function getValFromScroll(col, list) {
         const half = col.clientHeight / 2;
         const idx  = Math.round((col.scrollTop + half - CELL_H / 2) / CELL_H);
         return list[Math.max(0, Math.min(list.length - 1, idx))];
     }
 
-    /* Destaca a célula mais próxima do centro enquanto rola */
     function highlightCenter(col, list) {
         const half   = col.clientHeight / 2;
         const center = col.scrollTop + half;
@@ -79,19 +78,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function scrollToIdx(col, idx, smooth) {
+        /* spacer = metade da coluna, então o centro do item fica no centro da coluna */
         const half   = col.clientHeight / 2;
-        const target = Math.max(0, idx * CELL_H - half + CELL_H / 2);
-        col.scrollTo({ top: target, behavior: smooth ? "smooth" : "instant" });
+        const target = idx * CELL_H + CELL_H / 2 - half;
+        col.scrollTo({ top: Math.max(0, target), behavior: smooth ? "smooth" : "instant" });
     }
 
+    /* spacer dinâmico: calculado depois que o modal está visível */
     function buildCol(col, list, getVal) {
         col.innerHTML = "";
-        const spacer = () => {
+
+        /* spacer = metade da altura real da coluna */
+        const spacerH = col.clientHeight / 2 - CELL_H / 2;
+
+        const mkSpacer = () => {
             const d = document.createElement("div");
-            d.className = "tp-spacer";
+            d.style.cssText = `height:${spacerH}px;flex-shrink:0;width:100%;`;
             return d;
         };
-        col.appendChild(spacer());
+
+        col.appendChild(mkSpacer());
         list.forEach((v, i) => {
             const btn = document.createElement("button");
             btn.className   = "tp-cell" + (v === getVal() ? " active" : "");
@@ -99,20 +105,15 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.dataset.idx = i;
             col.appendChild(btn);
         });
-        col.appendChild(spacer());
+        col.appendChild(mkSpacer());
     }
 
-    /* ══════════════════════════════════════
-       LISTENERS — registrados UMA VEZ
-    ══════════════════════════════════════ */
-
-    /* MOBILE — scroll nativo totalmente livre, sem snap, sem trava */
+    /* ── Mobile — registrado UMA VEZ ── */
     colH.addEventListener("touchstart", e => e.stopPropagation(), { passive: true });
     colM.addEventListener("touchstart", e => e.stopPropagation(), { passive: true });
     colH.addEventListener("touchmove",  e => e.stopPropagation(), { passive: true });
     colM.addEventListener("touchmove",  e => e.stopPropagation(), { passive: true });
 
-    /* Atualiza highlight e preview enquanto rola */
     colH.addEventListener("scroll", () => {
         highlightCenter(colH, HOURS);
         selHour = getValFromScroll(colH, HOURS);
@@ -125,31 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updatePreview();
     }, { passive: true });
 
-    /* PC — wheel: 1 item por vez, sem acumular */
-    function setupWheel(col, list, getVal, setVal) {
-        let busy = false;
-        col.addEventListener("wheel", e => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (busy) return;
-            busy = true;
-            setTimeout(() => { busy = false; }, 150);
-
-            const dir  = e.deltaY > 0 ? 1 : -1;
-            const idx  = list.indexOf(getVal());
-            const next = Math.max(0, Math.min(list.length - 1, idx + dir));
-            if (list[next] === getVal()) return;
-            setVal(list[next]);
-            updatePreview();
-            scrollToIdx(col, next, true);
-            highlightCenter(col, list);
-        }, { passive: false });
-    }
-
-    setupWheel(colH, HOURS,   () => selHour, v => { selHour = v; });
-    setupWheel(colM, MINUTES, () => selMin,  v => { selMin  = v; });
-
-    /* Clique direto na célula */
+    /* ── Clique direto — registrado UMA VEZ ── */
     colH.addEventListener("click", e => {
         const btn = e.target.closest(".tp-cell");
         if (!btn) return;
@@ -157,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selHour = HOURS[idx];
         updatePreview();
         scrollToIdx(colH, idx, true);
-        highlightCenter(colH, HOURS);
+        setTimeout(() => highlightCenter(colH, HOURS), 300);
     });
 
     colM.addEventListener("click", e => {
@@ -167,10 +144,54 @@ document.addEventListener("DOMContentLoaded", () => {
         selMin = MINUTES[idx];
         updatePreview();
         scrollToIdx(colM, idx, true);
-        highlightCenter(colM, MINUTES);
+        setTimeout(() => highlightCenter(colM, MINUTES), 300);
     });
 
-    /* Bloqueia scroll do body no iOS */
+    /* ── PC wheel — recriado com AbortController a cada abertura ── */
+    function attachWheel() {
+        if (wheelAbort) wheelAbort.abort();
+        wheelAbort = new AbortController();
+        const signal = wheelAbort.signal;
+
+        let busyH = false;
+        let busyM = false;
+
+        colH.addEventListener("wheel", e => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (busyH) return;
+            busyH = true;
+            setTimeout(() => { busyH = false; }, 150);
+
+            const dir  = e.deltaY > 0 ? 1 : -1;
+            const idx  = HOURS.indexOf(selHour);
+            const next = Math.max(0, Math.min(HOURS.length - 1, idx + dir));
+            if (HOURS[next] === selHour) return;
+            selHour = HOURS[next];
+            updatePreview();
+            scrollToIdx(colH, next, true);
+            setTimeout(() => highlightCenter(colH, HOURS), 300);
+        }, { passive: false, signal });
+
+        colM.addEventListener("wheel", e => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (busyM) return;
+            busyM = true;
+            setTimeout(() => { busyM = false; }, 150);
+
+            const dir  = e.deltaY > 0 ? 1 : -1;
+            const idx  = MINUTES.indexOf(selMin);
+            const next = Math.max(0, Math.min(MINUTES.length - 1, idx + dir));
+            if (MINUTES[next] === selMin) return;
+            selMin = MINUTES[next];
+            updatePreview();
+            scrollToIdx(colM, next, true);
+            setTimeout(() => highlightCenter(colM, MINUTES), 300);
+        }, { passive: false, signal });
+    }
+
+    /* ── Body lock iOS ── */
     function blockBody() {
         document.body.style.overflow = "hidden";
         document.body.style.position = "fixed";
@@ -194,21 +215,25 @@ document.addEventListener("DOMContentLoaded", () => {
         selMin  = MINUTES.includes(rm) ? rm : 0;
 
         blockBody();
-        buildCol(colH, HOURS,   () => selHour);
-        buildCol(colM, MINUTES, () => selMin);
-        updatePreview();
         overlay.classList.add("open");
 
+        /* aguarda o modal estar visível para pegar clientHeight correto */
         setTimeout(() => {
+            buildCol(colH, HOURS,   () => selHour);
+            buildCol(colM, MINUTES, () => selMin);
+            updatePreview();
             scrollToIdx(colH, HOURS.indexOf(selHour),  false);
             scrollToIdx(colM, MINUTES.indexOf(selMin), false);
-        }, 60);
+            highlightCenter(colH, HOURS);
+            highlightCenter(colM, MINUTES);
+            attachWheel();
+        }, 80);
     }
 
     function closePicker() {
-        /* lê posição final do scroll antes de fechar */
         selHour = getValFromScroll(colH, HOURS);
         selMin  = getValFromScroll(colM, MINUTES);
+        if (wheelAbort) { wheelAbort.abort(); wheelAbort = null; }
         overlay.classList.remove("open");
         unblockBody();
         currentInput = null;
