@@ -272,7 +272,7 @@ span.flatpickr-weekday {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 6px;
+    padding: 0;
     gap: 0;
     scrollbar-width: none;
     overscroll-behavior: contain;
@@ -280,12 +280,6 @@ span.flatpickr-weekday {
 }
 
 .tp-col::-webkit-scrollbar { display: none; }
-
-.tp-spacer {
-    height: 86px;
-    flex-shrink: 0;
-    width: 100%;
-}
 
 .tp-divider {
     display: flex;
