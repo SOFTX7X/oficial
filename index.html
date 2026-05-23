@@ -7,8 +7,17 @@
 <link rel="stylesheet" href="style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="calendar.css">
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
+<script src="calendar.js"></script>
+
+</head> 
 <body>
 
 <div class="bg-noise"></div>
@@ -734,6 +743,26 @@ function closeMobileMenu(){
   if(overlay) overlay.classList.remove('open');
   if(drawer) drawer.classList.remove('open');
 }
+</script>
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  flatpickr("#data", {
+    locale: "pt",
+    dateFormat: "d/m/Y",
+    disableMobile: true
+  });
+
+  flatpickr("#hora", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true,
+    minuteIncrement: 5,
+    disableMobile: true
+  });
+
+});
 </script>
 </body>
 </html>
