@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>AgendaPro — Sistema de Agendamento</title>
 <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -572,15 +571,15 @@
         <div class="config-section">
           <div class="config-title"><div class="config-icon">🕐</div>Horários de funcionamento</div>
           <div class="schedule-grid">
-            <div class="sch-day"><div class="sch-day-name">Seg</div><input type="checkbox" data-day="seg" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Ter</div><input type="checkbox" data-day="ter" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Qua</div><input type="checkbox" data-day="qua" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Qui</div><input type="checkbox" data-day="qui" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Sex</div><input type="checkbox" data-day="sex" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Sáb</div><input type="checkbox" data-day="sab" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox" data-day="dom"></div>
+            <div class="sch-day"><div class="sch-day-name">Seg</div><input type="checkbox" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Ter</div><input type="checkbox" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Qua</div><input type="checkbox" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Qui</div><input type="checkbox" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Sex</div><input type="checkbox" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Sáb</div><input type="checkbox" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox"></div>
           </div>
-          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="salvarHorariosFuncionamento()">Salvar horários</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="toast('Horários salvos!','ok')">Salvar horários</button>
         </div>
         <div class="config-section">
           <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
