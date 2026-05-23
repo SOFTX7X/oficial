@@ -1,1 +1,31 @@
+.flatpickr-calendar{
+    background:#0b0b12 !important;
+    border:1px solid rgba(255,255,255,.08) !important;
+    box-shadow:0 0 30px rgba(0,0,0,.6) !important;
+    border-radius:18px !important;
+    color:#fff !important;
+}
 
+.flatpickr-day{
+    color:#fff !important;
+}
+
+.flatpickr-day.selected{
+    background:#6c63ff !important;
+    border-color:#6c63ff !important;
+}
+
+.flatpickr-time input{
+    color:#fff !important;
+    background:#0b0b12 !important;
+}
+
+.flatpickr-time{
+    background:#0b0b12 !important;
+}
+
+.flatpickr-months,
+.flatpickr-weekdays{
+    background:#0b0b12 !important;
+    color:#fff !important;
+}
