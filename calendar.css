@@ -196,7 +196,7 @@ span.flatpickr-weekday {
 }
 
 /* ═══════════════════════════════════════
-   TIME PICKER PREMIUM — GRADE
+   TIME PICKER PREMIUM
 ═══════════════════════════════════════ */
 
 .tp-overlay {
@@ -212,6 +212,8 @@ span.flatpickr-weekday {
     opacity: 0;
     pointer-events: none;
     transition: opacity .22s ease;
+    /* bloqueia scroll por baixo */
+    overscroll-behavior: contain;
 }
 
 .tp-overlay.open {
@@ -238,7 +240,6 @@ span.flatpickr-weekday {
     transform: scale(1) translateY(0);
 }
 
-/* Cabeçalho de colunas */
 .tp-top {
     display: flex;
     justify-content: space-around;
@@ -255,7 +256,6 @@ span.flatpickr-weekday {
     flex: 1;
 }
 
-/* Corpo com as duas colunas */
 .tp-body {
     display: flex;
     align-items: stretch;
@@ -273,10 +273,12 @@ span.flatpickr-weekday {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 6px;
+    padding: 6px;
     gap: 4px;
     scroll-behavior: smooth;
     scrollbar-width: none;
+    /* impede que o scroll do col vaze para a página */
+    overscroll-behavior: contain;
 }
 
 .tp-col::-webkit-scrollbar { display: none; }
@@ -290,7 +292,6 @@ span.flatpickr-weekday {
     color: rgba(255,255,255,.25);
     padding: 0 4px;
     flex-shrink: 0;
-    align-self: center;
 }
 
 .tp-cell {
@@ -303,7 +304,7 @@ span.flatpickr-weekday {
     font-size: 18px;
     font-weight: 600;
     cursor: pointer;
-    transition: background .15s, color .15s, transform .1s;
+    transition: background .15s, color .15s;
     font-family: inherit;
     flex-shrink: 0;
     letter-spacing: -.3px;
@@ -323,7 +324,6 @@ span.flatpickr-weekday {
     box-shadow: 0 4px 20px rgba(108,124,255,.25);
 }
 
-/* Preview do horário selecionado */
 .tp-preview-bar {
     display: flex;
     align-items: center;
@@ -355,7 +355,6 @@ span.flatpickr-weekday {
     text-transform: uppercase;
 }
 
-/* Botões */
 .tp-actions {
     display: flex;
     gap: 10px;
@@ -391,17 +390,13 @@ span.flatpickr-weekday {
     box-shadow: 0 4px 24px rgba(108,124,255,.40);
     transition: opacity .15s, transform .1s;
     font-family: inherit;
-    letter-spacing: .02em;
 }
 
 .tp-ok:hover { opacity: .9; transform: translateY(-1px); }
 .tp-ok:active { transform: translateY(0); }
 
-/* Mobile */
 @media (max-width: 480px) {
-    .tp-overlay {
-        align-items: flex-end;
-    }
+    .tp-overlay { align-items: flex-end; }
     .tp-modal {
         width: 100%;
         max-width: 100%;
@@ -409,10 +404,8 @@ span.flatpickr-weekday {
         padding: 20px 16px 32px;
         transform: translateY(100%);
     }
-    .tp-overlay.open .tp-modal {
-        transform: translateY(0);
-    }
-    .tp-cell { height: 42px; font-size: 17px; }
+    .tp-overlay.open .tp-modal { transform: translateY(0); }
+    .tp-cell { height: 44px; font-size: 17px; }
     .tp-cell.active { font-size: 21px; }
     .tp-preview-time { font-size: 32px; }
 }
