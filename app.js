@@ -1,4 +1,3 @@
-
 /* PATCH CLIQUES LANDING/AUTH — GARANTE BOTÕES ENTRAR/CRIAR CONTA */
 window.__authOpenMode = null;
 
