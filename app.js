@@ -1934,6 +1934,8 @@ async function confirmarAgendamentoPublico() {
   const pubTel = $('pubClienteTel')?.value?.trim();
   const pubData = $('pubData')?.value;
   const pubHora = $('pubHora')?.value;
+  const partesData = pubData.split('/');
+  const dataFormatada = `${partesData[2]}-${partesData[1]}-${partesData[0]}`;
 
   if (!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !pubNome || !pubTel || !pubData || !pubHora) {
     return toast('Preencha tudo para confirmar.', 'err');
@@ -1958,7 +1960,7 @@ async function confirmarAgendamentoPublico() {
       cliente_telefone: pubTel,
       servico_nome: state.pubServico.nome,
       profissional_nome: state.pubProfissional.nome,
-      data: pubData,
+      data: dataFormatada,
       hora: pubHora,
       status: 'Pendente',
       valor: Number(state.pubServico.preco || 0),
