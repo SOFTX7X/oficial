@@ -39,26 +39,27 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ══════════════════════════════════════
-     TIME PICKER — ESTILO RELÓGIO CELULAR
+     TIME PICKER — ESTILO CELULAR PREMIUM
+     Funciona igual no PC e no celular
   ══════════════════════════════════════ */
 
   const HOURS   = Array.from({length: 24}, (_, i) => i);
   const MINUTES = [0,5,10,15,20,25,30,35,40,45,50,55];
-  const CELL_H  = 52;
-  const VISIBLE = 5; // células visíveis (centro = selecionado)
+  const CELL_H  = 56;
+  const VISIBLE = 5;
   const COL_H   = CELL_H * VISIBLE;
 
   let currentInput = null;
   let selHour = 8;
   let selMin  = 0;
 
-  /* ── INJECT ESTILOS ── */
+  /* ── ESTILOS ── */
   const style = document.createElement("style");
   style.textContent = `
     .tp-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.80);
+      background: rgba(0,0,0,.82);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       z-index: 99999;
@@ -86,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
       transform: scale(.92) translateY(20px);
       transition: transform .32s cubic-bezier(.32,1,.6,1);
       box-sizing: border-box;
+      user-select: none;
     }
     .tp-overlay.open .tp-modal {
       transform: scale(1) translateY(0);
@@ -97,8 +99,22 @@ document.addEventListener("DOMContentLoaded", () => {
       letter-spacing: .12em;
       color: rgba(255,255,255,.35);
       text-transform: uppercase;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
+    .tp-labels {
+      display: flex;
+      margin-bottom: 6px;
+    }
+    .tp-lbl {
+      flex: 1;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: rgba(255,255,255,.30);
+      text-transform: uppercase;
+    }
+    .tp-lbl-div { width: 40px; }
     .tp-body {
       display: flex;
       align-items: center;
@@ -106,8 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
       gap: 4px;
       position: relative;
       margin-bottom: 20px;
+      height: ${COL_H}px;
     }
-    /* Faixa de seleção estilo iOS */
     .tp-body::before {
       content: '';
       position: absolute;
@@ -117,77 +133,77 @@ document.addEventListener("DOMContentLoaded", () => {
       height: ${CELL_H}px;
       background: rgba(108,124,255,.13);
       border-radius: 14px;
-      border-top: 1px solid rgba(108,124,255,.30);
-      border-bottom: 1px solid rgba(108,124,255,.30);
+      border-top: 1px solid rgba(108,124,255,.35);
+      border-bottom: 1px solid rgba(108,124,255,.35);
       pointer-events: none;
       z-index: 1;
     }
-    /* Fade superior e inferior estilo iOS */
     .tp-col-wrap {
       flex: 1;
       position: relative;
       height: ${COL_H}px;
+      overflow: hidden;
+      cursor: ns-resize;
     }
     .tp-col-wrap::before,
     .tp-col-wrap::after {
       content: '';
       position: absolute;
       left: 0; right: 0;
-      height: ${CELL_H * 1.8}px;
+      height: ${CELL_H * 1.6}px;
       z-index: 2;
       pointer-events: none;
     }
     .tp-col-wrap::before {
       top: 0;
-      background: linear-gradient(to bottom, #0e0e1c 10%, transparent 100%);
+      background: linear-gradient(to bottom, #0e0e1c 0%, rgba(14,14,28,0) 100%);
     }
     .tp-col-wrap::after {
       bottom: 0;
-      background: linear-gradient(to top, #0e0e1c 10%, transparent 100%);
+      background: linear-gradient(to top, #0e0e1c 0%, rgba(14,14,28,0) 100%);
     }
-    .tp-col {
-      height: ${COL_H}px;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      padding: 0;
+    .tp-col-inner {
+      position: absolute;
+      left: 0; right: 0;
+      top: 0;
+      transition: top .18s cubic-bezier(.25,.8,.25,1);
     }
-    .tp-col::-webkit-scrollbar { display: none; }
-    .tp-spacer {
-      height: ${CELL_H * 2}px;
+    .tp-col-inner.dragging {
+      transition: none;
     }
     .tp-cell {
       height: ${CELL_H}px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
+      font-size: 20px;
       font-weight: 700;
-      color: rgba(255,255,255,.20);
-      scroll-snap-align: center;
-      cursor: pointer;
-      transition: color .18s, transform .18s, font-size .18s;
-      user-select: none;
+      color: rgba(255,255,255,.18);
+      transition: color .15s, font-size .15s;
       position: relative;
       z-index: 3;
     }
+    .tp-cell.near1 {
+      color: rgba(255,255,255,.45);
+      font-size: 22px;
+    }
+    .tp-cell.near2 {
+      color: rgba(255,255,255,.28);
+      font-size: 20px;
+    }
     .tp-cell.sel {
       color: #fff;
-      font-size: 30px;
-    }
-    .tp-cell.near {
-      color: rgba(255,255,255,.55);
-      font-size: 24px;
+      font-size: 28px;
     }
     .tp-divider {
-      font-size: 32px;
+      font-size: 34px;
       font-weight: 800;
       color: rgba(108,124,255,.8);
       padding: 0 2px;
-      margin-bottom: 4px;
       position: relative;
       z-index: 5;
+      width: 40px;
+      text-align: center;
     }
     .tp-preview-bar {
       display: flex;
@@ -199,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
       margin-bottom: 16px;
     }
     .tp-preview-time {
-      font-size: 38px;
+      font-size: 40px;
       font-weight: 800;
       background: linear-gradient(135deg,#6c7cff,#9b59ff);
       -webkit-background-clip: text;
@@ -215,20 +231,6 @@ document.addEventListener("DOMContentLoaded", () => {
       text-transform: uppercase;
       letter-spacing: .1em;
     }
-    .tp-labels {
-      display: flex;
-      margin-bottom: 6px;
-    }
-    .tp-lbl {
-      flex: 1;
-      text-align: center;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: .1em;
-      color: rgba(255,255,255,.30);
-      text-transform: uppercase;
-    }
-    .tp-lbl-div { width: 36px; }
     .tp-actions {
       display: flex;
       gap: 10px;
@@ -277,12 +279,12 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="tp-lbl">Minuto</div>
       </div>
       <div class="tp-body">
-        <div class="tp-col-wrap">
-          <div class="tp-col" id="tpHours"></div>
+        <div class="tp-col-wrap" id="tpWrapH">
+          <div class="tp-col-inner" id="tpHours"></div>
         </div>
         <div class="tp-divider">:</div>
-        <div class="tp-col-wrap">
-          <div class="tp-col" id="tpMins"></div>
+        <div class="tp-col-wrap" id="tpWrapM">
+          <div class="tp-col-inner" id="tpMins"></div>
         </div>
       </div>
       <div class="tp-preview-bar">
@@ -297,83 +299,170 @@ document.addEventListener("DOMContentLoaded", () => {
   `;
   document.body.appendChild(overlay);
 
-  /* ── UTILITÁRIOS ── */
-  function pad(n) { return String(n).padStart(2, "0"); }
-
+  /* ── UTILS ── */
+  function pad(n) { return String(n).padStart(2,"0"); }
   function updatePreview() {
     const el = document.getElementById("tpPreview");
     if (el) el.textContent = pad(selHour) + ":" + pad(selMin);
   }
 
-  /* ── RENDER COLUNA ── */
-  function renderCol(colEl, items, selected) {
-    colEl.innerHTML = "";
-
-    // Espaçador topo
-    const top = document.createElement("div");
-    top.className = "tp-spacer";
-    colEl.appendChild(top);
-
-    items.forEach(val => {
+  /* ── RENDER ── */
+  function renderInner(inner, items, selVal) {
+    inner.innerHTML = "";
+    items.forEach((val, i) => {
       const cell = document.createElement("div");
-      const diff = Math.abs(items.indexOf(val) - items.indexOf(selected));
-      cell.className = "tp-cell" + (val === selected ? " sel" : diff === 1 ? " near" : "");
+      cell.className = "tp-cell";
       cell.textContent = pad(val);
-      cell.dataset.val = val;
-      colEl.appendChild(cell);
+      cell.dataset.val = String(val);
+      inner.appendChild(cell);
     });
-
-    // Espaçador base
-    const bot = document.createElement("div");
-    bot.className = "tp-spacer";
-    colEl.appendChild(bot);
+    updateClasses(inner, items, selVal);
   }
 
-  /* ── SCROLL PARA ITEM ── */
-  function scrollTo(colEl, val, items, smooth) {
-    const idx = items.indexOf(val);
-    if (idx < 0) return;
-    const top = CELL_H * idx; // spacer já ocupa 2*CELL_H mas scroll snap cuida
-    colEl.scrollTo({ top: CELL_H * idx, behavior: smooth ? "smooth" : "instant" });
-  }
-
-  /* ── ATUALIZA CLASSES AO ROLAR ── */
-  function updateCellClasses(colEl, items, currentVal) {
-    const cells = colEl.querySelectorAll(".tp-cell");
-    cells.forEach(cell => {
-      const v = parseInt(cell.dataset.val);
-      const diff = Math.abs(items.indexOf(v) - items.indexOf(currentVal));
-      cell.className = "tp-cell" + (v === currentVal ? " sel" : diff === 1 ? " near" : "");
+  function updateClasses(inner, items, selVal) {
+    const cells = inner.querySelectorAll(".tp-cell");
+    const selIdx = items.indexOf(selVal);
+    cells.forEach((cell, i) => {
+      const diff = Math.abs(i - selIdx);
+      cell.className = "tp-cell" +
+        (diff === 0 ? " sel" : diff === 1 ? " near1" : diff === 2 ? " near2" : "");
     });
   }
 
-  /* ── SNAP AO PARAR SCROLL ── */
-  function bindSnap(colEl, items, getCurrent, setCurrent) {
-    let timer;
-    colEl.addEventListener("scroll", () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        const idx = Math.round(colEl.scrollTop / CELL_H);
-        const clamped = Math.max(0, Math.min(idx, items.length - 1));
-        const val = items[clamped];
-        setCurrent(val);
-        updateCellClasses(colEl, items, val);
-        updatePreview();
-      }, 60);
+  /* ── POSICIONAR ── */
+  // O centro do col-wrap é onde fica o item selecionado
+  // top do inner = offset do centro - idx * CELL_H
+  function idxToTop(idx) {
+    return (COL_H / 2) - (idx * CELL_H) - (CELL_H / 2);
+  }
+
+  function setTop(inner, idx, animate) {
+    if (!animate) inner.classList.add("dragging");
+    else inner.classList.remove("dragging");
+    inner.style.top = idxToTop(idx) + "px";
+  }
+
+  function clampIdx(idx, items) {
+    return Math.max(0, Math.min(idx, items.length - 1));
+  }
+
+  /* ── BIND DRAG + WHEEL ── */
+  function bindCol(wrap, inner, items, getVal, setVal) {
+    let startY = 0;
+    let startTop = 0;
+    let isDragging = false;
+    let lastY = 0;
+    let velocity = 0;
+    let lastTime = 0;
+    let animFrame = null;
+
+    function currentIdx() {
+      return clampIdx(items.indexOf(getVal()), items);
+    }
+
+    function snapToIdx(idx) {
+      idx = clampIdx(idx, items);
+      const val = items[idx];
+      setVal(val);
+      setTop(inner, idx, true);
+      updateClasses(inner, items, val);
+      updatePreview();
+    }
+
+    function topToIdx(top) {
+      return Math.round(((COL_H / 2) - (CELL_H / 2) - top) / CELL_H);
+    }
+
+    // ── TOUCH ──
+    wrap.addEventListener("touchstart", e => {
+      cancelAnimationFrame(animFrame);
+      startY = e.touches[0].clientY;
+      lastY = startY;
+      lastTime = Date.now();
+      velocity = 0;
+      startTop = parseFloat(inner.style.top) || idxToTop(currentIdx());
+      inner.classList.add("dragging");
+      isDragging = true;
     }, { passive: true });
 
-    // Clique direto na célula
-    colEl.addEventListener("click", e => {
+    wrap.addEventListener("touchmove", e => {
+      if (!isDragging) return;
+      const y = e.touches[0].clientY;
+      const now = Date.now();
+      velocity = (y - lastY) / (now - lastTime + 1);
+      lastY = y; lastTime = now;
+      const dy = y - startY;
+      inner.style.top = (startTop + dy) + "px";
+    }, { passive: true });
+
+    wrap.addEventListener("touchend", () => {
+      if (!isDragging) return;
+      isDragging = false;
+      inner.classList.remove("dragging");
+      let top = parseFloat(inner.style.top);
+      // Aplica inércia
+      let inertia = velocity * 80;
+      top += inertia;
+      let idx = clampIdx(topToIdx(top), items);
+      snapToIdx(idx);
+    });
+
+    // ── MOUSE DRAG ──
+    wrap.addEventListener("mousedown", e => {
+      e.preventDefault();
+      cancelAnimationFrame(animFrame);
+      startY = e.clientY;
+      lastY = startY;
+      lastTime = Date.now();
+      velocity = 0;
+      startTop = parseFloat(inner.style.top) || idxToTop(currentIdx());
+      inner.classList.add("dragging");
+      isDragging = true;
+
+      function onMove(ev) {
+        if (!isDragging) return;
+        const now = Date.now();
+        velocity = (ev.clientY - lastY) / (now - lastTime + 1);
+        lastY = ev.clientY; lastTime = now;
+        const dy = ev.clientY - startY;
+        inner.style.top = (startTop + dy) + "px";
+      }
+
+      function onUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        inner.classList.remove("dragging");
+        let top = parseFloat(inner.style.top);
+        let inertia = velocity * 80;
+        top += inertia;
+        let idx = clampIdx(topToIdx(top), items);
+        snapToIdx(idx);
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+      }
+
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+
+    // ── MOUSE WHEEL ── (funciona perfeitamente no PC)
+    wrap.addEventListener("wheel", e => {
+      e.preventDefault();
+      cancelAnimationFrame(animFrame);
+      const dir = e.deltaY > 0 ? 1 : -1;
+      const newIdx = clampIdx(currentIdx() + dir, items);
+      snapToIdx(newIdx);
+    }, { passive: false });
+
+    // ── CLIQUE NA CÉLULA ──
+    inner.addEventListener("click", e => {
       const cell = e.target.closest(".tp-cell");
       if (!cell) return;
       const val = parseInt(cell.dataset.val);
       if (isNaN(val)) return;
-      setCurrent(val);
-      colEl.scrollTo({ top: CELL_H * items.indexOf(val), behavior: "smooth" });
-      setTimeout(() => {
-        updateCellClasses(colEl, items, val);
-        updatePreview();
-      }, 200);
+      const idx = items.indexOf(val);
+      if (idx < 0) return;
+      snapToIdx(idx);
     });
   }
 
@@ -383,28 +472,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const raw = (input.value || "08:00").split(":");
     selHour = Math.min(23, Math.max(0, parseInt(raw[0]) || 8));
     const rawMin = parseInt(raw[1]) || 0;
-    selMin = MINUTES.includes(rawMin) ? rawMin : MINUTES.reduce((a,b) => Math.abs(b-rawMin) < Math.abs(a-rawMin) ? b : a);
+    selMin = MINUTES.includes(rawMin)
+      ? rawMin
+      : MINUTES.reduce((a,b) => Math.abs(b-rawMin) < Math.abs(a-rawMin) ? b : a);
 
-    const hCol = document.getElementById("tpHours");
-    const mCol = document.getElementById("tpMins");
+    const hInner = document.getElementById("tpHours");
+    const mInner = document.getElementById("tpMins");
+    const hWrap  = document.getElementById("tpWrapH");
+    const mWrap  = document.getElementById("tpWrapM");
 
-    renderCol(hCol, HOURS, selHour);
-    renderCol(mCol, MINUTES, selMin);
+    renderInner(hInner, HOURS,   selHour);
+    renderInner(mInner, MINUTES, selMin);
 
-    bindSnap(hCol, HOURS,   () => selHour, v => { selHour = v; });
-    bindSnap(mCol, MINUTES, () => selMin,  v => { selMin  = v; });
+    // Posiciona SEM animação
+    setTop(hInner, HOURS.indexOf(selHour),   false);
+    setTop(mInner, MINUTES.indexOf(selMin),  false);
+
+    bindCol(hWrap, hInner, HOURS,   () => selHour, v => { selHour = v; });
+    bindCol(mWrap, mInner, MINUTES, () => selMin,  v => { selMin  = v; });
 
     updatePreview();
     overlay.classList.add("open");
     document.body.style.overflow = "hidden";
-
-    setTimeout(() => {
-      hCol.scrollTo({ top: CELL_H * HOURS.indexOf(selHour),   behavior: "instant" });
-      mCol.scrollTo({ top: CELL_H * MINUTES.indexOf(selMin),  behavior: "instant" });
-    }, 30);
   }
 
-  /* ── FECHAR / CONFIRMAR ── */
   function closeTP() {
     overlay.classList.remove("open");
     document.body.style.overflow = "";
