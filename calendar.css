@@ -17,7 +17,6 @@
     box-sizing: border-box !important;
 }
 
-/* ── Cabeçalho ── */
 .flatpickr-months {
     display: flex !important;
     align-items: center !important;
@@ -62,7 +61,6 @@
     font-size: 16px !important;
 }
 
-/* ── Setas ── */
 .flatpickr-prev-month,
 .flatpickr-next-month {
     padding: 8px 10px !important;
@@ -93,11 +91,8 @@
 }
 
 .flatpickr-prev-month:hover svg,
-.flatpickr-next-month:hover svg {
-    fill: #7f8cff !important;
-}
+.flatpickr-next-month:hover svg { fill: #7f8cff !important; }
 
-/* ── Dias da semana ── */
 .flatpickr-weekdays {
     background: transparent !important;
     margin-bottom: 6px !important;
@@ -121,16 +116,10 @@ span.flatpickr-weekday {
     text-align: center !important;
 }
 
-/* ── Grade de dias ── */
 .flatpickr-innerContainer,
-.flatpickr-rContainer {
-    width: 100% !important;
-}
+.flatpickr-rContainer { width: 100% !important; }
 
-.flatpickr-days {
-    width: 100% !important;
-    border: none !important;
-}
+.flatpickr-days { width: 100% !important; border: none !important; }
 
 .dayContainer {
     width: 100% !important;
@@ -183,109 +172,13 @@ span.flatpickr-weekday {
 .flatpickr-day.today.selected { color: #fff !important; }
 
 .flatpickr-day.prevMonthDay,
-.flatpickr-day.nextMonthDay {
-    color: rgba(255, 255, 255, .15) !important;
-}
+.flatpickr-day.nextMonthDay { color: rgba(255, 255, 255, .15) !important; }
 
 .flatpickr-day.flatpickr-disabled {
     color: rgba(255, 255, 255, .12) !important;
     cursor: not-allowed !important;
 }
 
-/* ── Horário no calendário ── */
-.flatpickr-time {
-    background: rgba(108, 124, 255, .06) !important;
-    border-top: 1px solid rgba(108, 124, 255, .15) !important;
-    border-radius: 14px !important;
-    margin-top: 14px !important;
-    height: 56px !important;
-    max-height: 56px !important;
-}
-
-.flatpickr-time input {
-    background: transparent !important;
-    color: #fff !important;
-    font-size: 26px !important;
-    font-weight: 700 !important;
-    border-radius: 10px !important;
-    transition: background .15s !important;
-}
-
-.flatpickr-time input:hover,
-.flatpickr-time input:focus {
-    background: rgba(108, 124, 255, .18) !important;
-}
-
-.flatpickr-time .flatpickr-time-separator {
-    color: rgba(255, 255, 255, .40) !important;
-    font-size: 22px !important;
-}
-
-.flatpickr-time .flatpickr-am-pm {
-    color: rgba(255, 255, 255, .60) !important;
-    font-weight: 700 !important;
-    border-radius: 10px !important;
-}
-
-.numInputWrapper span {
-    border: none !important;
-    opacity: 0 !important;
-    transition: opacity .15s !important;
-}
-
-.numInputWrapper:hover span { opacity: .5 !important; }
-.numInput { background: transparent !important; color: #fff !important; }
-
-/* ── Popup de horário standalone ── */
-.flatpickr-calendar.hasTime.noCalendar {
-    width: 240px !important;
-    border-radius: 20px !important;
-    padding: 16px !important;
-}
-
-.flatpickr-calendar.hasTime.noCalendar .flatpickr-time {
-    border-top: none !important;
-    border-radius: 16px !important;
-    background: rgba(108, 124, 255, .08) !important;
-    height: 72px !important;
-    max-height: 72px !important;
-    margin-top: 0 !important;
-}
-
-.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input {
-    font-size: 34px !important;
-    font-weight: 700 !important;
-    color: #fff !important;
-    background: transparent !important;
-    border-radius: 12px !important;
-}
-
-.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:hover,
-.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:focus {
-    background: rgba(108, 124, 255, .20) !important;
-}
-
-.flatpickr-calendar.hasTime.noCalendar .flatpickr-time-separator {
-    color: rgba(255, 255, 255, .40) !important;
-    font-size: 30px !important;
-    font-weight: 300 !important;
-}
-
-.flatpickr-calendar.hasTime.noCalendar .numInputWrapper span {
-    opacity: 0 !important;
-    transition: opacity .15s !important;
-}
-
-.flatpickr-calendar.hasTime.noCalendar .numInputWrapper:hover span {
-    opacity: .6 !important;
-}
-
-.flatpickr-calendar.hasTime.noCalendar .numInputWrapper span:hover {
-    opacity: 1 !important;
-    background: rgba(108, 124, 255, .25) !important;
-}
-
-/* ── Mobile ── */
 @media (max-width: 480px) {
     .flatpickr-calendar {
         width: calc(100vw - 24px) !important;
@@ -302,20 +195,197 @@ span.flatpickr-weekday {
         font-size: 12px !important;
         border-radius: 10px !important;
     }
-
-    .flatpickr-time {
-        height: 50px !important;
-        max-height: 50px !important;
-    }
-
-    .flatpickr-time input { font-size: 22px !important; }
-
-    .flatpickr-calendar.hasTime.noCalendar {
-        width: calc(100vw - 24px) !important;
-        max-width: 240px !important;
-    }
-
-    .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input {
-        font-size: 28px !important;
-    }
 }
+
+/* ═══════════════════════════════════════
+   TIME PICKER PREMIUM — CUSTOM
+═══════════════════════════════════════ */
+
+.tp-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 99998;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+}
+
+.tp-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.tp-sheet {
+    background: #0d0d1a;
+    border: 1px solid rgba(108, 124, 255, .25);
+    border-radius: 28px 28px 0 0;
+    padding: 12px 24px 40px;
+    width: 100%;
+    max-width: 480px;
+    transform: translateY(100%);
+    transition: transform .35s cubic-bezier(.32,1,.6,1);
+    box-shadow: 0 -8px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(108,124,255,.08);
+}
+
+.tp-overlay.open .tp-sheet {
+    transform: translateY(0);
+}
+
+.tp-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(255,255,255,.15);
+    border-radius: 99px;
+    margin: 0 auto 20px;
+}
+
+.tp-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,.4);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.tp-drums {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    height: 220px;
+    position: relative;
+}
+
+.tp-sep {
+    font-size: 36px;
+    font-weight: 700;
+    color: rgba(255,255,255,.5);
+    margin: 0 4px;
+    user-select: none;
+    margin-bottom: 4px;
+}
+
+.tp-drum-wrap {
+    position: relative;
+    width: 110px;
+    height: 220px;
+    overflow: hidden;
+}
+
+/* top & bottom fade */
+.tp-drum-wrap::before,
+.tp-drum-wrap::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 72px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.tp-drum-wrap::before {
+    top: 0;
+    background: linear-gradient(to bottom, #0d0d1a 0%, transparent 100%);
+}
+
+.tp-drum-wrap::after {
+    bottom: 0;
+    background: linear-gradient(to top, #0d0d1a 0%, transparent 100%);
+}
+
+/* selected highlight */
+.tp-drum-wrap .tp-selector {
+    position: absolute;
+    left: 6px; right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 52px;
+    background: rgba(108, 124, 255, .15);
+    border: 1px solid rgba(108, 124, 255, .35);
+    border-radius: 16px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.tp-drum {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    position: relative;
+    z-index: 3;
+}
+
+.tp-drum:active { cursor: grabbing; }
+
+.tp-item {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: rgba(255,255,255,.25);
+    transition: color .15s, font-size .15s;
+    width: 110px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    letter-spacing: -.5px;
+}
+
+.tp-item.active {
+    color: #fff;
+    font-size: 36px;
+}
+
+.tp-item.near {
+    color: rgba(255,255,255,.55);
+    font-size: 28px;
+}
+
+.tp-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.tp-btn-cancel {
+    flex: 1;
+    height: 52px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.05);
+    color: rgba(255,255,255,.6);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.tp-btn-cancel:hover { background: rgba(255,255,255,.10); }
+
+.tp-btn-ok {
+    flex: 2;
+    height: 52px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, #6c7cff, #9b59ff);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(108,124,255,.4);
+    transition: opacity .15s;
+}
+
+.tp-btn-ok:hover { opacity: .9; }
