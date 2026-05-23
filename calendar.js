@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ══════════════════════════════════════
      TIME PICKER — RODINHA INFINITA
-     Igual relógio de alarme Android
+     Igual alarme Android — celular e PC
   ══════════════════════════════════════ */
 
   const HOURS   = Array.from({length: 24}, (_, i) => i);
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const CELL_H  = 56;
   const VISIBLE = 5;
   const COL_H   = CELL_H * VISIBLE;
-  const REPEAT  = 20; // quantas vezes repete para criar ilusão de infinito
+  const REPEAT  = 40;
 
   let currentInput = null;
   let selHour = 8;
@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       transition: transform .32s cubic-bezier(.32,1,.6,1);
       box-sizing: border-box;
       user-select: none;
+      -webkit-user-select: none;
     }
     .tp-overlay.open .tp-modal {
       transform: scale(1) translateY(0);
@@ -145,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       height: ${COL_H}px;
       overflow: hidden;
       cursor: ns-resize;
+      touch-action: none;
     }
     .tp-col-wrap::before,
     .tp-col-wrap::after {
@@ -166,10 +168,8 @@ document.addEventListener("DOMContentLoaded", () => {
     .tp-col-inner {
       position: absolute;
       left: 0; right: 0;
-      top: 0;
-      transition: top .2s cubic-bezier(.25,.8,.25,1);
+      will-change: top;
     }
-    .tp-col-inner.instant { transition: none; }
     .tp-cell {
       height: ${CELL_H}px;
       display: flex;
@@ -178,7 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
       font-size: 20px;
       font-weight: 700;
       color: rgba(255,255,255,.18);
-      transition: color .12s, font-size .12s;
       position: relative;
       z-index: 3;
     }
@@ -280,177 +279,173 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function mod(n, m) { return ((n % m) + m) % m; }
 
-  /* ══════════════════════════════════════
-     COLUNA INFINITA
-  ══════════════════════════════════════ */
-  function makeInfiniteCol(inner, items, initVal, onSelect) {
+  /* ── COLUNA INFINITA COM INÉRCIA ── */
+  function makeCol(wrap, inner, items, initVal, onSelect) {
     const len = items.length;
-    const totalCells = len * REPEAT;
-    const midBlock = Math.floor(REPEAT / 2);
+    const total = len * REPEAT;
+    const mid = Math.floor(REPEAT / 2);
+    let realIdx = Math.max(0, items.indexOf(initVal));
+    let absIdx  = mid * len + realIdx;
 
-    // Índice real atual dentro do array
-    let currentRealIdx = items.indexOf(initVal);
-    if (currentRealIdx < 0) currentRealIdx = 0;
-
-    // Índice absoluto no inner (começa no bloco do meio)
-    let absIdx = midBlock * len + currentRealIdx;
-
-    // Gera células
-    function build() {
-      inner.innerHTML = "";
-      for (let i = 0; i < totalCells; i++) {
-        const val = items[mod(i, len)];
-        const cell = document.createElement("div");
-        cell.className = "tp-cell";
-        cell.textContent = pad(val);
-        cell.dataset.abs = String(i);
-        inner.appendChild(cell);
-      }
+    /* build */
+    inner.innerHTML = "";
+    for (let i = 0; i < total; i++) {
+      const cell = document.createElement("div");
+      cell.className = "tp-cell";
+      cell.textContent = pad(items[mod(i, len)]);
+      inner.appendChild(cell);
     }
 
-    // Posição top para um absIdx
     function topFor(idx) {
       return (COL_H / 2) - (idx * CELL_H) - (CELL_H / 2);
     }
 
-    // Aplica top
-    function applyTop(idx, instant) {
-      if (instant) {
-        inner.classList.add("instant");
-        inner.style.top = topFor(idx) + "px";
-        inner.offsetHeight; // force reflow
-        inner.classList.remove("instant");
+    function setPos(idx, animated) {
+      const t = topFor(idx);
+      if (animated) {
+        inner.style.transition = "top .22s cubic-bezier(.25,.8,.25,1)";
       } else {
-        inner.classList.remove("instant");
-        inner.style.top = topFor(idx) + "px";
+        inner.style.transition = "none";
       }
+      inner.style.top = t + "px";
     }
 
-    // Atualiza classes visuais
-    function updateClasses(centerAbs) {
+    function refreshClasses(centerAbs) {
       const cells = inner.querySelectorAll(".tp-cell");
-      cells.forEach((cell, i) => {
-        const diff = Math.abs(i - centerAbs);
-        cell.className = "tp-cell" +
-          (diff === 0 ? " sel" : diff === 1 ? " near1" : diff === 2 ? " near2" : "");
+      cells.forEach((c, i) => {
+        const d = Math.abs(i - centerAbs);
+        c.className = "tp-cell" +
+          (d === 0 ? " sel" : d === 1 ? " near1" : d === 2 ? " near2" : "");
       });
     }
 
-    // Snap para absIdx com recentramento se precisar
-    function snapTo(idx, instant) {
-      // Recentra se chegou perto das bordas
-      if (idx < len * 2) idx += len * Math.floor(REPEAT / 2);
-      if (idx > totalCells - len * 2) idx -= len * Math.floor(REPEAT / 2);
-
-      absIdx = idx;
-      currentRealIdx = mod(absIdx, len);
-      const val = items[currentRealIdx];
-
-      applyTop(absIdx, instant);
-      updateClasses(absIdx);
-      onSelect(val);
+    function snapTo(idx, animated) {
+      // recentra se perto das bordas
+      if (idx < len * 3)               idx += len * Math.floor(REPEAT / 2);
+      if (idx > total - len * 3)       idx -= len * Math.floor(REPEAT / 2);
+      absIdx   = Math.max(0, Math.min(idx, total - 1));
+      realIdx  = mod(absIdx, len);
+      setPos(absIdx, animated);
+      refreshClasses(absIdx);
+      onSelect(items[realIdx]);
       updatePreview();
     }
 
-    build();
-    applyTop(absIdx, true);
-    updateClasses(absIdx);
+    /* posição inicial sem animação */
+    setPos(absIdx, false);
+    refreshClasses(absIdx);
 
-    /* ── DRAG ── */
-    let startY = 0, startTop = 0, isDragging = false;
-    let lastY = 0, velocity = 0, lastTime = 0;
+    /* ── DRAG COM INÉRCIA (touch + mouse) ── */
+    let dragging = false;
+    let startY = 0, startTop = 0;
+    let lastY = 0, lastT = 0, vel = 0;
+    let rafId = null;
 
-    function getWrap() { return inner.parentElement; }
-
-    function startDrag(clientY) {
-      startY = clientY;
-      lastY = clientY;
-      lastTime = Date.now();
-      velocity = 0;
-      startTop = parseFloat(inner.style.top) || topFor(absIdx);
-      isDragging = true;
+    function onStart(y) {
+      cancelAnimationFrame(rafId);
+      dragging  = true;
+      startY    = y;
+      lastY     = y;
+      lastT     = Date.now();
+      vel       = 0;
+      startTop  = parseFloat(inner.style.top) || topFor(absIdx);
+      inner.style.transition = "none";
     }
 
-    function moveDrag(clientY) {
-      if (!isDragging) return;
+    function onMove(y) {
+      if (!dragging) return;
       const now = Date.now();
-      velocity = (clientY - lastY) / Math.max(1, now - lastTime);
-      lastY = clientY;
-      lastTime = now;
-      inner.classList.add("instant");
-      inner.style.top = (startTop + (clientY - startY)) + "px";
+      const dt  = Math.max(1, now - lastT);
+      vel   = (y - lastY) / dt;
+      lastY = y;
+      lastT = now;
+      inner.style.top = (startTop + (y - startY)) + "px";
     }
 
-    function endDrag() {
-      if (!isDragging) return;
-      isDragging = false;
-      inner.classList.remove("instant");
-      const top = parseFloat(inner.style.top) + velocity * 80;
-      const idx = Math.round((topFor(0) - top) / CELL_H);
-      snapTo(Math.max(0, Math.min(idx, totalCells - 1)), false);
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+
+      /* inércia */
+      let curTop = parseFloat(inner.style.top);
+      let v = vel * 1000; // px/s
+
+      function glide() {
+        v *= 0.92;
+        curTop += v / 60;
+        inner.style.top = curTop + "px";
+        if (Math.abs(v) > 2) {
+          rafId = requestAnimationFrame(glide);
+        } else {
+          /* snap ao item mais próximo */
+          const idx = Math.round((topFor(0) - curTop) / CELL_H);
+          snapTo(idx, true);
+        }
+      }
+      rafId = requestAnimationFrame(glide);
     }
 
-    // Touch
-    const wrap = inner.parentElement;
+    /* touch */
     wrap.addEventListener("touchstart", e => {
-      startDrag(e.touches[0].clientY);
+      onStart(e.touches[0].clientY);
     }, { passive: true });
-    wrap.addEventListener("touchmove", e => {
-      moveDrag(e.touches[0].clientY);
-      e.preventDefault();
-    }, { passive: false });
-    wrap.addEventListener("touchend", endDrag);
 
-    // Mouse
+    wrap.addEventListener("touchmove", e => {
+      e.preventDefault();
+      onMove(e.touches[0].clientY);
+    }, { passive: false });
+
+    wrap.addEventListener("touchend", onEnd, { passive: true });
+    wrap.addEventListener("touchcancel", onEnd, { passive: true });
+
+    /* mouse */
     wrap.addEventListener("mousedown", e => {
       e.preventDefault();
-      startDrag(e.clientY);
-      function onMove(ev) { moveDrag(ev.clientY); }
-      function onUp() {
-        endDrag();
-        document.removeEventListener("mousemove", onMove);
-        document.removeEventListener("mouseup", onUp);
-      }
-      document.addEventListener("mousemove", onMove);
-      document.addEventListener("mouseup", onUp);
+      onStart(e.clientY);
+      const mv = ev => onMove(ev.clientY);
+      const up = () => {
+        onEnd();
+        document.removeEventListener("mousemove", mv);
+        document.removeEventListener("mouseup", up);
+      };
+      document.addEventListener("mousemove", mv);
+      document.addEventListener("mouseup", up);
     });
 
-    // Wheel
+    /* wheel */
     wrap.addEventListener("wheel", e => {
       e.preventDefault();
-      const dir = e.deltaY > 0 ? 1 : -1;
-      snapTo(absIdx + dir, false);
+      cancelAnimationFrame(rafId);
+      snapTo(absIdx + (e.deltaY > 0 ? 1 : -1), true);
     }, { passive: false });
-
-    // Retorna função para setar valor externamente
-    return function setValue(val) {
-      const idx = items.indexOf(val);
-      if (idx < 0) return;
-      const newAbs = midBlock * len + idx;
-      snapTo(newAbs, true);
-    };
   }
 
   /* ── ABRIR ── */
-  let setHourFn = null;
-  let setMinFn  = null;
-
   function openTP(input) {
     currentInput = input;
     const raw = (input.value || "08:00").split(":");
     selHour = Math.min(23, Math.max(0, parseInt(raw[0]) || 8));
     selMin  = Math.min(59, Math.max(0, parseInt(raw[1]) || 0));
 
+    const hWrap  = document.getElementById("tpWrapH");
+    const mWrap  = document.getElementById("tpWrapM");
     const hInner = document.getElementById("tpHours");
     const mInner = document.getElementById("tpMins");
 
-    hInner.innerHTML = "";
-    mInner.innerHTML = "";
-    hInner.style.transition = "none";
-    mInner.style.transition = "none";
+    /* recria wraps para limpar listeners antigos */
+    const hNew = hWrap.cloneNode(false);
+    const mNew = mWrap.cloneNode(false);
+    const hIn  = document.createElement("div");
+    hIn.className = "tp-col-inner"; hIn.id = "tpHours";
+    const mIn  = document.createElement("div");
+    mIn.className = "tp-col-inner"; mIn.id = "tpMins";
+    hNew.appendChild(hIn);
+    mNew.appendChild(mIn);
+    hWrap.replaceWith(hNew);
+    mWrap.replaceWith(mNew);
 
-    setHourFn = makeInfiniteCol(hInner, HOURS,   selHour, v => { selHour = v; });
-    setMinFn  = makeInfiniteCol(mInner, MINUTES, selMin,  v => { selMin  = v; });
+    makeCol(hNew, hIn, HOURS,   selHour, v => { selHour = v; });
+    makeCol(mNew, mIn, MINUTES, selMin,  v => { selMin  = v; });
 
     updatePreview();
     overlay.classList.add("open");
@@ -479,6 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ["#agHora", "#pubHora", "#reagendarHora"].forEach(sel => {
     const el = document.querySelector(sel);
     if (!el) return;
+    el.type = "text";
     el.readOnly = true;
     el.style.cursor = "pointer";
     el.addEventListener("click", () => openTP(el));
