@@ -2182,3 +2182,71 @@ Object.assign(window, {
   salvarHorariosFuncionamento,
   carregarHorariosFuncionamento
 });
+
+
+/* ═══════════════════════════════════════════════
+   FORCE PATCH PICKERS
+═══════════════════════════════════════════════ */
+function forcePremiumPickers() {
+  if (typeof flatpickr !== 'function') return;
+
+  document.querySelectorAll('input').forEach(function(el) {
+
+    const ph = (el.placeholder || '').toLowerCase();
+    const id = (el.id || '').toLowerCase();
+    const cls = (el.className || '').toLowerCase();
+    const tp = (el.type || '').toLowerCase();
+
+    const isDate =
+      tp === 'date' ||
+      ph.includes('data') ||
+      id.includes('data') ||
+      cls.includes('data');
+
+    const isTime =
+      tp === 'time' ||
+      ph.includes('hora') ||
+      id.includes('hora') ||
+      cls.includes('hora');
+
+    if (isDate && !el.dataset.fpDate) {
+      el.dataset.fpDate = '1';
+      el.type = 'text';
+
+      flatpickr(el, {
+        locale: 'pt',
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        minDate: 'today',
+        disableMobile: true,
+        appendTo: document.body
+      });
+    }
+
+    if (isTime && !el.dataset.fpTime) {
+      el.dataset.fpTime = '1';
+      el.type = 'text';
+
+      flatpickr(el, {
+        locale: 'pt',
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: 'H:i',
+        time_24hr: true,
+        minuteIncrement: 5,
+        disableMobile: true,
+        appendTo: document.body
+      });
+    }
+  });
+}
+
+window.addEventListener('load', function() {
+  setTimeout(forcePremiumPickers, 500);
+  setTimeout(forcePremiumPickers, 1500);
+});
+
+document.addEventListener('click', function() {
+  setTimeout(forcePremiumPickers, 100);
+});
