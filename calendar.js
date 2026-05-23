@@ -27,9 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let selHour = 8;
     let selMin  = 0;
 
-    const isMobile = () => window.matchMedia("(pointer: coarse)").matches;
-
-    /* ── Cria overlay ── */
+    /* ── Overlay ── */
     const overlay = document.createElement("div");
     overlay.className = "tp-overlay";
     overlay.innerHTML = `
@@ -55,68 +53,85 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.body.appendChild(overlay);
 
+    const colH = document.getElementById("tpHours");
+    const colM = document.getElementById("tpMins");
+
     function pad(n) { return String(n).padStart(2, "0"); }
 
     function updatePreview() {
         document.getElementById("tpPreview").textContent = `${pad(selHour)}:${pad(selMin)}`;
     }
 
-    /* ── Calcula índice pelo scrollTop ── */
-    function idxFromScroll(col) {
-        const half = col.clientHeight / 2;
-        return Math.round((col.scrollTop + half - CELL_H / 2) / CELL_H);
-    }
-
-    /* ── Snapa suavemente para índice ── */
     function snapTo(col, idx, smooth) {
         const half   = col.clientHeight / 2;
         const target = Math.max(0, idx * CELL_H - half + CELL_H / 2);
         col.scrollTo({ top: target, behavior: smooth ? "smooth" : "instant" });
     }
 
-    /* ── Constrói coluna com padding para centralizar ── */
-    function buildCol(colId, list, getVal) {
-        const col = document.getElementById(colId);
-        col.innerHTML = "";
+    function idxFromScroll(col, list) {
+        const half = col.clientHeight / 2;
+        const raw  = Math.round((col.scrollTop + half - CELL_H / 2) / CELL_H);
+        return Math.max(0, Math.min(list.length - 1, raw));
+    }
 
+    function refreshHighlight(col, list, getVal) {
+        col.querySelectorAll(".tp-cell").forEach((btn, i) => {
+            btn.classList.toggle("active", list[i] === getVal());
+        });
+    }
+
+    function buildCol(col, list, getVal) {
+        col.innerHTML = "";
         const spacer = () => {
             const d = document.createElement("div");
             d.className = "tp-spacer";
             return d;
         };
         col.appendChild(spacer());
-
         list.forEach((v, i) => {
             const btn = document.createElement("button");
-            btn.className = "tp-cell" + (v === getVal() ? " active" : "");
+            btn.className   = "tp-cell" + (v === getVal() ? " active" : "");
             btn.textContent = pad(v);
             btn.dataset.idx = i;
             col.appendChild(btn);
         });
-
         col.appendChild(spacer());
-        return col;
-    }
-
-    function refreshHighlight(colId, list, getVal) {
-        const col = document.getElementById(colId);
-        col.querySelectorAll(".tp-cell").forEach((btn, i) => {
-            btn.classList.toggle("active", list[i] === getVal());
-        });
     }
 
     /* ══════════════════════════════════════
-       MOBILE — scroll nativo puro com snap
+       LISTENERS — adicionados UMA VEZ só
     ══════════════════════════════════════ */
-    function setupMobile(colId, list, getVal, setVal) {
-        const col = document.getElementById(colId);
+
+    /* — PC: wheel — */
+    function setupWheel(col, list, getVal, setVal) {
+        let busy = false;
+        col.addEventListener("wheel", e => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (busy) return;
+            busy = true;
+            setTimeout(() => { busy = false; }, 150);
+
+            const dir  = e.deltaY > 0 ? 1 : -1;
+            const idx  = list.indexOf(getVal());
+            const next = Math.max(0, Math.min(list.length - 1, idx + dir));
+            if (list[next] === getVal()) return;
+            setVal(list[next]);
+            updatePreview();
+            refreshHighlight(col, list, getVal);
+            snapTo(col, next, true);
+        }, { passive: false });
+    }
+
+    /* — Mobile: scroll nativo livre, snap só no soltar — */
+    function setupTouch(col, list, getVal, setVal) {
         let snapTimer = null;
 
         function doSnap() {
-            const idx = Math.max(0, Math.min(list.length - 1, idxFromScroll(col)));
+            const idx = idxFromScroll(col, list);
             setVal(list[idx]);
             updatePreview();
-            refreshHighlight(colId, list, getVal);
+            refreshHighlight(col, list, getVal);
             snapTo(col, idx, true);
         }
 
@@ -132,72 +147,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
         col.addEventListener("touchend", () => {
             clearTimeout(snapTimer);
-            snapTimer = setTimeout(doSnap, 60);
+            snapTimer = setTimeout(doSnap, 80);
         }, { passive: true });
 
         col.addEventListener("scroll", () => {
             clearTimeout(snapTimer);
-            snapTimer = setTimeout(doSnap, 120);
+            snapTimer = setTimeout(doSnap, 150);
         }, { passive: true });
+    }
 
-        /* toque direto numa célula */
+    /* — Clique direto na célula — */
+    function setupClick(col, list, getVal, setVal) {
         col.addEventListener("click", e => {
             const btn = e.target.closest(".tp-cell");
             if (!btn) return;
             const idx = parseInt(btn.dataset.idx);
             setVal(list[idx]);
             updatePreview();
-            refreshHighlight(colId, list, getVal);
+            refreshHighlight(col, list, getVal);
             snapTo(col, idx, true);
         });
     }
 
-    /* ══════════════════════════════════════
-       PC — wheel 1 item por vez, sem pular
-    ══════════════════════════════════════ */
-    function setupDesktop(colId, list, getVal, setVal) {
-        const col = document.getElementById(colId);
-        let busy = false;
+    /* Registra tudo UMA VEZ */
+    setupWheel(colH, HOURS,   () => selHour, v => { selHour = v; });
+    setupWheel(colM, MINUTES, () => selMin,  v => { selMin  = v; });
+    setupTouch(colH, HOURS,   () => selHour, v => { selHour = v; });
+    setupTouch(colM, MINUTES, () => selMin,  v => { selMin  = v; });
+    setupClick(colH, HOURS,   () => selHour, v => { selHour = v; });
+    setupClick(colM, MINUTES, () => selMin,  v => { selMin  = v; });
 
-        col.addEventListener("wheel", e => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (busy) return;
-
-            busy = true;
-            setTimeout(() => { busy = false; }, 130);
-
-            const dir = e.deltaY > 0 ? 1 : -1;
-            const idx = list.indexOf(getVal());
-            const next = Math.max(0, Math.min(list.length - 1, idx + dir));
-            if (list[next] === getVal()) return;
-
-            setVal(list[next]);
-            updatePreview();
-            refreshHighlight(colId, list, getVal);
-            snapTo(col, next, true);
-        }, { passive: false });
-
-        /* toque/clique direto na célula */
-        col.addEventListener("click", e => {
-            const btn = e.target.closest(".tp-cell");
-            if (!btn) return;
-            const idx = parseInt(btn.dataset.idx);
-            setVal(list[idx]);
-            updatePreview();
-            refreshHighlight(colId, list, getVal);
-            snapTo(col, idx, true);
-        });
-    }
-
-    /* ── Bloqueia scroll do body (iOS fix) ── */
+    /* ── Body lock iOS ── */
     function blockBody() {
         document.body.style.overflow = "hidden";
         document.body.style.position = "fixed";
         document.body.style.width    = "100%";
         document.body.style.top      = `-${window.scrollY}px`;
     }
-
     function unblockBody() {
         const y = parseInt(document.body.style.top || "0") * -1;
         document.body.style.overflow = "";
@@ -207,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo(0, y);
     }
 
-    /* ── Abre picker ── */
+    /* ── Abre ── */
     function openPicker(input) {
         currentInput = input;
         const parts  = (input.value || "08:00").split(":");
@@ -217,26 +203,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         blockBody();
 
-        buildCol("tpHours", HOURS,   () => selHour);
-        buildCol("tpMins",  MINUTES, () => selMin);
+        buildCol(colH, HOURS,   () => selHour);
+        buildCol(colM, MINUTES, () => selMin);
         updatePreview();
         overlay.classList.add("open");
 
         setTimeout(() => {
-            const colH = document.getElementById("tpHours");
-            const colM = document.getElementById("tpMins");
-
-            snapTo(colH, HOURS.indexOf(selHour),   false);
-            snapTo(colM, MINUTES.indexOf(selMin),  false);
-
-            if (isMobile()) {
-                setupMobile("tpHours", HOURS,   () => selHour, v => { selHour = v; });
-                setupMobile("tpMins",  MINUTES, () => selMin,  v => { selMin  = v; });
-            } else {
-                setupDesktop("tpHours", HOURS,   () => selHour, v => { selHour = v; });
-                setupDesktop("tpMins",  MINUTES, () => selMin,  v => { selMin  = v; });
-            }
-        }, 80);
+            snapTo(colH, HOURS.indexOf(selHour),  false);
+            snapTo(colM, MINUTES.indexOf(selMin), false);
+        }, 60);
     }
 
     function closePicker() {
