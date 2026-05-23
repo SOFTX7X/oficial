@@ -203,7 +203,7 @@ span.flatpickr-weekday {
     cursor: not-allowed !important;
 }
 
-/* ── Horário ── */
+/* ── Horário no calendário ── */
 .flatpickr-time {
     background: rgba(108, 124, 255, .06) !important;
     border-top: 1px solid rgba(108, 124, 255, .15) !important;
@@ -253,6 +253,55 @@ span.flatpickr-weekday {
     color: #fff !important;
 }
 
+/* ── Popup de horário standalone ── */
+.flatpickr-calendar.hasTime.noCalendar {
+    width: 220px !important;
+    border-radius: 20px !important;
+    padding: 16px !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time {
+    border-top: none !important;
+    border-radius: 16px !important;
+    background: rgba(108, 124, 255, .08) !important;
+    height: 70px !important;
+    max-height: 70px !important;
+    margin-top: 0 !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+    background: transparent !important;
+    border-radius: 12px !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:hover,
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time input:focus {
+    background: rgba(108, 124, 255, .20) !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .flatpickr-time-separator {
+    color: rgba(255, 255, 255, .40) !important;
+    font-size: 28px !important;
+    font-weight: 300 !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .numInputWrapper span {
+    opacity: 0 !important;
+    transition: opacity .15s !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .numInputWrapper:hover span {
+    opacity: .6 !important;
+}
+
+.flatpickr-calendar.hasTime.noCalendar .numInputWrapper span:hover {
+    opacity: 1 !important;
+    background: rgba(108, 124, 255, .25) !important;
+}
+
 /* ── Mobile ── */
 @media (max-width: 480px) {
     .flatpickr-calendar {
@@ -278,5 +327,14 @@ span.flatpickr-weekday {
 
     .flatpickr-time input {
         font-size: 22px !important;
+    }
+
+    .flatpickr-calendar.hasTime.noCalendar {
+        width: calc(100vw - 24px) !important;
+        max-width: 220px !important;
+    }
+
+    .flatpickr-calendar.hasTime.noCalendar .flatpickr-time input {
+        font-size: 26px !important;
     }
 }
