@@ -39,8 +39,32 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ══════════════════════════════════════
-     TIME PICKER — ESTILO CELULAR PREMIUM
-     Funciona igual no PC e no celular
+     DETECTA SE É CELULAR OU PC
+  ══════════════════════════════════════ */
+  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)
+    || ('ontouchstart' in window && navigator.maxTouchPoints > 1);
+
+  /* ══════════════════════════════════════
+     CELULAR — usa input type="time" nativo
+     O sistema já abre o relógio bonito do iOS/Android
+  ══════════════════════════════════════ */
+  if (isMobile) {
+    ["#agHora", "#pubHora", "#reagendarHora"].forEach(sel => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      el.type = "time";
+      el.readOnly = false;
+      el.style.cursor = "pointer";
+      // Garante que o valor salvo está no formato HH:MM
+      el.addEventListener("change", () => {
+        // já vem HH:MM do input nativo, não precisa tratar
+      });
+    });
+    return; // para aqui no celular, não monta o picker premium
+  }
+
+  /* ══════════════════════════════════════
+     PC — TIME PICKER PREMIUM DRAG + WHEEL
   ══════════════════════════════════════ */
 
   const HOURS   = Array.from({length: 24}, (_, i) => i);
@@ -53,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let selHour = 8;
   let selMin  = 0;
 
-  /* ── ESTILOS ── */
   const style = document.createElement("style");
   style.textContent = `
     .tp-overlay {
@@ -183,18 +206,9 @@ document.addEventListener("DOMContentLoaded", () => {
       position: relative;
       z-index: 3;
     }
-    .tp-cell.near1 {
-      color: rgba(255,255,255,.45);
-      font-size: 22px;
-    }
-    .tp-cell.near2 {
-      color: rgba(255,255,255,.28);
-      font-size: 20px;
-    }
-    .tp-cell.sel {
-      color: #fff;
-      font-size: 28px;
-    }
+    .tp-cell.near1 { color: rgba(255,255,255,.45); font-size: 22px; }
+    .tp-cell.near2 { color: rgba(255,255,255,.28); font-size: 20px; }
+    .tp-cell.sel   { color: #fff; font-size: 30px; }
     .tp-divider {
       font-size: 34px;
       font-weight: 800;
@@ -267,7 +281,6 @@ document.addEventListener("DOMContentLoaded", () => {
   `;
   document.head.appendChild(style);
 
-  /* ── CRIA OVERLAY ── */
   const overlay = document.createElement("div");
   overlay.className = "tp-overlay";
   overlay.innerHTML = `
@@ -299,17 +312,28 @@ document.addEventListener("DOMContentLoaded", () => {
   `;
   document.body.appendChild(overlay);
 
-  /* ── UTILS ── */
   function pad(n) { return String(n).padStart(2,"0"); }
+
   function updatePreview() {
     const el = document.getElementById("tpPreview");
     if (el) el.textContent = pad(selHour) + ":" + pad(selMin);
   }
 
-  /* ── RENDER ── */
+  function idxToTop(idx) {
+    return (COL_H / 2) - (idx * CELL_H) - (CELL_H / 2);
+  }
+
+  function clampIdx(idx, items) {
+    return Math.max(0, Math.min(idx, items.length - 1));
+  }
+
+  function topToIdx(top, items) {
+    return clampIdx(Math.round(((COL_H / 2) - (CELL_H / 2) - top) / CELL_H), items);
+  }
+
   function renderInner(inner, items, selVal) {
     inner.innerHTML = "";
-    items.forEach((val, i) => {
+    items.forEach(val => {
       const cell = document.createElement("div");
       cell.className = "tp-cell";
       cell.textContent = pad(val);
@@ -320,20 +344,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateClasses(inner, items, selVal) {
-    const cells = inner.querySelectorAll(".tp-cell");
     const selIdx = items.indexOf(selVal);
-    cells.forEach((cell, i) => {
+    inner.querySelectorAll(".tp-cell").forEach((cell, i) => {
       const diff = Math.abs(i - selIdx);
       cell.className = "tp-cell" +
         (diff === 0 ? " sel" : diff === 1 ? " near1" : diff === 2 ? " near2" : "");
     });
-  }
-
-  /* ── POSICIONAR ── */
-  // O centro do col-wrap é onde fica o item selecionado
-  // top do inner = offset do centro - idx * CELL_H
-  function idxToTop(idx) {
-    return (COL_H / 2) - (idx * CELL_H) - (CELL_H / 2);
   }
 
   function setTop(inner, idx, animate) {
@@ -342,23 +358,11 @@ document.addEventListener("DOMContentLoaded", () => {
     inner.style.top = idxToTop(idx) + "px";
   }
 
-  function clampIdx(idx, items) {
-    return Math.max(0, Math.min(idx, items.length - 1));
-  }
-
-  /* ── BIND DRAG + WHEEL ── */
   function bindCol(wrap, inner, items, getVal, setVal) {
-    let startY = 0;
-    let startTop = 0;
-    let isDragging = false;
-    let lastY = 0;
-    let velocity = 0;
-    let lastTime = 0;
-    let animFrame = null;
+    let startY = 0, startTop = 0, isDragging = false;
+    let lastY = 0, velocity = 0, lastTime = 0;
 
-    function currentIdx() {
-      return clampIdx(items.indexOf(getVal()), items);
-    }
+    function currentIdx() { return clampIdx(items.indexOf(getVal()), items); }
 
     function snapToIdx(idx) {
       idx = clampIdx(idx, items);
@@ -369,48 +373,9 @@ document.addEventListener("DOMContentLoaded", () => {
       updatePreview();
     }
 
-    function topToIdx(top) {
-      return Math.round(((COL_H / 2) - (CELL_H / 2) - top) / CELL_H);
-    }
-
-    // ── TOUCH ──
-    wrap.addEventListener("touchstart", e => {
-      cancelAnimationFrame(animFrame);
-      startY = e.touches[0].clientY;
-      lastY = startY;
-      lastTime = Date.now();
-      velocity = 0;
-      startTop = parseFloat(inner.style.top) || idxToTop(currentIdx());
-      inner.classList.add("dragging");
-      isDragging = true;
-    }, { passive: true });
-
-    wrap.addEventListener("touchmove", e => {
-      if (!isDragging) return;
-      const y = e.touches[0].clientY;
-      const now = Date.now();
-      velocity = (y - lastY) / (now - lastTime + 1);
-      lastY = y; lastTime = now;
-      const dy = y - startY;
-      inner.style.top = (startTop + dy) + "px";
-    }, { passive: true });
-
-    wrap.addEventListener("touchend", () => {
-      if (!isDragging) return;
-      isDragging = false;
-      inner.classList.remove("dragging");
-      let top = parseFloat(inner.style.top);
-      // Aplica inércia
-      let inertia = velocity * 80;
-      top += inertia;
-      let idx = clampIdx(topToIdx(top), items);
-      snapToIdx(idx);
-    });
-
-    // ── MOUSE DRAG ──
+    // MOUSE DRAG
     wrap.addEventListener("mousedown", e => {
       e.preventDefault();
-      cancelAnimationFrame(animFrame);
       startY = e.clientY;
       lastY = startY;
       lastTime = Date.now();
@@ -422,21 +387,18 @@ document.addEventListener("DOMContentLoaded", () => {
       function onMove(ev) {
         if (!isDragging) return;
         const now = Date.now();
-        velocity = (ev.clientY - lastY) / (now - lastTime + 1);
-        lastY = ev.clientY; lastTime = now;
-        const dy = ev.clientY - startY;
-        inner.style.top = (startTop + dy) + "px";
+        velocity = (ev.clientY - lastY) / Math.max(1, now - lastTime);
+        lastY = ev.clientY;
+        lastTime = now;
+        inner.style.top = (startTop + (ev.clientY - startY)) + "px";
       }
 
       function onUp() {
         if (!isDragging) return;
         isDragging = false;
         inner.classList.remove("dragging");
-        let top = parseFloat(inner.style.top);
-        let inertia = velocity * 80;
-        top += inertia;
-        let idx = clampIdx(topToIdx(top), items);
-        snapToIdx(idx);
+        const top = parseFloat(inner.style.top) + velocity * 60;
+        snapToIdx(topToIdx(top, items));
         document.removeEventListener("mousemove", onMove);
         document.removeEventListener("mouseup", onUp);
       }
@@ -445,28 +407,22 @@ document.addEventListener("DOMContentLoaded", () => {
       document.addEventListener("mouseup", onUp);
     });
 
-    // ── MOUSE WHEEL ── (funciona perfeitamente no PC)
+    // MOUSE WHEEL — 1 tick = 1 item, sem delay
     wrap.addEventListener("wheel", e => {
       e.preventDefault();
-      cancelAnimationFrame(animFrame);
       const dir = e.deltaY > 0 ? 1 : -1;
-      const newIdx = clampIdx(currentIdx() + dir, items);
-      snapToIdx(newIdx);
+      snapToIdx(clampIdx(currentIdx() + dir, items));
     }, { passive: false });
 
-    // ── CLIQUE NA CÉLULA ──
+    // CLIQUE NA CÉLULA
     inner.addEventListener("click", e => {
       const cell = e.target.closest(".tp-cell");
       if (!cell) return;
       const val = parseInt(cell.dataset.val);
-      if (isNaN(val)) return;
-      const idx = items.indexOf(val);
-      if (idx < 0) return;
-      snapToIdx(idx);
+      if (!isNaN(val)) snapToIdx(items.indexOf(val));
     });
   }
 
-  /* ── ABRIR ── */
   function openTP(input) {
     currentInput = input;
     const raw = (input.value || "08:00").split(":");
@@ -484,12 +440,19 @@ document.addEventListener("DOMContentLoaded", () => {
     renderInner(hInner, HOURS,   selHour);
     renderInner(mInner, MINUTES, selMin);
 
-    // Posiciona SEM animação
     setTop(hInner, HOURS.indexOf(selHour),   false);
     setTop(mInner, MINUTES.indexOf(selMin),  false);
 
-    bindCol(hWrap, hInner, HOURS,   () => selHour, v => { selHour = v; });
-    bindCol(mWrap, mInner, MINUTES, () => selMin,  v => { selMin  = v; });
+    // Recria bind a cada abertura (evita listeners duplicados)
+    const hWrapNew = hWrap.cloneNode(false);
+    const mWrapNew = mWrap.cloneNode(false);
+    hWrapNew.appendChild(hInner);
+    mWrapNew.appendChild(mInner);
+    hWrap.replaceWith(hWrapNew);
+    mWrap.replaceWith(mWrapNew);
+
+    bindCol(hWrapNew, hInner, HOURS,   () => selHour, v => { selHour = v; });
+    bindCol(mWrapNew, mInner, MINUTES, () => selMin,  v => { selMin  = v; });
 
     updatePreview();
     overlay.classList.add("open");
@@ -514,7 +477,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("tpOk").addEventListener("click", confirmTP);
   overlay.addEventListener("click", e => { if (e.target === overlay) closeTP(); });
 
-  /* ── BIND NOS INPUTS ── */
   ["#agHora", "#pubHora", "#reagendarHora"].forEach(sel => {
     const el = document.querySelector(sel);
     if (!el) return;
