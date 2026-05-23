@@ -171,7 +171,7 @@ window.addEventListener('scroll', () => {
 // ── HASH ROUTING ──
 window.addEventListener('hashchange', () => {
   const slug = getPublicSlug();
-  if (slug) loadPublic(slug);
+  if (slug) { loadPublic(slug); setTimeout(function(){ if (typeof setupPremiumDateTimePickers === 'function') setupPremiumDateTimePickers(); }, 250); }
 });
 
 // ── FECHAR MENUS AO CLICAR FORA ──
@@ -236,6 +236,7 @@ async function carregarConta(user) {
     state.empresa = empresa;
     showDashboard();
     await loadAll();
+    if (typeof setupPremiumDateTimePickers === 'function') setTimeout(setupPremiumDateTimePickers, 80);
     return true;
   } catch (e) {
     console.error('Erro em carregarConta:', e);
@@ -2074,4 +2075,110 @@ document.addEventListener('DOMContentLoaded', function() {
     loginComSenha,
     finalizarCadastro
   });
+});
+
+
+/* ═══════════════════════════════════════════════
+   PATCH FINAL — CALENDÁRIO/HORA PREMIUM + HORÁRIOS
+═══════════════════════════════════════════════ */
+function setupPremiumDateTimePickers() {
+  if (typeof flatpickr !== 'function') return;
+
+  const dateFields = ['agData', 'pubData', 'reagendarData'];
+  const timeFields = ['agHora', 'pubHora', 'reagendarHora'];
+
+  dateFields.forEach(function(id) {
+    const el = document.getElementById(id);
+    if (!el || el.dataset.fpReady === '1') return;
+
+    el.dataset.fpReady = '1';
+    el.classList.add('premium-picker');
+    el.setAttribute('type', 'text');
+    el.setAttribute('inputmode', 'none');
+    el.setAttribute('placeholder', 'Selecione a data');
+
+    flatpickr(el, {
+      locale: (flatpickr.l10ns && flatpickr.l10ns.pt) ? flatpickr.l10ns.pt : 'pt',
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd/m/Y',
+      minDate: 'today',
+      disableMobile: true,
+      appendTo: document.body
+    });
+  });
+
+  timeFields.forEach(function(id) {
+    const el = document.getElementById(id);
+    if (!el || el.dataset.fpReady === '1') return;
+
+    el.dataset.fpReady = '1';
+    el.classList.add('premium-picker');
+    el.setAttribute('type', 'text');
+    el.setAttribute('inputmode', 'none');
+    el.setAttribute('placeholder', 'Selecione a hora');
+
+    flatpickr(el, {
+      locale: (flatpickr.l10ns && flatpickr.l10ns.pt) ? flatpickr.l10ns.pt : 'pt',
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: 'H:i',
+      time_24hr: true,
+      minuteIncrement: 5,
+      disableMobile: true,
+      appendTo: document.body
+    });
+  });
+}
+
+function salvarHorariosFuncionamento() {
+  const checkboxes = document.querySelectorAll('.schedule-grid input[type="checkbox"]');
+  const dados = {};
+
+  checkboxes.forEach(function(cb, index) {
+    const key = cb.dataset.day || ('dia_' + index);
+    dados[key] = !!cb.checked;
+  });
+
+  try {
+    localStorage.setItem('agenda_horarios_funcionamento', JSON.stringify(dados));
+  } catch (e) {}
+
+  toast('Horários salvos!', 'ok');
+}
+
+function carregarHorariosFuncionamento() {
+  let dados = null;
+
+  try {
+    dados = JSON.parse(localStorage.getItem('agenda_horarios_funcionamento') || 'null');
+  } catch (e) {
+    dados = null;
+  }
+
+  if (!dados) return;
+
+  document.querySelectorAll('.schedule-grid input[type="checkbox"]').forEach(function(cb, index) {
+    const key = cb.dataset.day || ('dia_' + index);
+    if (Object.prototype.hasOwnProperty.call(dados, key)) {
+      cb.checked = !!dados[key];
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    setupPremiumDateTimePickers();
+    carregarHorariosFuncionamento();
+  }, 150);
+});
+
+window.addEventListener('hashchange', function() {
+  setTimeout(setupPremiumDateTimePickers, 250);
+});
+
+Object.assign(window, {
+  setupPremiumDateTimePickers,
+  salvarHorariosFuncionamento,
+  carregarHorariosFuncionamento
 });
