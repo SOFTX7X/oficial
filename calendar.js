@@ -27,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let selHour = 8;
     let selMin  = 0;
 
-    /* ── Overlay ── */
     const overlay = document.createElement("div");
     overlay.className = "tp-overlay";
     overlay.innerHTML = `
@@ -62,22 +61,27 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("tpPreview").textContent = `${pad(selHour)}:${pad(selMin)}`;
     }
 
-    function snapTo(col, idx, smooth) {
+    /* Pega o valor central visível da coluna */
+    function getValFromScroll(col, list) {
+        const half = col.clientHeight / 2;
+        const idx  = Math.round((col.scrollTop + half - CELL_H / 2) / CELL_H);
+        return list[Math.max(0, Math.min(list.length - 1, idx))];
+    }
+
+    /* Destaca a célula mais próxima do centro enquanto rola */
+    function highlightCenter(col, list) {
+        const half   = col.clientHeight / 2;
+        const center = col.scrollTop + half;
+        col.querySelectorAll(".tp-cell").forEach((btn, i) => {
+            const btnCenter = CELL_H * i + CELL_H / 2;
+            btn.classList.toggle("active", Math.abs(center - btnCenter) < CELL_H / 2);
+        });
+    }
+
+    function scrollToIdx(col, idx, smooth) {
         const half   = col.clientHeight / 2;
         const target = Math.max(0, idx * CELL_H - half + CELL_H / 2);
         col.scrollTo({ top: target, behavior: smooth ? "smooth" : "instant" });
-    }
-
-    function idxFromScroll(col, list) {
-        const half = col.clientHeight / 2;
-        const raw  = Math.round((col.scrollTop + half - CELL_H / 2) / CELL_H);
-        return Math.max(0, Math.min(list.length - 1, raw));
-    }
-
-    function refreshHighlight(col, list, getVal) {
-        col.querySelectorAll(".tp-cell").forEach((btn, i) => {
-            btn.classList.toggle("active", list[i] === getVal());
-        });
     }
 
     function buildCol(col, list, getVal) {
@@ -99,10 +103,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* ══════════════════════════════════════
-       LISTENERS — adicionados UMA VEZ só
+       LISTENERS — registrados UMA VEZ
     ══════════════════════════════════════ */
 
-    /* — PC: wheel — */
+    /* MOBILE — scroll nativo totalmente livre, sem snap, sem trava */
+    colH.addEventListener("touchstart", e => e.stopPropagation(), { passive: true });
+    colM.addEventListener("touchstart", e => e.stopPropagation(), { passive: true });
+    colH.addEventListener("touchmove",  e => e.stopPropagation(), { passive: true });
+    colM.addEventListener("touchmove",  e => e.stopPropagation(), { passive: true });
+
+    /* Atualiza highlight e preview enquanto rola */
+    colH.addEventListener("scroll", () => {
+        highlightCenter(colH, HOURS);
+        selHour = getValFromScroll(colH, HOURS);
+        updatePreview();
+    }, { passive: true });
+
+    colM.addEventListener("scroll", () => {
+        highlightCenter(colM, MINUTES);
+        selMin = getValFromScroll(colM, MINUTES);
+        updatePreview();
+    }, { passive: true });
+
+    /* PC — wheel: 1 item por vez, sem acumular */
     function setupWheel(col, list, getVal, setVal) {
         let busy = false;
         col.addEventListener("wheel", e => {
@@ -118,66 +141,36 @@ document.addEventListener("DOMContentLoaded", () => {
             if (list[next] === getVal()) return;
             setVal(list[next]);
             updatePreview();
-            refreshHighlight(col, list, getVal);
-            snapTo(col, next, true);
+            scrollToIdx(col, next, true);
+            highlightCenter(col, list);
         }, { passive: false });
     }
 
-    /* — Mobile: scroll nativo livre, snap só no soltar — */
-    function setupTouch(col, list, getVal, setVal) {
-        let snapTimer = null;
-
-        function doSnap() {
-            const idx = idxFromScroll(col, list);
-            setVal(list[idx]);
-            updatePreview();
-            refreshHighlight(col, list, getVal);
-            snapTo(col, idx, true);
-        }
-
-        col.addEventListener("touchstart", e => {
-            e.stopPropagation();
-            clearTimeout(snapTimer);
-        }, { passive: true });
-
-        col.addEventListener("touchmove", e => {
-            e.stopPropagation();
-            e.preventDefault();
-        }, { passive: false });
-
-        col.addEventListener("touchend", () => {
-            clearTimeout(snapTimer);
-            snapTimer = setTimeout(doSnap, 80);
-        }, { passive: true });
-
-        col.addEventListener("scroll", () => {
-            clearTimeout(snapTimer);
-            snapTimer = setTimeout(doSnap, 150);
-        }, { passive: true });
-    }
-
-    /* — Clique direto na célula — */
-    function setupClick(col, list, getVal, setVal) {
-        col.addEventListener("click", e => {
-            const btn = e.target.closest(".tp-cell");
-            if (!btn) return;
-            const idx = parseInt(btn.dataset.idx);
-            setVal(list[idx]);
-            updatePreview();
-            refreshHighlight(col, list, getVal);
-            snapTo(col, idx, true);
-        });
-    }
-
-    /* Registra tudo UMA VEZ */
     setupWheel(colH, HOURS,   () => selHour, v => { selHour = v; });
     setupWheel(colM, MINUTES, () => selMin,  v => { selMin  = v; });
-    setupTouch(colH, HOURS,   () => selHour, v => { selHour = v; });
-    setupTouch(colM, MINUTES, () => selMin,  v => { selMin  = v; });
-    setupClick(colH, HOURS,   () => selHour, v => { selHour = v; });
-    setupClick(colM, MINUTES, () => selMin,  v => { selMin  = v; });
 
-    /* ── Body lock iOS ── */
+    /* Clique direto na célula */
+    colH.addEventListener("click", e => {
+        const btn = e.target.closest(".tp-cell");
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx);
+        selHour = HOURS[idx];
+        updatePreview();
+        scrollToIdx(colH, idx, true);
+        highlightCenter(colH, HOURS);
+    });
+
+    colM.addEventListener("click", e => {
+        const btn = e.target.closest(".tp-cell");
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx);
+        selMin = MINUTES[idx];
+        updatePreview();
+        scrollToIdx(colM, idx, true);
+        highlightCenter(colM, MINUTES);
+    });
+
+    /* Bloqueia scroll do body no iOS */
     function blockBody() {
         document.body.style.overflow = "hidden";
         document.body.style.position = "fixed";
@@ -193,7 +186,6 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo(0, y);
     }
 
-    /* ── Abre ── */
     function openPicker(input) {
         currentInput = input;
         const parts  = (input.value || "08:00").split(":");
@@ -202,19 +194,21 @@ document.addEventListener("DOMContentLoaded", () => {
         selMin  = MINUTES.includes(rm) ? rm : 0;
 
         blockBody();
-
         buildCol(colH, HOURS,   () => selHour);
         buildCol(colM, MINUTES, () => selMin);
         updatePreview();
         overlay.classList.add("open");
 
         setTimeout(() => {
-            snapTo(colH, HOURS.indexOf(selHour),  false);
-            snapTo(colM, MINUTES.indexOf(selMin), false);
+            scrollToIdx(colH, HOURS.indexOf(selHour),  false);
+            scrollToIdx(colM, MINUTES.indexOf(selMin), false);
         }, 60);
     }
 
     function closePicker() {
+        /* lê posição final do scroll antes de fechar */
+        selHour = getValFromScroll(colH, HOURS);
+        selMin  = getValFromScroll(colM, MINUTES);
         overlay.classList.remove("open");
         unblockBody();
         currentInput = null;
@@ -222,6 +216,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("tpOk").addEventListener("click", () => {
         if (!currentInput) return;
+        selHour = getValFromScroll(colH, HOURS);
+        selMin  = getValFromScroll(colM, MINUTES);
         currentInput.value = `${pad(selHour)}:${pad(selMin)}`;
         currentInput.dispatchEvent(new Event("change", { bubbles: true }));
         closePicker();
