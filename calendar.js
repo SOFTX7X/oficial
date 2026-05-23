@@ -1,8 +1,6 @@
-/* ═══════════════════════════════════════
-   FLATPICKR — DATA
-═══════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", () => {
 
+    /* ── FLATPICKR DATA ── */
     const dateConfig = {
         locale: "pt",
         disableMobile: true,
@@ -20,17 +18,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (el) flatpickr(el, dateConfig);
     });
 
-    /* ═══════════════════════════════════════
-       TIME PICKER PREMIUM — DRUM SCROLL
-    ═══════════════════════════════════════ */
+    /* ── TIME PICKER PREMIUM ── */
 
-    // Cria o HTML do picker
     const overlay = document.createElement("div");
     overlay.className = "tp-overlay";
     overlay.innerHTML = `
         <div class="tp-sheet" id="tpSheet">
             <div class="tp-handle"></div>
             <div class="tp-title">Selecionar horário</div>
+            <div class="tp-preview" id="tpPreview">00:00</div>
             <div class="tp-drums">
                 <div class="tp-drum-wrap">
                     <div class="tp-selector"></div>
@@ -51,181 +47,191 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(overlay);
 
     let currentInput = null;
-    let hourIndex = 12;
-    let minIndex = 0;
+    let hourIndex = 8;
+    let minIndex  = 0; // 0..11 → *5 = minutos
 
-    const ITEM_H = 52;
-    const PADDING = 2; // itens acima/abaixo visíveis
+    const ITEM_H  = 56;
+    const PADDING = 2;
+    const HOURS   = 24;
+    const MIN_STEPS = 12; // 0,5,10,...55
 
-    function buildDrum(drum, count, pad, current) {
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    function updatePreview() {
+        const el = document.getElementById("tpPreview");
+        if (el) el.textContent = `${pad(hourIndex)}:${pad(minIndex * 5)}`;
+    }
+
+    function buildDrum(drum, count, getValue, format) {
         drum.innerHTML = "";
-        // padding top
         for (let i = 0; i < PADDING; i++) {
-            const ghost = document.createElement("div");
-            ghost.className = "tp-item";
-            drum.appendChild(ghost);
+            const g = document.createElement("div");
+            g.className = "tp-item tp-ghost";
+            drum.appendChild(g);
         }
         for (let i = 0; i < count; i++) {
             const el = document.createElement("div");
             el.className = "tp-item";
-            el.textContent = String(i).padStart(2, "0");
+            el.textContent = format(i);
             drum.appendChild(el);
         }
-        // padding bottom
         for (let i = 0; i < PADDING; i++) {
-            const ghost = document.createElement("div");
-            ghost.className = "tp-item";
-            drum.appendChild(ghost);
+            const g = document.createElement("div");
+            g.className = "tp-item tp-ghost";
+            drum.appendChild(g);
         }
-        scrollDrum(drum, current, false);
-        updateActive(drum, current, count);
     }
 
-    function scrollDrum(drum, index, animate) {
-        const y = index * ITEM_H;
-        drum.style.transition = animate ? "transform .35s cubic-bezier(.32,1,.6,1)" : "none";
-        drum.style.transform = `translateY(${-y}px)`;
+    function setDrumPosition(drum, index, animate) {
+        drum.style.transition = animate
+            ? "transform .3s cubic-bezier(.32,1,.6,1)"
+            : "none";
+        drum.style.transform = `translateY(${-index * ITEM_H}px)`;
     }
 
-    function updateActive(drum, index, count) {
-        const items = drum.querySelectorAll(".tp-item:not(:first-child):not(:last-child)");
-        // remove padding items
-        const real = Array.from(drum.querySelectorAll(".tp-item")).slice(PADDING, PADDING + count);
-        real.forEach((el, i) => {
-            el.classList.remove("active", "near");
+    function updateActiveItems(drum, index, count) {
+        const items = Array.from(drum.querySelectorAll(".tp-item:not(.tp-ghost)"));
+        items.forEach((el, i) => {
+            el.classList.remove("active", "near", "far");
             const diff = Math.abs(i - index);
-            if (diff === 0) el.classList.add("active");
+            if (diff === 0)      el.classList.add("active");
             else if (diff === 1) el.classList.add("near");
+            else                 el.classList.add("far");
         });
     }
 
-    function attachDrum(drum, count, getIdx, setIdx) {
-        let startY = 0;
-        let startIdx = 0;
-        let isDragging = false;
+    function initDrum(drum, count, getIdx, setIdx, format) {
+        buildDrum(drum, count, getIdx, format);
+        setDrumPosition(drum, getIdx(), false);
+        updateActiveItems(drum, getIdx(), count);
+
+        let startY    = 0;
+        let startIdx  = 0;
+        let dragging  = false;
+        let lastY     = 0;
+        let velocity  = 0;
+        let lastTime  = 0;
 
         function clamp(v) { return Math.max(0, Math.min(count - 1, v)); }
 
         function onStart(y) {
-            isDragging = true;
-            startY = y;
-            startIdx = getIdx();
+            dragging  = true;
+            startY    = y;
+            lastY     = y;
+            startIdx  = getIdx();
+            velocity  = 0;
+            lastTime  = Date.now();
             drum.style.transition = "none";
         }
 
         function onMove(y) {
-            if (!isDragging) return;
+            if (!dragging) return;
+            const now   = Date.now();
+            velocity    = (lastY - y) / (now - lastTime + 1);
+            lastY       = y;
+            lastTime    = now;
             const delta = Math.round((startY - y) / ITEM_H);
-            const newIdx = clamp(startIdx + delta);
-            if (newIdx !== getIdx()) {
-                setIdx(newIdx);
-                scrollDrum(drum, newIdx, false);
-                updateActive(drum, newIdx, count);
-            }
+            const idx   = clamp(startIdx + delta);
+            setIdx(idx);
+            setDrumPosition(drum, idx, false);
+            updateActiveItems(drum, idx, count);
+            updatePreview();
         }
 
         function onEnd() {
-            isDragging = false;
-            scrollDrum(drum, getIdx(), true);
+            if (!dragging) return;
+            dragging = false;
+            // momentum
+            const momentum = Math.round(velocity * 4);
+            const idx = clamp(getIdx() + momentum);
+            setIdx(idx);
+            setDrumPosition(drum, idx, true);
+            updateActiveItems(drum, idx, count);
+            updatePreview();
         }
 
         // Mouse
         drum.addEventListener("mousedown", e => { e.preventDefault(); onStart(e.clientY); });
-        window.addEventListener("mousemove", e => onMove(e.clientY));
+        window.addEventListener("mousemove", e => { if (dragging) onMove(e.clientY); });
         window.addEventListener("mouseup", onEnd);
 
-        // Touch
-        drum.addEventListener("touchstart", e => { onStart(e.touches[0].clientY); }, { passive: true });
-        drum.addEventListener("touchmove", e => { e.preventDefault(); onMove(e.touches[0].clientY); }, { passive: false });
+        // Touch — preventDefault para impedir scroll da página
+        drum.addEventListener("touchstart", e => {
+            onStart(e.touches[0].clientY);
+        }, { passive: true });
+
+        drum.addEventListener("touchmove", e => {
+            e.preventDefault(); // BLOQUEIA scroll da página
+            onMove(e.touches[0].clientY);
+        }, { passive: false });
+
         drum.addEventListener("touchend", onEnd);
 
         // Wheel
         drum.addEventListener("wheel", e => {
             e.preventDefault();
-            const delta = e.deltaY > 0 ? 1 : -1;
-            const newIdx = clamp(getIdx() + delta);
-            setIdx(newIdx);
-            scrollDrum(drum, newIdx, true);
-            updateActive(drum, newIdx, count);
+            const idx = clamp(getIdx() + (e.deltaY > 0 ? 1 : -1));
+            setIdx(idx);
+            setDrumPosition(drum, idx, true);
+            updateActiveItems(drum, idx, count);
+            updatePreview();
         }, { passive: false });
     }
 
     function openPicker(input) {
         currentInput = input;
-        const val = input.value || "12:00";
+        const val  = input.value || "08:00";
         const parts = val.split(":");
-        hourIndex = parseInt(parts[0]) || 0;
-        minIndex  = Math.round((parseInt(parts[1]) || 0) / 5) * 5;
-        if (minIndex >= 60) minIndex = 55;
+        hourIndex = parseInt(parts[0]) || 8;
+        const rawMin = parseInt(parts[1]) || 0;
+        minIndex = Math.round(rawMin / 5);
+        if (minIndex >= MIN_STEPS) minIndex = MIN_STEPS - 1;
+
+        // Bloqueia scroll do body
+        document.body.style.overflow = "hidden";
 
         const hDrum = document.getElementById("tpHourDrum");
         const mDrum = document.getElementById("tpMinDrum");
 
-        buildDrum(hDrum, 24, 2, hourIndex);
-        buildDrum(mDrum, 12, 2, minIndex / 5);
+        initDrum(hDrum, HOURS,
+            () => hourIndex,
+            v  => { hourIndex = v; },
+            i  => pad(i)
+        );
+        initDrum(mDrum, MIN_STEPS,
+            () => minIndex,
+            v  => { minIndex = v; },
+            i  => pad(i * 5)
+        );
 
+        updatePreview();
         overlay.classList.add("open");
     }
 
     function closePicker() {
         overlay.classList.remove("open");
+        document.body.style.overflow = "";
         currentInput = null;
     }
 
-    // Confirmar
     document.getElementById("tpOk").addEventListener("click", () => {
         if (!currentInput) return;
-        const h = String(hourIndex).padStart(2, "0");
-        const m = String((minIndex / 5) * 5).padStart(2, "0");
-
-        // Reconstrói o minIndex corretamente
-        const mDrum = document.getElementById("tpMinDrum");
-        const real = Array.from(mDrum.querySelectorAll(".tp-item")).slice(PADDING, PADDING + 12);
-        const activeMin = real.findIndex(el => el.classList.contains("active"));
-        const finalMin = String(activeMin * 5).padStart(2, "0");
-
-        const hDrum = document.getElementById("tpHourDrum");
-        const realH = Array.from(hDrum.querySelectorAll(".tp-item")).slice(PADDING, PADDING + 24);
-        const activeHour = realH.findIndex(el => el.classList.contains("active"));
-        const finalHour = String(activeHour).padStart(2, "0");
-
-        currentInput.value = `${finalHour}:${finalMin}`;
+        currentInput.value = `${pad(hourIndex)}:${pad(minIndex * 5)}`;
         currentInput.dispatchEvent(new Event("change", { bubbles: true }));
         closePicker();
     });
 
     document.getElementById("tpCancel").addEventListener("click", closePicker);
+    overlay.addEventListener("click", e => { if (e.target === overlay) closePicker(); });
 
-    // Fechar ao clicar fora
-    overlay.addEventListener("click", e => {
-        if (e.target === overlay) closePicker();
-    });
-
-    // Inicializar drums com scroll
-    setTimeout(() => {
-        const hDrum = document.getElementById("tpHourDrum");
-        const mDrum = document.getElementById("tpMinDrum");
-
-        attachDrum(
-            hDrum, 24,
-            () => hourIndex,
-            v => { hourIndex = v; }
-        );
-        attachDrum(
-            mDrum, 12,
-            () => Math.round(minIndex / 5),
-            v => { minIndex = v * 5; }
-        );
-    }, 100);
-
-    // Bind nos inputs de hora
+    // Bind inputs de hora
     ["#agHora", "#pubHora", "#reagendarHora"].forEach(sel => {
         const el = document.querySelector(sel);
         if (!el) return;
         el.setAttribute("readonly", true);
         el.style.cursor = "pointer";
-        el.addEventListener("click", () => openPicker(el));
-        el.addEventListener("focus", () => openPicker(el));
+        el.addEventListener("click",  () => openPicker(el));
+        el.addEventListener("focus",  () => openPicker(el));
     });
 
 });
