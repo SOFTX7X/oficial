@@ -1,20 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    flatpickr("input[type='date']", {
+    const dateConfig = {
         locale: "pt",
         disableMobile: true,
         dateFormat: "d/m/Y",
         allowInput: false,
         clickOpens: true,
-        minDate: "today",          // bloqueia datas passadas
-        showMonths: 1,
-
+        minDate: "today",
         onChange(selectedDates, dateStr, instance) {
             instance.close();
         }
-    });
+    };
 
-    flatpickr("input[type='time']", {
+    const timeConfig = {
         locale: "pt",
         disableMobile: true,
         enableTime: true,
@@ -24,6 +22,18 @@ document.addEventListener("DOMContentLoaded", () => {
         minuteIncrement: 5,
         allowInput: false,
         clickOpens: true
+    };
+
+    // Todos os campos de data
+    ["#agData", "#pubData", "#reagendarData"].forEach(sel => {
+        const el = document.querySelector(sel);
+        if (el) flatpickr(el, dateConfig);
+    });
+
+    // Todos os campos de hora
+    ["#agHora", "#pubHora", "#reagendarHora"].forEach(sel => {
+        const el = document.querySelector(sel);
+        if (el) flatpickr(el, timeConfig);
     });
 
 });
