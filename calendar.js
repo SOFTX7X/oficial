@@ -1,42 +1,35 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    /* =========================
-       FLATPICKR DATA
-    ========================= */
-
-    const configData = {
+    const dateConfig = {
         locale: "pt",
         disableMobile: true,
         dateFormat: "d/m/Y",
+        allowInput: false,
+        clickOpens: true,
         minDate: "today",
-        allowInput: false
+        position: "auto center",
+        onChange(selectedDates, dateStr, instance) {
+            instance.close();
+        }
     };
 
-    ["#agData", "#pubData", "#reagendarData"].forEach(id => {
-
-        const el = document.querySelector(id);
-
-        if(el){
-            flatpickr(el, configData);
-        }
+    ["#agData", "#pubData", "#reagendarData"].forEach(sel => {
+        const el = document.querySelector(sel);
+        if (el) flatpickr(el, dateConfig);
     });
 
-    /* =========================
-       TIME PICKER PREMIUM
-    ========================= */
-
     const HOURS = Array.from({ length: 24 }, (_, i) => i);
-
     const MINUTES = [0,5,10,15,20,25,30,35,40,45,50,55];
 
+    let currentInput = null;
+
     function pad(n){
-        return String(n).padStart(2, "0");
+        return String(n).padStart(2,"0");
     }
 
     function createTimePicker(input){
 
         const overlay = document.createElement("div");
-
         overlay.className = "tp-overlay open";
 
         overlay.innerHTML = `
@@ -57,28 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 </div>
 
-                <div class="tp-preview-bar">
-
-                    <span class="tp-preview-time" id="tpPreview">
-                        08:00
-                    </span>
-
-                    <span class="tp-preview-label">
-                        selecionado
-                    </span>
-
-                </div>
-
                 <div class="tp-actions">
-
-                    <button class="tp-cancel">
-                        Cancelar
-                    </button>
-
-                    <button class="tp-ok">
-                        Confirmar
-                    </button>
-
+                    <button class="tp-cancel">Cancelar</button>
+                    <button class="tp-ok">Confirmar</button>
                 </div>
 
             </div>
@@ -89,36 +63,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const hourCol = overlay.querySelector(".tp-hours");
         const minCol  = overlay.querySelector(".tp-mins");
 
-        const preview = overlay.querySelector("#tpPreview");
-
         let selHour = 8;
-        let selMin  = 0;
-
-        if(input.value){
-
-            const parts = input.value.split(":");
-
-            selHour = parseInt(parts[0]) || 8;
-            selMin  = parseInt(parts[1]) || 0;
-        }
-
-        function updatePreview(){
-
-            preview.textContent =
-                `${pad(selHour)}:${pad(selMin)}`;
-        }
+        let selMin = 0;
 
         HOURS.forEach(h => {
 
             const btn = document.createElement("button");
 
             btn.className = "tp-cell";
-
             btn.textContent = pad(h);
-
-            if(h === selHour){
-                btn.classList.add("active");
-            }
 
             btn.onclick = () => {
 
@@ -128,8 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     .forEach(el => el.classList.remove("active"));
 
                 btn.classList.add("active");
-
-                updatePreview();
             };
 
             hourCol.appendChild(btn);
@@ -140,12 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const btn = document.createElement("button");
 
             btn.className = "tp-cell";
-
             btn.textContent = pad(m);
-
-            if(m === selMin){
-                btn.classList.add("active");
-            }
 
             btn.onclick = () => {
 
@@ -155,51 +101,42 @@ document.addEventListener("DOMContentLoaded", () => {
                     .forEach(el => el.classList.remove("active"));
 
                 btn.classList.add("active");
-
-                updatePreview();
             };
 
             minCol.appendChild(btn);
         });
 
-        updatePreview();
-
         overlay.querySelector(".tp-ok").onclick = () => {
 
-            input.value =
-                `${pad(selHour)}:${pad(selMin)}`;
-
-            input.dispatchEvent(
-                new Event("change", { bubbles: true })
-            );
+            input.value = `${pad(selHour)}:${pad(selMin)}`;
 
             overlay.remove();
         };
 
         overlay.querySelector(".tp-cancel").onclick = () => {
-
             overlay.remove();
         };
 
         overlay.onclick = (e) => {
-
             if(e.target === overlay){
                 overlay.remove();
             }
         };
     }
 
-    ["#agHora", "#pubHora", "#reagendarHora"].forEach(id => {
+    ["#agHora", "#pubHora", "#reagendarHora"].forEach(sel => {
 
-        const input = document.querySelector(id);
+        const el = document.querySelector(sel);
 
-        if(!input) return;
+        if(!el) return;
 
-        input.readOnly = true;
+        el.type = "text";
+        el.readOnly = true;
+        el.style.cursor = "pointer";
 
-        input.addEventListener("click", () => {
-
-            createTimePicker(input);
+        el.addEventListener("click", () => {
+            currentInput = el;
+            createTimePicker(el);
         });
     });
 
