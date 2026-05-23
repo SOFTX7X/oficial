@@ -1,3 +1,18 @@
+const SUPABASE_URL = "https://wyjrjioipqfltdyupfna.supabase.co";
+const SUPABASE_KEY = "sb_publishable_PkDkt5S-_rdrT0HhANoPAw_ZWluV2_H";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: false
+    }
+  }
+);
+
 /* ═══════════════════════════════════════════════
    AGENDAPRO — app.js CORRIGIDO COMPLETO
 ═══════════════════════════════════════════════ */
@@ -361,58 +376,93 @@ function showLogin() {
   if (fc) fc.style.display = 'none';
 }
 
+// ═══════════════════════════════════════════════
+// CORREÇÃO DEFINITIVA DOS STEPS
+// Esta é a ÚNICA função que controla visibilidade dos steps.
+// Esconde TUDO antes de mostrar o step correto.
+// Nunca chame display diretamente em outro lugar.
+// ═══════════════════════════════════════════════
+function _mostrarStep(n) {
+  var ids = ['step1', 'step2', 'step3'];
+  // Esconde TODOS sem exceção
+  for (var i = 0; i < ids.length; i++) {
+    var el = document.getElementById(ids[i]);
+    if (el) {
+      el.style.cssText = 'display:none !important; visibility:hidden !important;';
+    }
+  }
+  // Mostra apenas o correto
+  var alvo = document.getElementById('step' + n);
+  if (alvo) {
+    alvo.style.cssText = 'display:block !important; visibility:visible !important;';
+  }
+  // Atualiza indicadores de progresso
+  var dots = ['st1', 'st2', 'st3'];
+  for (var j = 0; j < dots.length; j++) {
+    var dot = document.getElementById(dots[j]);
+    if (!dot) continue;
+    if (j + 1 === n) dot.className = 'step-dot active';
+    else if (j + 1 < n) dot.className = 'step-dot done';
+    else dot.className = 'step-dot';
+  }
+}
+
 function showCadastro() {
-  const fl = $('formLogin');
-  const fc = $('formCadastro');
+  var fl = $('formLogin');
+  var fc = $('formCadastro');
+
+  // Esconde login
   if (fl) fl.style.display = 'none';
-  if (fc) fc.style.display = 'block';
-  const s1 = $('step1'), s2 = $('step2'), s3 = $('step3');
-  if (s1) s1.style.display = 'block';
-  if (s2) s2.style.display = 'none';
-  if (s3) s3.style.display = 'none';
-  setStep(1);
+
+  // Mostra formulário de cadastro
+  if (fc) {
+    fc.style.cssText = 'display:block !important; visibility:visible !important;';
+  }
+
+  // Limpa campos
+  var campos = ['cadNome','cadEmail','cadSenha','empNome','empSlug','empWhatsapp',
+                'servNome','servPreco','servDuracao','profNome','profEsp'];
+  for (var i = 0; i < campos.length; i++) {
+    var el = document.getElementById(campos[i]);
+    if (el) {
+      el.value = '';
+      if (el.dataset) el.dataset.manual = '';
+    }
+  }
+
+  // Mostra step 1 e esconde todos os outros
+  _mostrarStep(1);
+
+  // Carrega categorias
   preencherSelectCategorias();
 }
 
 function setStep(n) {
-  ['st1', 'st2', 'st3'].forEach((id, i) => {
-    const el = $(id);
-    if (!el) return;
-    el.className = 'step-dot' + (i + 1 === n ? ' active' : i + 1 < n ? ' done' : '');
-  });
-}
-
-function goStep2() {
-  const nome = $('cadNome')?.value?.trim();
-  const email = $('cadEmail')?.value?.trim();
-  const senha = $('cadSenha')?.value?.trim();
-  if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
-  if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
-  const s1 = $('step1'), s2 = $('step2');
-  if (s1) s1.style.display = 'none';
-  if (s2) s2.style.display = 'block';
-  setStep(2);
-  preencherSelectCategorias();
+  _mostrarStep(n);
 }
 
 function goStep1() {
-  const s1 = $('step1'), s2 = $('step2');
-  if (s2) s2.style.display = 'none';
-  if (s1) s1.style.display = 'block';
-  setStep(1);
+  _mostrarStep(1);
+}
+
+function goStep2() {
+  var nome = ($('cadNome') ? $('cadNome').value : '').trim();
+  var email = ($('cadEmail') ? $('cadEmail').value : '').trim();
+  var senha = ($('cadSenha') ? $('cadSenha').value : '').trim();
+  if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
+  if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
+  preencherSelectCategorias();
+  _mostrarStep(2);
 }
 
 function goStep3() {
-  const empNome = $('empNome')?.value?.trim();
-  const empSlug = $('empSlug')?.value?.trim();
-  const empWhatsapp = $('empWhatsapp')?.value?.trim();
+  var empNome = ($('empNome') ? $('empNome').value : '').trim();
+  var empSlug = ($('empSlug') ? $('empSlug').value : '').trim();
+  var empWhatsapp = ($('empWhatsapp') ? $('empWhatsapp').value : '').trim();
   if (!empNome || !empSlug || !empWhatsapp) {
     return toast('Preencha nome, link e WhatsApp.', 'err');
   }
-  const s2 = $('step2'), s3 = $('step3');
-  if (s2) s2.style.display = 'none';
-  if (s3) s3.style.display = 'block';
-  setStep(3);
+  _mostrarStep(3);
 }
 
 function autoSlug() {
@@ -1979,3 +2029,23 @@ Object.assign(window, {
   toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu
 });
+
+
+
+/* PATCH FINAL — proteção da página pública */
+(function(){
+  function forcePublicIsolation(){
+    if(!location.hash || !location.hash.startsWith('#agendar/')) return;
+    const landing = document.getElementById('landingView');
+    const dashboard = document.getElementById('dashboardView');
+    const publicView = document.getElementById('publicView');
+    if(landing) landing.style.display = 'none';
+    if(dashboard) dashboard.style.display = 'none';
+    if(publicView) publicView.style.display = 'block';
+    document.body.classList.add('public-mode');
+  }
+  window.addEventListener('hashchange', forcePublicIsolation);
+  window.addEventListener('DOMContentLoaded', forcePublicIsolation);
+  setTimeout(forcePublicIsolation, 300);
+  setTimeout(forcePublicIsolation, 1000);
+})();
