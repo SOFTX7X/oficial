@@ -594,7 +594,7 @@
 
 <div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox" id="diaDom"></div>
           </div>
-          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="toast('Horários salvos!','ok')">Salvar horários</button>
+         <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="localStorage.setItem('horariosFuncionamento',JSON.stringify({seg:diaSeg.checked,ter:diaTer.checked,qua:diaQua.checked,qui:diaQui.checked,sex:diaSex.checked,sab:diaSab.checked,dom:diaDom.checked}));toast('Horários salvos!','ok')">Salvar horários</button>
         </div>
         <div class="config-section">
           <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
