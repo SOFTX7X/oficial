@@ -212,7 +212,6 @@ span.flatpickr-weekday {
     opacity: 0;
     pointer-events: none;
     transition: opacity .22s ease;
-    /* bloqueia scroll por baixo */
     overscroll-behavior: contain;
 }
 
@@ -275,10 +274,11 @@ span.flatpickr-weekday {
     align-items: center;
     padding: 6px;
     gap: 4px;
-    scroll-behavior: smooth;
     scrollbar-width: none;
-    /* impede que o scroll do col vaze para a página */
     overscroll-behavior: contain;
+    /* NOVO: scroll nativo com snap */
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
 }
 
 .tp-col::-webkit-scrollbar { display: none; }
@@ -308,6 +308,8 @@ span.flatpickr-weekday {
     font-family: inherit;
     flex-shrink: 0;
     letter-spacing: -.3px;
+    /* NOVO: snap em cada célula */
+    scroll-snap-align: center;
 }
 
 .tp-cell:hover {
