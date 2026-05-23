@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const HOURS   = Array.from({length: 24}, (_, i) => i);
     const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+    const CELL_H  = 44; /* altura de cada célula em px */
 
     let currentInput = null;
     let selHour = 8;
@@ -61,136 +62,155 @@ document.addEventListener("DOMContentLoaded", () => {
             `${pad(selHour)}:${pad(selMin)}`;
     }
 
-    function scrollToActive(col) {
-        const active = col.querySelector(".active");
-        if (active) {
-            setTimeout(() => {
-                active.scrollIntoView({ block: "center", behavior: "smooth" });
-            }, 50);
-        }
+    /* ── Constrói células e retorna o col ── */
+    function buildCol(colId, list, getVal, setVal, rebuild) {
+        const col = document.getElementById(colId);
+        col.innerHTML = "";
+
+        /* padding para centralizar o primeiro e último item */
+        const pad_el = () => {
+            const s = document.createElement("div");
+            s.style.cssText = `height:${(col.clientHeight / 2) - (CELL_H / 2)}px;flex-shrink:0;`;
+            return s;
+        };
+        col.appendChild(pad_el());
+
+        list.forEach(v => {
+            const btn = document.createElement("button");
+            btn.className  = "tp-cell" + (v === getVal() ? " active" : "");
+            btn.textContent = pad(v);
+            btn.dataset.val = v;
+            btn.addEventListener("click", () => {
+                setVal(v);
+                rebuild();
+                updatePreview();
+                snapTo(col, list.indexOf(v));
+            });
+            col.appendChild(btn);
+        });
+
+        col.appendChild(pad_el());
+        return col;
     }
 
     function buildHours() {
-        const col = document.getElementById("tpHours");
-        col.innerHTML = "";
-        HOURS.forEach(h => {
-            const btn = document.createElement("button");
-            btn.className = "tp-cell" + (h === selHour ? " active" : "");
-            btn.textContent = pad(h);
-            btn.addEventListener("click", () => {
-                selHour = h;
-                buildHours();
-                updatePreview();
-            });
-            col.appendChild(btn);
-        });
-        scrollToActive(col);
+        buildCol("tpHours", HOURS, () => selHour, v => { selHour = v; }, buildHours);
+        highlightActive("tpHours", HOURS, () => selHour);
     }
 
     function buildMins() {
-        const col = document.getElementById("tpMins");
-        col.innerHTML = "";
-        MINUTES.forEach(m => {
-            const btn = document.createElement("button");
-            btn.className = "tp-cell" + (m === selMin ? " active" : "");
-            btn.textContent = pad(m);
-            btn.addEventListener("click", () => {
-                selMin = m;
-                buildMins();
-                updatePreview();
-            });
-            col.appendChild(btn);
-        });
-        scrollToActive(col);
+        buildCol("tpMins", MINUTES, () => selMin, v => { selMin = v; }, buildMins);
+        highlightActive("tpMins", MINUTES, () => selMin);
     }
 
-    /* ── Wheel: 1 item por vez ── */
-    function attachWheel(colId, getList, getVal, setVal, rebuild) {
+    /* ── Atualiza só o highlight sem reconstruir tudo ── */
+    function highlightActive(colId, list, getVal) {
         const col = document.getElementById(colId);
-        let accumulated = 0;
-        let wheelTimer  = null;
+        col.querySelectorAll(".tp-cell").forEach((btn, i) => {
+            const isActive = list[i] === getVal();
+            btn.classList.toggle("active", isActive);
+        });
+    }
+
+    /* ── Snapa o scroll para o índice correto ── */
+    function snapTo(col, idx, animate = true) {
+        const half    = col.clientHeight / 2;
+        const offset  = idx * CELL_H + (CELL_H / 2) - half;
+        col.scrollTo({ top: Math.max(0, offset), behavior: animate ? "smooth" : "instant" });
+    }
+
+    /* ── Após scroll livre, descobre qual item está no centro e seleciona ── */
+    function getIdxFromScroll(col) {
+        const half   = col.clientHeight / 2;
+        const center = col.scrollTop + half;
+        return Math.round((center - CELL_H / 2) / CELL_H);
+    }
+
+    /* ── WHEEL: 1 item por vez, sem pular ── */
+    function attachWheel(colId, list, getVal, setVal, rebuild) {
+        const col = document.getElementById(colId);
+        let cooldown = false;
 
         col.addEventListener("wheel", e => {
             e.preventDefault();
             e.stopPropagation();
-            accumulated += e.deltaY;
-            if (Math.abs(accumulated) >= 40) {
-                const dir  = accumulated > 0 ? 1 : -1;
-                accumulated = 0;
-                const list = getList();
-                const cur  = getVal();
-                const idx  = list.indexOf(cur);
-                const next = list[Math.max(0, Math.min(list.length - 1, idx + dir))];
-                if (next !== cur) { setVal(next); rebuild(); updatePreview(); }
+
+            if (cooldown) return;
+            cooldown = true;
+            setTimeout(() => { cooldown = false; }, 120);
+
+            const dir  = e.deltaY > 0 ? 1 : -1;
+            const cur  = getVal();
+            const idx  = list.indexOf(cur);
+            const next = Math.max(0, Math.min(list.length - 1, idx + dir));
+
+            if (list[next] !== cur) {
+                setVal(list[next]);
+                updatePreview();
+                highlightActive(colId, list, getVal);
+                snapTo(col, next);
             }
-            clearTimeout(wheelTimer);
-            wheelTimer = setTimeout(() => { accumulated = 0; }, 200);
         }, { passive: false });
     }
 
-    /* ── Touch: cola o col, bloqueia a página ── */
-    function attachTouch(col, getList, getVal, setVal, rebuild) {
-        let startY = 0;
-        let lastY  = 0;
-        let moved  = 0;
-        let locked = false;
+    /* ── TOUCH: scroll livre + snap no soltar ── */
+    function attachTouch(colId, list, getVal, setVal, rebuild) {
+        const col = document.getElementById(colId);
+        let snapTimer = null;
 
+        /* impede que o toque vaze para a página */
         col.addEventListener("touchstart", e => {
-            startY = e.touches[0].clientY;
-            lastY  = startY;
-            moved  = 0;
-            locked = false;
+            e.stopPropagation();
+            clearTimeout(snapTimer);
         }, { passive: true });
 
         col.addEventListener("touchmove", e => {
-            const y     = e.touches[0].clientY;
-            const delta = lastY - y;
-            lastY = y;
-
-            /* determina direção predominante na primeira movimentação */
-            if (!locked) {
-                const absX = Math.abs(e.touches[0].clientX - e.touches[0].clientX);
-                const absY = Math.abs(delta);
-                if (absY > 2) locked = true;
-            }
-
-            /* bloqueia scroll da página sempre que estiver no col */
-            e.preventDefault();
             e.stopPropagation();
-
-            moved += delta;
-
-            if (Math.abs(moved) >= 44) {
-                const dir  = moved > 0 ? 1 : -1;
-                moved = 0;
-                const list = getList();
-                const cur  = getVal();
-                const idx  = list.indexOf(cur);
-                const next = list[Math.max(0, Math.min(list.length - 1, idx + dir))];
-                if (next !== cur) { setVal(next); rebuild(); updatePreview(); }
-            }
+            e.preventDefault();
         }, { passive: false });
 
         col.addEventListener("touchend", () => {
-            moved  = 0;
-            locked = false;
+            /* aguarda inércia parar, depois snapa */
+            snapTimer = setTimeout(() => {
+                const idx  = Math.max(0, Math.min(list.length - 1, getIdxFromScroll(col)));
+                const val  = list[idx];
+                setVal(val);
+                updatePreview();
+                highlightActive(colId, list, getVal);
+                snapTo(col, idx);
+            }, 80);
+        }, { passive: true });
+
+        /* snap também quando o scroll para sozinho (inércia) */
+        col.addEventListener("scroll", () => {
+            clearTimeout(snapTimer);
+            snapTimer = setTimeout(() => {
+                const idx = Math.max(0, Math.min(list.length - 1, getIdxFromScroll(col)));
+                const val = list[idx];
+                if (val !== getVal()) {
+                    setVal(val);
+                    updatePreview();
+                    highlightActive(colId, list, getVal);
+                    snapTo(col, idx);
+                }
+            }, 150);
         }, { passive: true });
     }
 
-    /* ── Bloqueia scroll nativo do body no iOS ── */
+    /* ── Bloqueia scroll do body (iOS fix) ── */
     function blockBodyScroll() {
-        document.body.style.overflow   = "hidden";
-        document.body.style.position   = "fixed";
-        document.body.style.width      = "100%";
-        document.body.style.top        = `-${window.scrollY}px`;
+        document.body.style.overflow = "hidden";
+        document.body.style.position = "fixed";
+        document.body.style.width    = "100%";
+        document.body.style.top      = `-${window.scrollY}px`;
     }
 
     function unblockBodyScroll() {
         const scrollY = document.body.style.top;
-        document.body.style.overflow   = "";
-        document.body.style.position   = "";
-        document.body.style.width      = "";
-        document.body.style.top        = "";
+        document.body.style.overflow = "";
+        document.body.style.position = "";
+        document.body.style.width    = "";
+        document.body.style.top      = "";
         window.scrollTo(0, parseInt(scrollY || "0") * -1);
     }
 
@@ -203,26 +223,22 @@ document.addEventListener("DOMContentLoaded", () => {
         selMin  = MINUTES.includes(rawMin) ? rawMin : 0;
 
         blockBodyScroll();
-
         buildHours();
         buildMins();
         updatePreview();
         overlay.classList.add("open");
 
-        /* Attach direto no elemento (não pelo ID) para evitar duplicatas */
+        /* scroll inicial sem animação para posição correta */
         setTimeout(() => {
             const colH = document.getElementById("tpHours");
             const colM = document.getElementById("tpMins");
+            snapTo(colH, HOURS.indexOf(selHour), false);
+            snapTo(colM, MINUTES.indexOf(selMin), false);
 
-            attachWheel("tpHours",
-                () => HOURS,   () => selHour, v => { selHour = v; }, buildHours);
-            attachWheel("tpMins",
-                () => MINUTES, () => selMin,  v => { selMin  = v; }, buildMins);
-
-            attachTouch(colH,
-                () => HOURS,   () => selHour, v => { selHour = v; }, buildHours);
-            attachTouch(colM,
-                () => MINUTES, () => selMin,  v => { selMin  = v; }, buildMins);
+            attachWheel("tpHours", HOURS,   () => selHour, v => { selHour = v; }, buildHours);
+            attachWheel("tpMins",  MINUTES, () => selMin,  v => { selMin  = v; }, buildMins);
+            attachTouch("tpHours", HOURS,   () => selHour, v => { selHour = v; }, buildHours);
+            attachTouch("tpMins",  MINUTES, () => selMin,  v => { selMin  = v; }, buildMins);
         }, 80);
     }
 
@@ -245,7 +261,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === overlay) closePicker();
     });
 
-    /* Bloqueia scroll no fundo do overlay */
     overlay.addEventListener("wheel",     e => { if (e.target === overlay) e.preventDefault(); }, { passive: false });
     overlay.addEventListener("touchmove", e => { if (e.target === overlay) e.preventDefault(); }, { passive: false });
 
@@ -254,8 +269,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!el) return;
         el.setAttribute("readonly", true);
         el.style.cursor = "pointer";
-        el.addEventListener("click",  () => openPicker(el));
-        el.addEventListener("focus",  () => openPicker(el));
+        el.addEventListener("click", () => openPicker(el));
+        el.addEventListener("focus", () => openPicker(el));
     });
 
 });
