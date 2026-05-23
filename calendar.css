@@ -20,8 +20,13 @@
     font-weight:700 !important;
 }
 
+.flatpickr-current-month input,
+.flatpickr-current-month .cur-month{
+    color:#ffffff !important;
+}
+
 .flatpickr-weekday{
-    color:#7f8cff !important;
+    color:#ffffff !important;
     font-weight:700 !important;
 }
 
@@ -29,7 +34,7 @@
     color:#ffffff !important;
     border-radius:14px !important;
     border:none !important;
-    font-weight:600 !important;
+    font-weight:700 !important;
     transition:.18s !important;
 }
 
@@ -72,7 +77,8 @@
     border:none !important;
 }
 
-.flatpickr-monthDropdown-months{
+.flatpickr-monthDropdown-months,
+.numInput{
     background:#0b0b12 !important;
     color:#ffffff !important;
 }
