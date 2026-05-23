@@ -1417,3 +1417,186 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .form-actions { grid-template-columns: 1fr; }
   .hero-title { font-size: clamp(36px, 10vw, 48px); }
 }
+
+
+/* ═══════════════════════════════════════════════
+   PATCH FINAL — CALENDÁRIO/HORA PREMIUM + SEM ARRASTO LATERAL
+═══════════════════════════════════════════════ */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  overscroll-behavior-x: none;
+  background: var(--bg);
+}
+
+body {
+  position: relative;
+  touch-action: pan-y;
+}
+
+#landingView,
+#dashboardView,
+#publicView,
+.auth-overlay,
+.auth-modal,
+.dashboard-shell,
+.main-content,
+.view,
+.panel,
+.form-panel,
+.pub-shell,
+.pub-main,
+.pub-panel {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+input.premium-picker {
+  cursor: pointer;
+}
+
+/* Flatpickr escuro/premium */
+.flatpickr-calendar {
+  background: #111114 !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.72), 0 0 0 1px rgba(99,102,241,.18) !important;
+  overflow: hidden !important;
+  z-index: 999999 !important;
+  font-family: 'Geist', sans-serif !important;
+  color: var(--text) !important;
+}
+
+.flatpickr-calendar::before,
+.flatpickr-calendar::after {
+  display: none !important;
+}
+
+.flatpickr-months,
+.flatpickr-weekdays,
+.flatpickr-days,
+.flatpickr-innerContainer,
+.flatpickr-rContainer,
+.flatpickr-time {
+  background: #111114 !important;
+  color: var(--text) !important;
+}
+
+.flatpickr-months {
+  padding-top: 8px !important;
+}
+
+.flatpickr-current-month,
+.flatpickr-current-month input.cur-year,
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+  color: var(--text) !important;
+  fill: var(--text) !important;
+}
+
+.flatpickr-monthDropdown-months,
+.flatpickr-monthDropdown-month {
+  background: #111114 !important;
+  color: var(--text) !important;
+}
+
+.flatpickr-prev-month,
+.flatpickr-next-month {
+  fill: var(--text2) !important;
+  color: var(--text2) !important;
+}
+
+.flatpickr-prev-month:hover svg,
+.flatpickr-next-month:hover svg {
+  fill: var(--accent2) !important;
+}
+
+span.flatpickr-weekday {
+  color: var(--text3) !important;
+  font-weight: 600 !important;
+}
+
+.flatpickr-day {
+  color: var(--text2) !important;
+  border-radius: 10px !important;
+  border-color: transparent !important;
+}
+
+.flatpickr-day:hover {
+  background: rgba(99,102,241,.14) !important;
+  border-color: rgba(99,102,241,.25) !important;
+  color: #fff !important;
+}
+
+.flatpickr-day.today {
+  border-color: rgba(99,102,241,.55) !important;
+  color: #fff !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 0 18px rgba(99,102,241,.35) !important;
+}
+
+.flatpickr-day.disabled,
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+  color: rgba(255,255,255,.22) !important;
+}
+
+.flatpickr-time {
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+}
+
+.flatpickr-time input,
+.flatpickr-time .flatpickr-am-pm {
+  background: #111114 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.flatpickr-time input:hover,
+.flatpickr-time .flatpickr-am-pm:hover,
+.flatpickr-time input:focus {
+  background: rgba(99,102,241,.12) !important;
+}
+
+.flatpickr-time .numInputWrapper span.arrowUp::after {
+  border-bottom-color: var(--text2) !important;
+}
+
+.flatpickr-time .numInputWrapper span.arrowDown::after {
+  border-top-color: var(--text2) !important;
+}
+
+/* Evita picker branco nativo quando o Flatpickr estiver ativo */
+input[type="date"].premium-picker,
+input[type="time"].premium-picker {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+@media (max-width: 560px) {
+  .flatpickr-calendar {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    left: 12px !important;
+    right: 12px !important;
+  }
+
+  .flatpickr-days,
+  .dayContainer {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .flatpickr-day {
+    max-width: calc((100vw - 48px) / 7) !important;
+  }
+}
