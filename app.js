@@ -4,7 +4,7 @@ window.__authOpenMode = null;
 window.openAuth = function(mode) {
   window.__authOpenMode = mode || 'login';
 
-  const overlay = document.getElementById('authOverlay');
+  const overlay = document.getElementById('authOverlay');F
   if (overlay) overlay.classList.add('open');
 
   document.body.style.overflow = 'hidden';
@@ -68,7 +68,9 @@ function slugify(s) {
 
 function hojeISO() { return new Date().toISOString().slice(0, 10); }
 function mesPrefixo() { return new Date().toISOString().slice(0, 7); }
-function publicUrl(slug) { return location.origin + '/' + slug + '/'; }
+function publicUrl(slug) {
+  return location.origin + '/agendar/' + slug + '/';
+}
 function initial(name) { return (name || '?').trim().substring(0, 1).toUpperCase(); }
 
 function formatDate(d) {
