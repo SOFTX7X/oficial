@@ -1,32 +1,3 @@
-/* PATCH CLIQUES LANDING/AUTH — GARANTE BOTÕES ENTRAR/CRIAR CONTA */
-window.__authOpenMode = null;
-
-window.openAuth = function(mode) {
-  window.__authOpenMode = mode || 'login';
-
-  const overlay = document.getElementById('authOverlay');
-  if (overlay) overlay.classList.add('open');
-
-  document.body.style.overflow = 'hidden';
-
-  if (window.__authOpenMode === 'login') {
-    if (typeof window.showLogin === 'function') window.showLogin();
-  } else {
-    if (typeof window.showCadastro === 'function') window.showCadastro();
-  }
-};
-
-window.closeAuth = function() {
-  const overlay = document.getElementById('authOverlay');
-  if (overlay) overlay.classList.remove('open');
-  document.body.style.overflow = '';
-};
-
-
-/* ═══════════════════════════════════════════════
-   AGENDAPRO — app.js CORRIGIDO COMPLETO
-═══════════════════════════════════════════════ */
-
 // ── STATE ──
 let state = {
   user: null, empresa: null, perfil: null,
@@ -68,8 +39,12 @@ function slugify(s) {
 
 function hojeISO() { return new Date().toISOString().slice(0, 10); }
 function mesPrefixo() { return new Date().toISOString().slice(0, 7); }
-function publicUrl(slug) { 
-return location.origin + location.pathname + 'agendar/' + slug + '/'; }
+
+// CORRIGIDO: publicUrl agora usa # para hash routing
+function publicUrl(slug) {
+  return location.origin + location.pathname + '#agendar/' + slug;
+}
+
 function initial(name) { return (name || '?').trim().substring(0, 1).toUpperCase(); }
 
 function formatDate(d) {
@@ -174,18 +149,14 @@ window.addEventListener('hashchange', () => {
 });
 
 // ── FECHAR MENUS AO CLICAR FORA ──
-// FIX: só fecha se o clique NÃO foi dentro do dropdown aberto
 document.addEventListener('click', function(e) {
   if (_openMenu) {
-    // Se clicou no próprio botão que abriu — o handler do btn já trata
     if (_openMenuBtn && _openMenuBtn.contains(e.target)) return;
-    // Se clicou dentro do dropdown — não fecha
     if (_openMenu.contains(e.target)) return;
     closeAllMenus();
   }
 });
 
-// Fecha menus ao rolar (evita dropdown desalinhado)
 document.addEventListener('scroll', closeAllMenus, { passive: true });
 
 // ── INIT ──
@@ -364,15 +335,12 @@ function setView(view) {
 }
 
 // ── AUTH ──
+// CORRIGIDO: apenas uma definição de openAuth, sem patch duplicado no topo
 function openAuth(mode) {
-  window.__authOpenMode = mode || 'login';
-
   const overlay = $('authOverlay');
   if (!overlay) return;
-
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-
   if (mode === 'login') showLogin();
   else showCadastro();
 }
@@ -386,7 +354,6 @@ function closeAuth() {
 function showLogin() {
   const fl = $('formLogin');
   const fc = $('formCadastro');
-
   if (fc) fc.style.display = 'none';
   if (fl) fl.style.display = 'block';
 }
@@ -394,18 +361,13 @@ function showLogin() {
 function showCadastro() {
   const fl = $('formLogin');
   const fc = $('formCadastro');
-
   if (fl) fl.style.display = 'none';
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
-
   if (typeof _mostrarStep === 'function') _mostrarStep(1);
   preencherSelectCategorias();
 }
 
-
-// ═══════════════════════════════════════════════
-// CORREÇÃO DEFINITIVA DOS STEPS DO CADASTRO
-// ═══════════════════════════════════════════════
+// ── STEPS DO CADASTRO ──
 function _mostrarStep(n) {
   ['step1', 'step2', 'step3'].forEach(function(id) {
     const el = document.getElementById(id);
@@ -428,22 +390,15 @@ function _mostrarStep(n) {
   });
 }
 
-function setStep(n) {
-  _mostrarStep(n);
-}
-
-function goStep1() {
-  _mostrarStep(1);
-}
+function setStep(n) { _mostrarStep(n); }
+function goStep1() { _mostrarStep(1); }
 
 function goStep2() {
   const nome = $('cadNome')?.value?.trim();
   const email = $('cadEmail')?.value?.trim();
   const senha = $('cadSenha')?.value?.trim();
-
   if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
   if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
-
   preencherSelectCategorias();
   _mostrarStep(2);
 }
@@ -452,14 +407,11 @@ function goStep3() {
   const empNome = $('empNome')?.value?.trim();
   const empSlug = $('empSlug')?.value?.trim();
   const empWhatsapp = $('empWhatsapp')?.value?.trim();
-
   if (!empNome || !empSlug || !empWhatsapp) {
     return toast('Preencha nome, link e WhatsApp.', 'err');
   }
-
   _mostrarStep(3);
 }
-
 
 function autoSlug() {
   const el = $('empSlug');
@@ -930,7 +882,6 @@ function renderTimeline() {
         </div>
       </div>`;
     const card = block.querySelector('.tl-card');
-    const cardTop = block.querySelector('.tl-card-top');
     const menu = buildActionMenu(a.id, [
       { icon: '✏️', label: 'Editar', action: () => editAgendamento(a.id) },
       { icon: '📋', label: 'Duplicar', action: () => duplicarAgendamento(a.id) },
@@ -968,9 +919,7 @@ function renderAcoes(a) {
   </div>`;
 }
 
-// ── ACTION MENU — FIX COMPLETO ──
-// Usa position:fixed com coordenadas calculadas do getBoundingClientRect
-// para que o dropdown nunca seja cortado por qualquer overflow:hidden do pai
+// ── ACTION MENU ──
 function buildActionMenu(id, items) {
   const wrap = document.createElement('div');
   wrap.className = 'action-menu';
@@ -998,7 +947,6 @@ function buildActionMenu(id, items) {
       e.stopPropagation();
       e.preventDefault();
       closeAllMenus();
-      // Pequeno delay para garantir que o menu fechou antes da ação
       setTimeout(() => item.action(), 50);
     });
     drop.appendChild(el);
@@ -1015,28 +963,22 @@ function buildActionMenu(id, items) {
 
     closeAllMenus();
 
-    // FIX CRÍTICO: posiciona o dropdown via fixed usando coordenadas reais do botão
     const rect = btn.getBoundingClientRect();
     const dropW = 200;
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
 
-    // Calcula posição: tenta abrir à direita do botão, alinhado pela direita
     let left = rect.right - dropW;
     let top = rect.bottom + 6;
 
-    // Se sair pela esquerda, abre pela esquerda do botão
     if (left < 8) left = rect.left;
-    // Se sair pela direita, recua
     if (left + dropW > viewportW - 8) left = viewportW - dropW - 8;
-    // Se sair por baixo, abre para cima
     if (top + 200 > viewportH - 8) top = rect.top - 210;
 
     drop.style.top = top + 'px';
     drop.style.left = left + 'px';
     drop.style.minWidth = dropW + 'px';
 
-    // Adiciona ao body para escapar de qualquer overflow:hidden
     document.body.appendChild(drop);
     drop.classList.add('open');
     _openMenu = drop;
@@ -1044,8 +986,6 @@ function buildActionMenu(id, items) {
   });
 
   wrap.appendChild(btn);
-  // drop fica no body quando aberto, não dentro do wrap
-  // mas começa dentro para não poluir o DOM
   wrap.appendChild(drop);
   return wrap;
 }
@@ -1053,14 +993,12 @@ function buildActionMenu(id, items) {
 function closeAllMenus() {
   if (_openMenu) {
     _openMenu.classList.remove('open');
-    // Remove do body se foi movido para lá
     if (_openMenu.parentElement === document.body) {
       document.body.removeChild(_openMenu);
     }
     _openMenu = null;
     _openMenuBtn = null;
   }
-  // Limpa qualquer dropdown órfão
   document.querySelectorAll('body > .action-dropdown').forEach(d => {
     d.classList.remove('open');
     if (d.parentElement === document.body) document.body.removeChild(d);
@@ -2006,6 +1944,24 @@ function voltarDaPublica() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ── PROTEÇÃO DA PÁGINA PÚBLICA ──
+(function() {
+  function forcePublicIsolation() {
+    if (!location.hash || !location.hash.startsWith('#agendar/')) return;
+    const landing = document.getElementById('landingView');
+    const dashboard = document.getElementById('dashboardView');
+    const publicView = document.getElementById('publicView');
+    if (landing) landing.style.display = 'none';
+    if (dashboard) dashboard.style.display = 'none';
+    if (publicView) publicView.style.display = 'block';
+    document.body.classList.add('public-mode');
+  }
+  window.addEventListener('hashchange', forcePublicIsolation);
+  window.addEventListener('DOMContentLoaded', forcePublicIsolation);
+  setTimeout(forcePublicIsolation, 300);
+  setTimeout(forcePublicIsolation, 1000);
+})();
+
 // ── EXPOSE GLOBALS ──
 Object.assign(window, {
   openAuth, closeAuth, showLogin, showCadastro,
@@ -2025,54 +1981,6 @@ Object.assign(window, {
   selectPubSvc, selectPubProf, confirmarAgendamentoPublico, resetPublic,
   closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
   toast, clearNotifDot, loadPublic,
-  openMobileMenu, closeMobileMenu
-});
-
-
-
-/* PATCH FINAL — proteção da página pública */
-(function(){
-  function forcePublicIsolation(){
-    if(!location.hash || !location.hash.startsWith('#agendar/')) return;
-    const landing = document.getElementById('landingView');
-    const dashboard = document.getElementById('dashboardView');
-    const publicView = document.getElementById('publicView');
-    if(landing) landing.style.display = 'none';
-    if(dashboard) dashboard.style.display = 'none';
-    if(publicView) publicView.style.display = 'block';
-    document.body.classList.add('public-mode');
-  }
-  window.addEventListener('hashchange', forcePublicIsolation);
-  window.addEventListener('DOMContentLoaded', forcePublicIsolation);
-  setTimeout(forcePublicIsolation, 300);
-  setTimeout(forcePublicIsolation, 1000);
-})();
-
-
-
-/* PATCH FINAL CLIQUES — REEXPÕE FUNÇÕES APÓS CARREGAR */
-Object.assign(window, {
-  openAuth,
-  closeAuth,
-  showLogin,
-  showCadastro,
-  goStep1,
-  goStep2,
-  goStep3,
-  loginComSenha,
-  finalizarCadastro
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-  Object.assign(window, {
-    openAuth,
-    closeAuth,
-    showLogin,
-    showCadastro,
-    goStep1,
-    goStep2,
-    goStep3,
-    loginComSenha,
-    finalizarCadastro
-  });
+  openMobileMenu, closeMobileMenu,
+  menuOpenPublic, menuCopyPublicLink, menuNotifications
 });
