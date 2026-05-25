@@ -5,9 +5,11 @@
   <script>
     (function () {
       var path = window.location.pathname;
-      var slug = path.replace(/^\//, '').replace(/\/$/, '');
-      if (slug) {
-        sessionStorage.setItem('pubSlug', slug);
+      if (path.includes('/agendar/')) {
+        var slug = path.split('/agendar/')[1].replace(/\/$/, '');
+        if (slug) {
+          sessionStorage.setItem('pubSlug', slug);
+        }
       }
       window.location.replace('https://vyxora.online/');
     })();
