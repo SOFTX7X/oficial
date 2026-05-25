@@ -5,13 +5,11 @@
   <script>
     (function () {
       var path = window.location.pathname;
-
-      if (path.includes("/oficial/agendar/")) {
-        var slug = path.split("/oficial/agendar/")[1].replace("/", "");
-        window.location.replace("https://agendaprosite.github.io/oficial/#agendar/" + slug);
-      } else {
-        window.location.replace("https://agendaprosite.github.io/oficial/");
+      var slug = path.replace(/^\//, '').replace(/\/$/, '');
+      if (slug) {
+        sessionStorage.setItem('pubSlug', slug);
       }
+      window.location.replace('https://vyxora.online/');
     })();
   </script>
 </head>
