@@ -4,7 +4,7 @@ window.__authOpenMode = null;
 window.openAuth = function(mode) {
   window.__authOpenMode = mode || 'login';
 
-  const overlay = document.getElementById('authOverlay');F
+  const overlay = document.getElementById('authOverlay');
   if (overlay) overlay.classList.add('open');
 
   document.body.style.overflow = 'hidden';
@@ -24,7 +24,7 @@ window.closeAuth = function() {
 
 
 /* ═══════════════════════════════════════════════
-   VYXORA AGENDAS — app.js
+   AGENDAPRO — app.js CORRIGIDO COMPLETO
 ═══════════════════════════════════════════════ */
 
 // ── STATE ──
@@ -68,9 +68,8 @@ function slugify(s) {
 
 function hojeISO() { return new Date().toISOString().slice(0, 10); }
 function mesPrefixo() { return new Date().toISOString().slice(0, 7); }
-function publicUrl(slug) {
-  return location.origin + '/agendar/' + slug + '/';
-}
+function publicUrl(slug) { 
+return location.origin + location.pathname + 'agendar/' + slug + '/'; }
 function initial(name) { return (name || '?').trim().substring(0, 1).toUpperCase(); }
 
 function formatDate(d) {
@@ -175,14 +174,18 @@ window.addEventListener('hashchange', () => {
 });
 
 // ── FECHAR MENUS AO CLICAR FORA ──
+// FIX: só fecha se o clique NÃO foi dentro do dropdown aberto
 document.addEventListener('click', function(e) {
   if (_openMenu) {
+    // Se clicou no próprio botão que abriu — o handler do btn já trata
     if (_openMenuBtn && _openMenuBtn.contains(e.target)) return;
+    // Se clicou dentro do dropdown — não fecha
     if (_openMenu.contains(e.target)) return;
     closeAllMenus();
   }
 });
 
+// Fecha menus ao rolar (evita dropdown desalinhado)
 document.addEventListener('scroll', closeAllMenus, { passive: true });
 
 // ── INIT ──
@@ -210,15 +213,7 @@ async function init() {
   }
 }
 
-// ── GET PUBLIC SLUG ──
 function getPublicSlug() {
-  // Pega slug salvo pelo 404.html
-  const slug = sessionStorage.getItem('pubSlug');
-  if (slug) {
-    sessionStorage.removeItem('pubSlug');
-    return slug;
-  }
-  // Fallback hash
   if (location.hash.startsWith('#agendar/')) {
     return location.hash.replace('#agendar/', '').trim();
   }
@@ -391,6 +386,7 @@ function closeAuth() {
 function showLogin() {
   const fl = $('formLogin');
   const fc = $('formCadastro');
+
   if (fc) fc.style.display = 'none';
   if (fl) fl.style.display = 'block';
 }
@@ -398,13 +394,18 @@ function showLogin() {
 function showCadastro() {
   const fl = $('formLogin');
   const fc = $('formCadastro');
+
   if (fl) fl.style.display = 'none';
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
+
   if (typeof _mostrarStep === 'function') _mostrarStep(1);
   preencherSelectCategorias();
 }
 
-// ── STEPS ──
+
+// ═══════════════════════════════════════════════
+// CORREÇÃO DEFINITIVA DOS STEPS DO CADASTRO
+// ═══════════════════════════════════════════════
 function _mostrarStep(n) {
   ['step1', 'step2', 'step3'].forEach(function(id) {
     const el = document.getElementById(id);
@@ -427,15 +428,22 @@ function _mostrarStep(n) {
   });
 }
 
-function setStep(n) { _mostrarStep(n); }
-function goStep1() { _mostrarStep(1); }
+function setStep(n) {
+  _mostrarStep(n);
+}
+
+function goStep1() {
+  _mostrarStep(1);
+}
 
 function goStep2() {
   const nome = $('cadNome')?.value?.trim();
   const email = $('cadEmail')?.value?.trim();
   const senha = $('cadSenha')?.value?.trim();
+
   if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
   if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
+
   preencherSelectCategorias();
   _mostrarStep(2);
 }
@@ -444,11 +452,14 @@ function goStep3() {
   const empNome = $('empNome')?.value?.trim();
   const empSlug = $('empSlug')?.value?.trim();
   const empWhatsapp = $('empWhatsapp')?.value?.trim();
+
   if (!empNome || !empSlug || !empWhatsapp) {
     return toast('Preencha nome, link e WhatsApp.', 'err');
   }
+
   _mostrarStep(3);
 }
+
 
 function autoSlug() {
   const el = $('empSlug');
@@ -562,7 +573,9 @@ async function finalizarCadastro() {
       cargo: 'Administrador'
     });
 
-    if (perfilErr) console.error('Erro ao criar perfil:', perfilErr);
+    if (perfilErr) {
+      console.error('Erro ao criar perfil:', perfilErr);
+    }
 
     await db.from('agenda_servicos').insert({
       empresa_id: empresa.id,
@@ -599,7 +612,7 @@ async function finalizarCadastro() {
     state.empresa = empresa;
     showDashboard();
     await loadAll();
-    showNotif('Bem-vindo ao VyXora Agendas!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
+    showNotif('Bem-vindo ao AgendaPro!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
 
   } catch (e) {
     console.error('Erro em finalizarCadastro:', e);
@@ -917,6 +930,7 @@ function renderTimeline() {
         </div>
       </div>`;
     const card = block.querySelector('.tl-card');
+    const cardTop = block.querySelector('.tl-card-top');
     const menu = buildActionMenu(a.id, [
       { icon: '✏️', label: 'Editar', action: () => editAgendamento(a.id) },
       { icon: '📋', label: 'Duplicar', action: () => duplicarAgendamento(a.id) },
@@ -954,7 +968,9 @@ function renderAcoes(a) {
   </div>`;
 }
 
-// ── ACTION MENU ──
+// ── ACTION MENU — FIX COMPLETO ──
+// Usa position:fixed com coordenadas calculadas do getBoundingClientRect
+// para que o dropdown nunca seja cortado por qualquer overflow:hidden do pai
 function buildActionMenu(id, items) {
   const wrap = document.createElement('div');
   wrap.className = 'action-menu';
@@ -982,6 +998,7 @@ function buildActionMenu(id, items) {
       e.stopPropagation();
       e.preventDefault();
       closeAllMenus();
+      // Pequeno delay para garantir que o menu fechou antes da ação
       setTimeout(() => item.action(), 50);
     });
     drop.appendChild(el);
@@ -998,22 +1015,28 @@ function buildActionMenu(id, items) {
 
     closeAllMenus();
 
+    // FIX CRÍTICO: posiciona o dropdown via fixed usando coordenadas reais do botão
     const rect = btn.getBoundingClientRect();
     const dropW = 200;
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
 
+    // Calcula posição: tenta abrir à direita do botão, alinhado pela direita
     let left = rect.right - dropW;
     let top = rect.bottom + 6;
 
+    // Se sair pela esquerda, abre pela esquerda do botão
     if (left < 8) left = rect.left;
+    // Se sair pela direita, recua
     if (left + dropW > viewportW - 8) left = viewportW - dropW - 8;
+    // Se sair por baixo, abre para cima
     if (top + 200 > viewportH - 8) top = rect.top - 210;
 
     drop.style.top = top + 'px';
     drop.style.left = left + 'px';
     drop.style.minWidth = dropW + 'px';
 
+    // Adiciona ao body para escapar de qualquer overflow:hidden
     document.body.appendChild(drop);
     drop.classList.add('open');
     _openMenu = drop;
@@ -1021,6 +1044,8 @@ function buildActionMenu(id, items) {
   });
 
   wrap.appendChild(btn);
+  // drop fica no body quando aberto, não dentro do wrap
+  // mas começa dentro para não poluir o DOM
   wrap.appendChild(drop);
   return wrap;
 }
@@ -1028,12 +1053,14 @@ function buildActionMenu(id, items) {
 function closeAllMenus() {
   if (_openMenu) {
     _openMenu.classList.remove('open');
+    // Remove do body se foi movido para lá
     if (_openMenu.parentElement === document.body) {
       document.body.removeChild(_openMenu);
     }
     _openMenu = null;
     _openMenuBtn = null;
   }
+  // Limpa qualquer dropdown órfão
   document.querySelectorAll('body > .action-dropdown').forEach(d => {
     d.classList.remove('open');
     if (d.parentElement === document.body) document.body.removeChild(d);
@@ -1808,7 +1835,7 @@ function copyPublicLink() {
 
 function openPublic() {
   if (!state?.empresa?.slug) return;
-  history.pushState(null, '', '/' + state.empresa.slug + '/');
+  history.pushState(null, '', '#agendar/' + state.empresa.slug);
   loadPublic(state.empresa.slug);
 }
 
@@ -1907,15 +1934,11 @@ async function confirmarAgendamentoPublico() {
   const pubTel = $('pubClienteTel')?.value?.trim();
   const pubData = $('pubData')?.value;
   const pubHora = $('pubHora')?.value;
+  const partesData = pubData.split('/');
+  const dataFormatada = `${partesData[2]}-${partesData[1]}-${partesData[0]}`;
 
   if (!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !pubNome || !pubTel || !pubData || !pubHora) {
     return toast('Preencha tudo para confirmar.', 'err');
-  }
-
-  let dataFormatada = pubData;
-  if (pubData.includes('/')) {
-    const partes = pubData.split('/');
-    dataFormatada = `${partes[2]}-${partes[1]}-${partes[0]}`;
   }
 
   try {
@@ -2005,29 +2028,18 @@ Object.assign(window, {
   openMobileMenu, closeMobileMenu
 });
 
+
+
 /* PATCH FINAL — proteção da página pública */
 (function(){
   function forcePublicIsolation(){
-    const slug = sessionStorage.getItem('pubSlug');
-    if (slug) {
-      sessionStorage.removeItem('pubSlug');
-      const landing = document.getElementById('landingView');
-      const dashboard = document.getElementById('dashboardView');
-      const publicView = document.getElementById('publicView');
-      if (landing) landing.style.display = 'none';
-      if (dashboard) dashboard.style.display = 'none';
-      if (publicView) publicView.style.display = 'block';
-      document.body.classList.add('public-mode');
-      loadPublic(slug);
-      return;
-    }
-    if (!location.hash || !location.hash.startsWith('#agendar/')) return;
+    if(!location.hash || !location.hash.startsWith('#agendar/')) return;
     const landing = document.getElementById('landingView');
     const dashboard = document.getElementById('dashboardView');
     const publicView = document.getElementById('publicView');
-    if (landing) landing.style.display = 'none';
-    if (dashboard) dashboard.style.display = 'none';
-    if (publicView) publicView.style.display = 'block';
+    if(landing) landing.style.display = 'none';
+    if(dashboard) dashboard.style.display = 'none';
+    if(publicView) publicView.style.display = 'block';
     document.body.classList.add('public-mode');
   }
   window.addEventListener('hashchange', forcePublicIsolation);
@@ -2036,17 +2048,31 @@ Object.assign(window, {
   setTimeout(forcePublicIsolation, 1000);
 })();
 
+
+
 /* PATCH FINAL CLIQUES — REEXPÕE FUNÇÕES APÓS CARREGAR */
 Object.assign(window, {
-  openAuth, closeAuth, showLogin, showCadastro,
-  goStep1, goStep2, goStep3,
-  loginComSenha, finalizarCadastro
+  openAuth,
+  closeAuth,
+  showLogin,
+  showCadastro,
+  goStep1,
+  goStep2,
+  goStep3,
+  loginComSenha,
+  finalizarCadastro
 });
 
 document.addEventListener('DOMContentLoaded', function() {
   Object.assign(window, {
-    openAuth, closeAuth, showLogin, showCadastro,
-    goStep1, goStep2, goStep3,
-    loginComSenha, finalizarCadastro
+    openAuth,
+    closeAuth,
+    showLogin,
+    showCadastro,
+    goStep1,
+    goStep2,
+    goStep3,
+    loginComSenha,
+    finalizarCadastro
   });
 });
