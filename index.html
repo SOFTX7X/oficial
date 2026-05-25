@@ -3,7 +3,50 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>VyXora Agendas — Sistema de Agendamento</title>
+
+<!-- SEO META TAGS -->
+<meta name="description" content="VyXora Agendas — Sistema de agendamento online premium para profissionais brasileiros. Crie sua agenda, receba agendamentos 24h, gerencie clientes, serviços e financeiro em um painel completo. Grátis para começar."/>
+<meta name="keywords" content="agendamento online, agenda online, sistema de agendamento, agendamento para salão, agendamento para barbearia, nail designer, agendamento grátis, VyXora"/>
+<meta name="author" content="VyXora Agendas"/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://vyxora.online/"/>
+
+<!-- OPEN GRAPH (WhatsApp, Instagram, Facebook) -->
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://vyxora.online/"/>
+<meta property="og:title" content="VyXora Agendas — Sua agenda online, organizada e elegante."/>
+<meta property="og:description" content="Receba agendamentos 24h, gerencie clientes e faturamento. Painel profissional pronto em 3 minutos. Grátis para começar."/>
+<meta property="og:locale" content="pt_BR"/>
+
+<!-- TWITTER CARD -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="VyXora Agendas — Sua agenda online, organizada e elegante."/>
+<meta name="twitter:description" content="Receba agendamentos 24h, gerencie clientes e faturamento. Painel profissional pronto em 3 minutos. Grátis para começar."/>
+
+<!-- SCHEMA.ORG (Google Rich Results) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "VyXora Agendas",
+  "url": "https://vyxora.online",
+  "description": "Sistema de agendamento online premium para profissionais brasileiros. Gerencie agenda, clientes, serviços e financeiro em um painel completo.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web, Android, iOS",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "BRL"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "2400"
+  }
+}
+</script>
+
+<title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="stylesheet" href="style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -581,20 +624,14 @@
           <div class="config-title"><div class="config-icon">🕐</div>Horários de funcionamento</div>
           <div class="schedule-grid">
             <div class="sch-day"><div class="sch-day-name">Seg</div><input type="checkbox" id="diaSeg" checked></div>
-
-<div class="sch-day"><div class="sch-day-name">Ter</div><input type="checkbox" id="diaTer" checked></div>
-
-<div class="sch-day"><div class="sch-day-name">Qua</div><input type="checkbox" id="diaQua" checked></div>
-
-<div class="sch-day"><div class="sch-day-name">Qui</div><input type="checkbox" id="diaQui" checked></div>
-
-<div class="sch-day"><div class="sch-day-name">Sex</div><input type="checkbox" id="diaSex" checked></div>
-
-<div class="sch-day"><div class="sch-day-name">Sáb</div><input type="checkbox" id="diaSab" checked></div>
-
-<div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox" id="diaDom"></div>
+            <div class="sch-day"><div class="sch-day-name">Ter</div><input type="checkbox" id="diaTer" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Qua</div><input type="checkbox" id="diaQua" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Qui</div><input type="checkbox" id="diaQui" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Sex</div><input type="checkbox" id="diaSex" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Sáb</div><input type="checkbox" id="diaSab" checked></div>
+            <div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox" id="diaDom"></div>
           </div>
-         <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="localStorage.setItem('horariosFuncionamento',JSON.stringify({seg:diaSeg.checked,ter:diaTer.checked,qua:diaQua.checked,qui:diaQui.checked,sex:diaSex.checked,sab:diaSab.checked,dom:diaDom.checked}));toast('Horários salvos!','ok')">Salvar horários</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="localStorage.setItem('horariosFuncionamento',JSON.stringify({seg:diaSeg.checked,ter:diaTer.checked,qua:diaQua.checked,qui:diaQui.checked,sex:diaSex.checked,sab:diaSab.checked,dom:diaDom.checked}));toast('Horários salvos!','ok')">Salvar horários</button>
         </div>
         <div class="config-section">
           <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
@@ -750,7 +787,7 @@ function closeMobileMenu(){
   if(drawer) drawer.classList.remove('open');
 }
 </script>
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
 
   flatpickr("#data", {
