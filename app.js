@@ -564,7 +564,7 @@ async function finalizarCadastro() {
     state.empresa = empresa;
     showDashboard();
     await loadAll();
-    showNotif('Bem-vindo ao AgendaPro!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
+    showNotif('Bem-vindo ao VyXora Agendas!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
 
   } catch (e) {
     console.error('Erro em finalizarCadastro:', e);
