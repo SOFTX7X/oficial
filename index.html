@@ -3,27 +3,19 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-
-<!-- SEO META TAGS -->
 <meta name="description" content="VyXora Agendas — Sistema de agendamento online premium para profissionais brasileiros. Crie sua agenda, receba agendamentos 24h, gerencie clientes, serviços e financeiro em um painel completo. Grátis para começar."/>
 <meta name="keywords" content="agendamento online, agenda online, sistema de agendamento, agendamento para salão, agendamento para barbearia, nail designer, agendamento grátis, VyXora"/>
 <meta name="author" content="VyXora Agendas"/>
 <meta name="robots" content="index, follow"/>
 <link rel="canonical" href="https://vyxora.online/"/>
-
-<!-- OPEN GRAPH (WhatsApp, Instagram, Facebook) -->
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://vyxora.online/"/>
 <meta property="og:title" content="VyXora Agendas — Sua agenda online, organizada e elegante."/>
 <meta property="og:description" content="Receba agendamentos 24h, gerencie clientes e faturamento. Painel profissional pronto em 3 minutos. Grátis para começar."/>
 <meta property="og:locale" content="pt_BR"/>
-
-<!-- TWITTER CARD -->
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="VyXora Agendas — Sua agenda online, organizada e elegante."/>
 <meta name="twitter:description" content="Receba agendamentos 24h, gerencie clientes e faturamento. Painel profissional pronto em 3 minutos. Grátis para começar."/>
-
-<!-- SCHEMA.ORG (Google Rich Results) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -45,23 +37,18 @@
   }
 }
 </script>
-
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" href="calendar.css">
-
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
-
 <script src="calendar.js"></script>
-
-</head> 
+</head>
 <body>
 
 <div class="bg-noise"></div>
@@ -288,7 +275,6 @@
       <p class="auth-left-footer">🔒 Supabase Auth · RLS · Dispositivo confiável</p>
     </div>
     <div class="auth-form-area">
-      <!-- LOGIN -->
       <div id="formLogin" style="display:none">
         <div class="auth-form-title">Entrar no painel</div>
         <p class="auth-form-sub">Use o mesmo e-mail e senha criados no cadastro.</p>
@@ -299,7 +285,6 @@
         </div>
         <div class="auth-switch">Não tenho conta. <button onclick="showCadastro()">Criar cadastro</button></div>
       </div>
-      <!-- CADASTRO -->
       <div id="formCadastro" style="display:none">
         <div class="auth-form-title">Criar sua conta</div>
         <p class="auth-form-sub">Configure em 3 etapas simples.</p>
@@ -308,7 +293,6 @@
           <div class="step-dot" id="st2"></div>
           <div class="step-dot" id="st3"></div>
         </div>
-        <!-- Step 1 -->
         <div id="step1">
           <div class="form-gap">
             <div class="field"><label>Seu nome</label><input id="cadNome" placeholder="Ex: Ana Caroline" autocomplete="name"></div>
@@ -318,7 +302,6 @@
           </div>
           <div class="auth-switch">Já tenho conta. <button onclick="showLogin()">Entrar</button></div>
         </div>
-        <!-- Step 2 -->
         <div id="step2" style="display:none">
           <div class="form-gap">
             <div class="field"><label>Nome do negócio</label><input id="empNome" placeholder="Ex: Nails da Ana" oninput="autoSlug()"></div>
@@ -338,7 +321,6 @@
             </div>
           </div>
         </div>
-        <!-- Step 3 -->
         <div id="step3" style="display:none">
           <div class="form-gap">
             <div class="field"><label>Primeiro serviço</label><input id="servNome" placeholder="Ex: Alongamento em Gel"></div>
@@ -412,7 +394,6 @@
       </div>
     </div>
 
-    <!-- MOBILE NAV -->
     <nav class="mobile-nav-bar" id="mobileNavBar">
       <button class="mob-nav-btn" onclick="setView('dashboard')"><span class="mni">📊</span>Início</button>
       <button class="mob-nav-btn" onclick="setView('agenda')"><span class="mni">📅</span>Agenda</button>
@@ -421,7 +402,6 @@
       <button class="mob-nav-btn" onclick="openMobileMenu()"><span class="mni">☰</span>Menu</button>
     </nav>
 
-    <!-- MOBILE MENU DRAWER -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
     <div class="mobile-menu-drawer" id="mobileMenuDrawer">
       <div class="mobile-menu-header">
@@ -632,7 +612,7 @@
             <div class="sch-day"><div class="sch-day-name">Sáb</div><input type="checkbox" id="diaSab" checked></div>
             <div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox" id="diaDom"></div>
           </div>
-         <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="salvarHorarios()">Salvar horários</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="salvarHorarios()">Salvar horários</button>
         </div>
         <div class="config-section">
           <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
@@ -680,7 +660,11 @@ Aguardamos você!</textarea></div>
           <div class="field"><label>Nome completo</label><input id="pubClienteNome" placeholder="Seu nome"></div>
           <div class="field"><label>WhatsApp</label><input id="pubClienteTel" placeholder="(92) 99999-9999"></div>
           <div class="field-row">
-            <div class="field"><label>Data</label><input id="pubData" type="date"></div>
+            <div class="field">
+              <label>Data</label>
+              <input id="pubData" type="date">
+              <div id="pubDataAviso" style="display:none;color:#ef4444;font-size:12px;margin-top:4px;font-weight:500">⛔ Este dia não está disponível. Escolha outra data.</div>
+            </div>
             <div class="field"><label>Hora</label><input id="pubHora" type="time"></div>
           </div>
           <div class="field"><label>Observação</label><textarea id="pubObs" placeholder="Alguma observação?"></textarea></div>
@@ -766,7 +750,6 @@ Aguardamos você!</textarea></div>
 (function () {
   const params = new URLSearchParams(window.location.search);
   const agendar = params.get("agendar");
-
   if (agendar) {
     window.location.hash = "agendar/" + agendar;
   }
@@ -790,13 +773,11 @@ function closeMobileMenu(){
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
   flatpickr("#data", {
     locale: "pt",
     dateFormat: "d/m/Y",
     disableMobile: true
   });
-
   flatpickr("#hora", {
     enableTime: true,
     noCalendar: true,
@@ -805,7 +786,6 @@ document.addEventListener("DOMContentLoaded", () => {
     minuteIncrement: 5,
     disableMobile: true
   });
-
 });
 </script>
 </body>
