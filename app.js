@@ -1137,6 +1137,16 @@ function renderConfig() {
   set('cfgFacebook', e.facebook);
   set('cfgTiktok', e.tiktok);
   set('cfgSite', e.site);
+
+  // LÊ OS DIAS DO BANCO E MARCA/DESMARCA AS CAIXINHAS NA TELA
+  const dias = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
+  dias.forEach(dia => {
+    const cb = $(dia.toUpperCase()); // Procura por SEG, TER, QUA...
+    if (cb) {
+      cb.checked = e[dia] !== false; // Se não for falso no banco, deixa marcado
+    }
+  });
+
   const lb = $('cfgLinkBox');
   if (lb) lb.textContent = '🔗 ' + publicUrl(e.slug || '');
 }
@@ -1249,7 +1259,7 @@ async function salvarConfig() {
     nome,
     whatsapp: ($('cfgWhatsapp')?.value || '').trim(),
     endereco: ($('cfgEndereco')?.value || '').trim(),
-    cidade: ($('cfgCidade')?.value || '').trim()
+    node_modulescidade: ($('cfgCidade')?.value || '').trim()
   };
   if (slugNovo !== slugAtual) {
     const { data: slugExiste } = await db.from('agenda_empresas')
@@ -1269,6 +1279,29 @@ async function salvarConfig() {
   showNotif('Configurações salvas', '', 'ok');
 }
 
+// CIRÚRGICO: Nova função isolada para salvar os dias de funcionamento no Supabase
+async function salvarHorarios() {
+  if (!state?.empresa?.id) return;
+  
+  const dias = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
+  const updates = {};
+  
+  dias.forEach(dia => {
+    const cb = $(dia.toUpperCase());
+    if (cb) {
+      updates[dia] = cb.checked;
+    }
+  });
+
+  const { data, error } = await db.from('agenda_empresas')
+    .update(updates).eq('id', state.empresa.id).select('*').single();
+    
+  if (error) return toast('Erro ao salvar horários: ' + error.message, 'err');
+  
+  state.empresa = data || { ...state.empresa, ...updates };
+  showNotif('Horários de funcionamento salvos', '', 'ok');
+}
+
 async function salvarRedesSociais() {
   if (!state?.empresa?.id) return;
   const updates = {
@@ -1283,7 +1316,6 @@ async function salvarRedesSociais() {
   state.empresa = data || { ...state.empresa, ...updates };
   showNotif('Redes sociais salvas', '', 'ok');
 }
-
 // ── AÇÕES AGENDAMENTO ──
 async function confirmarAg(id) {
   const ag = (state.agendamentos || []).find(a => a.id === id);
@@ -1969,7 +2001,7 @@ Object.assign(window, {
   loginComSenha, finalizarCadastro, logout,
   setView, setFilter,
   salvarCliente, salvarServico, salvarProfissional, salvarAgendamento,
-  salvarConfig, salvarRedesSociais,
+  salvarConfig, salvarRedesSociais, salvarHorarios,
   confirmarAg, concluirAg, abrirWA,
   openModalRecusa, closeModalRecusa, selectMotivo, confirmarRecusa,
   openModalReagendar, closeModalReagendar, confirmarReagendar,
