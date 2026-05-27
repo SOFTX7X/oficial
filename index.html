@@ -61,272 +61,6 @@
 
 <script src="calendar.js"></script>
 
-<!-- ============================================================
-     CSS EMBUTIDO DO MODAL DE LOGIN/CADASTRO
-     Garante que o modal funcione mesmo sem depender do style.css.
-     Os estilos abaixo são "escopados" no #authOverlay para não
-     afetar o resto da página.
-     ============================================================ -->
-<style>
-#authOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(8, 8, 14, 0.78);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 20px;
-}
-#authOverlay.open { display: flex; }
-
-#authOverlay .auth-modal {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 100%;
-  max-width: 880px;
-  min-height: 520px;
-  background: #14141c;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-}
-
-#authOverlay .auth-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
-  font-size: 15px;
-  cursor: pointer;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#authOverlay .auth-close:hover { background: rgba(255, 255, 255, 0.1); }
-
-#authOverlay .auth-panel-left {
-  background: linear-gradient(160deg, #2a1d52 0%, #1a1430 60%, #14141c 100%);
-  padding: 40px 34px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-#authOverlay .auth-left-brand {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-weight: 600;
-  font-size: 16px;
-  color: #fff;
-  margin-bottom: 28px;
-}
-#authOverlay .auth-left-brand .nav-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-}
-#authOverlay .auth-left-title {
-  font-size: 32px;
-  line-height: 1.12;
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 16px;
-}
-#authOverlay .auth-left-title em {
-  font-style: italic;
-  color: #a78bfa;
-}
-#authOverlay .auth-left-desc {
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0 0 26px;
-}
-#authOverlay .auth-left-perks {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-#authOverlay .auth-perk {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
-}
-#authOverlay .auth-perk-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  background: rgba(139, 92, 246, 0.25);
-  color: #c4b5fd;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  flex-shrink: 0;
-}
-#authOverlay .auth-left-footer {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
-  margin: 26px 0 0;
-}
-
-#authOverlay .auth-form-area {
-  padding: 44px 38px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: #14141c;
-  overflow-y: auto;
-}
-#authOverlay .auth-form-title {
-  font-size: 23px;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 6px;
-}
-#authOverlay .auth-form-sub {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
-  margin: 0 0 22px;
-}
-#authOverlay .form-gap {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-#authOverlay .field { display: flex; flex-direction: column; gap: 6px; }
-#authOverlay .field-row { display: flex; gap: 12px; }
-#authOverlay .field-row .field { flex: 1; }
-#authOverlay .field label {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
-}
-#authOverlay .field input,
-#authOverlay .field select {
-  width: 100%;
-  padding: 11px 13px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  box-sizing: border-box;
-}
-#authOverlay .field input:focus,
-#authOverlay .field select:focus {
-  border-color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.08);
-}
-#authOverlay .field input::placeholder { color: rgba(255, 255, 255, 0.3); }
-#authOverlay .field select option { background: #1a1a24; color: #fff; }
-
-#authOverlay .btn {
-  padding: 12px 18px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: opacity 0.15s, background 0.15s;
-}
-#authOverlay .btn-primary {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
-  color: #fff;
-  border: none;
-}
-#authOverlay .btn-primary:hover { opacity: 0.9; }
-#authOverlay .btn-ghost {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-#authOverlay .btn-ghost:hover { background: rgba(255, 255, 255, 0.1); }
-#authOverlay .btn-full { width: 100%; }
-
-#authOverlay .form-actions { display: flex; gap: 10px; }
-
-#authOverlay .auth-switch {
-  margin-top: 18px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
-  text-align: center;
-}
-#authOverlay .auth-switch button {
-  background: none;
-  border: none;
-  color: #a78bfa;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
-  padding: 0;
-}
-#authOverlay .auth-switch button:hover { text-decoration: underline; }
-
-#authOverlay .stepper {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 22px;
-}
-#authOverlay .step-dot {
-  flex: 1;
-  height: 4px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.12);
-}
-#authOverlay .step-dot.active { background: #8b5cf6; }
-#authOverlay .step-dot.done { background: #6366f1; }
-
-#authOverlay textarea {
-  width: 100%;
-  padding: 11px 13px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  box-sizing: border-box;
-  min-height: 60px;
-  resize: vertical;
-}
-
-/* Responsivo: no celular, esconde o painel roxo e mostra só o formulário */
-@media (max-width: 720px) {
-  #authOverlay .auth-modal {
-    grid-template-columns: 1fr;
-    min-height: auto;
-    max-width: 440px;
-  }
-  #authOverlay .auth-panel-left { display: none; }
-  #authOverlay .auth-form-area { padding: 40px 26px; }
-}
-</style>
-
 </head> 
 <body>
 
@@ -898,7 +632,7 @@
             <div class="sch-day"><div class="sch-day-name">Sáb</div><input type="checkbox" id="diaSab" checked></div>
             <div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox" id="diaDom"></div>
           </div>
-          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="salvarHorarios()">Salvar horários</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="localStorage.setItem('horariosFuncionamento',JSON.stringify({seg:diaSeg.checked,ter:diaTer.checked,qua:diaQua.checked,qui:diaQui.checked,sex:diaSex.checked,sab:diaSab.checked,dom:diaDom.checked}));toast('Horários salvos!','ok')">Salvar horários</button>
         </div>
         <div class="config-section">
           <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
@@ -946,8 +680,8 @@ Aguardamos você!</textarea></div>
           <div class="field"><label>Nome completo</label><input id="pubClienteNome" placeholder="Seu nome"></div>
           <div class="field"><label>WhatsApp</label><input id="pubClienteTel" placeholder="(92) 99999-9999"></div>
           <div class="field-row">
-            <div class="field"><label>Data</label><input id="pubData" type="text" placeholder="Selecione a data" readonly></div>
-            <div class="field"><label>Hora</label><input id="pubHora" type="text" placeholder="Selecione a hora" readonly></div>
+            <div class="field"><label>Data</label><input id="pubData" type="date"></div>
+            <div class="field"><label>Hora</label><input id="pubHora" type="time"></div>
           </div>
           <div class="field"><label>Observação</label><textarea id="pubObs" placeholder="Alguma observação?"></textarea></div>
           <button class="btn btn-primary btn-full btn-lg" onclick="confirmarAgendamentoPublico()">Confirmar agendamento ✓</button>
@@ -1041,20 +775,37 @@ Aguardamos você!</textarea></div>
 
 <script src="app.js"></script>
 <script>
+function openMobileMenu(){
+  const overlay = document.getElementById('mobileMenuOverlay');
+  const drawer = document.getElementById('mobileMenuDrawer');
+  if(overlay) overlay.classList.add('open');
+  if(drawer) drawer.classList.add('open');
+}
+function closeMobileMenu(){
+  const overlay = document.getElementById('mobileMenuOverlay');
+  const drawer = document.getElementById('mobileMenuDrawer');
+  if(overlay) overlay.classList.remove('open');
+  if(drawer) drawer.classList.remove('open');
+}
+</script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-  // CORRIGIDO: o relógio da página pública (#pubHora). A data (#pubData) é
-  // configurada pelo app.js em setupPublicDatePicker(), pois depende dos
-  // horários de funcionamento da empresa (para bloquear dias fechados).
-  if (typeof flatpickr !== "undefined") {
-    flatpickr("#pubHora", {
-      enableTime: true,
-      noCalendar: true,
-      dateFormat: "H:i",
-      time_24hr: true,
-      minuteIncrement: 5,
-      disableMobile: true
-    });
-  }
+
+  flatpickr("#data", {
+    locale: "pt",
+    dateFormat: "d/m/Y",
+    disableMobile: true
+  });
+
+  flatpickr("#hora", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true,
+    minuteIncrement: 5,
+    disableMobile: true
+  });
+
 });
 </script>
 </body>
