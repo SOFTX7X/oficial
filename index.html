@@ -632,7 +632,7 @@
             <div class="sch-day"><div class="sch-day-name">Sáb</div><input type="checkbox" id="diaSab" checked></div>
             <div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox" id="diaDom"></div>
           </div>
-          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="localStorage.setItem('horariosFuncionamento',JSON.stringify({seg:diaSeg.checked,ter:diaTer.checked,qua:diaQua.checked,qui:diaQui.checked,sex:diaSex.checked,sab:diaSab.checked,dom:diaDom.checked}));toast('Horários salvos!','ok')">Salvar horários</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="salvarHorarios()">Salvar horários</button>
         </div>
         <div class="config-section">
           <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
@@ -680,8 +680,8 @@ Aguardamos você!</textarea></div>
           <div class="field"><label>Nome completo</label><input id="pubClienteNome" placeholder="Seu nome"></div>
           <div class="field"><label>WhatsApp</label><input id="pubClienteTel" placeholder="(92) 99999-9999"></div>
           <div class="field-row">
-            <div class="field"><label>Data</label><input id="pubData" type="date"></div>
-            <div class="field"><label>Hora</label><input id="pubHora" type="time"></div>
+            <div class="field"><label>Data</label><input id="pubData" type="text" placeholder="Selecione a data" readonly></div>
+            <div class="field"><label>Hora</label><input id="pubHora" type="text" placeholder="Selecione a hora" readonly></div>
           </div>
           <div class="field"><label>Observação</label><textarea id="pubObs" placeholder="Alguma observação?"></textarea></div>
           <button class="btn btn-primary btn-full btn-lg" onclick="confirmarAgendamentoPublico()">Confirmar agendamento ✓</button>
@@ -775,37 +775,20 @@ Aguardamos você!</textarea></div>
 
 <script src="app.js"></script>
 <script>
-function openMobileMenu(){
-  const overlay = document.getElementById('mobileMenuOverlay');
-  const drawer = document.getElementById('mobileMenuDrawer');
-  if(overlay) overlay.classList.add('open');
-  if(drawer) drawer.classList.add('open');
-}
-function closeMobileMenu(){
-  const overlay = document.getElementById('mobileMenuOverlay');
-  const drawer = document.getElementById('mobileMenuDrawer');
-  if(overlay) overlay.classList.remove('open');
-  if(drawer) drawer.classList.remove('open');
-}
-</script>
-<script>
 document.addEventListener("DOMContentLoaded", () => {
-
-  flatpickr("#data", {
-    locale: "pt",
-    dateFormat: "d/m/Y",
-    disableMobile: true
-  });
-
-  flatpickr("#hora", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",
-    time_24hr: true,
-    minuteIncrement: 5,
-    disableMobile: true
-  });
-
+  // CORRIGIDO: o relógio da página pública (#pubHora). A data (#pubData) é
+  // configurada pelo app.js em setupPublicDatePicker(), pois depende dos
+  // horários de funcionamento da empresa (para bloquear dias fechados).
+  if (typeof flatpickr !== "undefined") {
+    flatpickr("#pubHora", {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: true,
+      minuteIncrement: 5,
+      disableMobile: true
+    });
+  }
 });
 </script>
 </body>
