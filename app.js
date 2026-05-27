@@ -3,7 +3,8 @@ let state = {
   user: null, empresa: null, perfil: null,
   categorias: [], clientes: [], servicos: [],
   profissionais: [], agendamentos: [], pagamentos: [],
-  pubEmpresa: null, pubServico: null, pubProfissional: null
+  pubEmpresa: null, pubServico: null, pubProfissional: null,
+  pubDiasFechados: []
 };
 
 let _agendaFilter = 'todos';
@@ -40,7 +41,6 @@ function slugify(s) {
 function hojeISO() { return new Date().toISOString().slice(0, 10); }
 function mesPrefixo() { return new Date().toISOString().slice(0, 7); }
 
-// CORRIGIDO: publicUrl agora usa # para hash routing
 function publicUrl(slug) {
   return location.origin + location.pathname + '#agendar/' + slug;
 }
@@ -96,6 +96,30 @@ function isAtivoCliente(c) {
 
 function podeTerAcoes(a) {
   return !['Excluído', 'Recusado', 'Concluído'].includes(normStatus(a.status));
+}
+
+// ── DIAS FECHADOS ──
+// Recebe o objeto empresa e retorna array com os índices JS dos dias fechados
+// 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sab
+function calcDiasFechados(empresa) {
+  if (!empresa) return [];
+  const mapa = [
+    { campo: 'dom', indice: 0 },
+    { campo: 'seg', indice: 1 },
+    { campo: 'ter', indice: 2 },
+    { campo: 'qua', indice: 3 },
+    { campo: 'qui', indice: 4 },
+    { campo: 'sex', indice: 5 },
+    { campo: 'sab', indice: 6 }
+  ];
+  return mapa.filter(d => empresa[d.campo] === false).map(d => d.indice);
+}
+
+// Verifica se uma data (string YYYY-MM-DD) é dia fechado
+function isDiaFechado(dataStr, diasFechados) {
+  if (!dataStr || !diasFechados || diasFechados.length === 0) return false;
+  const d = new Date(dataStr + 'T00:00:00');
+  return diasFechados.includes(d.getDay());
 }
 
 // ── TOAST / NOTIF ──
@@ -335,7 +359,6 @@ function setView(view) {
 }
 
 // ── AUTH ──
-// CORRIGIDO: apenas uma definição de openAuth, sem patch duplicado no topo
 function openAuth(mode) {
   const overlay = $('authOverlay');
   if (!overlay) return;
@@ -1125,6 +1148,7 @@ function renderFinanceiro() {
 }
 
 // ── CONFIG ──
+// CORRIGIDO: IDs corretos diaSeg, diaTer, diaQua, diaQui, diaSex, diaSab, diaDom
 function renderConfig() {
   const e = state.empresa || {};
   const set = (id, v) => { const el = $(id); if (el) el.value = v || ''; };
@@ -1138,12 +1162,21 @@ function renderConfig() {
   set('cfgTiktok', e.tiktok);
   set('cfgSite', e.site);
 
-  // LÊ OS DIAS DO BANCO E MARCA/DESMARCA AS CAIXINHAS NA TELA
-  const dias = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
-  dias.forEach(dia => {
-    const cb = $(dia.toUpperCase()); // Procura por SEG, TER, QUA...
+  // Mapeamento correto: campo do banco -> ID do checkbox no HTML
+  const diasMap = [
+    { campo: 'seg', id: 'diaSeg' },
+    { campo: 'ter', id: 'diaTer' },
+    { campo: 'qua', id: 'diaQua' },
+    { campo: 'qui', id: 'diaQui' },
+    { campo: 'sex', id: 'diaSex' },
+    { campo: 'sab', id: 'diaSab' },
+    { campo: 'dom', id: 'diaDom' }
+  ];
+
+  diasMap.forEach(({ campo, id }) => {
+    const cb = $(id);
     if (cb) {
-      cb.checked = e[dia] !== false; // Se não for falso no banco, deixa marcado
+      cb.checked = e[campo] !== false;
     }
   });
 
@@ -1249,6 +1282,7 @@ async function salvarAgendamento() {
   showNotif('Agendamento criado!', `${agCli} — ${formatDate(agData)} às ${agHora}.`, 'ok');
 }
 
+// CORRIGIDO: typo node_modulescidade -> cidade
 async function salvarConfig() {
   if (!state?.empresa?.id) return;
   const nome = ($('cfgNome')?.value || '').trim();
@@ -1259,7 +1293,7 @@ async function salvarConfig() {
     nome,
     whatsapp: ($('cfgWhatsapp')?.value || '').trim(),
     endereco: ($('cfgEndereco')?.value || '').trim(),
-    node_modulescidade: ($('cfgCidade')?.value || '').trim()
+    cidade: ($('cfgCidade')?.value || '').trim()
   };
   if (slugNovo !== slugAtual) {
     const { data: slugExiste } = await db.from('agenda_empresas')
@@ -1279,25 +1313,31 @@ async function salvarConfig() {
   showNotif('Configurações salvas', '', 'ok');
 }
 
-// CIRÚRGICO: Nova função isolada para salvar os dias de funcionamento no Supabase
+// CORRIGIDO: IDs corretos diaSeg, diaTer, diaQua, diaQui, diaSex, diaSab, diaDom
 async function salvarHorarios() {
   if (!state?.empresa?.id) return;
-  
-  const dias = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
+
+  const diasMap = [
+    { campo: 'seg', id: 'diaSeg' },
+    { campo: 'ter', id: 'diaTer' },
+    { campo: 'qua', id: 'diaQua' },
+    { campo: 'qui', id: 'diaQui' },
+    { campo: 'sex', id: 'diaSex' },
+    { campo: 'sab', id: 'diaSab' },
+    { campo: 'dom', id: 'diaDom' }
+  ];
+
   const updates = {};
-  
-  dias.forEach(dia => {
-    const cb = $(dia.toUpperCase());
-    if (cb) {
-      updates[dia] = cb.checked;
-    }
+  diasMap.forEach(({ campo, id }) => {
+    const cb = $(id);
+    if (cb) updates[campo] = cb.checked;
   });
 
   const { data, error } = await db.from('agenda_empresas')
     .update(updates).eq('id', state.empresa.id).select('*').single();
-    
+
   if (error) return toast('Erro ao salvar horários: ' + error.message, 'err');
-  
+
   state.empresa = data || { ...state.empresa, ...updates };
   showNotif('Horários de funcionamento salvos', '', 'ok');
 }
@@ -1316,6 +1356,7 @@ async function salvarRedesSociais() {
   state.empresa = data || { ...state.empresa, ...updates };
   showNotif('Redes sociais salvas', '', 'ok');
 }
+
 // ── AÇÕES AGENDAMENTO ──
 async function confirmarAg(id) {
   const ag = (state.agendamentos || []).find(a => a.id === id);
@@ -1509,7 +1550,44 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.target === modalReagendarOverlay) closeModalReagendar();
     });
   }
+
+  // ── VALIDAÇÃO DE DATA PÚBLICA EM TEMPO REAL ──
+  // Quando o cliente escolhe uma data no link público, verifica se o dia está fechado
+  const pubDataInput = $('pubData');
+  if (pubDataInput) {
+    pubDataInput.addEventListener('change', function() {
+      validarDataPublica(this.value);
+    });
+  }
 });
+
+// ── VALIDAÇÃO DA DATA PÚBLICA ──
+function validarDataPublica(dataStr) {
+  const aviso = $('pubDataAviso');
+  const inputData = $('pubData');
+  if (!aviso || !inputData) return true;
+
+  if (!dataStr) {
+    aviso.style.display = 'none';
+    inputData.style.borderColor = '';
+    return true;
+  }
+
+  const diasFechados = state.pubDiasFechados || [];
+  const fechado = isDiaFechado(dataStr, diasFechados);
+
+  if (fechado) {
+    aviso.style.display = 'block';
+    inputData.style.borderColor = '#ef4444';
+    inputData.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.2)';
+    return false;
+  } else {
+    aviso.style.display = 'none';
+    inputData.style.borderColor = '';
+    inputData.style.boxShadow = '';
+    return true;
+  }
+}
 
 // ── EDIT MODAL ──
 function openEditModal(title, bodyHtml, saveCb) {
@@ -1809,6 +1887,7 @@ function openPublic() {
   loadPublic(state.empresa.slug);
 }
 
+// ── LOAD PUBLIC — CORRIGIDO: lê dias do banco e bloqueia datas fechadas ──
 async function loadPublic(slug) {
   const lv = $('landingView');
   const dv = $('dashboardView');
@@ -1827,6 +1906,13 @@ async function loadPublic(slug) {
   }
 
   state.pubEmpresa = empresa;
+
+  // ── CALCULA E ARMAZENA OS DIAS FECHADOS ──
+  state.pubDiasFechados = calcDiasFechados(empresa);
+
+  // ── APLICA O BLOQUEIO NO INPUT DE DATA ──
+  aplicarBloqueioDataPublica(state.pubDiasFechados);
+
   setText('pubNomeEmpresa', empresa.nome);
   setText('pubDescEmpresa', (empresa.area_atuacao || 'Agendamento Online') + ' • WhatsApp: ' + (empresa.whatsapp || 'Não informado'));
 
@@ -1887,6 +1973,29 @@ async function loadPublic(slug) {
   }
 }
 
+// ── APLICA BLOQUEIO VISUAL NO INPUT DE DATA ──
+// Usa os índices dos dias fechados para desabilitar esses dias no <input type="date">
+// Mostra aviso vermelho quando o cliente tenta selecionar um dia fechado
+function aplicarBloqueioDataPublica(diasFechados) {
+  const inputData = $('pubData');
+  if (!inputData) return;
+
+  // Remove listener anterior se existir
+  if (inputData._diaFechadoListener) {
+    inputData.removeEventListener('change', inputData._diaFechadoListener);
+  }
+
+  // Adiciona novo listener
+  inputData._diaFechadoListener = function() {
+    validarDataPublica(this.value);
+  };
+  inputData.addEventListener('change', inputData._diaFechadoListener);
+
+  // Define a data mínima como hoje
+  const hoje = hojeISO();
+  inputData.min = hoje;
+}
+
 function selectPubSvc(id, el) {
   state.pubServico = (state.servicos || []).find(s => s.id === id);
   document.querySelectorAll('#pubServicos .choice').forEach(c => c.classList.remove('active'));
@@ -1899,16 +2008,21 @@ function selectPubProf(id, el) {
   if (el) el.classList.add('active');
 }
 
+// ── CONFIRMAR AGENDAMENTO PÚBLICO — CORRIGIDO: bloqueia dias fechados ──
 async function confirmarAgendamentoPublico() {
   const pubNome = $('pubClienteNome')?.value?.trim();
   const pubTel = $('pubClienteTel')?.value?.trim();
   const pubData = $('pubData')?.value;
   const pubHora = $('pubHora')?.value;
-  const partesData = pubData.split('/');
-  const dataFormatada = `${partesData[2]}-${partesData[1]}-${partesData[0]}`;
 
   if (!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !pubNome || !pubTel || !pubData || !pubHora) {
     return toast('Preencha tudo para confirmar.', 'err');
+  }
+
+  // ── BLOQUEIA ENVIO SE O DIA ESTIVER FECHADO ──
+  if (isDiaFechado(pubData, state.pubDiasFechados || [])) {
+    validarDataPublica(pubData);
+    return toast('Este dia não está disponível. Escolha outra data.', 'err');
   }
 
   try {
@@ -1930,7 +2044,7 @@ async function confirmarAgendamentoPublico() {
       cliente_telefone: pubTel,
       servico_nome: state.pubServico.nome,
       profissional_nome: state.pubProfissional.nome,
-      data: dataFormatada,
+      data: pubData,
       hora: pubHora,
       status: 'Pendente',
       valor: Number(state.pubServico.preco || 0),
@@ -1956,6 +2070,13 @@ function resetPublic() {
   if (cs) cs.style.display = 'none';
   const campos = ['pubClienteNome', 'pubClienteTel', 'pubData', 'pubHora', 'pubObs'];
   campos.forEach(id => { const el = $(id); if (el) el.value = ''; });
+
+  // Limpa aviso de data
+  const aviso = $('pubDataAviso');
+  if (aviso) aviso.style.display = 'none';
+  const inputData = $('pubData');
+  if (inputData) { inputData.style.borderColor = ''; inputData.style.boxShadow = ''; }
+
   state.pubServico = null;
   state.pubProfissional = null;
   document.querySelectorAll('.choice').forEach(c => c.classList.remove('active'));
