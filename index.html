@@ -772,39 +772,25 @@ function closeMobileMenu(){
 }
 </script>
 <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-  // Página pública
   flatpickr("#pubData", {
     locale: "pt",
-    dateFormat: "Y-m-d",       // ← ISO para o Supabase
-    disableMobile: true
-  });
-  flatpickr("#pubHora", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",
-    time_24hr: true,
-    minuteIncrement: 5,
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "d/m/Y",
     disableMobile: true
   });
 
-  // Admin (agenda)
   flatpickr("#agData", {
     locale: "pt",
-    dateFormat: "Y-m-d",       // ← ISO para o Supabase
-    disableMobile: true
-  });
-  flatpickr("#agHora", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",
-    time_24hr: true,
-    minuteIncrement: 5,
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "d/m/Y",
     disableMobile: true
   });
 });
 </script>
-
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
