@@ -773,12 +773,28 @@ function closeMobileMenu(){
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  flatpickr("#data", {
+  // Página pública
+  flatpickr("#pubData", {
     locale: "pt",
-    dateFormat: "d/m/Y",
+    dateFormat: "Y-m-d",       // ← ISO para o Supabase
     disableMobile: true
   });
-  flatpickr("#hora", {
+  flatpickr("#pubHora", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true,
+    minuteIncrement: 5,
+    disableMobile: true
+  });
+
+  // Admin (agenda)
+  flatpickr("#agData", {
+    locale: "pt",
+    dateFormat: "Y-m-d",       // ← ISO para o Supabase
+    disableMobile: true
+  });
+  flatpickr("#agHora", {
     enableTime: true,
     noCalendar: true,
     dateFormat: "H:i",
