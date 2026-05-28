@@ -23,15 +23,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ── FLATPICKR DATAS ── */
   const dateConfig = {
-    locale: "pt",
-    disableMobile: true,
-    dateFormat: "d/m/Y",
-    allowInput: false,
-    clickOpens: true,
-    minDate: "today",
-    onChange(selectedDates, dateStr, instance) {
-      instance.close();
-    }
+   locale: "pt",
+disableMobile: true,
+dateFormat: "Y-m-d",
+altInput: true,
+altFormat: "d/m/Y",
+allowInput: false,
+clickOpens: true,
+minDate: "today",
+onChange(selectedDates, dateStr, instance) {
+  instance.close();
+}
   };
   ["#agData", "#pubData", "#reagendarData"].forEach(sel => {
     const el = document.querySelector(sel);
