@@ -1986,6 +1986,13 @@ function aplicarBloqueioDataPublica(diasFechados) {
 
   // Flatpickr replaces the native date UI, so disable the dates on its instance.
   if (inputData._flatpickr) {
+    inputData._flatpickr.set('onDayCreate', [
+      (_, __, ___, dayElem) => {
+        if (diasBloqueados.includes(dayElem.dateObj.getDay())) {
+          dayElem.classList.add('dia-fechado');
+        }
+      }
+    ]);
     inputData._flatpickr.set('minDate', hoje);
     inputData._flatpickr.set('disable', [
       date => diasBloqueados.includes(date.getDay())
