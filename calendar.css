@@ -140,6 +140,7 @@ span.flatpickr-weekday {
 }
 
 .flatpickr-day {
+    position: relative !important;
     background: transparent !important;
     border: none !important;
     border-radius: 10px !important;
@@ -188,13 +189,26 @@ span.flatpickr-weekday {
 
 .flatpickr-day.flatpickr-disabled {
     color: rgba(224, 224, 255, .30) !important;
-    background: transparent !important;
+    background: rgba(255, 255, 255, .018) !important;
     cursor: not-allowed !important;
 }
 
 .flatpickr-day.flatpickr-disabled:hover {
     color: rgba(224, 224, 255, .30) !important;
-    background: transparent !important;
+    background: rgba(255, 255, 255, .018) !important;
+}
+
+.flatpickr-day.dia-fechado:not(.prevMonthDay):not(.nextMonthDay)::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 50% !important;
+    bottom: 4px !important;
+    width: 4px !important;
+    height: 4px !important;
+    border-radius: 50% !important;
+    background: #ef4444 !important;
+    box-shadow: 0 0 6px rgba(239, 68, 68, .65) !important;
+    transform: translateX(-50%) !important;
 }
 
 .flatpickr-day.prevMonthDay,
