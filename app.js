@@ -330,6 +330,15 @@ function menuNotifications() {
   if (stack) stack.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function openSupportChat() {
+  closeMobileMenu();
+  if (!window.Tawk_API || typeof window.Tawk_API.showWidget !== 'function') {
+    return toast('O suporte ainda está carregando. Tente novamente em instantes.', 'info');
+  }
+  window.Tawk_API.showWidget();
+  window.Tawk_API.maximize();
+}
+
 // ── VIEW NAVIGATION ──
 function setView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -2160,5 +2169,5 @@ Object.assign(window, {
   closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
   toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu,
-  menuOpenPublic, menuCopyPublicLink, menuNotifications
+  menuOpenPublic, menuCopyPublicLink, menuNotifications, openSupportChat
 });
