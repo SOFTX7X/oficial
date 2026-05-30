@@ -60,6 +60,92 @@ function buildWaLink(tel, msg) {
   return 'https://wa.me/' + f + '?text=' + encodeURIComponent(msg);
 }
 
+const MENSAGENS_WHATSAPP_PADRAO = {
+  confirmacao: `Olá, [CLIENTE]! ✨
+
+Seu agendamento na [EMPRESA] foi confirmado.
+
+Serviço: [SERVICO]
+Profissional: [PROFISSIONAL]
+Data: [DATA]
+Horário: [HORARIO]
+
+Esperamos por você!`,
+  recusa: `Olá, [CLIENTE].
+
+Não conseguimos confirmar seu agendamento na [EMPRESA].
+
+Serviço: [SERVICO]
+Profissional: [PROFISSIONAL]
+Data solicitada: [DATA] às [HORARIO]
+Motivo: [MOTIVO]
+
+Você pode escolher um novo horário aqui:
+[LINK]`,
+  reagendamento: `Olá, [CLIENTE]! 📅
+
+Seu agendamento na [EMPRESA] foi reagendado com sucesso.
+
+Serviço: [SERVICO]
+Profissional: [PROFISSIONAL]
+Nova data: [NOVA_DATA]
+Novo horário: [NOVO_HORARIO]
+
+Até breve!`,
+  contato: `Olá, [CLIENTE]! 👋
+
+Estamos entrando em contato sobre seu agendamento na [EMPRESA].
+
+Serviço: [SERVICO]
+Profissional: [PROFISSIONAL]
+Data: [DATA]
+Horário: [HORARIO]`
+};
+
+const MARCADORES_OBRIGATORIOS = {
+  confirmacao: ['[CLIENTE]', '[SERVICO]', '[PROFISSIONAL]', '[DATA]', '[HORARIO]'],
+  recusa: ['[CLIENTE]', '[SERVICO]', '[PROFISSIONAL]', '[DATA]', '[HORARIO]', '[MOTIVO]', '[LINK]'],
+  reagendamento: ['[CLIENTE]', '[SERVICO]', '[PROFISSIONAL]', '[NOVA_DATA]', '[NOVO_HORARIO]'],
+  contato: ['[CLIENTE]', '[SERVICO]', '[PROFISSIONAL]', '[DATA]', '[HORARIO]']
+};
+
+function getMensagensWhatsapp() {
+  const mensagens = { ...MENSAGENS_WHATSAPP_PADRAO, ...(state.empresa?.mensagens_whatsapp || {}) };
+  const antigos = {
+    nome: '[CLIENTE]',
+    empresa: '[EMPRESA]',
+    servico: '[SERVICO]',
+    profissional: '[PROFISSIONAL]',
+    data: '[DATA]',
+    hora: '[HORARIO]',
+    motivo: '[MOTIVO]',
+    link: '[LINK]',
+    nova_data: '[NOVA_DATA]',
+    nova_hora: '[NOVO_HORARIO]'
+  };
+  Object.keys(mensagens).forEach(tipo => {
+    mensagens[tipo] = (mensagens[tipo] || '').replace(/\{([a-z_]+)\}/g, (_, chave) => antigos[chave] || `{${chave}}`);
+  });
+  return mensagens;
+}
+
+function montarMensagemWhatsapp(tipo, ag, extras = {}) {
+  const templates = getMensagensWhatsapp();
+  const valores = {
+    CLIENTE: ag?.cliente_nome || 'Cliente',
+    EMPRESA: state.empresa?.nome || 'nossa empresa',
+    SERVICO: ag?.servico_nome || 'Não informado',
+    PROFISSIONAL: ag?.profissional_nome || 'Não informado',
+    DATA: formatDate(ag?.data),
+    HORARIO: ag?.hora || 'Não informado',
+    MOTIVO: extras.motivo || 'Não informado',
+    LINK: extras.link || (state.empresa?.slug ? publicUrl(state.empresa.slug) : ''),
+    NOVA_DATA: extras.novaData ? formatDate(extras.novaData) : formatDate(ag?.data),
+    NOVO_HORARIO: extras.novaHora || ag?.hora || 'Não informado'
+  };
+  return (templates[tipo] || '').replace(/\[([A-Z_]+)\]/g, (_, chave) => valores[chave] ?? `[${chave}]`);
+}
+
 function normStatus(s) {
   const r = (s || 'pendente').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   if (r === 'confirmado' || r === 'confirmada') return 'Confirmado';
@@ -1170,6 +1256,11 @@ function renderConfig() {
   set('cfgFacebook', e.facebook);
   set('cfgTiktok', e.tiktok);
   set('cfgSite', e.site);
+  const mensagens = getMensagensWhatsapp();
+  set('msgConfirmacao', mensagens.confirmacao);
+  set('msgRecusa', mensagens.recusa);
+  set('msgReagendamento', mensagens.reagendamento);
+  set('msgContato', mensagens.contato);
 
   // Mapeamento correto: campo do banco -> ID do checkbox no HTML
   const diasMap = [
@@ -1366,6 +1457,36 @@ async function salvarRedesSociais() {
   showNotif('Redes sociais salvas', '', 'ok');
 }
 
+async function salvarMensagensWhatsapp() {
+  if (!state?.empresa?.id) return;
+  const mensagens = {
+    confirmacao: ($('msgConfirmacao')?.value || '').trim(),
+    recusa: ($('msgRecusa')?.value || '').trim(),
+    reagendamento: ($('msgReagendamento')?.value || '').trim(),
+    contato: ($('msgContato')?.value || '').trim()
+  };
+  if (Object.values(mensagens).some(msg => !msg)) {
+    return toast('Preencha todas as mensagens.', 'err');
+  }
+  const nomes = {
+    confirmacao: 'Confirmação',
+    recusa: 'Recusa',
+    reagendamento: 'Reagendamento',
+    contato: 'Contato pelo botão WA'
+  };
+  for (const [tipo, obrigatorios] of Object.entries(MARCADORES_OBRIGATORIOS)) {
+    const ausentes = obrigatorios.filter(marcador => !mensagens[tipo].includes(marcador));
+    if (ausentes.length) {
+      return toast(`${nomes[tipo]}: inclua ${ausentes.join(', ')}.`, 'err');
+    }
+  }
+  const { data, error } = await db.from('agenda_empresas')
+    .update({ mensagens_whatsapp: mensagens }).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar mensagens. Verifique a configuração do Supabase.', 'err');
+  state.empresa = data || { ...state.empresa, mensagens_whatsapp: mensagens };
+  showNotif('Mensagens automáticas salvas', '', 'ok');
+}
+
 // ── AÇÕES AGENDAMENTO ──
 async function confirmarAg(id) {
   const ag = (state.agendamentos || []).find(a => a.id === id);
@@ -1377,7 +1498,7 @@ async function confirmarAg(id) {
   showNotif('Confirmado!', ag.cliente_nome + ' — ' + formatDate(ag.data) + ' às ' + (ag.hora || '—'), 'ok');
   const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
   if (tel) {
-    const msg = `Olá, ${ag.cliente_nome}! Seu agendamento foi confirmado ✅\nServiço: ${ag.servico_nome || '—'}\nData: ${formatDate(ag.data)} às ${ag.hora || '—'}\nAguardamos você!`;
+    const msg = montarMensagemWhatsapp('confirmacao', ag);
     const link = buildWaLink(tel, msg);
     if (link) window.open(link, '_blank');
   }
@@ -1399,7 +1520,7 @@ function abrirWA(id) {
   if (!ag) return;
   const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
   if (!tel) return toast('Telefone não cadastrado.', 'err');
-  const msg = `Olá, ${ag.cliente_nome}! 👋\nServiço: ${ag.servico_nome || '—'}\nData: ${formatDate(ag.data)} às ${ag.hora || '—'}\nAté lá! 😊`;
+  const msg = montarMensagemWhatsapp('contato', ag);
   const link = buildWaLink(tel, msg);
   if (link) window.open(link, '_blank');
 }
@@ -1454,7 +1575,7 @@ async function confirmarRecusa() {
   const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
   if (tel) {
     const pubLink = state.empresa ? publicUrl(state.empresa.slug) : '';
-    const msg = `Olá, ${ag.cliente_nome}!\nInfelizmente não conseguimos confirmar seu agendamento para ${formatDate(ag.data)}.\nMotivo: ${motivo}\nEscolha outro horário: ${pubLink}`;
+    const msg = montarMensagemWhatsapp('recusa', ag, { motivo, link: pubLink });
     const link = buildWaLink(tel, msg);
     if (link) window.open(link, '_blank');
   }
@@ -1495,7 +1616,7 @@ async function confirmarReagendar() {
   showNotif('Reagendado!', ag.cliente_nome + ' → ' + formatDate(data) + ' às ' + hora, 'ok');
   const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
   if (tel) {
-    const msg = `Olá, ${ag.cliente_nome}!\nSeu agendamento foi reagendado 📅\nNova data: ${formatDate(data)} às ${hora}\nAguardamos você! 😊`;
+    const msg = montarMensagemWhatsapp('reagendamento', ag, { novaData: data, novaHora: hora });
     const link = buildWaLink(tel, msg);
     if (link) window.open(link, '_blank');
   }
@@ -2156,7 +2277,7 @@ Object.assign(window, {
   loginComSenha, finalizarCadastro, logout,
   setView, setFilter,
   salvarCliente, salvarServico, salvarProfissional, salvarAgendamento,
-  salvarConfig, salvarRedesSociais, salvarHorarios,
+  salvarConfig, salvarRedesSociais, salvarHorarios, salvarMensagensWhatsapp,
   confirmarAg, concluirAg, abrirWA,
   openModalRecusa, closeModalRecusa, selectMotivo, confirmarRecusa,
   openModalReagendar, closeModalReagendar, confirmarReagendar,
