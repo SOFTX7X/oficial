@@ -394,13 +394,9 @@
       </div>
     </div>
 
-    <nav class="mobile-nav-bar" id="mobileNavBar">
-      <button class="mob-nav-btn" onclick="setView('dashboard')"><span class="mni">📊</span>Início</button>
-      <button class="mob-nav-btn" onclick="setView('agenda')"><span class="mni">📅</span>Agenda</button>
-      <button class="mob-nav-btn mob-nav-fab" onclick="setView('agenda');setTimeout(()=>{var el=document.getElementById('agCliente');if(el)el.focus()},200)"><span class="mni">+</span>Novo</button>
-      <button class="mob-nav-btn" onclick="setView('clientes')"><span class="mni">👥</span>Clientes</button>
-      <button class="mob-nav-btn" onclick="openMobileMenu()"><span class="mni">☰</span>Menu</button>
-    </nav>
+    <button class="mobile-menu-trigger" onclick="openMobileMenu()" aria-label="Abrir menu">
+      <span>☰</span> Menu
+    </button>
 
     <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
     <div class="mobile-menu-drawer" id="mobileMenuDrawer">
@@ -411,6 +407,7 @@
       <div class="mobile-menu-body">
         <div class="side-nav-label">Gestão</div>
         <button class="nav-btn" onclick="setView('dashboard');closeMobileMenu()"><span class="ni">📊</span>Dashboard</button>
+        <button class="nav-btn mobile-menu-new" onclick="setView('agenda');closeMobileMenu();setTimeout(()=>{var el=document.getElementById('agCliente');if(el)el.focus()},200)"><span class="ni">＋</span>Novo agendamento</button>
         <button class="nav-btn" onclick="setView('agenda');closeMobileMenu()"><span class="ni">📅</span>Agenda</button>
         <button class="nav-btn" onclick="setView('clientes');closeMobileMenu()"><span class="ni">👥</span>Clientes</button>
         <button class="nav-btn" onclick="setView('servicos');closeMobileMenu()"><span class="ni">✦</span>Serviços</button>
@@ -424,6 +421,7 @@
         <button class="nav-btn" onclick="openPublic();closeMobileMenu()"><span class="ni">🌐</span>Página Pública</button>
         <button class="nav-btn" onclick="setView('config');closeMobileMenu()"><span class="ni">⚙</span>Configurações</button>
         <div class="side-nav-sep"></div>
+        <button class="nav-btn mobile-menu-support" onclick="openSupportChat()"><span class="ni">💬</span>Suporte</button>
         <button class="btn btn-ghost btn-full btn-sm" onclick="logout()" style="margin-top:8px">Sair da conta</button>
       </div>
     </div>
@@ -753,21 +751,6 @@ Aguardamos você!</textarea></div>
 </script>
 
 <script src="app.js"></script>
-<script>
-function openMobileMenu(){
-  const overlay = document.getElementById('mobileMenuOverlay');
-  const drawer = document.getElementById('mobileMenuDrawer');
-  if(overlay) overlay.classList.add('open');
-  if(drawer) drawer.classList.add('open');
-}
-function closeMobileMenu(){
-  const overlay = document.getElementById('mobileMenuOverlay');
-  const drawer = document.getElementById('mobileMenuDrawer');
-  if(overlay) overlay.classList.remove('open');
-  if(drawer) drawer.classList.remove('open');
-}
-});
-</script>
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
@@ -783,6 +766,16 @@ Tawk_API.customStyle = {
       xOffset: 8,
       yOffset: 100
     }
+  }
+};
+Tawk_API.onLoad = function() {
+  if (window.matchMedia('(max-width: 768px)').matches) {
+    Tawk_API.hideWidget();
+  }
+};
+Tawk_API.onChatMinimized = function() {
+  if (window.matchMedia('(max-width: 768px)').matches) {
+    Tawk_API.hideWidget();
   }
 };
 (function(){
