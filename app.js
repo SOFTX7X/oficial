@@ -1979,6 +1979,7 @@ async function loadPublic(slug) {
 function aplicarBloqueioDataPublica(diasFechados) {
   const inputData = $('pubData');
   if (!inputData) return;
+  const diasBloqueados = Array.isArray(diasFechados) ? diasFechados : [];
 
   // Remove listener anterior se existir
   if (inputData._diaFechadoListener) {
@@ -1994,6 +1995,21 @@ function aplicarBloqueioDataPublica(diasFechados) {
   // Define a data mínima como hoje
   const hoje = hojeISO();
   inputData.min = hoje;
+
+  // Flatpickr replaces the native date UI, so disable the dates on its instance.
+  if (inputData._flatpickr) {
+    inputData._flatpickr.set('minDate', hoje);
+    inputData._flatpickr.set('disable', [
+      date => diasBloqueados.includes(date.getDay())
+    ]);
+    inputData._flatpickr.redraw();
+
+    if (isDiaFechado(inputData.value, diasBloqueados)) {
+      inputData._flatpickr.clear();
+    }
+  }
+
+  validarDataPublica(inputData.value);
 }
 
 function selectPubSvc(id, el) {
