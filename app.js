@@ -1932,18 +1932,6 @@ async function loadPublic(slug) {
     sociais.style.display = html ? 'flex' : 'none';
   }
 
-  const waFab = $('pubWaFab');
-  if (waFab) {
-    const tel = (empresa.whatsapp || '').replace(/\D/g, '');
-    if (tel) {
-      const f = tel.startsWith('55') ? tel : '55' + tel;
-      waFab.href = 'https://wa.me/' + f + '?text=' + encodeURIComponent('Olá, tenho uma dúvida antes de agendar.');
-      waFab.style.display = 'flex';
-    } else {
-      waFab.style.display = 'none';
-    }
-  }
-
   const [svcs, profs] = await Promise.all([
     db.from('agenda_servicos').select('*').eq('empresa_id', empresa.id).eq('status', 'ativo').order('nome'),
     db.from('agenda_profissionais').select('*').eq('empresa_id', empresa.id).eq('status', 'ativo').order('nome')
