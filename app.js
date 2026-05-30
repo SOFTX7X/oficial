@@ -61,7 +61,7 @@ function buildWaLink(tel, msg) {
 }
 
 const MENSAGENS_WHATSAPP_PADRAO = {
-  confirmacao: `Olá, [CLIENTE]! ✨
+  confirmacao: `Olá, [CLIENTE]!
 
 Seu agendamento na [EMPRESA] foi confirmado.
 
@@ -82,7 +82,7 @@ Motivo: [MOTIVO]
 
 Você pode escolher um novo horário aqui:
 [LINK]`,
-  reagendamento: `Olá, [CLIENTE]! 📅
+  reagendamento: `Olá, [CLIENTE]!
 
 Seu agendamento na [EMPRESA] foi reagendado com sucesso.
 
@@ -92,7 +92,7 @@ Nova data: [NOVA_DATA]
 Novo horário: [NOVO_HORARIO]
 
 Até breve!`,
-  contato: `Olá, [CLIENTE]! 👋
+  contato: `Olá, [CLIENTE]!
 
 Estamos entrando em contato sobre seu agendamento na [EMPRESA].
 
