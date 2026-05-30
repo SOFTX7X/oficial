@@ -1170,16 +1170,6 @@ a { text-decoration: none; color: inherit; }
 }
 .pub-confirm-screen h2 { font-family: 'Instrument Serif', serif; font-size: 28px; }
 .pub-confirm-screen p { color: var(--text2); font-size: 14px; margin-top: 8px; line-height: 1.6; }
-.pub-wa-fab {
-  position: fixed; bottom: 24px; right: 20px; z-index: 9990;
-  display: none; align-items: center; gap: 8px; padding: 12px 18px;
-  border-radius: 99px; background: #25d366; color: #fff;
-  font-family: 'Geist', sans-serif; font-weight: 700; font-size: 13.5px;
-  text-decoration: none; box-shadow: 0 8px 28px rgba(37,211,102,0.4);
-  transition: transform 0.2s, box-shadow 0.2s; white-space: nowrap;
-}
-.pub-wa-fab:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(37,211,102,0.5); }
-
 /* ══════════════════════════════════════════
    NOTIFICAÇÕES
 ══════════════════════════════════════════ */
@@ -1409,9 +1399,6 @@ body.menu-open { overflow: hidden; touch-action: none; }
   }
 
   .notif-stack { left: 10px; right: 10px; top: 10px; width: auto; }
-
-  .pub-wa-fab { bottom: 90px; padding: 14px; border-radius: 50%; width: 50px; height: 50px; justify-content: center; }
-  .pub-wa-fab span { display: none; }
 
   .schedule-grid { grid-template-columns: repeat(4,1fr); }
 
