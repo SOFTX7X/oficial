@@ -146,8 +146,9 @@ span.flatpickr-weekday {
     font-weight: 600 !important;
     height: 38px !important;
     line-height: 38px !important;
-    max-width: 38px !important;
-    flex-basis: 14.2857% !important;
+    width: 14.2857143% !important;
+    max-width: 14.2857143% !important;
+    flex-basis: 14.2857143% !important;
     flex-grow: 0 !important;
     flex-shrink: 0 !important;
     margin: 1px 0 !important;
