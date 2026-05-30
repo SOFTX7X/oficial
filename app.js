@@ -1468,6 +1468,9 @@ async function salvarMensagensWhatsapp() {
   if (Object.values(mensagens).some(msg => !msg)) {
     return toast('Preencha todas as mensagens.', 'err');
   }
+  if (Object.values(mensagens).some(msg => msg.includes('\uFFFD'))) {
+    return toast('Existe um caractere inválido nas mensagens. Remova o símbolo � e digite o emoji novamente.', 'err');
+  }
   const nomes = {
     confirmacao: 'Confirmação',
     recusa: 'Recusa',
@@ -1485,6 +1488,15 @@ async function salvarMensagensWhatsapp() {
   if (error) return toast('Erro ao salvar mensagens. Verifique a configuração do Supabase.', 'err');
   state.empresa = data || { ...state.empresa, mensagens_whatsapp: mensagens };
   showNotif('Mensagens automáticas salvas', '', 'ok');
+}
+
+function restaurarMensagensWhatsappPadrao() {
+  const set = (id, valor) => { const el = $(id); if (el) el.value = valor; };
+  set('msgConfirmacao', MENSAGENS_WHATSAPP_PADRAO.confirmacao);
+  set('msgRecusa', MENSAGENS_WHATSAPP_PADRAO.recusa);
+  set('msgReagendamento', MENSAGENS_WHATSAPP_PADRAO.reagendamento);
+  set('msgContato', MENSAGENS_WHATSAPP_PADRAO.contato);
+  toast('Modelos padrão restaurados. Clique em Salvar mensagens.', 'ok');
 }
 
 // ── AÇÕES AGENDAMENTO ──
@@ -2277,7 +2289,7 @@ Object.assign(window, {
   loginComSenha, finalizarCadastro, logout,
   setView, setFilter,
   salvarCliente, salvarServico, salvarProfissional, salvarAgendamento,
-  salvarConfig, salvarRedesSociais, salvarHorarios, salvarMensagensWhatsapp,
+  salvarConfig, salvarRedesSociais, salvarHorarios, salvarMensagensWhatsapp, restaurarMensagensWhatsappPadrao,
   confirmarAg, concluirAg, abrirWA,
   openModalRecusa, closeModalRecusa, selectMotivo, confirmarRecusa,
   openModalReagendar, closeModalReagendar, confirmarReagendar,
