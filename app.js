@@ -61,7 +61,7 @@ function buildWaLink(tel, msg) {
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
   return isMobile
     ? 'https://api.whatsapp.com/send' + params
-    : 'https://web.whatsapp.com/send' + params;
+    : 'whatsapp://send' + params;
 }
 
 const MENSAGENS_WHATSAPP_PADRAO = {
