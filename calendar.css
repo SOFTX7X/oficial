@@ -95,7 +95,9 @@
 
 .flatpickr-weekdays {
     background: transparent !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 8px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid rgba(108, 124, 255, .12) !important;
     width: 100% !important;
 }
 
@@ -140,12 +142,12 @@ span.flatpickr-weekday {
 .flatpickr-day {
     background: transparent !important;
     border: none !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     color: #e0e0ff !important;
     font-size: 13px !important;
     font-weight: 600 !important;
-    height: 38px !important;
-    line-height: 38px !important;
+    height: 36px !important;
+    line-height: 36px !important;
     width: 14.2857143% !important;
     max-width: 14.2857143% !important;
     flex-basis: 14.2857143% !important;
@@ -186,8 +188,14 @@ span.flatpickr-weekday {
 }
 
 .flatpickr-day.flatpickr-disabled {
-    color: rgba(255, 255, 255, .12) !important;
+    color: rgba(224, 224, 255, .30) !important;
+    background: rgba(255, 255, 255, .018) !important;
     cursor: not-allowed !important;
+}
+
+.flatpickr-day.flatpickr-disabled:hover {
+    color: rgba(224, 224, 255, .30) !important;
+    background: rgba(255, 255, 255, .018) !important;
 }
 
 /* ═══════════════════════════════════════
