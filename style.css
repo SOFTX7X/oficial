@@ -1390,12 +1390,27 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .prof-card { padding: 48px 14px 14px; }
 
   /* FIX timeline mobile */
-  .tl-block { gap: 6px; }
-  .tl-time { min-width: 32px; font-size: 10px; }
+  .tl-block { display: block; }
+  .tl-time {
+    min-width: 0; padding: 0 0 5px 2px;
+    font-size: 10px; text-align: left;
+  }
   .tl-line { display: none; }
-  .tl-card-top { padding-right: 44px; }
-  .tl-card-name { white-space: normal; word-break: break-word; }
-  .tl-card-meta { white-space: normal; word-break: break-word; }
+  .tl-card-top {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    padding-right: 44px;
+  }
+  .tl-card-status { grid-column: 1 / -1; padding-left: 44px; }
+  .tl-card-name {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    word-break: normal; overflow-wrap: normal;
+  }
+  .tl-card-meta {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    word-break: normal; overflow-wrap: normal;
+  }
 
   /* FIX ações mobile: grid 2 colunas */
   .apt-actions {
