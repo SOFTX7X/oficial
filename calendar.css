@@ -181,21 +181,24 @@ span.flatpickr-weekday {
     color: #fff !important;
 }
 
-.flatpickr-day.prevMonthDay,
-.flatpickr-day.nextMonthDay {
+.flatpickr-day.prevMonthDay {
     visibility: hidden !important;
     pointer-events: none !important;
 }
 
+.flatpickr-day.nextMonthDay {
+    display: none !important;
+}
+
 .flatpickr-day.flatpickr-disabled {
     color: rgba(224, 224, 255, .30) !important;
-    background: rgba(255, 255, 255, .018) !important;
+    background: transparent !important;
     cursor: not-allowed !important;
 }
 
 .flatpickr-day.flatpickr-disabled:hover {
     color: rgba(224, 224, 255, .30) !important;
-    background: rgba(255, 255, 255, .018) !important;
+    background: transparent !important;
 }
 
 /* ═══════════════════════════════════════
