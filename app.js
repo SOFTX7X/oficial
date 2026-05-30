@@ -1986,10 +1986,14 @@ function aplicarBloqueioDataPublica(diasFechados) {
 
   // Flatpickr replaces the native date UI, so disable the dates on its instance.
   if (inputData._flatpickr) {
+    const hojeLocal = new Date();
+    hojeLocal.setHours(0, 0, 0, 0);
     inputData._flatpickr.set('onDayCreate', [
       (_, __, ___, dayElem) => {
         if (diasBloqueados.includes(dayElem.dateObj.getDay())) {
           dayElem.classList.add('dia-fechado');
+        } else if (dayElem.dateObj >= hojeLocal) {
+          dayElem.classList.add('dia-disponivel');
         }
       }
     ]);
@@ -1998,6 +2002,16 @@ function aplicarBloqueioDataPublica(diasFechados) {
       date => diasBloqueados.includes(date.getDay())
     ]);
     inputData._flatpickr.redraw();
+
+    if (!inputData._flatpickr.calendarContainer.querySelector('.calendar-legenda')) {
+      const legenda = document.createElement('div');
+      legenda.className = 'calendar-legenda';
+      legenda.innerHTML = `
+        <span><i class="calendar-dot disponivel"></i>Disponível</span>
+        <span><i class="calendar-dot indisponivel"></i>Indisponível</span>
+      `;
+      inputData._flatpickr.calendarContainer.appendChild(legenda);
+    }
 
     if (isDiaFechado(inputData.value, diasBloqueados)) {
       inputData._flatpickr.clear();
