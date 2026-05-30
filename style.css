@@ -1404,6 +1404,7 @@ body.menu-open { overflow: hidden; touch-action: none; }
     gap: 6px;
   }
   .apt-actions .act-btn { justify-content: center; width: 100%; }
+  .apt-actions .act-btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .muted-actions { display: flex; flex-wrap: wrap; }
 
   /* FIX: botão ⋮ maior em mobile */
