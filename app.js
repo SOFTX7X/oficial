@@ -57,7 +57,11 @@ function buildWaLink(tel, msg) {
   const n = (tel || '').replace(/\D/g, '');
   if (!n) return null;
   const f = n.startsWith('55') ? n : '55' + n;
-  return 'https://wa.me/' + f + '?text=' + encodeURIComponent(msg);
+  const params = '?phone=' + f + '&text=' + encodeURIComponent(msg);
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  return isMobile
+    ? 'https://api.whatsapp.com/send' + params
+    : 'https://web.whatsapp.com/send' + params;
 }
 
 const MENSAGENS_WHATSAPP_PADRAO = {
