@@ -1402,6 +1402,7 @@ body.menu-open { overflow: hidden; touch-action: none; }
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px;
+    width: 100%;
   }
   .apt-actions .act-btn { justify-content: center; width: 100%; }
   .apt-actions .act-btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
