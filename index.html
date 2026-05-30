@@ -615,12 +615,12 @@
         <div class="config-section">
           <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
           <div class="form-gap">
-            <div class="field"><label>Confirmação</label><textarea id="msgConfirmacao">Olá, {nome}! Seu agendamento foi confirmado ✅
-Serviço: {servico} · Data: {data} às {hora}
-Aguardamos você!</textarea></div>
-            <div class="field"><label>Lembrete</label><textarea id="msgLembrete">Olá, {nome}! Lembrando do seu agendamento amanhã 📅
-{servico} às {hora}. Qualquer dúvida estamos aqui!</textarea></div>
-            <button class="btn btn-ghost btn-full" onclick="toast('Mensagens salvas!','ok')">Salvar mensagens</button>
+            <div class="field"><label>Confirmação</label><textarea id="msgConfirmacao"></textarea></div>
+            <div class="field"><label>Recusa</label><textarea id="msgRecusa"></textarea></div>
+            <div class="field"><label>Reagendamento</label><textarea id="msgReagendamento"></textarea></div>
+            <div class="field"><label>Contato pelo botão WA</label><textarea id="msgContato"></textarea></div>
+            <div class="config-hint">Use os marcadores exibidos em cada mensagem para preencher automaticamente os dados do agendamento. O marcador [EMPRESA] é opcional.</div>
+            <button class="btn btn-ghost btn-full" onclick="salvarMensagensWhatsapp()">Salvar mensagens</button>
           </div>
         </div>
       </div>
