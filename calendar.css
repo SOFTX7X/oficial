@@ -181,7 +181,8 @@ span.flatpickr-weekday {
 
 .flatpickr-day.prevMonthDay,
 .flatpickr-day.nextMonthDay {
-    color: rgba(255, 255, 255, .15) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 .flatpickr-day.flatpickr-disabled {
