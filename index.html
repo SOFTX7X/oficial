@@ -39,15 +39,15 @@
 </script>
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora-v6.png?v=6">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20260601-2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="calendar.css">
+<link rel="stylesheet" href="calendar.css?v=20260601-2">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
-<script src="calendar.js"></script>
+<script src="calendar.js?v=20260601-2"></script>
 </head>
 <body>
 
@@ -363,7 +363,11 @@
     <div class="side-nav-section">
       <div class="side-nav-label">Empresa</div>
       <button class="nav-btn" onclick="openPublic()"><span class="ni">🌐</span>Página Pública</button>
-      <button class="nav-btn" onclick="setView('config')"><span class="ni">⚙</span>Configurações</button>
+      <button class="nav-btn" data-config-section="empresa" onclick="openConfigSection('empresa')"><span class="ni">🏢</span>Dados da empresa</button>
+      <button class="nav-btn" data-config-section="redes" onclick="openConfigSection('redes')"><span class="ni">📱</span>Redes sociais</button>
+      <button class="nav-btn" data-config-section="horarios" onclick="openConfigSection('horarios')"><span class="ni">🕐</span>Horários</button>
+      <button class="nav-btn" data-config-section="mensagens" onclick="openConfigSection('mensagens')"><span class="ni">💬</span>Mensagens</button>
+      <button class="nav-btn" data-config-section="fotos" onclick="openConfigSection('fotos')"><span class="ni">📷</span>Fotos</button>
     </div>
     <div class="side-bottom">
       <div class="side-user-card">
@@ -419,7 +423,11 @@
         <div class="side-nav-sep"></div>
         <div class="side-nav-label">Empresa</div>
         <button class="nav-btn" onclick="openPublic();closeMobileMenu()"><span class="ni">🌐</span>Página Pública</button>
-        <button class="nav-btn" onclick="setView('config');closeMobileMenu()"><span class="ni">⚙</span>Configurações</button>
+        <button class="nav-btn" data-config-section="empresa" onclick="openConfigSection('empresa')"><span class="ni">🏢</span>Dados da empresa</button>
+        <button class="nav-btn" data-config-section="redes" onclick="openConfigSection('redes')"><span class="ni">📱</span>Redes sociais</button>
+        <button class="nav-btn" data-config-section="horarios" onclick="openConfigSection('horarios')"><span class="ni">🕐</span>Horários</button>
+        <button class="nav-btn" data-config-section="mensagens" onclick="openConfigSection('mensagens')"><span class="ni">💬</span>Mensagens</button>
+        <button class="nav-btn" data-config-section="fotos" onclick="openConfigSection('fotos')"><span class="ni">📷</span>Fotos</button>
         <div class="side-nav-sep"></div>
         <button class="nav-btn mobile-menu-support" onclick="openSupportChat()"><span class="ni">💬</span>Suporte</button>
         <button class="btn btn-ghost btn-full btn-sm" onclick="logout()" style="margin-top:8px">Sair da conta</button>
@@ -574,14 +582,7 @@
     <!-- VIEW: CONFIG -->
     <section class="view" id="view-config">
       <div class="dash-hero" style="margin-bottom:20px">
-        <div class="dash-hero-inner"><div><h1>Configurações <em>da empresa.</em></h1><p>Dados, identidade e preferências.</p></div></div>
-      </div>
-      <div class="config-tabs" role="tablist" aria-label="Configurações da empresa">
-        <button class="config-tab active" onclick="setConfigTab('empresa',this)">🏢 Empresa</button>
-        <button class="config-tab" onclick="setConfigTab('redes',this)">📱 Redes sociais</button>
-        <button class="config-tab" onclick="setConfigTab('horarios',this)">🕐 Horários</button>
-        <button class="config-tab" onclick="setConfigTab('mensagens',this)">💬 Mensagens</button>
-        <button class="config-tab" onclick="setConfigTab('fotos',this)">📷 Fotos</button>
+        <div class="dash-hero-inner"><div><h1 id="configHeroTitle">Dados <em>da empresa.</em></h1><p id="configHeroSub">Informações principais do seu negócio.</p></div></div>
       </div>
       <div class="config-tab-content">
         <div class="config-section config-tab-panel active" data-config-tab="empresa">
@@ -787,7 +788,7 @@
 <!-- Notif Stack -->
 <div class="notif-stack" id="notifStack"></div>
 
-<script src="supabase.js"></script>
+<script src="supabase.js?v=20260601-2"></script>
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -798,7 +799,7 @@
 })();
 </script>
 
-<script src="app.js"></script>
+<script src="app.js?v=20260601-2"></script>
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();

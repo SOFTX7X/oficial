@@ -1401,6 +1401,30 @@ function setConfigTab(tab, botao) {
   document.querySelectorAll('.config-tab-panel').forEach(item => item.classList.remove('active'));
   if (botao) botao.classList.add('active');
   document.querySelector(`[data-config-tab="${tab}"]`)?.classList.add('active');
+  document.querySelectorAll('[data-config-section]').forEach(item => {
+    item.classList.toggle('active', item.dataset.configSection === tab);
+  });
+
+  const secoes = {
+    empresa: ['Dados da empresa', 'Informações principais do seu negócio.', 'Dados <em>da empresa.</em>'],
+    redes: ['Redes sociais', 'Links exibidos na sua página pública.', 'Redes <em>sociais.</em>'],
+    horarios: ['Horários', 'Dias disponíveis para receber agendamentos.', 'Horários <em>de funcionamento.</em>'],
+    mensagens: ['Mensagens', 'Textos automáticos enviados pelo WhatsApp.', 'Mensagens <em>automáticas.</em>'],
+    fotos: ['Fotos', 'Imagens usadas no painel e na página pública.', 'Fotos <em>de perfil.</em>']
+  };
+  const info = secoes[tab] || secoes.empresa;
+  setText('pageTitle', info[0]);
+  setText('pageSub', info[1]);
+  const titulo = $('configHeroTitle');
+  const subtitulo = $('configHeroSub');
+  if (titulo) titulo.innerHTML = info[2];
+  if (subtitulo) subtitulo.textContent = info[1];
+}
+
+function openConfigSection(tab = 'empresa') {
+  setView('config');
+  setConfigTab(tab);
+  closeMobileMenu();
 }
 
 // ── SALVAR ──
@@ -2590,7 +2614,7 @@ Object.assign(window, {
   goStep1, goStep2, goStep3, autoSlug,
   loginComSenha, finalizarCadastro, logout,
   setView, setFilter,
-  setConfigTab,
+  setConfigTab, openConfigSection,
   salvarCliente, salvarServico, salvarProfissional, salvarAgendamento,
   salvarConfig, salvarRedesSociais, salvarHorarios, salvarMensagensWhatsapp, restaurarMensagensWhatsappPadrao,
   abrirEditorFoto, fecharEditorFoto, atualizarEditorFoto, iniciarArrasteFotoEditor, salvarFotoEditor,
