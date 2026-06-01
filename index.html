@@ -576,8 +576,15 @@
       <div class="dash-hero" style="margin-bottom:20px">
         <div class="dash-hero-inner"><div><h1>Configurações <em>da empresa.</em></h1><p>Dados, identidade e preferências.</p></div></div>
       </div>
-      <div class="config-grid">
-        <div class="config-section">
+      <div class="config-tabs" role="tablist" aria-label="Configurações da empresa">
+        <button class="config-tab active" onclick="setConfigTab('empresa',this)">🏢 Empresa</button>
+        <button class="config-tab" onclick="setConfigTab('redes',this)">📱 Redes sociais</button>
+        <button class="config-tab" onclick="setConfigTab('horarios',this)">🕐 Horários</button>
+        <button class="config-tab" onclick="setConfigTab('mensagens',this)">💬 Mensagens</button>
+        <button class="config-tab" onclick="setConfigTab('fotos',this)">📷 Fotos</button>
+      </div>
+      <div class="config-tab-content">
+        <div class="config-section config-tab-panel active" data-config-tab="empresa">
           <div class="config-title"><div class="config-icon">🏢</div>Dados da empresa</div>
           <div class="form-gap">
             <div class="field"><label>Nome da empresa</label><input id="cfgNome"></div>
@@ -589,7 +596,7 @@
             <div id="cfgLinkBox" style="font-size:10.5px;color:var(--text4);padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);word-break:break-all"></div>
           </div>
         </div>
-        <div class="config-section">
+        <div class="config-section config-tab-panel" data-config-tab="redes">
           <div class="config-title"><div class="config-icon">📱</div>Redes sociais</div>
           <div class="form-gap">
             <div class="field"><label>Instagram</label><input id="cfgInstagram" placeholder="@seuinstagram"></div>
@@ -599,7 +606,7 @@
             <button class="btn btn-ghost btn-full" onclick="salvarRedesSociais()">Salvar redes sociais</button>
           </div>
         </div>
-        <div class="config-section">
+        <div class="config-section config-tab-panel" data-config-tab="horarios">
           <div class="config-title"><div class="config-icon">🕐</div>Horários de funcionamento</div>
           <div class="schedule-grid">
             <div class="sch-day"><div class="sch-day-name">Seg</div><input type="checkbox" id="diaSeg" checked></div>
@@ -612,7 +619,7 @@
           </div>
           <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="salvarHorarios()">Salvar horários</button>
         </div>
-        <div class="config-section">
+        <div class="config-section config-tab-panel" data-config-tab="mensagens">
           <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
           <div class="form-gap">
             <div class="field"><label>Confirmação</label><textarea id="msgConfirmacao"></textarea></div>
@@ -622,6 +629,26 @@
             <div class="config-hint">Use os marcadores exibidos em cada mensagem para preencher automaticamente os dados do agendamento. O marcador [EMPRESA] é opcional.</div>
             <button class="btn btn-ghost btn-full" onclick="salvarMensagensWhatsapp()">Salvar mensagens</button>
             <button class="btn btn-ghost btn-full" onclick="restaurarMensagensWhatsappPadrao()">Restaurar mensagens padrão</button>
+          </div>
+        </div>
+        <div class="config-section config-tab-panel" data-config-tab="fotos">
+          <div class="config-title"><div class="config-icon">📷</div>Fotos de perfil</div>
+          <div class="config-hint" style="margin-bottom:12px">Escolha uma imagem, ajuste o enquadramento no círculo e salve. O recorte pode ser diferente no painel e na página pública.</div>
+          <div class="profile-images-grid">
+            <label class="profile-image-card">
+              <span class="profile-image-title">Foto do painel</span>
+              <span class="profile-image-sub">Avatar pequeno da sua conta.</span>
+              <span class="profile-image-preview is-avatar" id="previewFotoPerfil"><span>+</span></span>
+              <input type="file" id="inputFotoPerfil" accept="image/jpeg,image/png,image/webp" onchange="abrirEditorFoto('perfil',this)">
+              <span class="profile-image-action">Escolher imagem</span>
+            </label>
+            <label class="profile-image-card">
+              <span class="profile-image-title">Foto da página pública</span>
+              <span class="profile-image-sub">Imagem circular exibida aos seus clientes.</span>
+              <span class="profile-image-preview is-cover" id="previewFotoPublica"><span>+</span></span>
+              <input type="file" id="inputFotoPublica" accept="image/jpeg,image/png,image/webp" onchange="abrirEditorFoto('publica',this)">
+              <span class="profile-image-action">Escolher imagem</span>
+            </label>
           </div>
         </div>
       </div>
@@ -634,9 +661,13 @@
   <div class="pub-wrap">
     <button class="pub-back" onclick="voltarDaPublica()">← Voltar</button>
     <div class="pub-hero">
-      <div class="pub-hero-brand"><div class="nav-dot" style="width:20px;height:20px;font-size:9px">✦</div>VyXora Agendas</div>
-      <h1 id="pubNomeEmpresa">Agendamento Online</h1>
-      <p id="pubDescEmpresa">Escolha seu serviço, profissional, data e horário.</p>
+      <div class="pub-cover" id="pubFotoPublica" style="display:none"></div>
+      <div class="pub-hero-content">
+        <div class="pub-hero-brand"><div class="nav-dot" style="width:20px;height:20px;font-size:9px">✦</div>VyXora Agendas</div>
+        <h1 id="pubNomeEmpresa">Agendamento Online</h1>
+        <p id="pubDescEmpresa">Escolha seu serviço, profissional, data e horário.</p>
+      </div>
+      <div class="pub-location" id="pubLocalizacao" style="display:none"></div>
       <div id="pubSociais" class="pub-socials" style="display:none"></div>
     </div>
     <div id="pubConfirmScreen" class="pub-confirm-screen" style="display:none">
@@ -733,6 +764,22 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeConfirmModal()">Cancelar</button>
       <button class="btn btn-danger" id="confirmActionBtn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Editor de foto -->
+<div class="modal-overlay" id="fotoEditorOverlay">
+  <div class="modal foto-editor-modal">
+    <button class="modal-close" onclick="fecharEditorFoto()">✕</button>
+    <div class="modal-title" id="fotoEditorTitulo">Ajustar foto</div>
+    <div class="modal-sub">Arraste a imagem. No computador, use a rolagem do mouse para ajustar o zoom. No celular, use dois dedos.</div>
+    <div class="foto-editor-stage">
+      <div class="foto-editor-circle" id="fotoEditorCircle" onpointerdown="iniciarArrasteFotoEditor(event)"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fecharEditorFoto()">Cancelar</button>
+      <button class="btn btn-primary" id="fotoEditorSalvar" onclick="salvarFotoEditor()">Salvar foto</button>
     </div>
   </div>
 </div>

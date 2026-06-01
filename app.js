@@ -18,6 +18,7 @@ let _openMenuBtn = null;
 let autoSyncTimer = null;
 let lastIds = new Set();
 let realtimeChannel = null;
+let _fotoEditor = null;
 
 // ── UTILS ──
 function $(id) { return document.getElementById(id); }
@@ -39,6 +40,59 @@ function ajustarFonteCampo(campo) {
 
 function ajustarFontesCampos(container = document) {
   container.querySelectorAll('input:not([type="hidden"]), select').forEach(ajustarFonteCampo);
+}
+
+function escapeHtml(valor) {
+  return String(valor || '').replace(/[&<>"']/g, caractere => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  })[caractere]);
+}
+
+function normalizarUrl(valor, base = '') {
+  const texto = String(valor || '').trim();
+  if (!texto) return '';
+  if (base && !/^https?:\/\//i.test(texto)) {
+    return base + texto.replace(/^@/, '').replace(/^\/+/, '');
+  }
+  return /^https?:\/\//i.test(texto) ? texto : 'https://' + texto;
+}
+
+function aplicarImagemFundo(elemento, url) {
+  if (!elemento) return;
+  elemento.style.backgroundImage = url ? `url("${String(url).replace(/"/g, '%22')}")` : '';
+}
+
+function renderAvatarPainel() {
+  const avatar = $('sideAvatar');
+  if (!avatar || !state.empresa) return;
+  const foto = state.empresa.foto_perfil_url || '';
+  aplicarImagemFundo(avatar, foto);
+  const enquadramento = getEnquadramentoFoto('perfil');
+  aplicarEnquadramentoFoto(avatar, enquadramento.x, enquadramento.y, enquadramento.zoom);
+  avatar.textContent = foto ? '' : initial(state.empresa.nome);
+}
+
+function renderPreviewImagem(id, url) {
+  const preview = $(id);
+  if (!preview) return;
+  aplicarImagemFundo(preview, url);
+  preview.innerHTML = url ? '' : '<span>+</span>';
+}
+
+function aplicarEnquadramentoFoto(elemento, x = 50, y = 50, zoom = 100) {
+  if (!elemento) return;
+  elemento.style.backgroundPosition = `${Number(x) || 50}% ${Number(y) || 50}%`;
+  elemento.style.backgroundSize = `${Math.max(40, Number(zoom) || 100)}%`;
+  elemento.style.backgroundRepeat = 'no-repeat';
+}
+
+function getEnquadramentoFoto(tipo, empresa = state.empresa || {}) {
+  const prefixo = tipo === 'perfil' ? 'foto_perfil' : 'foto_publica';
+  return {
+    x: Number(empresa[`${prefixo}_x`] ?? 50),
+    y: Number(empresa[`${prefixo}_y`] ?? 50),
+    zoom: Number(empresa[`${prefixo}_zoom`] ?? 100)
+  };
 }
 
 function money(v) {
@@ -426,7 +480,7 @@ function showDashboard() {
   closeAuth();
 
   if (state.empresa) {
-    setText('sideAvatar', initial(state.empresa.nome));
+    renderAvatarPainel();
     setText('sideNome', state.empresa.nome);
     setText('sidePlan', state.empresa.plano || 'Grátis');
     const lb = $('sideLinkBox');
@@ -1308,6 +1362,12 @@ function renderConfig() {
   set('cfgFacebook', e.facebook);
   set('cfgTiktok', e.tiktok);
   set('cfgSite', e.site);
+  renderPreviewImagem('previewFotoPerfil', e.foto_perfil_url);
+  renderPreviewImagem('previewFotoPublica', e.foto_publica_url);
+  const enquadramentoPerfil = getEnquadramentoFoto('perfil', e);
+  const enquadramentoPublico = getEnquadramentoFoto('publica', e);
+  aplicarEnquadramentoFoto($('previewFotoPerfil'), enquadramentoPerfil.x, enquadramentoPerfil.y, enquadramentoPerfil.zoom);
+  aplicarEnquadramentoFoto($('previewFotoPublica'), enquadramentoPublico.x, enquadramentoPublico.y, enquadramentoPublico.zoom);
   const mensagens = getMensagensWhatsapp();
   set('msgConfirmacao', mensagens.confirmacao);
   set('msgRecusa', mensagens.recusa);
@@ -1334,6 +1394,13 @@ function renderConfig() {
 
   const lb = $('cfgLinkBox');
   if (lb) lb.textContent = '🔗 ' + publicUrl(e.slug || '');
+}
+
+function setConfigTab(tab, botao) {
+  document.querySelectorAll('.config-tab').forEach(item => item.classList.remove('active'));
+  document.querySelectorAll('.config-tab-panel').forEach(item => item.classList.remove('active'));
+  if (botao) botao.classList.add('active');
+  document.querySelector(`[data-config-tab="${tab}"]`)?.classList.add('active');
 }
 
 // ── SALVAR ──
@@ -1464,7 +1531,7 @@ async function salvarConfig() {
   if (error) return toast('Erro ao salvar: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
   setText('sideNome', state.empresa.nome);
-  setText('sideAvatar', initial(state.empresa.nome));
+  renderAvatarPainel();
   const lb = $('sideLinkBox');
   if (lb) lb.textContent = publicUrl(state.empresa.slug);
   renderConfig();
@@ -1513,6 +1580,149 @@ async function salvarRedesSociais() {
   if (error) return toast('Erro ao salvar redes: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
   showNotif('Redes sociais salvas', '', 'ok');
+}
+
+function abrirEditorFoto(tipo, input) {
+  if (!state?.empresa?.id || !state?.user?.id || !input?.files?.[0]) return;
+  const arquivo = input.files[0];
+  const permitidos = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!permitidos.includes(arquivo.type)) {
+    input.value = '';
+    return toast('Use uma imagem JPG, PNG ou WEBP.', 'err');
+  }
+  if (arquivo.size > 5 * 1024 * 1024) {
+    input.value = '';
+    return toast('A imagem deve ter no máximo 5 MB.', 'err');
+  }
+
+  const atual = getEnquadramentoFoto(tipo);
+  _fotoEditor = {
+    tipo, input, arquivo, urlTemporaria: URL.createObjectURL(arquivo),
+    x: atual.x, y: atual.y, zoom: atual.zoom,
+    ponteiros: new Map(), ultimoX: 0, ultimoY: 0, distanciaAnterior: 0
+  };
+  setText('fotoEditorTitulo', tipo === 'perfil' ? 'Ajustar foto do painel' : 'Ajustar foto pública');
+  aplicarImagemFundo($('fotoEditorCircle'), _fotoEditor.urlTemporaria);
+  atualizarEditorFoto();
+  const overlay = $('fotoEditorOverlay');
+  if (overlay) overlay.classList.add('open');
+}
+
+function atualizarEditorFoto() {
+  if (!_fotoEditor) return;
+  _fotoEditor.zoom = Math.max(40, Math.min(300, Number(_fotoEditor.zoom) || 100));
+  aplicarEnquadramentoFoto($('fotoEditorCircle'), _fotoEditor.x, _fotoEditor.y, _fotoEditor.zoom);
+}
+
+function iniciarArrasteFotoEditor(evento) {
+  if (!_fotoEditor) return;
+  _fotoEditor.ponteiros.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
+  _fotoEditor.ultimoX = evento.clientX;
+  _fotoEditor.ultimoY = evento.clientY;
+  _fotoEditor.distanciaAnterior = distanciaEntrePonteiros();
+  evento.currentTarget.setPointerCapture?.(evento.pointerId);
+}
+
+function moverFotoEditor(evento) {
+  if (!_fotoEditor?.ponteiros?.has(evento.pointerId)) return;
+  _fotoEditor.ponteiros.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
+  const circulo = $('fotoEditorCircle');
+  const largura = circulo?.clientWidth || 270;
+  if (_fotoEditor.ponteiros.size >= 2) {
+    const distanciaAtual = distanciaEntrePonteiros();
+    if (_fotoEditor.distanciaAnterior) {
+      _fotoEditor.zoom += (distanciaAtual - _fotoEditor.distanciaAnterior) / largura * 180;
+    }
+    _fotoEditor.distanciaAnterior = distanciaAtual;
+    atualizarEditorFoto();
+    return;
+  }
+  _fotoEditor.x = Math.max(0, Math.min(100, _fotoEditor.x - (evento.clientX - _fotoEditor.ultimoX) / largura * 100));
+  _fotoEditor.y = Math.max(0, Math.min(100, _fotoEditor.y - (evento.clientY - _fotoEditor.ultimoY) / largura * 100));
+  _fotoEditor.ultimoX = evento.clientX;
+  _fotoEditor.ultimoY = evento.clientY;
+  atualizarEditorFoto();
+}
+
+function distanciaEntrePonteiros() {
+  if (!_fotoEditor?.ponteiros || _fotoEditor.ponteiros.size < 2) return 0;
+  const [a, b] = [..._fotoEditor.ponteiros.values()];
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function finalizarArrasteFotoEditor(evento) {
+  if (!_fotoEditor?.ponteiros) return;
+  _fotoEditor.ponteiros.delete(evento.pointerId);
+  _fotoEditor.distanciaAnterior = distanciaEntrePonteiros();
+}
+
+function zoomFotoEditor(evento) {
+  if (!_fotoEditor) return;
+  evento.preventDefault();
+  _fotoEditor.zoom += evento.deltaY < 0 ? 10 : -10;
+  atualizarEditorFoto();
+}
+
+function fecharEditorFoto() {
+  const overlay = $('fotoEditorOverlay');
+  if (overlay) overlay.classList.remove('open');
+  if (_fotoEditor?.urlTemporaria) URL.revokeObjectURL(_fotoEditor.urlTemporaria);
+  if (_fotoEditor?.input) _fotoEditor.input.value = '';
+  _fotoEditor = null;
+}
+
+document.addEventListener('pointermove', moverFotoEditor);
+document.addEventListener('pointerup', finalizarArrasteFotoEditor);
+document.addEventListener('pointercancel', finalizarArrasteFotoEditor);
+document.addEventListener('DOMContentLoaded', () => {
+  $('fotoEditorCircle')?.addEventListener('wheel', zoomFotoEditor, { passive: false });
+});
+
+async function salvarFotoEditor() {
+  if (!state?.empresa?.id || !state?.user?.id || !_fotoEditor) return;
+  const { tipo, input, arquivo, x, y, zoom } = _fotoEditor;
+  const btn = $('fotoEditorSalvar');
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
+  const extensao = (arquivo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const caminho = `${state.user.id}/${tipo}-${Date.now()}.${extensao}`;
+  const coluna = tipo === 'perfil' ? 'foto_perfil_url' : 'foto_publica_url';
+  const prefixo = tipo === 'perfil' ? 'foto_perfil' : 'foto_publica';
+
+  const { error: uploadError } = await db.storage.from('fotos-perfil')
+    .upload(caminho, arquivo, { cacheControl: '3600', upsert: false, contentType: arquivo.type });
+  if (uploadError) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar foto'; }
+    return toast('Erro ao enviar imagem: ' + uploadError.message, 'err');
+  }
+
+  const { data: publica } = db.storage.from('fotos-perfil').getPublicUrl(caminho);
+  const url = publica?.publicUrl || '';
+  if (!url) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar foto'; }
+    return toast('Não foi possível gerar o link da imagem.', 'err');
+  }
+
+  const updates = {
+    [coluna]: url,
+    [`${prefixo}_x`]: Math.round(x),
+    [`${prefixo}_y`]: Math.round(y),
+    [`${prefixo}_zoom`]: Math.round(zoom)
+  };
+  const { data, error } = await db.from('agenda_empresas')
+    .update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar foto'; }
+    return toast('Imagem enviada, mas não foi possível vinculá-la: ' + error.message, 'err');
+  }
+
+  state.empresa = data || { ...state.empresa, ...updates };
+  renderPreviewImagem(tipo === 'perfil' ? 'previewFotoPerfil' : 'previewFotoPublica', url);
+  aplicarEnquadramentoFoto($(tipo === 'perfil' ? 'previewFotoPerfil' : 'previewFotoPublica'), x, y, zoom);
+  if (tipo === 'perfil') renderAvatarPainel();
+  if (btn) { btn.disabled = false; btn.textContent = 'Salvar foto'; }
+  fecharEditorFoto();
+  showNotif(tipo === 'perfil' ? 'Foto do painel atualizada' : 'Imagem pública atualizada', '', 'ok');
 }
 
 async function salvarMensagensWhatsapp() {
@@ -2123,17 +2333,44 @@ async function loadPublic(slug) {
   setText('pubNomeEmpresa', empresa.nome);
   setText('pubDescEmpresa', (empresa.area_atuacao || 'Agendamento Online') + ' • WhatsApp: ' + (empresa.whatsapp || 'Não informado'));
 
+  const fotoPublica = $('pubFotoPublica');
+  if (fotoPublica) {
+    aplicarImagemFundo(fotoPublica, empresa.foto_publica_url);
+    const enquadramento = getEnquadramentoFoto('publica', empresa);
+    aplicarEnquadramentoFoto(fotoPublica, enquadramento.x, enquadramento.y, enquadramento.zoom);
+    fotoPublica.style.display = empresa.foto_publica_url ? 'block' : 'none';
+  }
+
+  const localizacao = $('pubLocalizacao');
+  if (localizacao) {
+    const enderecoCompleto = [empresa.endereco, empresa.cidade].filter(Boolean).join(' • ');
+    localizacao.innerHTML = enderecoCompleto
+      ? `<span>📍</span><span style="flex:1">${escapeHtml(enderecoCompleto)}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCompleto)}" target="_blank" rel="noopener">Ver mapa</a>`
+      : '';
+    localizacao.style.display = enderecoCompleto ? 'flex' : 'none';
+  }
+
   const sociais = $('pubSociais');
   if (sociais) {
     let html = '';
     if (empresa.instagram) {
       const h = empresa.instagram.replace('@', '').replace(/.*instagram\.com\//, '');
-      html += `<a href="https://instagram.com/${h}" target="_blank" rel="noopener" class="pub-social">📸 @${h}</a>`;
+      html += `<a href="${escapeHtml(normalizarUrl(h, 'https://instagram.com/'))}" target="_blank" rel="noopener" class="pub-social">📸 @${escapeHtml(h)}</a>`;
+    }
+    if (empresa.facebook) {
+      const url = /facebook\.com\//i.test(empresa.facebook)
+        ? normalizarUrl(empresa.facebook)
+        : normalizarUrl(empresa.facebook, 'https://facebook.com/');
+      html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="pub-social">f Facebook</a>`;
+    }
+    if (empresa.tiktok) {
+      const h = empresa.tiktok.replace('@', '').replace(/.*tiktok\.com\/@?/, '');
+      html += `<a href="https://tiktok.com/@${escapeHtml(h)}" target="_blank" rel="noopener" class="pub-social">♪ @${escapeHtml(h)}</a>`;
     }
     if (empresa.site) {
-      const url = empresa.site.startsWith('http') ? empresa.site : 'https://' + empresa.site;
+      const url = normalizarUrl(empresa.site);
       const lbl = empresa.site.replace(/^https?:\/\//, '').replace(/\/$/, '');
-      html += `<a href="${url}" target="_blank" rel="noopener" class="pub-social">🌐 ${lbl}</a>`;
+      html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="pub-social">🌐 ${escapeHtml(lbl)}</a>`;
     }
     sociais.innerHTML = html;
     sociais.style.display = html ? 'flex' : 'none';
@@ -2298,7 +2535,7 @@ async function confirmarAgendamentoPublico() {
 function resetPublic() {
   const mb = $('pubMainBody');
   const cs = $('pubConfirmScreen');
-  if (mb) mb.style.display = 'flex';
+  if (mb) mb.style.display = '';
   if (cs) cs.style.display = 'none';
   const campos = ['pubClienteNome', 'pubClienteTel', 'pubData', 'pubHora', 'pubObs'];
   campos.forEach(id => { const el = $(id); if (el) el.value = ''; });
@@ -2353,8 +2590,10 @@ Object.assign(window, {
   goStep1, goStep2, goStep3, autoSlug,
   loginComSenha, finalizarCadastro, logout,
   setView, setFilter,
+  setConfigTab,
   salvarCliente, salvarServico, salvarProfissional, salvarAgendamento,
   salvarConfig, salvarRedesSociais, salvarHorarios, salvarMensagensWhatsapp, restaurarMensagensWhatsappPadrao,
+  abrirEditorFoto, fecharEditorFoto, atualizarEditorFoto, iniciarArrasteFotoEditor, salvarFotoEditor,
   confirmarAg, concluirAg, abrirWA,
   openModalRecusa, closeModalRecusa, selectMotivo, confirmarRecusa,
   openModalReagendar, closeModalReagendar, confirmarReagendar,
