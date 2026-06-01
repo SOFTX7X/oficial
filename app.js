@@ -38,8 +38,15 @@ function slugify(s) {
     .replace(/^-+|-+$/g, '').substring(0, 60);
 }
 
-function hojeISO() { return new Date().toISOString().slice(0, 10); }
-function mesPrefixo() { return new Date().toISOString().slice(0, 7); }
+function dataLocalISO(data = new Date()) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+
+function hojeISO() { return dataLocalISO(); }
+function mesPrefixo() { return hojeISO().slice(0, 7); }
 
 function publicUrl(slug) {
   return location.origin + location.pathname + '#agendar/' + slug;
