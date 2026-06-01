@@ -749,6 +749,24 @@ a { text-decoration: none; color: inherit; }
   grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
   gap: 10px; align-items: end;
 }
+#view-agenda .form-grid {
+  grid-template-columns:
+    minmax(150px, 1fr)
+    minmax(140px, 0.9fr)
+    minmax(210px, 1.35fr)
+    minmax(180px, 1.15fr)
+    minmax(145px, 0.9fr)
+    minmax(130px, 0.8fr);
+}
+#view-agenda .form-grid .field:nth-child(7),
+#view-agenda .form-grid .field:nth-child(8) {
+  min-width: 150px;
+}
+@media (max-width: 1500px) {
+  #view-agenda .form-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
 
 .filter-bar {
   display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;

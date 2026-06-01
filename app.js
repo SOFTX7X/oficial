@@ -27,6 +27,20 @@ function setText(id, v) {
   if (el) el.textContent = v;
 }
 
+function ajustarFonteCampo(campo) {
+  if (!campo || !campo.matches('input, select') || campo.type === 'hidden') return;
+  const texto = campo.tagName === 'SELECT'
+    ? (campo.options[campo.selectedIndex]?.text || '')
+    : (campo.value || campo.placeholder || '');
+  const tamanho = texto.length > 34 ? 11 : texto.length > 25 ? 12 : texto.length > 18 ? 13 : 14;
+  campo.style.fontSize = tamanho + 'px';
+  campo.title = texto;
+}
+
+function ajustarFontesCampos(container = document) {
+  container.querySelectorAll('input:not([type="hidden"]), select').forEach(ajustarFonteCampo);
+}
+
 function money(v) {
   return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -47,6 +61,28 @@ function dataLocalISO(data = new Date()) {
 
 function hojeISO() { return dataLocalISO(); }
 function mesPrefixo() { return hojeISO().slice(0, 7); }
+
+function dataConclusaoISO(agendamento) {
+  if (!agendamento?.concluido_em) return agendamento?.data || '';
+  const data = new Date(agendamento.concluido_em);
+  return Number.isNaN(data.getTime()) ? (agendamento.data || '') : dataLocalISO(data);
+}
+
+function ordenarAgendamentosRecentes(agendamentos) {
+  return [...(agendamentos || [])].sort((a, b) => {
+    const dataA = Date.parse(a.criado_em || '') || 0;
+    const dataB = Date.parse(b.criado_em || '') || 0;
+    return dataB - dataA;
+  });
+}
+
+function ordenarAtendimentosAgendados(agendamentos) {
+  return [...(agendamentos || [])].sort((a, b) => {
+    const dataA = `${a.data || ''}T${a.hora || '00:00'}`;
+    const dataB = `${b.data || ''}T${b.hora || '00:00'}`;
+    return dataA.localeCompare(dataB);
+  });
+}
 
 function publicUrl(slug) {
   return location.origin + location.pathname + '#agendar/' + slug;
@@ -553,6 +589,11 @@ document.addEventListener('input', function(e) {
   if (e.target && e.target.id === 'empSlug') {
     e.target.dataset.manual = '1';
   }
+  ajustarFonteCampo(e.target);
+});
+
+document.addEventListener('change', function(e) {
+  ajustarFonteCampo(e.target);
 });
 
 // ── LOGIN ──
@@ -757,10 +798,9 @@ function startAutoSync() {
     try {
       const { data } = await db.from('agenda_agendamentos').select('*')
         .eq('empresa_id', state.empresa.id)
-        .order('data', { ascending: true })
-        .order('hora', { ascending: true });
+        .order('criado_em', { ascending: false });
       const novos = (data || []).filter(a => !lastIds.has(String(a.id)));
-      state.agendamentos = data || [];
+      state.agendamentos = ordenarAgendamentosRecentes(data);
       if (novos.length) {
         novos.forEach(a => showNotif('Novo agendamento!', `${a.cliente_nome || 'Cliente'} agendou.`, 'new', 6000));
       }
@@ -801,13 +841,13 @@ async function loadAll() {
       db.from('agenda_clientes').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
       db.from('agenda_servicos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
       db.from('agenda_profissionais').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
-      db.from('agenda_agendamentos').select('*').eq('empresa_id', id).order('data', { ascending: true }).order('hora', { ascending: true }),
+      db.from('agenda_agendamentos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
       db.from('agenda_pagamentos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false })
     ]);
     state.clientes = cli.data || [];
     state.servicos = svc.data || [];
     state.profissionais = prof.data || [];
-    state.agendamentos = ag.data || [];
+    state.agendamentos = ordenarAgendamentosRecentes(ag.data);
     state.pagamentos = pag.data || [];
     lastIds = new Set(state.agendamentos.map(a => String(a.id)));
     renderAll();
@@ -838,6 +878,7 @@ function renderAll() {
     const editingConfig = active && active.closest && active.closest('#view-config');
     if (!editingConfig) renderConfig();
   });
+  ajustarFontesCampos();
 }
 
 // ── STATS ──
@@ -850,8 +891,8 @@ function renderStats() {
   const base = ativos.filter(a => normStatus(a.status) !== 'Recusado').length;
   const taxa = base > 0 ? Math.round(concluidos / base * 100) : 0;
   const fin = ags.filter(isFinanceiro);
-  const fatHoje = fin.filter(a => a.data === hoje).reduce((s, a) => s + Number(a.valor || 0), 0);
-  const fatMes = fin.filter(a => (a.data || '').startsWith(mes)).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const fatHoje = fin.filter(a => dataConclusaoISO(a) === hoje).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const fatMes = fin.filter(a => dataConclusaoISO(a).startsWith(mes)).reduce((s, a) => s + Number(a.valor || 0), 0);
 
   setText('statHoje', ativos.filter(a => a.data === hoje).length);
   setText('statPendentes', st('Pendente'));
@@ -880,7 +921,7 @@ function renderStats() {
 function renderDashList() {
   const el = $('dashAptList');
   if (!el) return;
-  const visibles = (state.agendamentos || [])
+  const visibles = ordenarAtendimentosAgendados(state.agendamentos)
     .filter(a => ['Pendente', 'Confirmado', 'Reagendado'].includes(normStatus(a.status)))
     .slice(0, 6);
   if (!visibles.length) {
@@ -967,7 +1008,7 @@ function setFilter(filter, btn) {
 function renderTimeline() {
   const el = $('agendaTimeline');
   if (!el) return;
-  const ags = state.agendamentos || [];
+  const ags = ordenarAgendamentosRecentes(state.agendamentos);
   if (!ags.length) {
     el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>';
     return;
@@ -1387,7 +1428,13 @@ async function salvarAgendamento() {
   if (error) return toast('Erro ao salvar: ' + error.message, 'err');
   if ($('agCliente')) $('agCliente').value = '';
   if ($('agTelefone')) $('agTelefone').value = '';
-  if ($('agData')) $('agData').value = '';
+  if ($('agServico')) $('agServico').value = '';
+  if ($('agProfissional')) $('agProfissional').value = '';
+  if ($('agStatus')) $('agStatus').value = 'Confirmado';
+  if ($('agData')) {
+    if ($('agData')._flatpickr) $('agData')._flatpickr.clear();
+    else $('agData').value = '';
+  }
   if ($('agHora')) $('agHora').value = '';
   await loadAll();
   showNotif('Agendamento criado!', `${agCli} — ${formatDate(agData)} às ${agHora}.`, 'ok');
@@ -1530,10 +1577,11 @@ async function confirmarAg(id) {
 async function concluirAg(id) {
   const ag = (state.agendamentos || []).find(a => a.id === id);
   if (!ag) return;
+  const concluidoEm = new Date().toISOString();
   const { error } = await db.from('agenda_agendamentos')
-    .update({ status: 'Concluído', financeiro_status: 'Concluído' }).eq('id', id);
+    .update({ status: 'Concluído', financeiro_status: 'Concluído', concluido_em: concluidoEm }).eq('id', id);
   if (error) return toast('Erro ao concluir.', 'err');
-  ag.status = 'Concluído'; ag.financeiro_status = 'Concluído';
+  ag.status = 'Concluído'; ag.financeiro_status = 'Concluído'; ag.concluido_em = concluidoEm;
   renderAll();
   showNotif('Concluído!', ag.cliente_nome + ' — ' + (ag.servico_nome || '—'), 'ok');
 }
@@ -1865,7 +1913,8 @@ function editAgendamento(id) {
     if (!cli || !data || !hora) return toast('Preencha cliente, data e hora.', 'err');
     const serv = (state.servicos || []).find(s => s.id === $('ed_as')?.value);
     const prof = (state.profissionais || []).find(p => p.id === $('ed_ap')?.value);
-    const { error } = await db.from('agenda_agendamentos').update({
+    const status = $('ed_ast')?.value || 'Pendente';
+    const updates = {
       cliente_nome: cli,
       cliente_telefone: ($('ed_atel')?.value || '').trim(),
       servico_id: $('ed_as')?.value || null,
@@ -1873,9 +1922,14 @@ function editAgendamento(id) {
       servico_nome: serv?.nome || a.servico_nome,
       profissional_nome: prof?.nome || a.profissional_nome,
       data, hora,
-      status: $('ed_ast')?.value || 'Pendente',
+      status,
       valor: Number(serv?.preco || a.valor || 0)
-    }).eq('id', id);
+    };
+    if (normStatus(status) === 'Concluído') {
+      updates.financeiro_status = 'Concluído';
+      updates.concluido_em = a.concluido_em || new Date().toISOString();
+    }
+    const { error } = await db.from('agenda_agendamentos').update(updates).eq('id', id);
     if (error) return toast('Erro ao salvar.', 'err');
     closeEditModal(); await loadAll();
     showNotif('Agendamento atualizado', '', 'ok');
