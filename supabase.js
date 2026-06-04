@@ -1,9 +1,9 @@
 // supabase.js — conexão separada do AgendaPro
 // Este arquivo precisa ficar na mesma pasta do index.html.
 
-const SUPABASE_URL = "https://wyjrjioipqfltdyupfna.supabase.co";
+const SUPABASE_URL = "https://bbupjunmkutqrlamcdlx.supabase.co";
 
-const SUPABASE_KEY = "sb_publishable_PkDkt5S-_rdrT0HhANoPAw_ZWluV2_H";
+const SUPABASE_KEY = "sb_publishable_xnbWHgN5SIq4fqHRaNT-8A_Pc7qC8py";
 
 window.db = window.supabase.createClient(
   SUPABASE_URL,
