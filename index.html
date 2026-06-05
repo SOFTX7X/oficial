@@ -40,15 +40,15 @@
 </script>
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora-v6.png?v=6">
-<link rel="stylesheet" href="style.css?v=20260601-2">
+<link rel="stylesheet" href="style.css?v=20260601-3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="calendar.css?v=20260601-2">
+<link rel="stylesheet" href="calendar.css?v=20260601-3">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
-<script src="calendar.js?v=20260601-2"></script>
+<script src="calendar.js?v=20260601-3"></script>
 </head>
 <body>
 
@@ -309,9 +309,7 @@
             <div class="field-row">
               <div class="field">
                 <label>Área de atuação</label>
-                <select id="empCategoria">
-                  <option value="">Carregando...</option>
-                </select>
+                <select id="empCategoria"><option value="">Carregando...</option></select>
               </div>
               <div class="field"><label>WhatsApp</label><input id="empWhatsapp" placeholder="(92) 99999-9999"></div>
             </div>
@@ -635,7 +633,7 @@
         </div>
         <div class="config-section config-tab-panel" data-config-tab="fotos">
           <div class="config-title"><div class="config-icon">📷</div>Fotos de perfil</div>
-          <div class="config-hint" style="margin-bottom:12px">Escolha uma imagem, ajuste o enquadramento no círculo e salve. O recorte pode ser diferente no painel e na página pública.</div>
+          <div class="config-hint" style="margin-bottom:12px">Escolha uma imagem, ajuste o enquadramento no círculo e salve.</div>
           <div class="profile-images-grid">
             <label class="profile-image-card">
               <span class="profile-image-title">Foto do painel</span>
@@ -663,7 +661,6 @@
   <div class="pub-wrap">
     <button class="pub-back" onclick="voltarDaPublica()">← Voltar</button>
 
-    <!-- HERO -->
     <div class="pub-hero">
       <div class="pub-hero-inner">
         <div class="pub-cover" id="pubFotoPublica" style="display:none"></div>
@@ -680,7 +677,6 @@
       </div>
     </div>
 
-    <!-- TELA DE SUCESSO -->
     <div id="pubConfirmScreen" class="pub-confirm-screen" style="display:none">
       <div class="pub-tick">✓</div>
       <h2>Agendamento enviado!</h2>
@@ -688,21 +684,14 @@
       <button class="btn btn-primary" style="margin-top:24px" onclick="resetPublic()">Fazer novo agendamento</button>
     </div>
 
-    <!-- CORPO PRINCIPAL -->
     <div class="pub-body" id="pubMainBody">
-
-      <!-- PAINEL ESQUERDO: SERVIÇO + PROFISSIONAL -->
       <div class="pub-panel">
         <div class="pub-panel-title">Escolha o serviço</div>
         <div class="choices" id="pubServicos"></div>
-
         <div class="pub-panel-sep"></div>
-
         <div class="pub-panel-title">Escolha o profissional</div>
         <div class="choices" id="pubProfissionais"></div>
       </div>
-
-      <!-- PAINEL DIREITO: DADOS + FORM -->
       <div class="pub-panel">
         <div class="pub-panel-title">Seus dados</div>
         <div class="form-gap">
@@ -734,7 +723,6 @@
           </button>
         </div>
       </div>
-
     </div>
   </div>
 </section>
@@ -821,7 +809,7 @@
 <!-- Notif Stack -->
 <div class="notif-stack" id="notifStack"></div>
 
-<script src="supabase.js?v=20260601-2"></script>
+<script src="supabase.js?v=20260601-3"></script>
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -832,22 +820,14 @@
 })();
 </script>
 
-<script src="app.js?v=20260601-2"></script>
+<script src="app.js?v=20260601-3"></script>
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
 Tawk_API.customStyle = {
   visibility: {
-    desktop: {
-      position: 'br',
-      xOffset: 0,
-      yOffset: 0
-    },
-    mobile: {
-      position: 'br',
-      xOffset: 8,
-      yOffset: 100
-    }
+    desktop: { position: 'br', xOffset: 0, yOffset: 0 },
+    mobile: { position: 'br', xOffset: 8, yOffset: 100 }
   }
 };
 Tawk_API.onLoad = function() {
