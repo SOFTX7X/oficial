@@ -662,47 +662,79 @@
 <section id="publicView" style="display:none">
   <div class="pub-wrap">
     <button class="pub-back" onclick="voltarDaPublica()">← Voltar</button>
+
+    <!-- HERO -->
     <div class="pub-hero">
-      <div class="pub-cover" id="pubFotoPublica" style="display:none"></div>
-      <div class="pub-hero-content">
-        <div class="pub-hero-brand"><div class="nav-dot" style="width:20px;height:20px;font-size:9px">✦</div>VyXora Agendas</div>
-        <h1 id="pubNomeEmpresa">Agendamento Online</h1>
-        <p id="pubDescEmpresa">Escolha seu serviço, profissional, data e horário.</p>
+      <div class="pub-hero-inner">
+        <div class="pub-cover" id="pubFotoPublica" style="display:none"></div>
+        <div class="pub-hero-content">
+          <div class="pub-hero-brand">
+            <div class="nav-dot" style="width:18px;height:18px;font-size:8px">✦</div>
+            VyXora Agendas
+          </div>
+          <h1 id="pubNomeEmpresa">Agendamento Online</h1>
+          <p id="pubDescEmpresa">Escolha seu serviço, profissional, data e horário.</p>
+          <div class="pub-location" id="pubLocalizacao" style="display:none"></div>
+          <div id="pubSociais" class="pub-socials" style="display:none"></div>
+        </div>
       </div>
-      <div class="pub-location" id="pubLocalizacao" style="display:none"></div>
-      <div id="pubSociais" class="pub-socials" style="display:none"></div>
     </div>
+
+    <!-- TELA DE SUCESSO -->
     <div id="pubConfirmScreen" class="pub-confirm-screen" style="display:none">
       <div class="pub-tick">✓</div>
       <h2>Agendamento enviado!</h2>
       <p>Entraremos em contato pelo WhatsApp para confirmar seu horário.</p>
-      <button class="btn btn-primary" style="margin-top:20px" onclick="resetPublic()">Fazer novo agendamento</button>
+      <button class="btn btn-primary" style="margin-top:24px" onclick="resetPublic()">Fazer novo agendamento</button>
     </div>
+
+    <!-- CORPO PRINCIPAL -->
     <div class="pub-body" id="pubMainBody">
+
+      <!-- PAINEL ESQUERDO: SERVIÇO + PROFISSIONAL -->
       <div class="pub-panel">
         <div class="pub-panel-title">Escolha o serviço</div>
         <div class="choices" id="pubServicos"></div>
-        <div style="height:16px"></div>
-        <div class="pub-panel-title" style="font-size:15px;margin-bottom:10px">Escolha o profissional</div>
+
+        <div class="pub-panel-sep"></div>
+
+        <div class="pub-panel-title">Escolha o profissional</div>
         <div class="choices" id="pubProfissionais"></div>
       </div>
+
+      <!-- PAINEL DIREITO: DADOS + FORM -->
       <div class="pub-panel">
         <div class="pub-panel-title">Seus dados</div>
         <div class="form-gap">
-          <div class="field"><label>Nome completo</label><input id="pubClienteNome" placeholder="Seu nome"></div>
-          <div class="field"><label>WhatsApp</label><input id="pubClienteTel" placeholder="(92) 99999-9999"></div>
+          <div class="field">
+            <label>Nome completo</label>
+            <input id="pubClienteNome" placeholder="Seu nome completo">
+          </div>
+          <div class="field">
+            <label>WhatsApp</label>
+            <input id="pubClienteTel" placeholder="(92) 99999-9999">
+          </div>
           <div class="field-row">
             <div class="field">
               <label>Data</label>
               <input id="pubData" type="date">
-              <div id="pubDataAviso" style="display:none;color:#ef4444;font-size:12px;margin-top:4px;font-weight:500">⛔ Este dia não está disponível. Escolha outra data.</div>
+              <div id="pubDataAviso">⛔ Este dia não está disponível. Escolha outra data.</div>
             </div>
-            <div class="field"><label>Hora</label><input id="pubHora" type="time"></div>
+            <div class="field">
+              <label>Hora</label>
+              <input id="pubHora" type="time">
+            </div>
           </div>
-          <div class="field"><label>Observação</label><textarea id="pubObs" placeholder="Alguma observação?"></textarea></div>
-          <button class="btn btn-primary btn-full btn-lg" onclick="confirmarAgendamentoPublico()">Confirmar agendamento ✓</button>
+          <div class="field">
+            <label>Observação</label>
+            <textarea id="pubObs" placeholder="Alguma observação? (opcional)"></textarea>
+          </div>
+          <button class="btn btn-primary btn-full btn-lg" onclick="confirmarAgendamentoPublico()">
+            Confirmar agendamento ✓
+          </button>
         </div>
       </div>
+
     </div>
   </div>
 </section>
