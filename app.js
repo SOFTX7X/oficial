@@ -477,7 +477,7 @@ function showDashboard() {
   if (dv) dv.style.display = 'block';
   if (pv) pv.style.display = 'none';
 
-  closeAuth();
+  if (typeof tawkAtualizarVisibilidade === 'function') tawkAtualizarVisibilidade();   closeAuth();
 
   if (state.empresa) {
     renderAvatarPainel();
@@ -2335,7 +2335,7 @@ async function loadPublic(slug) {
   const pv = $('publicView');
   if (lv) lv.style.display = 'none';
   if (dv) dv.style.display = 'none';
-  if (pv) pv.style.display = 'block';
+  if (pv) pv.style.display = 'block';   if (typeof tawkAtualizarVisibilidade === 'function') tawkAtualizarVisibilidade();
 
   const { data: empresa, error } = await db.from('agenda_empresas')
     .select('*').eq('slug', slug).single();
@@ -2587,7 +2587,7 @@ function voltarDaPublica() {
     const lv = $('landingView');
     if (lv) lv.style.display = 'block';
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (typeof tawkAtualizarVisibilidade === 'function') tawkAtualizarVisibilidade();   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── PROTEÇÃO DA PÁGINA PÚBLICA ──
