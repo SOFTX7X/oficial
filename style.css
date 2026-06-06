@@ -1208,3 +1208,25 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .pub-hero h1 { font-size: clamp(22px, 8vw, 30px); }
   .pub-panel { padding: 14px; }
 }
+.footer-contact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.footer-contact-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text3);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+.footer-contact-link:hover {
+  color: var(--purple);
+}
+.footer-contact-sep {
+  color: var(--text4);
+}
