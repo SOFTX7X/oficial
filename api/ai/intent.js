@@ -65,7 +65,7 @@ export function interpretIntent(message, payload = {}) {
   if (/\bmelhor cliente\b/.test(text)) return { domain: 'query', name: 'best_client', params: {} };
   if (/\bprofissional\b.*\b(mais|ocupado|atende)\b|\bmais ocupado\b/.test(text)) return { domain: 'query', name: 'top_professional', params: {} };
   if (/\bservico\b.*\b(mais|vendido)\b|\bserviço\b.*\b(mais|vendido)\b/.test(text)) return { domain: 'query', name: 'top_service', params: {} };
-  if (/\bhorarios? livres?\b|\bdisponiveis\b|\bdisponíveis\b/.test(text)) return { domain: 'query', name: 'free_slots', params: { data: parseDate(raw) } };
+  if (/\bhorarios?\b.*\blivres?\b|\blivres?\b.*\bhorarios?\b|\bdisponiveis\b|\bdisponíveis\b/.test(text)) return { domain: 'query', name: 'free_slots', params: { data: parseDate(raw) } };
   if (/\binativos?\b/.test(text)) return { domain: 'query', name: 'inactive_clients', params: {} };
   if (/\bpendentes?\b/.test(text)) return { domain: 'query', name: 'pending_appointments', params: {} };
 
