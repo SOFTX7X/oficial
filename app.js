@@ -996,19 +996,29 @@ function renderDashList() {
     </div>`).join('');
 }
 
-// ── CALENDAR ──
 function renderCalendar() {
   const el = $('calGrid');
   if (!el) return;
   const days = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+  const hoje = new Date();
+  const anoAtual = hoje.getFullYear();
+  const mesAtual = hoje.getMonth();
+  const totalDias = new Date(anoAtual, mesAtual + 1, 0).getDate();
+
   const busy = new Set(
     (state.agendamentos || [])
-      .filter(a => normStatus(a.status) !== 'Excluído')
-      .map(a => String(new Date((a.data || '') + 'T00:00:00').getDate()))
+      .filter(a => {
+        if (normStatus(a.status) === 'Excluído') return false;
+        if (!a.data) return false;
+        const d = new Date(a.data + 'T00:00:00');
+        return d.getFullYear() === anoAtual && d.getMonth() === mesAtual;
+      })
+      .map(a => String(new Date(a.data + 'T00:00:00').getDate()))
   );
-  const today = String(new Date().getDate());
+
+  const today = String(hoje.getDate());
   let html = days.map(d => `<div class="cal-label">${d}</div>`).join('');
-  for (let i = 1; i <= 28; i++) {
+  for (let i = 1; i <= totalDias; i++) {
     const d = String(i);
     html += `<div class="cal-day${busy.has(d) ? ' busy' : ''}${d === today ? ' today' : ''}">${i}</div>`;
   }
