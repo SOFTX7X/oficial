@@ -1,22 +1,15 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.URL_SUPABASE,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 export default async function handler(req, res) {
-  const { data, error } = await supabase
-    .from("agenda_empresas")
-    .select("id, nome, slug, plano, status")
-    .limit(1);
+  const url = process.env.URL_SUPABASE;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (error) {
-    return res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
+  const response = await fetch(`${url}/rest/v1/agenda_empresas?select=id,nome,slug,plano,status&limit=1`, {
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`
+    }
+  });
+
+  const data = await response.json();
 
   return res.status(200).json({
     success: true,
