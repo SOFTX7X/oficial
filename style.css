@@ -72,8 +72,8 @@ body {
   line-height: 1.5;
   overflow-x: hidden;
   min-height: 100vh;
+  overscroll-behavior: none;
 }
-
 .serif { font-family: 'Instrument Serif', serif; }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
