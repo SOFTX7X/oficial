@@ -1,18 +1,46 @@
+import { createAuthenticatedContext } from './ai/auth.js';
+import { interpretIntent } from './ai/intent.js';
+import { executeAction } from './ai/actions.js';
+import { executeQuery } from './ai/queries.js';
+import { getDashboardStats } from './ai/statistics.js';
+
+function readMessage(req) {
+  if (req.method === 'GET') return String(req.query?.message || req.query?.q || '').trim();
+  return String(req.body?.message || req.body?.prompt || req.body?.text || '').trim();
+}
+
 export default async function handler(req, res) {
-  const url = process.env.URL_SUPABASE || process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: 'Metodo nao permitido.' });
+  }
 
-  const response = await fetch(`${url}/rest/v1/agenda_empresas?select=id,nome,slug,plano,status&limit=1`, {
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`
-    }
-  });
+  try {
+    const context = await createAuthenticatedContext(req);
+    const payload = req.method === 'POST' && req.body && typeof req.body === 'object' ? req.body : {};
+    const intent = interpretIntent(readMessage(req), payload);
 
-  const data = await response.json();
+    const result = intent.domain === 'dashboard'
+      ? await getDashboardStats(context, intent)
+      : intent.domain === 'action'
+        ? await executeAction(context, intent)
+        : await executeQuery(context, intent);
 
-  return res.status(200).json({
-    success: true,
-    empresa: data[0] || null
-  });
+    return res.status(200).json({
+      success: true,
+      intent,
+      empresa: {
+        id: context.empresa.id,
+        nome: context.empresa.nome,
+        slug: context.empresa.slug
+      },
+      ...result
+    });
+  } catch (error) {
+    const status = error.statusCode || 500;
+    return res.status(status).json({
+      success: false,
+      error: error.publicMessage || 'Erro ao processar solicitacao.',
+      details: status >= 500 ? undefined : error.message
+    });
+  }
 }
