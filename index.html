@@ -808,7 +808,6 @@
 
 <!-- Notif Stack -->
 <div class="notif-stack" id="notifStack"></div>
-
 <script src="supabase.js?v=20260601-3"></script>
 <script>
 (function () {
@@ -819,7 +818,6 @@
   }
 })();
 </script>
-
 <script src="app.js?v=20260601-3"></script>
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
@@ -830,15 +828,26 @@ Tawk_API.customStyle = {
     mobile: { position: 'br', xOffset: 8, yOffset: 100 }
   }
 };
-Tawk_API.onLoad = function() {
-  if (window.matchMedia('(max-width: 768px)').matches) {
+
+function tawkAtualizarVisibilidade() {
+  if (!window.Tawk_API || typeof Tawk_API.showWidget !== 'function') return;
+  var isMobile = window.matchMedia('(max-width: 768px)').matches;
+  if (!isMobile) { Tawk_API.showWidget(); return; }
+  var dashVisible = document.getElementById('dashboardView') &&
+                    document.getElementById('dashboardView').style.display !== 'none';
+  if (dashVisible) {
     Tawk_API.hideWidget();
+  } else {
+    Tawk_API.showWidget();
   }
+}
+window.tawkAtualizarVisibilidade = tawkAtualizarVisibilidade;
+
+Tawk_API.onLoad = function() {
+  tawkAtualizarVisibilidade();
 };
 Tawk_API.onChatMinimized = function() {
-  if (window.matchMedia('(max-width: 768px)').matches) {
-    Tawk_API.hideWidget();
-  }
+  tawkAtualizarVisibilidade();
 };
 (function(){
 var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
@@ -850,6 +859,5 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-
 </body>
 </html>
