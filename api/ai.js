@@ -27,17 +27,19 @@ export default async function handler(req, res) {
     let resultData = null;
     let type = 'action';
 
-    // 1. Tentar descobrir o nome real da tabela de agendamentos no banco
+    // Varredura direta e segura para identificar o nome da tabela ativa no banco
     let tableName = 'appointments';
-    const { data: tables } = await supabase.rpc('get_tables').catch(() => ({ data: null })); 
-    
-    // Fallback: Se falhar, tenta mapear as tabelas comuns do seu sistema
     const testTables = ['appointments', 'agendamentos', 'appointment', 'agendamento'];
+    
     for (const t of testTables) {
-      const { error: checkError } = await supabase.from(t).select('id').limit(1);
-      if (!checkError || checkError.code !== 'PGRST116' && checkError.message.indexOf('could not find') === -1) {
-        tableName = t;
-        break;
+      try {
+        const { error: checkError } = await supabase.from(t).select('id').limit(1);
+        if (!checkError || (checkError.code !== 'PGRST116' && !checkError.message.includes('could not find'))) {
+          tableName = t;
+          break;
+        }
+      } catch (e) {
+        // Ignora falhas de tabela inexistente e continua o loop
       }
     }
 
@@ -56,7 +58,6 @@ export default async function handler(req, res) {
       parsedDate.setDate(parsedDate.getDate() + 1);
       const dateString = parsedDate.toISOString().split('T')[0];
 
-      // Insere dinamicamente na tabela correta encontrada
       const { data: newAppointment, error: insertError } = await supabase
         .from(tableName)
         .insert([{
