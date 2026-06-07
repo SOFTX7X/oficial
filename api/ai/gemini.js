@@ -2,7 +2,7 @@
 // O Gemini é o cérebro principal. Ele decide tudo: o que o usuário quer,
 // como responder, quando executar ações, quando conversar, quando criar conteúdo.
 
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 // ─── System Prompt — Identidade e Instruções ─────────────────────────────────
