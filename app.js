@@ -510,44 +510,41 @@ function showCadastro() {
 }
 
 // ── AI CONTEXT ────────────────────────────────────────────────────────────────
-let _aiContext = {
-  active: false, intent: null,
-  cliente_nome: null, data: null, hora: null,
-  servico_nome: null, profissional_nome: null, telefone: null,
-  nome: null, especialidade: null, preco: null,
-  duracao_minutos: null, email: null,
-};
+let _aiSlotState = null;
+let _aiHistory = [];
+const AI_MAX_HISTORY = 20;
 
-function _resetAiContext() {
-  _aiContext = {
-    active: false, intent: null,
-    cliente_nome: null, data: null, hora: null,
-    servico_nome: null, profissional_nome: null, telefone: null,
-    nome: null, especialidade: null, preco: null,
-    duracao_minutos: null, email: null,
-  };
+function _aiSalvarHistoricoLocal() {
+  try {
+    localStorage.setItem('vyxora_ai_history', JSON.stringify(_aiHistory.slice(-AI_MAX_HISTORY)));
+    localStorage.setItem('vyxora_ai_slot', JSON.stringify(_aiSlotState));
+  } catch(e) {}
 }
 
-// Detecta qual campo faltava na última pergunta e preenche com a resposta do usuário
-function _absorverResposta(textoUsuario, ultimaPergunta) {
-  if (!ultimaPergunta) return;
-  const p = ultimaPergunta.toLowerCase();
-  const t = textoUsuario.trim();
-  if (/nome do cliente|qual.*cliente|nome.*cliente/.test(p))      { _aiContext.cliente_nome = t; return; }
-  if (/quando.*agendar|qual.*data|para quando/.test(p))           { _aiContext.data = t; return; }
-  if (/qual.*hor[aá]rio|que hora|horario/.test(p))                { _aiContext.hora = t; return; }
-  if (/nome.*profissional/.test(p))                               { _aiContext.nome = t; return; }
-  if (/nome.*servi[cç]o/.test(p))                                 { _aiContext.nome = t; return; }
-  if (/nome.*cliente.*cadastrar|cadastrar/.test(p))               { _aiContext.nome = t; return; }
-  if (/cliente.*agendamento|criar.*agendamento/.test(p)) {
-    const r = t.toLowerCase();
-    if (/agendamento|agendar|marcar/.test(r))  _aiContext.intent = 'create_appointment';
-    else if (/cliente|cadastrar/.test(r))      { _aiContext.intent = 'create_client'; _aiContext.active = false; }
-    return;
+function _aiCarregarHistoricoLocal() {
+  try {
+    const h = localStorage.getItem('vyxora_ai_history');
+    const s = localStorage.getItem('vyxora_ai_slot');
+    if (h) _aiHistory = JSON.parse(h) || [];
+    if (s) _aiSlotState = JSON.parse(s) || null;
+  } catch(e) {}
+}
+
+function _aiLimparHistorico() {
+  _aiSlotState = null;
+  _aiHistory = [];
+  try {
+    localStorage.removeItem('vyxora_ai_history');
+    localStorage.removeItem('vyxora_ai_slot');
+  } catch(e) {}
+  const lista = $('aiMessages');
+  if (lista) {
+    lista.innerHTML = `
+      <div class="ai-message ai-message-bot">
+        <div class="ai-bubble">Olá. Posso consultar seus dados e executar ações já validadas na sua agenda.</div>
+      </div>`;
   }
 }
-
-let _ultimaPerguntaAI = null;
 
 function adicionarMensagemAI(tipo, texto) {
   const lista = $('aiMessages');
@@ -560,12 +557,33 @@ function adicionarMensagemAI(tipo, texto) {
   item.appendChild(bubble);
   lista.appendChild(item);
   lista.scrollTop = lista.scrollHeight;
+
+  // Salva no histórico
+  _aiHistory.push({ role: tipo === 'user' ? 'user' : 'assistant', content: texto });
+  if (_aiHistory.length > AI_MAX_HISTORY) _aiHistory = _aiHistory.slice(-AI_MAX_HISTORY);
+  _aiSalvarHistoricoLocal();
+}
+
+function _aiCarregarMensagensNaTela() {
+  const lista = $('aiMessages');
+  if (!lista || !_aiHistory.length) return;
+  lista.innerHTML = '';
+  _aiHistory.forEach(msg => {
+    const item = document.createElement('div');
+    item.className = `ai-message ai-message-${msg.role === 'user' ? 'user' : 'bot'}`;
+    const bubble = document.createElement('div');
+    bubble.className = 'ai-bubble';
+    bubble.textContent = msg.content;
+    item.appendChild(bubble);
+    lista.appendChild(item);
+  });
+  lista.scrollTop = lista.scrollHeight;
 }
 
 async function enviarMensagemAI(event) {
   if (event) event.preventDefault();
   const input = $('aiInput');
-  const btn   = $('aiSendBtn');
+  const btn = $('aiSendBtn');
   const texto = (input?.value || '').trim();
   if (!texto) return;
 
@@ -573,74 +591,64 @@ async function enviarMensagemAI(event) {
   if (input) input.value = '';
   if (btn) btn.disabled = true;
 
-  // Absorve a resposta do usuário no campo que estava faltando
-  if (_aiContext.active && _ultimaPerguntaAI) {
-    _absorverResposta(texto, _ultimaPerguntaAI);
-  }
+  // Indicador de digitando
+  const lista = $('aiMessages');
+  const typing = document.createElement('div');
+  typing.className = 'ai-message ai-message-bot';
+  typing.id = 'aiTyping';
+  typing.innerHTML = '<div class="ai-bubble" style="opacity:0.5">✧ digitando...</div>';
+  if (lista) { lista.appendChild(typing); lista.scrollTop = lista.scrollHeight; }
 
   try {
     const { data } = await window.db.auth.getSession();
     const token = data?.session?.access_token;
     if (!token) throw new Error('Sessão expirada. Faça login novamente.');
 
-    // Monta payload com contexto acumulado
-    const payload = { message: texto };
-    if (_aiContext.active) {
-      if (_aiContext.intent)            payload.intent            = _aiContext.intent;
-      if (_aiContext.cliente_nome)      payload.cliente_nome      = _aiContext.cliente_nome;
-      if (_aiContext.data)              payload.data              = _aiContext.data;
-      if (_aiContext.hora)              payload.hora              = _aiContext.hora;
-      if (_aiContext.servico_nome)      payload.servico_nome      = _aiContext.servico_nome;
-      if (_aiContext.profissional_nome) payload.profissional_nome = _aiContext.profissional_nome;
-      if (_aiContext.telefone)          payload.telefone          = _aiContext.telefone;
-      if (_aiContext.nome)              payload.nome              = _aiContext.nome;
-      if (_aiContext.especialidade)     payload.especialidade     = _aiContext.especialidade;
-      if (_aiContext.preco)             payload.preco             = _aiContext.preco;
-      if (_aiContext.duracao_minutos)   payload.duracao_minutos   = _aiContext.duracao_minutos;
-      if (_aiContext.email)             payload.email             = _aiContext.email;
-    }
+    const payload = {
+      message: texto,
+      history: _aiHistory.slice(-10),
+      slotState: _aiSlotState || null
+    };
 
     const resp = await fetch('/api/ai', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      },
       body: JSON.stringify(payload)
     });
 
     const json = await resp.json();
 
+    // Remove typing
+    const t = $('aiTyping'); if (t) t.remove();
+
     if (!json.success) {
       adicionarMensagemAI('bot', json.error || 'Não consegui processar sua solicitação.');
-      _resetAiContext(); _ultimaPerguntaAI = null;
+      _aiSlotState = null;
+      _aiSalvarHistoricoLocal();
       return;
     }
 
-    const intent = json.intent || {};
+    // Atualiza slotState
+    _aiSlotState = json.slotState || null;
+    _aiSalvarHistoricoLocal();
 
-    if (intent.domain === 'clarification') {
-      const pergunta = json.answer || intent.params?.question || 'Pode me dar mais detalhes?';
-      const hint     = intent.params?.hint || '';
+    // Exibe resposta
+    const resposta = json.answer || json.data?.answer || 'Pronto.';
+    adicionarMensagemAI('bot', resposta);
 
-      if (!_aiContext.active) {
-        _aiContext.active = true;
-        const m = texto.toLowerCase();
-        if (/agendar|agende|agenda|marcar|marque/.test(m))             _aiContext.intent = 'create_appointment';
-        else if (/criar.*cliente|cadastrar.*cliente/.test(m))           _aiContext.intent = 'create_client';
-        else if (/criar.*profissional|cadastrar.*profissional/.test(m)) _aiContext.intent = 'create_professional';
-        else if (/criar.*servi|cadastrar.*servi/.test(m))              _aiContext.intent = 'create_service';
-      }
-
-      _ultimaPerguntaAI = pergunta;
-      adicionarMensagemAI('bot', pergunta);
-      if (hint) adicionarMensagemAI('bot', '💡 ' + hint);
-      return;
+    // Se concluiu uma ação, recarrega os dados do painel
+    if (json.type === 'action' && !_aiSlotState) {
+      try { await loadAll(); } catch(e) {}
     }
-
-    _resetAiContext(); _ultimaPerguntaAI = null;
-    adicionarMensagemAI('bot', json.answer || 'Pronto.');
 
   } catch (error) {
+    const t = $('aiTyping'); if (t) t.remove();
     adicionarMensagemAI('bot', error?.message || 'Erro ao conectar com a VyXora AI.');
-    _resetAiContext(); _ultimaPerguntaAI = null;
+    _aiSlotState = null;
+    _aiSalvarHistoricoLocal();
   } finally {
     if (btn) btn.disabled = false;
     if (input) input.focus();
