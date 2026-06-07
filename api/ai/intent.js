@@ -103,7 +103,7 @@ export function interpretIntent(message, payload = {}) {
     return { domain: 'dashboard', name: 'metric', params: { metric } };
   }
 
-  // ── agendamento ───────────────────────────────────────────────────────────
+// ── agendamento ───────────────────────────────────────────────────────────
   if (isAgendamento(text)) {
     const cliente_nome      = payload.cliente_nome      || extrairClienteAgendamento(raw);
     const data              = payload.data              || parseDate(raw);
@@ -111,15 +111,15 @@ export function interpretIntent(message, payload = {}) {
     const servico_nome      = payload.servico_nome;
     const profissional_nome = payload.profissional_nome;
 
-    if (!hasValue(cliente_nome) && !hasValue(data) && !hasValue(hora)) {
-      return clarify(
-        'Para agendar preciso de mais informações. Informe o nome do cliente, a data e o horário.',
-        'Ex: "Agendar João amanhã às 14h"'
-      );
+    if (!hasValue(cliente_nome)) {
+      return clarify('Qual é o nome do cliente para este agendamento?');
     }
-    if (!hasValue(cliente_nome)) return clarify('Qual é o nome do cliente para este agendamento?');
-    if (!hasValue(data))         return clarify(`Para quando deseja agendar ${cliente_nome}? Informe a data.`);
-    if (!hasValue(hora))         return clarify(`Qual horário deseja agendar ${cliente_nome} no dia ${data}?`);
+    if (!hasValue(data)) {
+      return clarify(`Para quando deseja agendar ${cliente_nome}? Informe a data.`);
+    }
+    if (!hasValue(hora)) {
+      return clarify(`Qual horário deseja agendar ${cliente_nome} no dia ${data}?`);
+    }
 
     return {
       domain: 'action',
@@ -127,7 +127,6 @@ export function interpretIntent(message, payload = {}) {
       params: { cliente_nome, data, hora, servico_nome, profissional_nome, telefone: payload.telefone },
     };
   }
-
   // ── reagendar ─────────────────────────────────────────────────────────────
   if (/\b(reagende|reagendar)\b/.test(text)) {
     const data = payload.data || parseDate(raw);
