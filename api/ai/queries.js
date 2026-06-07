@@ -190,7 +190,7 @@ async function getBestClient({ supabase, empresaId }) {
 
   const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
   return {
-    answer: `O seu melhor cliente e ${best[0]}, com ${best[1]} agendamentos realizados.`,
+    answer: `⭐ Melhor cliente: ${best[0]}\n${best[1]} agendamento${best[1]!==1?'s':''} realizados.`,
     data: { cliente: best[0], quantidade: best[1] }
   };
 }
@@ -213,7 +213,7 @@ async function getTopProfessional({ supabase, empresaId }) {
 
   const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
   return {
-    answer: `O profissional mais ocupado e ${top[0]}, com ${top[1]} agendamentos.`,
+    answer: `🏆 Profissional mais ocupado: ${top[0]}\n${top[1]} agendamento${top[1]!==1?'s':''} realizados.`,
     data: { profissional: top[0], quantidade: top[1] }
   };
 }
@@ -236,7 +236,7 @@ async function getTopService({ supabase, empresaId }) {
 
   const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
   return {
-    answer: `O servico mais procurado e "${top[0]}", agendado ${top[1]} vezes.`,
+    answer: `✦ Serviço mais popular: ${top[0]}\nAgendado ${top[1]} vez${top[1]!==1?'es':''}.`,
     data: { servico: top[0], quantidade: top[1] }
   };
 }
@@ -323,8 +323,9 @@ async function getInactiveClients({ supabase, empresaId }) {
   if (!inativos.length) return { answer: 'Todos os seus clientes possuem agendamentos ativos!' };
 
   const nomes = inativos.map(c => c.nome).slice(0, 10).join(', ');
+  const linhas = inativos.slice(0, 15).map(c => `• ${c.nome}`).join('\n');
   return {
-    answer: `Encontrei ${inativos.length} clientes inativos. Exemplos: ${nomes}.`,
+    answer: `😴 ${inativos.length} cliente${inativos.length!==1?'s':''} sem agendamentos:\n\n${linhas}${inativos.length > 15 ? `\n• ...e mais ${inativos.length - 15}` : ''}`,
     data: { total_inativos: inativos.length, lista: inativos.map(c => c.nome) }
   };
 }
@@ -345,8 +346,11 @@ async function getPendingAppointments({ supabase, empresaId }) {
     `${a.cliente_nome} (${a.servico_nome || 'Geral'}) no dia ${a.data} as ${a.hora}`
   ).join('; ');
 
+  const linhas = data.map(a =>
+    `• ${a.data} ${a.hora?.slice(0,5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}`
+  ).join('\n');
   return {
-    answer: `Voce tem ${data.length} agendamentos pendentes: ${lista}.`,
+    answer: `⏳ ${data.length} agendamento${data.length!==1?'s':''} pendente${data.length!==1?'s':''} aguardando aprovação:\n\n${linhas}`,
     data: { total_pendentes: data.length, agendamentos: data }
   };
 }
@@ -369,8 +373,11 @@ async function getTodayAppointments({ supabase, empresaId }) {
     `${a.hora.slice(0, 5)} - ${a.cliente_nome} (${a.servico_nome || 'Geral'}) com ${a.profissional_nome || 'profissional'}`
   ).join('; ');
 
+  const linhas = data.map(a =>
+    `• ${a.hora.slice(0, 5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${a.profissional_nome}` : ''} [${a.status}]`
+  ).join('\n');
   return {
-    answer: `Agendamentos de hoje (${hoje}): ${lista}.`,
+    answer: `📅 ${data.length} agendamento${data.length!==1?'s':''} para hoje (${hoje}):\n\n${linhas}`,
     data: { total: data.length, agendamentos: data }
   };
 }
@@ -393,8 +400,11 @@ async function getTomorrowAppointments({ supabase, empresaId }) {
     `${a.hora.slice(0, 5)} - ${a.cliente_nome} (${a.servico_nome || 'Geral'}) com ${a.profissional_nome || 'profissional'}`
   ).join('; ');
 
+  const linhas = data.map(a =>
+    `• ${a.hora.slice(0, 5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${a.profissional_nome}` : ''} [${a.status}]`
+  ).join('\n');
   return {
-    answer: `Agendamentos de amanha (${amanha}): ${lista}.`,
+    answer: `📅 ${data.length} agendamento${data.length!==1?'s':''} para amanhã (${amanha}):\n\n${linhas}`,
     data: { total: data.length, agendamentos: data }
   };
 }
@@ -417,8 +427,9 @@ async function getRevenue({ supabase, empresaId }) {
     .filter(row => row.data?.startsWith(mesAtual))
     .reduce((sum, row) => sum + Number(row.valor || 0), 0);
 
+  const fmt = v => `R$ ${Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
   return {
-    answer: `Faturamento total: R$ ${total.toFixed(2)}. Faturamento do mes atual: R$ ${totalMes.toFixed(2)}.`,
+    answer: `💰 Faturamento\n\n• Mês atual: ${fmt(totalMes)}\n• Total geral: ${fmt(total)}`,
     data: { total_geral: total, total_mes: totalMes }
   };
 }
@@ -440,8 +451,11 @@ async function listAllAppointments({ supabase, empresaId }) {
     `${a.data} ${a.hora?.slice(0,5)} — ${a.cliente_nome} (${a.servico_nome || 'Geral'}) com ${a.profissional_nome || 'profissional'} [${a.status}]`
   ).join('; ');
 
+  const linhas = data.map(a =>
+    `• ${a.data} ${a.hora?.slice(0,5)} — ${a.cliente_nome} (${a.servico_nome || 'Geral'}) com ${a.profissional_nome || 'profissional'} [${a.status}]`
+  ).join('\n');
   return {
-    answer: `Ultimos ${data.length} agendamentos: ${lista}.`,
+    answer: `📋 Últimos ${data.length} agendamentos:\n\n${linhas}`,
     data: { total: data.length, agendamentos: data }
   };
 }
@@ -496,8 +510,9 @@ async function getClientsByPeriod({ supabase, empresaId }, params) {
   }
 
   const nomes = unicos.slice(0, 10).join(', ');
+  const linhas = unicos.slice(0, 15).map(n => `• ${n}`).join('\n');
   return {
-    answer: `${unicos.length} cliente${unicos.length !== 1 ? 's' : ''} com agendamento em ${prefixo}: ${nomes}.`,
+    answer: `👥 ${unicos.length} cliente${unicos.length!==1?'s':''} com agendamento em ${prefixo}:\n\n${linhas}`,
     data: { total: unicos.length, periodo: prefixo, clientes: unicos }
   };
 }
@@ -538,8 +553,9 @@ async function getRevenueByPeriod({ supabase, empresaId }, params) {
   if (!data?.length) return { answer: `Nenhum faturamento encontrado para o periodo ${prefixo}.` };
 
   const total = data.reduce((sum, row) => sum + Number(row.valor || 0), 0);
+  const fmt2 = v => `R$ ${Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
   return {
-    answer: `Faturamento de ${prefixo}: R$ ${total.toFixed(2)} (${data.length} agendamento${data.length !== 1 ? 's' : ''}).`,
+    answer: `💰 Faturamento de ${prefixo}\n\n• Total: ${fmt2(total)}\n• Agendamentos: ${data.length}`,
     data: { periodo: prefixo, total, quantidade: data.length }
   };
 }
@@ -558,8 +574,9 @@ async function listClients({ supabase, empresaId }) {
   if (!data?.length) return { answer: 'Nenhum cliente cadastrado ainda.' };
 
   const lista = data.map(c => `${c.nome}${c.telefone ? ' (' + c.telefone + ')' : ''}`).join(', ');
+  const linhas = data.map(c => `• ${c.nome}${c.telefone ? ` (${c.telefone})` : ''}`).join('\n');
   return {
-    answer: `Voce tem ${data.length} cliente${data.length !== 1 ? 's' : ''} ativo${data.length !== 1 ? 's' : ''}: ${lista}.`,
+    answer: `👥 ${data.length} cliente${data.length!==1?'s':''} ativo${data.length!==1?'s':''}:\n\n${linhas}`,
     data: { total: data.length, clientes: data }
   };
 }
@@ -578,8 +595,9 @@ async function listProfessionals({ supabase, empresaId }) {
   if (!data?.length) return { answer: 'Nenhum profissional cadastrado ainda.' };
 
   const lista = data.map(p => `${p.nome}${p.especialidade ? ' — ' + p.especialidade : ''}`).join(', ');
+  const linhas = data.map(p => `• ${p.nome}${p.especialidade ? ` — ${p.especialidade}` : ''}`).join('\n');
   return {
-    answer: `Voce tem ${data.length} profissional${data.length !== 1 ? 'is' : ''} ativo${data.length !== 1 ? 's' : ''}: ${lista}.`,
+    answer: `👤 ${data.length} profissional${data.length!==1?'is':''} ativo${data.length!==1?'s':''}:\n\n${linhas}`,
     data: { total: data.length, profissionais: data }
   };
 }
@@ -598,8 +616,9 @@ async function listServices({ supabase, empresaId }) {
   if (!data?.length) return { answer: 'Nenhum servico cadastrado ainda.' };
 
   const lista = data.map(s => `${s.nome} (R$ ${Number(s.preco || 0).toFixed(2)}, ${s.duracao_minutos || 60}min)`).join(', ');
+  const linhas = data.map(s => `• ${s.nome} — R$ ${Number(s.preco||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}${s.duracao_minutos ? `, ${s.duracao_minutos}min` : ''}`).join('\n');
   return {
-    answer: `Voce tem ${data.length} servico${data.length !== 1 ? 's' : ''} ativo${data.length !== 1 ? 's' : ''}: ${lista}.`,
+    answer: `✦ ${data.length} serviço${data.length!==1?'s':''} ativo${data.length!==1?'s':''}:\n\n${linhas}`,
     data: { total: data.length, servicos: data }
   };
 }
