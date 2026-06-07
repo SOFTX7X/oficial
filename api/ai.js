@@ -19,18 +19,18 @@ export default async function handler(req, res) {
     const payload = req.method === 'POST' && req.body && typeof req.body === 'object' ? req.body : {};
     
     // ── ETAPA 1: Busca Dinâmica de Profissionais e Serviços Ativos no Supabase ──
-    // Executa em paralelo usando Promise.all para máxima performance sem travar a requisição
+    // Prefixos atualizados para refletir o schema real do banco de dados (agenda_*)
     const [profissionaisRes, servicosRes] = await Promise.all([
       context.supabase
         ? context.supabase
-            .from('profissionais')
+            .from('agenda_profissionais') // <── CORRIGIDO
             .select('id, nome')
             .eq('empresa_id', context.empresa.id)
             .eq('ativo', true)
         : { data: [] },
       context.supabase
         ? context.supabase
-            .from('servicos')
+            .from('agenda_servicos') // <── CORRIGIDO
             .select('id, nome, duracao, preco')
             .eq('empresa_id', context.empresa.id)
             .eq('ativo', true)
@@ -89,7 +89,7 @@ export default async function handler(req, res) {
     return res.status(status).json({
       success: false,
       error:   error.publicMessage || 'Erro ao processar solicitacao.',
-      details: status >= 500 ? undefined : error.message
+      details: error.message
     });
   }
 }
