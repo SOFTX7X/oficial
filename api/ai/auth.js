@@ -25,8 +25,9 @@ export async function createAuthenticatedContext(req) {
     throw error;
   }
 
+  // Atualizado para a tabela real de perfis do banco
   const { data: perfil, error: perfilError } = await supabase
-    .from('agenda_perfis')
+    .from('perfis')
     .select('*')
     .eq('auth_user_id', user.id)
     .single();
@@ -38,8 +39,9 @@ export async function createAuthenticatedContext(req) {
     throw error;
   }
 
+  // Atualizado para a tabela real de empresas do banco
   const { data: empresa, error: empresaError } = await supabase
-    .from('agenda_empresas')
+    .from('empresas')
     .select('*')
     .eq('id', perfil.empresa_id)
     .single();
