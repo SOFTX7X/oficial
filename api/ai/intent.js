@@ -3,6 +3,24 @@ import { runQuery } from './queries.js';
 import { getStatistics } from './statistics.js';
 import { normalizeText, parseDate, parseTime } from './utils.js';
 
+// Helper: evita que erros do Supabase/queries explodam para o catch do ai.js
+async function safeRunQuery(context, input) {
+  try {
+    const result = await runQuery(context, input);
+    return result;
+  } catch (err) {
+    return { answer: err.publicMessage || err.message || 'Erro ao consultar dados. Tente novamente.' };
+  }
+}
+
+async function safeGetStatistics(context, intent) {
+  try {
+    return await getStatistics(context, intent);
+  } catch (err) {
+    return { answer: err.publicMessage || err.message || 'Erro ao buscar estatisticas. Tente novamente.' };
+  }
+}
+
 // ─── Entry point principal ───────────────────────────────────────────────────
 export async function interpretIntent(context, message, fullBody) {
   const text = normalizeText(message);
@@ -16,14 +34,14 @@ export async function interpretIntent(context, message, fullBody) {
 
   // 2. Painel / Estatísticas
   if (matchAny(text, ['painel', 'resumo', 'estatistica', 'dashboard', 'visao geral'])) {
-    const stats = await getStatistics(context);
+    const stats = await safeGetStatistics(context);
     return { type: 'statistics', answer: stats.answer, data: stats.data };
   }
 
   // 3. Métricas diretas — "quantos X tenho", "listar X", "agendamentos hoje/amanhã"
   const metricIntent = detectMetricIntent(text);
   if (metricIntent) {
-    const stats = await getStatistics(context, { params: { metric: metricIntent } });
+    const stats = await safeGetStatistics(context, { params: { metric: metricIntent } });
     return { type: 'statistics', answer: stats.answer, data: stats.data };
   }
 
@@ -35,14 +53,14 @@ export async function interpretIntent(context, message, fullBody) {
     'profissional mais', 'servico mais', 'top cliente', 'top profissional',
     'agendamento de amanha', 'agenda de amanha', 'amanha tem'
   ])) {
-    const queryResult = await runQuery(context, text);
+    const queryResult = await safeRunQuery(context, text);
     return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
 
   // 4b. Faturamento geral (sem período específico)
   if (matchAny(text, ['faturamento', 'receita', 'lucro', 'quanto ganhei', 'quanto faturei']) &&
       !matchAny(text, ['mes', 'janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro', 'periodo', 'em '])) {
-    const queryResult = await runQuery(context, text);
+    const queryResult = await safeRunQuery(context, text);
     return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
 
@@ -128,24 +146,24 @@ export async function interpretIntent(context, message, fullBody) {
 
   // 20. Listar agendamentos completos
   if (matchAny(text, ['listar agendamentos', 'todos agendamentos', 'ver agendamentos', 'mostrar agendamentos', 'lista de agendamentos'])) {
-    const queryResult = await runQuery(context, { name: 'list_appointments', params: {} });
+    const queryResult = await safeRunQuery(context, { name: 'list_appointments', params: {} });
     return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
 
   // 21. Clientes por período
   if (matchAny(text, ['clientes por periodo', 'clientes do mes', 'novos clientes', 'clientes em ', 'clientes de '])) {
-    const queryResult = await runQuery(context, { name: 'clients_by_period', params: { text: message } });
+    const queryResult = await safeRunQuery(context, { name: 'clients_by_period', params: { text: message } });
     return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
 
   // 22. Faturamento por período
   if (matchAny(text, ['faturamento do mes', 'faturamento por periodo', 'faturamento em ', 'receita do mes', 'receita por periodo', 'receita em ', 'quanto ganhei em ', 'quanto faturei em '])) {
-    const queryResult = await runQuery(context, { name: 'revenue_by_period', params: { text: message } });
+    const queryResult = await safeRunQuery(context, { name: 'revenue_by_period', params: { text: message } });
     return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
 
   // 23. Fallback — tenta consulta livre
-  const queryResult = await runQuery(context, text);
+  const queryResult = await safeRunQuery(context, text);
   return { type: 'query', answer: queryResult.answer, data: queryResult.data };
 }
 
