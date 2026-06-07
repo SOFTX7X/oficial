@@ -18,25 +18,28 @@ export async function createAuthenticatedContext(req) {
     throw { statusCode: 401, publicMessage: 'Sessao expirada.', message: error?.message || 'Usuario nao encontrado.' };
   }
 
-  // 1. Busca usando um array para evitar o erro de coerção caso existam múltiplos registros com o mesmo e-mail
+  // Limpa o email da sessão para evitar espaços em branco
+  const userEmail = String(user.email || '').trim();
+
+  // 1. Busca o profissional usando ilike para ignorar maiúsculas/minúsculas
   const { data: profissionais, error: profError } = await supabase
     .from('agenda_profissionais')
     .select('empresa_id')
-    .eq('email', user.email)
+    .ilike('email', userEmail)
     .eq('status', 'ativo')
     .limit(1);
 
   if (profError || !profissionais || profissionais.length === 0) {
     throw { 
       statusCode: 404, 
-      publicMessage: 'Usuario nao vinculado a nenhuma empresa.', 
+      publicMessage: `Usuario (${userEmail}) nao vinculado a nenhuma empresa.`, 
       message: profError?.message || 'Nenhum profissional ativo encontrado com este email.' 
     };
   }
 
   const empresaIdFinal = profissionais[0].empresa_id;
 
-  // 2. Busca os dados de configuração da empresa de forma segura
+  // 2. Busca as configurações da empresa vinculada
   const { data: empresas, error: perfilError } = await supabase
     .from('agenda_empresas')
     .select('id, horario_abertura, horario_fechamento, intervalo_ativo, intervalo_inicio, intervalo_fim, dom, seg, ter, qua, qui, sex, sab')
