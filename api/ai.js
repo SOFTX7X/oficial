@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import { createAuthenticatedContext } from './ai/auth.js';
 import { interpretIntent } from './ai/intent.js';
 
@@ -15,10 +14,10 @@ export default async function handler(req, res) {
     const { message } = req.body || {};
     if (!message) return res.status(400).json({ success: false, error: 'Mensagem nao informada.' });
 
-    // 1. Autenticação usando o arquivo correto dentro de ./ai/auth.js
+    // 1. Autenticação e montagem do contexto da empresa
     const context = await createAuthenticatedContext(req);
     
-    // 2. Processamento da intenção usando o arquivo correto dentro de ./ai/intent.js
+    // 2. Processamento da intenção delegando o body completo para mapear os parâmetros
     const result = await interpretIntent(context, message, req.body);
     
     return res.status(200).json({ success: true, ...result });
