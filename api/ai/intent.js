@@ -177,7 +177,14 @@ export async function interpretIntent(context, message, fullBody) {
   }
 
   // 22. Faturamento por período
-  if (matchAny(text, ['faturamento do mes', 'faturamento por periodo', 'faturamento em ', 'receita do mes', 'receita por periodo', 'receita em ', 'quanto ganhei em ', 'quanto faturei em '])) {
+  if (matchAny(text, [
+    'faturamento do mes', 'faturamento por periodo', 'faturamento em ', 'faturamento de ',
+    'receita do mes', 'receita por periodo', 'receita em ', 'receita de ',
+    'quanto ganhei em ', 'quanto faturei em ', 'quanto ganhei de ', 'quanto faturei de '
+  ]) || (
+    matchAny(text, ['faturamento', 'receita', 'quanto ganhei', 'quanto faturei']) &&
+    matchAny(text, ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'])
+  )) {
     const queryResult = await safeRunQuery(context, { name: 'revenue_by_period', params: { text: message } });
     return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
