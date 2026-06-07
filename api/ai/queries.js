@@ -14,6 +14,15 @@ function matchAny(text, terms) {
 function detectQueryIntent(text) {
   const t = normalizeText(typeof text === 'string' ? text : text?.name || '');
 
+  if (matchAny(t, ['listar clientes', 'ver clientes', 'mostrar clientes', 'todos os clientes', 'meus clientes']))
+    return { name: 'list_clients', params: {} };
+
+  if (matchAny(t, ['listar profissionais', 'ver profissionais', 'mostrar profissionais', 'todos os profissionais', 'meus profissionais']))
+    return { name: 'list_professionals', params: {} };
+
+  if (matchAny(t, ['listar servicos', 'ver servicos', 'mostrar servicos', 'todos os servicos', 'meus servicos']))
+    return { name: 'list_services', params: {} };
+
   if (matchAny(t, ['melhor cliente', 'cliente mais frequente', 'cliente que mais agenda', 'top cliente']))
     return { name: 'best_client', params: {} };
 
@@ -66,6 +75,9 @@ export async function executeQuery(context, intent) {
     tomorrow_appointments: getTomorrowAppointments,
     revenue:               getRevenue,
     list_appointments:     listAllAppointments,
+    list_clients:          listClients,
+    list_professionals:    listProfessionals,
+    list_services:         listServices,
     clients_by_period:     getClientsByPeriod,
     revenue_by_period:     getRevenueByPeriod,
     // ── intents de métricas vindas do intent.js ──────────────────────────────
@@ -529,5 +541,65 @@ async function getRevenueByPeriod({ supabase, empresaId }, params) {
   return {
     answer: `Faturamento de ${prefixo}: R$ ${total.toFixed(2)} (${data.length} agendamento${data.length !== 1 ? 's' : ''}).`,
     data: { periodo: prefixo, total, quantidade: data.length }
+  };
+}
+
+// ─── Listar clientes ──────────────────────────────────────────────────────────
+async function listClients({ supabase, empresaId }) {
+  const { data, error } = await supabase
+    .from('agenda_clientes')
+    .select('id, nome, telefone, email, status')
+    .eq('empresa_id', empresaId)
+    .eq('status', 'ativo')
+    .order('nome', { ascending: true })
+    .limit(50);
+
+  if (error) throw error;
+  if (!data?.length) return { answer: 'Nenhum cliente cadastrado ainda.' };
+
+  const lista = data.map(c => `${c.nome}${c.telefone ? ' (' + c.telefone + ')' : ''}`).join(', ');
+  return {
+    answer: `Voce tem ${data.length} cliente${data.length !== 1 ? 's' : ''} ativo${data.length !== 1 ? 's' : ''}: ${lista}.`,
+    data: { total: data.length, clientes: data }
+  };
+}
+
+// ─── Listar profissionais ─────────────────────────────────────────────────────
+async function listProfessionals({ supabase, empresaId }) {
+  const { data, error } = await supabase
+    .from('agenda_profissionais')
+    .select('id, nome, especialidade, telefone, status')
+    .eq('empresa_id', empresaId)
+    .eq('status', 'ativo')
+    .order('nome', { ascending: true })
+    .limit(50);
+
+  if (error) throw error;
+  if (!data?.length) return { answer: 'Nenhum profissional cadastrado ainda.' };
+
+  const lista = data.map(p => `${p.nome}${p.especialidade ? ' — ' + p.especialidade : ''}`).join(', ');
+  return {
+    answer: `Voce tem ${data.length} profissional${data.length !== 1 ? 'is' : ''} ativo${data.length !== 1 ? 's' : ''}: ${lista}.`,
+    data: { total: data.length, profissionais: data }
+  };
+}
+
+// ─── Listar serviços ──────────────────────────────────────────────────────────
+async function listServices({ supabase, empresaId }) {
+  const { data, error } = await supabase
+    .from('agenda_servicos')
+    .select('id, nome, preco, duracao_minutos, status')
+    .eq('empresa_id', empresaId)
+    .eq('status', 'ativo')
+    .order('nome', { ascending: true })
+    .limit(50);
+
+  if (error) throw error;
+  if (!data?.length) return { answer: 'Nenhum servico cadastrado ainda.' };
+
+  const lista = data.map(s => `${s.nome} (R$ ${Number(s.preco || 0).toFixed(2)}, ${s.duracao_minutos || 60}min)`).join(', ');
+  return {
+    answer: `Voce tem ${data.length} servico${data.length !== 1 ? 's' : ''} ativo${data.length !== 1 ? 's' : ''}: ${lista}.`,
+    data: { total: data.length, servicos: data }
   };
 }
