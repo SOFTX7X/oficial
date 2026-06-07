@@ -20,6 +20,141 @@ let lastIds = new Set();
 let realtimeChannel = null;
 let _fotoEditor = null;
 
+// ── AI CONTEXT ────────────────────────────────────────────────────────────────
+let _aiSlotState = null;
+let _aiHistory = [];
+const AI_MAX_HISTORY = 20;
+
+function _aiSalvarHistoricoLocal() {
+  try {
+    localStorage.setItem('vyxora_ai_history', JSON.stringify(_aiHistory.slice(-AI_MAX_HISTORY)));
+    localStorage.setItem('vyxora_ai_slot', JSON.stringify(_aiSlotState));
+  } catch(e) {}
+}
+
+function _aiCarregarHistoricoLocal() {
+  try {
+    const h = localStorage.getItem('vyxora_ai_history');
+    const s = localStorage.getItem('vyxora_ai_slot');
+    if (h) _aiHistory = JSON.parse(h) || [];
+    if (s) _aiSlotState = JSON.parse(s) || null;
+  } catch(e) {}
+}
+
+function _aiLimparHistorico() {
+  _aiSlotState = null;
+  _aiHistory = [];
+  try {
+    localStorage.removeItem('vyxora_ai_history');
+    localStorage.removeItem('vyxora_ai_slot');
+  } catch(e) {}
+  const lista = $('aiMessages');
+  if (lista) {
+    lista.innerHTML = `
+      <div class="ai-message ai-message-bot">
+        <div class="ai-bubble">Olá. Posso consultar seus dados e executar ações já validadas na sua agenda.</div>
+      </div>`;
+  }
+}
+
+function adicionarMensagemAI(tipo, texto) {
+  const lista = $('aiMessages');
+  if (!lista) return;
+  const item = document.createElement('div');
+  item.className = `ai-message ai-message-${tipo}`;
+  const bubble = document.createElement('div');
+  bubble.className = 'ai-bubble';
+  bubble.textContent = texto;
+  item.appendChild(bubble);
+  lista.appendChild(item);
+  lista.scrollTop = lista.scrollHeight;
+  _aiHistory.push({ role: tipo === 'user' ? 'user' : 'assistant', content: texto });
+  if (_aiHistory.length > AI_MAX_HISTORY) _aiHistory = _aiHistory.slice(-AI_MAX_HISTORY);
+  _aiSalvarHistoricoLocal();
+}
+
+function _aiCarregarMensagensNaTela() {
+  const lista = $('aiMessages');
+  if (!lista || !_aiHistory.length) return;
+  lista.innerHTML = '';
+  _aiHistory.forEach(msg => {
+    const item = document.createElement('div');
+    item.className = `ai-message ai-message-${msg.role === 'user' ? 'user' : 'bot'}`;
+    const bubble = document.createElement('div');
+    bubble.className = 'ai-bubble';
+    bubble.textContent = msg.content;
+    item.appendChild(bubble);
+    lista.appendChild(item);
+  });
+  lista.scrollTop = lista.scrollHeight;
+}
+
+async function enviarMensagemAI(event) {
+  if (event) event.preventDefault();
+  const input = $('aiInput');
+  const btn = $('aiSendBtn');
+  const texto = (input?.value || '').trim();
+  if (!texto) return;
+
+  adicionarMensagemAI('user', texto);
+  if (input) input.value = '';
+  if (btn) btn.disabled = true;
+
+  const lista = $('aiMessages');
+  const typing = document.createElement('div');
+  typing.className = 'ai-message ai-message-bot';
+  typing.id = 'aiTyping';
+  typing.innerHTML = '<div class="ai-bubble" style="opacity:0.5">✧ digitando...</div>';
+  if (lista) { lista.appendChild(typing); lista.scrollTop = lista.scrollHeight; }
+
+  try {
+    const { data } = await window.db.auth.getSession();
+    const token = data?.session?.access_token;
+    if (!token) throw new Error('Sessão expirada. Faça login novamente.');
+
+    const payload = {
+      message: texto,
+      history: _aiHistory.slice(-10),
+      slotState: _aiSlotState || null
+    };
+
+    const resp = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify(payload)
+    });
+
+    const json = await resp.json();
+    const t = $('aiTyping'); if (t) t.remove();
+
+    if (!json.success) {
+      adicionarMensagemAI('bot', json.error || 'Não consegui processar sua solicitação.');
+      _aiSlotState = null;
+      _aiSalvarHistoricoLocal();
+      return;
+    }
+
+    _aiSlotState = json.slotState || null;
+    _aiSalvarHistoricoLocal();
+
+    const resposta = json.answer || json.data?.answer || 'Pronto.';
+    adicionarMensagemAI('bot', resposta);
+
+    if (json.type === 'action' && !_aiSlotState) {
+      try { await loadAll(); } catch(e) {}
+    }
+
+  } catch (error) {
+    const t = $('aiTyping'); if (t) t.remove();
+    adicionarMensagemAI('bot', error?.message || 'Erro ao conectar com a VyXora AI.');
+    _aiSlotState = null;
+    _aiSalvarHistoricoLocal();
+  } finally {
+    if (btn) btn.disabled = false;
+    if (input) input.focus();
+  }
+}
+
 // ── UTILS ──
 function $(id) { return document.getElementById(id); }
 
@@ -479,6 +614,10 @@ function setView(view) {
   document.querySelectorAll('.mob-nav-btn').forEach(b => {
     b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
   });
+  if (view === 'ai') {
+    _aiCarregarHistoricoLocal();
+    _aiCarregarMensagensNaTela();
+  }
 }
 
 function openAuth(mode) {
@@ -507,152 +646,6 @@ function showCadastro() {
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
   if (typeof _mostrarStep === 'function') _mostrarStep(1);
   preencherSelectCategorias();
-}
-
-// ── AI CONTEXT ────────────────────────────────────────────────────────────────
-let _aiSlotState = null;
-let _aiHistory = [];
-const AI_MAX_HISTORY = 20;
-
-function _aiSalvarHistoricoLocal() {
-  try {
-    localStorage.setItem('vyxora_ai_history', JSON.stringify(_aiHistory.slice(-AI_MAX_HISTORY)));
-    localStorage.setItem('vyxora_ai_slot', JSON.stringify(_aiSlotState));
-  } catch(e) {}
-}
-
-function _aiCarregarHistoricoLocal() {
-  try {
-    const h = localStorage.getItem('vyxora_ai_history');
-    const s = localStorage.getItem('vyxora_ai_slot');
-    if (h) _aiHistory = JSON.parse(h) || [];
-    if (s) _aiSlotState = JSON.parse(s) || null;
-  } catch(e) {}
-}
-
-function _aiLimparHistorico() {
-  _aiSlotState = null;
-  _aiHistory = [];
-  try {
-    localStorage.removeItem('vyxora_ai_history');
-    localStorage.removeItem('vyxora_ai_slot');
-  } catch(e) {}
-  const lista = $('aiMessages');
-  if (lista) {
-    lista.innerHTML = `
-      <div class="ai-message ai-message-bot">
-        <div class="ai-bubble">Olá. Posso consultar seus dados e executar ações já validadas na sua agenda.</div>
-      </div>`;
-  }
-}
-
-function adicionarMensagemAI(tipo, texto) {
-  const lista = $('aiMessages');
-  if (!lista) return;
-  const item = document.createElement('div');
-  item.className = `ai-message ai-message-${tipo}`;
-  const bubble = document.createElement('div');
-  bubble.className = 'ai-bubble';
-  bubble.textContent = texto;
-  item.appendChild(bubble);
-  lista.appendChild(item);
-  lista.scrollTop = lista.scrollHeight;
-
-  // Salva no histórico
-  _aiHistory.push({ role: tipo === 'user' ? 'user' : 'assistant', content: texto });
-  if (_aiHistory.length > AI_MAX_HISTORY) _aiHistory = _aiHistory.slice(-AI_MAX_HISTORY);
-  _aiSalvarHistoricoLocal();
-}
-
-function _aiCarregarMensagensNaTela() {
-  const lista = $('aiMessages');
-  if (!lista || !_aiHistory.length) return;
-  lista.innerHTML = '';
-  _aiHistory.forEach(msg => {
-    const item = document.createElement('div');
-    item.className = `ai-message ai-message-${msg.role === 'user' ? 'user' : 'bot'}`;
-    const bubble = document.createElement('div');
-    bubble.className = 'ai-bubble';
-    bubble.textContent = msg.content;
-    item.appendChild(bubble);
-    lista.appendChild(item);
-  });
-  lista.scrollTop = lista.scrollHeight;
-}
-
-async function enviarMensagemAI(event) {
-  if (event) event.preventDefault();
-  const input = $('aiInput');
-  const btn = $('aiSendBtn');
-  const texto = (input?.value || '').trim();
-  if (!texto) return;
-
-  adicionarMensagemAI('user', texto);
-  if (input) input.value = '';
-  if (btn) btn.disabled = true;
-
-  // Indicador de digitando
-  const lista = $('aiMessages');
-  const typing = document.createElement('div');
-  typing.className = 'ai-message ai-message-bot';
-  typing.id = 'aiTyping';
-  typing.innerHTML = '<div class="ai-bubble" style="opacity:0.5">✧ digitando...</div>';
-  if (lista) { lista.appendChild(typing); lista.scrollTop = lista.scrollHeight; }
-
-  try {
-    const { data } = await window.db.auth.getSession();
-    const token = data?.session?.access_token;
-    if (!token) throw new Error('Sessão expirada. Faça login novamente.');
-
-    const payload = {
-      message: texto,
-      history: _aiHistory.slice(-10),
-      slotState: _aiSlotState || null
-    };
-
-    const resp = await fetch('/api/ai', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + token
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const json = await resp.json();
-
-    // Remove typing
-    const t = $('aiTyping'); if (t) t.remove();
-
-    if (!json.success) {
-      adicionarMensagemAI('bot', json.error || 'Não consegui processar sua solicitação.');
-      _aiSlotState = null;
-      _aiSalvarHistoricoLocal();
-      return;
-    }
-
-    // Atualiza slotState
-    _aiSlotState = json.slotState || null;
-    _aiSalvarHistoricoLocal();
-
-    // Exibe resposta
-    const resposta = json.answer || json.data?.answer || 'Pronto.';
-    adicionarMensagemAI('bot', resposta);
-
-    // Se concluiu uma ação, recarrega os dados do painel
-    if (json.type === 'action' && !_aiSlotState) {
-      try { await loadAll(); } catch(e) {}
-    }
-
-  } catch (error) {
-    const t = $('aiTyping'); if (t) t.remove();
-    adicionarMensagemAI('bot', error?.message || 'Erro ao conectar com a VyXora AI.');
-    _aiSlotState = null;
-    _aiSalvarHistoricoLocal();
-  } finally {
-    if (btn) btn.disabled = false;
-    if (input) input.focus();
-  }
 }
 
 // ── STEPS DO CADASTRO ──
@@ -1988,5 +1981,5 @@ Object.assign(window, {
   toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu,
   menuOpenPublic, menuCopyPublicLink, menuNotifications,
-  enviarMensagemAI
+  enviarMensagemAI, _aiLimparHistorico, _aiCarregarHistoricoLocal, _aiCarregarMensagensNaTela
 });
