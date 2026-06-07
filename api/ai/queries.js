@@ -46,7 +46,7 @@ async function freeSlots({ supabase, empresa, empresaId }, params) {
   if (empresa[dayFields[weekday]] === false) return { answer: 'A empresa esta fechada nesta data.', data: { data, horarios: [] } };
 
   const [{ data: profissionais, error: profError }, { data: agendamentos, error: agError }] = await Promise.all([
-    supabase.from('agenda_profissionais').select('id,nome,status').eq('empresa_id', empresaId).eq('status', 'ativo'),
+    supabase.from('profissionais').select('id,nome,ativo').eq('empresa_id', empresaId).eq('ativo', true),
     supabase.from('agenda_agendamentos').select('profissional_id,hora,status').eq('empresa_id', empresaId).eq('data', data)
   ]);
   if (profError) throw profError;
