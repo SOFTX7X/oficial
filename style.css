@@ -1281,7 +1281,7 @@ body.menu-open { overflow: hidden; touch-action: none; }
   body { padding-bottom: 84px; overscroll-behavior-x: none; -webkit-text-size-adjust: 100%; }
   .view#view-ai.active { height: 100dvh; max-height: 100dvh; overflow: hidden; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
   .view#view-ai.active .ai-chat { flex: 1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-  .view#view-ai.active .ai-messages { flex: 1 1 0; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .view#view-ai.active .ai-messages { flex: 1 1 0; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
   button, input, select, textarea { font-family: 'Geist', sans-serif; -webkit-tap-highlight-color: transparent; }
   input, select, textarea { font-size: 16px !important; }
 
