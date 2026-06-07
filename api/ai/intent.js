@@ -63,11 +63,52 @@ export function interpretIntent(message, payload = {}) {
     };
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // PROTEÇÃO GLOBAL — roda sobre raw.toLowerCase() ignorando normalizeText
-  // cliente + qualquer referência temporal = clarification imediata
-  // Posição: ANTES de dashboard, métricas, queries e actions
-  // ══════════════════════════════════════════════════════════════════════════
+  // ── RETOMADA DE FLUXO ─────────────────────────────────────────────────────
+  // Se o frontend enviou payload.intent, significa que há um fluxo em andamento.
+  // Ignora o message e continua coletando os dados que faltam.
+
+  if (payload.intent === 'create_appointment') {
+    const cliente_nome      = payload.cliente_nome;
+    const data              = payload.data;
+    const hora              = payload.hora;
+    const servico_nome      = payload.servico_nome;
+    const profissional_nome = payload.profissional_nome;
+
+    if (!hasValue(cliente_nome)) {
+      return clarify('Qual é o nome do cliente para este agendamento?');
+    }
+    if (!hasValue(data)) {
+      return clarify(`Para quando deseja agendar ${cliente_nome}? Informe a data.`);
+    }
+    if (!hasValue(hora)) {
+      return clarify(`Qual horário deseja agendar ${cliente_nome} no dia ${data}?`);
+    }
+    return {
+      domain: 'action',
+      name:   'create_appointment',
+      params: { cliente_nome, data, hora, servico_nome, profissional_nome, telefone: payload.telefone },
+    };
+  }
+
+  if (payload.intent === 'create_client') {
+    const nome = payload.nome;
+    if (!hasValue(nome)) return clarify('Qual é o nome do cliente que deseja cadastrar?');
+    return { domain: 'action', name: 'create_client', params: { nome, telefone: payload.telefone, email: payload.email } };
+  }
+
+  if (payload.intent === 'create_professional') {
+    const nome = payload.nome;
+    if (!hasValue(nome)) return clarify('Qual é o nome do profissional que deseja cadastrar?');
+    return { domain: 'action', name: 'create_professional', params: { nome, especialidade: payload.especialidade, telefone: payload.telefone } };
+  }
+
+  if (payload.intent === 'create_service') {
+    const nome = payload.nome;
+    if (!hasValue(nome)) return clarify('Qual é o nome do serviço que deseja cadastrar?');
+    return { domain: 'action', name: 'create_service', params: { nome, preco: payload.preco, duracao_minutos: payload.duracao_minutos } };
+  }
+
+  // ── PROTEÇÃO GLOBAL ───────────────────────────────────────────────────────
   {
     const _raw        = raw.toLowerCase();
     const _temCliente = /cliente/.test(_raw);
@@ -103,7 +144,7 @@ export function interpretIntent(message, payload = {}) {
     return { domain: 'dashboard', name: 'metric', params: { metric } };
   }
 
-// ── agendamento ───────────────────────────────────────────────────────────
+  // ── agendamento ───────────────────────────────────────────────────────────
   if (isAgendamento(text)) {
     const cliente_nome      = payload.cliente_nome      || extrairClienteAgendamento(raw);
     const data              = payload.data              || parseDate(raw);
@@ -120,13 +161,13 @@ export function interpretIntent(message, payload = {}) {
     if (!hasValue(hora)) {
       return clarify(`Qual horário deseja agendar ${cliente_nome} no dia ${data}?`);
     }
-
     return {
       domain: 'action',
       name:   'create_appointment',
       params: { cliente_nome, data, hora, servico_nome, profissional_nome, telefone: payload.telefone },
     };
   }
+
   // ── reagendar ─────────────────────────────────────────────────────────────
   if (/\b(reagende|reagendar)\b/.test(text)) {
     const data = payload.data || parseDate(raw);
