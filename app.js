@@ -178,7 +178,7 @@ async function enviarMensagemAI(event) {
     _aiSalvarHistoricoLocal();
   } finally {
     if (btn) btn.disabled = false;
-    if (input) input.focus();
+    // Não chama input.focus() para não abrir o teclado no mobile automaticamente
   }
 }
 
@@ -660,9 +660,17 @@ function setView(view) {
   document.querySelectorAll('.mob-nav-btn').forEach(b => {
     b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
   });
+  // Esconder botão Menu e mostrar botão Voltar na tela da IA (mobile)
+  const menuTrigger = document.querySelector('.mobile-menu-trigger');
+  const backBtn = document.getElementById('aiBackBtn');
   if (view === 'ai') {
+    if (menuTrigger) menuTrigger.style.display = 'none';
+    if (backBtn) backBtn.style.display = 'inline-flex';
     _aiCarregarHistoricoLocal();
     _aiCarregarMensagensNaTela();
+  } else {
+    if (menuTrigger) menuTrigger.style.removeProperty('display');
+    if (backBtn) backBtn.style.display = 'none';
   }
 }
 
@@ -1521,7 +1529,16 @@ function restaurarMensagensWhatsappPadrao() {
 }
 
 async function confirmarAg(id) {
-  const ag = (state.agendamentos || []).find(a => a.id === id); if (!ag) return;
+  let ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) {
+    // Agendamento criado/atualizado pela IA pode não estar no state ainda — busca no Supabase
+    const { data, error: fetchErr } = await db.from('agenda_agendamentos').select('*').eq('id', id).single();
+    if (fetchErr || !data) return toast('Agendamento não encontrado.', 'err');
+    ag = data;
+    // Adiciona ao state para manter consistência
+    if (state.agendamentos) state.agendamentos.push(ag);
+    else state.agendamentos = [ag];
+  }
   const { error } = await db.from('agenda_agendamentos').update({ status: 'Confirmado' }).eq('id', id);
   if (error) return toast('Erro ao confirmar.', 'err');
   ag.status = 'Confirmado'; renderAll();
