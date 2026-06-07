@@ -37,7 +37,13 @@ export async function executeAction(context, intent) {
 async function createClient({ supabase, empresaId }, params) {
   const nome = String(params.nome || '').trim();
   if (!nome) badRequest('Informe o nome do cliente.');
-  const { data, error } = await supabase.from('agenda_clientes').insert({ empresa_id: empresaId, nome, telefone: params.telefone || '', email: params.email || '', status: 'ativo' }).select('*').single();
+  const { data, error } = await supabase.from('agenda_clientes').insert({
+    empresa_id: empresaId,
+    nome,
+    telefone: params.telefone || '',
+    email: params.email || '',
+    status: 'ativo'
+  }).select('*').single();
   if (error) throw error;
   return { answer: `Cliente ${data.nome} criado com sucesso.`, data };
 }
@@ -46,7 +52,9 @@ async function updateClient({ supabase, empresaId }, params) {
   const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_clientes', empresaId, params.nome || params.cliente_nome);
   if (!current?.id) badRequest('Cliente nao encontrado para atualizar.');
   const updates = {};
-  ['nome', 'telefone', 'email', 'status'].forEach(key => { if (params[key] !== undefined && params[key] !== '') updates[key] = params[key]; });
+  ['nome', 'telefone', 'email', 'status'].forEach(key => {
+    if (params[key] !== undefined && params[key] !== '') updates[key] = params[key];
+  });
   const { data, error } = await supabase.from('agenda_clientes').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
   if (error) throw error;
   return { answer: `Cliente ${data.nome} atualizado.`, data };
@@ -55,7 +63,13 @@ async function updateClient({ supabase, empresaId }, params) {
 async function createProfessional({ supabase, empresaId }, params) {
   const nome = String(params.nome || '').trim();
   if (!nome) badRequest('Informe o nome do profissional.');
-  const { data, error } = await supabase.from('agenda_profissionais').insert({ empresa_id: empresaId, nome, especialidade: params.especialidade || '', telefone: params.telefone || '', ativo: true }).select('*').single();
+  const { data, error } = await supabase.from('agenda_profissionais').insert({
+    empresa_id: empresaId,
+    nome,
+    especialidade: params.especialidade || '',
+    telefone: params.telefone || '',
+    ativo: true
+  }).select('*').single();
   if (error) throw error;
   return { answer: `Profissional ${data.nome} criado com sucesso.`, data };
 }
@@ -64,7 +78,9 @@ async function updateProfessional({ supabase, empresaId }, params) {
   const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_profissionais', empresaId, params.nome);
   if (!current?.id) badRequest('Profissional nao encontrado para atualizar.');
   const updates = {};
-  ['nome', 'especialidade', 'telefone', 'ativo'].forEach(key => { if (params[key] !== undefined && params[key] !== '') updates[key] = params[key]; });
+  ['nome', 'especialidade', 'telefone', 'ativo'].forEach(key => {
+    if (params[key] !== undefined && params[key] !== '') updates[key] = params[key];
+  });
   const { data, error } = await supabase.from('agenda_profissionais').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
   if (error) throw error;
   return { answer: `Profissional ${data.nome} atualizado.`, data };
@@ -73,7 +89,13 @@ async function updateProfessional({ supabase, empresaId }, params) {
 async function createService({ supabase, empresaId }, params) {
   const nome = String(params.nome || '').trim();
   if (!nome) badRequest('Informe o nome do servico.');
-  const { data, error } = await supabase.from('agenda_servicos').insert({ empresa_id: empresaId, nome, preco: Number(params.preco || 0), duracao: Number(params.duracao_minutos || 60), ativo: true }).select('*').single();
+  const { data, error } = await supabase.from('agenda_servicos').insert({
+    empresa_id: empresaId,
+    nome,
+    preco: Number(params.preco || 0),
+    duracao: Number(params.duracao_minutos || 60),
+    ativo: true
+  }).select('*').single();
   if (error) throw error;
   return { answer: `Servico ${data.nome} criado com sucesso.`, data };
 }
@@ -86,7 +108,6 @@ async function updateService({ supabase, empresaId }, params) {
   if (params.preco !== undefined && params.preco !== '') updates.preco = Number(params.preco);
   if (params.duracao_minutos !== undefined && params.duracao_minutos !== '') updates.duracao = Number(params.duracao_minutos);
   if (params.status !== undefined && params.status !== '') updates.ativo = params.status === 'ativo' || params.status === true;
-  
   const { data, error } = await supabase.from('agenda_servicos').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
   if (error) throw error;
   return { answer: `Servico ${data.nome} atualizado.`, data };
@@ -112,7 +133,7 @@ async function createAppointment({ supabase, empresa, empresaId }, params) {
     servico = (await supabase.from('agenda_servicos').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
   }
 
-  let profesional = null;
+  let profissional = null;
   if (params.profissional_id) {
     const { data: prof } = await supabase.from('agenda_profissionais').select('*').eq('id', params.profissional_id).single();
     profissional = prof;
@@ -136,7 +157,7 @@ async function createAppointment({ supabase, empresa, empresaId }, params) {
     cliente_nome: cliente.nome,
     cliente_telefone: params.telefone || cliente.telefone || '',
     servico_nome: servico?.nome || '',
-    profissional_nome: profesional?.nome || '',
+    profissional_nome: profissional?.nome || '',  // corrigido: era "profesional"
     data: dataAg,
     hora,
     status: params.status || 'Pendente',
@@ -180,7 +201,9 @@ async function ensureAppointmentSlotIsFree(supabase, empresaId, profissionalId, 
     .limit(10);
   if (error) throw error;
 
-  const busy = (data || []).find(appointment => !['Recusado', 'Excluido', 'Excluído', 'excluido'].includes(appointment.status));
+  const busy = (data || []).find(appointment =>
+    !['Recusado', 'Excluido', 'Excluído', 'excluido'].includes(appointment.status)
+  );
   if (busy) {
     badRequest('Horario indisponivel: este profissional ja possui agendamento nesta data e horario.');
   }
@@ -211,7 +234,10 @@ async function rescheduleAppointment(context, params) {
 async function cancelAppointment(context, params) {
   const agendamento = await findAppointment(context, params);
   if (!agendamento?.id) badRequest('Agendamento nao encontrado para cancelar.');
-  const { data, error } = await context.supabase.from('agenda_agendamentos').update({ status: normStatus(params.status || 'Recusado'), observacoes: params.motivo || agendamento.observacoes || '' }).eq('empresa_id', context.empresaId).eq('id', agendamento.id).select('*').single();
+  const { data, error } = await context.supabase.from('agenda_agendamentos').update({
+    status: normStatus(params.status || 'Recusado'),
+    observacoes: params.motivo || agendamento.observacoes || ''
+  }).eq('empresa_id', context.empresaId).eq('id', agendamento.id).select('*').single();
   if (error) throw error;
   return { answer: `Agendamento de ${data.cliente_nome} cancelado.`, data };
 }
