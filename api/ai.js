@@ -2,24 +2,30 @@ import { createAuthenticatedContext } from './ai/auth.js';
 import { interpretIntent } from './ai/intent.js';
 
 export default async function handler(req, res) {
-  // Configuração de CORS
+  // CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const { message } = req.body || {};
-    if (!message) return res.status(400).json({ success: false, error: 'Mensagem nao informada.' });
+    const { message, history, slotState } = req.body || {};
+
+    if (!message) {
+      return res.status(400).json({ success: false, error: 'Mensagem nao informada.' });
+    }
 
     // 1. Autenticação e montagem do contexto da empresa
     const context = await createAuthenticatedContext(req);
-    
-    // 2. Processamento da intenção delegando o body completo para mapear os parâmetros
-    const result = await interpretIntent(context, message, req.body);
-    
+
+    // 2. Processa a intenção com histórico e estado do slot filling
+    const result = await interpretIntent(context, message, {
+      ...req.body,
+      history: history || [],
+      slotState: slotState || null
+    });
+
     return res.status(200).json({ success: true, ...result });
 
   } catch (error) {
