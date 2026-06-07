@@ -25,7 +25,6 @@ export async function createAuthenticatedContext(req) {
     throw error;
   }
 
-  // ── CORRIGIDO: Nome real da tabela no banco com o prefixo agenda_ ──
   const { data: perfil, error: perfilError } = await supabase
     .from('agenda_perfis')
     .select('*')
@@ -39,7 +38,6 @@ export async function createAuthenticatedContext(req) {
     throw error;
   }
 
-  // ── CORRIGIDO: Nome real da tabela no banco com o prefixo agenda_ ──
   const { data: empresa, error: empresaError } = await supabase
     .from('agenda_empresas')
     .select('*')
@@ -53,5 +51,6 @@ export async function createAuthenticatedContext(req) {
     throw error;
   }
 
-  return { supabase, user, perfil, empresa, empresaId: perfil.empresa_id };
+  // Retorna o contexto incluindo a requisição (req) para blindagem de rotas e query strings
+  return { supabase, user, perfil, empresa, empresaId: perfil.empresa_id, req };
 }
