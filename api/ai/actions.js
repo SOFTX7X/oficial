@@ -19,28 +19,26 @@ async function findByName(supabase, table, empresaId, name) {
 
 export async function executeAction(context, intent) {
   const handlers = {
-    create_client:           createClient,
-    update_client:           updateClient,
-    deactivate_client:       deactivateClient,
-    delete_client:           deleteClient,
-    create_professional:     createProfessional,
-    update_professional:     updateProfessional,
-    deactivate_professional: deactivateProfessional,
-    delete_professional:     deleteProfessional,
-    create_service:          createService,
-    update_service:          updateService,
-    deactivate_service:      deactivateService,
-    delete_service:          deleteService,
-    create_appointment:      createAppointment,
-    reschedule_appointment:  rescheduleAppointment,
-    cancel_appointment:      cancelAppointment
+    create_client: createClient,
+    update_client: updateClient,
+    create_professional: createProfessional,
+    update_professional: updateProfessional,
+    create_service: createService,
+    update_service: updateService,
+    create_appointment: createAppointment,
+    reschedule_appointment: rescheduleAppointment,
+    cancel_appointment: cancelAppointment,
+    disable_client:       (ctx, p) => updateClient(ctx, { ...p, status: 'inativo' }),
+    disable_professional: (ctx, p) => updateProfessional(ctx, { ...p, status: 'inativo' }),
+    disable_service:      (ctx, p) => updateService(ctx, { ...p, status: 'inativo' }),
+    delete_client:        (ctx, p) => updateClient(ctx, { ...p, status: 'excluido' }),
+    delete_professional:  (ctx, p) => updateProfessional(ctx, { ...p, status: 'excluido' }),
+    delete_service:       (ctx, p) => updateService(ctx, { ...p, status: 'excluido' })
   };
   const handler = handlers[intent.name];
   if (!handler) badRequest('Acao nao reconhecida.');
   return handler(context, intent.params || {});
 }
-
-// ─── Clientes ────────────────────────────────────────────────────────────────
 
 async function createClient({ supabase, empresaId }, params) {
   const nome = String(params.nome || '').trim();
@@ -68,24 +66,6 @@ async function updateClient({ supabase, empresaId }, params) {
   return { answer: `Cliente ${data.nome} atualizado.`, data };
 }
 
-async function deactivateClient({ supabase, empresaId }, params) {
-  const current = await findByName(supabase, 'agenda_clientes', empresaId, params.nome || params.cliente_nome);
-  if (!current?.id) badRequest('Cliente nao encontrado para desativar.');
-  const { data, error } = await supabase.from('agenda_clientes').update({ status: 'inativo' }).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
-  if (error) throw error;
-  return { answer: `Cliente ${data.nome} desativado com sucesso.`, data };
-}
-
-async function deleteClient({ supabase, empresaId }, params) {
-  const current = await findByName(supabase, 'agenda_clientes', empresaId, params.nome || params.cliente_nome);
-  if (!current?.id) badRequest('Cliente nao encontrado para excluir.');
-  const { error } = await supabase.from('agenda_clientes').delete().eq('empresa_id', empresaId).eq('id', current.id);
-  if (error) throw error;
-  return { answer: `Cliente ${current.nome} excluido com sucesso.` };
-}
-
-// ─── Profissionais ───────────────────────────────────────────────────────────
-
 async function createProfessional({ supabase, empresaId }, params) {
   const nome = String(params.nome || '').trim();
   if (!nome) badRequest('Informe o nome do profissional.');
@@ -107,30 +87,10 @@ async function updateProfessional({ supabase, empresaId }, params) {
   ['nome', 'especialidade', 'telefone', 'status'].forEach(key => {
     if (params[key] !== undefined && params[key] !== '') updates[key] = params[key];
   });
-  // Suporte a novo_nome vindo do slot update_service (nome do campo de busca vs campo novo)
-  if (params.novo_nome !== undefined && params.novo_nome !== '') updates.nome = params.novo_nome;
   const { data, error } = await supabase.from('agenda_profissionais').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
   if (error) throw error;
   return { answer: `Profissional ${data.nome} atualizado.`, data };
 }
-
-async function deactivateProfessional({ supabase, empresaId }, params) {
-  const current = await findByName(supabase, 'agenda_profissionais', empresaId, params.nome);
-  if (!current?.id) badRequest('Profissional nao encontrado para desativar.');
-  const { data, error } = await supabase.from('agenda_profissionais').update({ status: 'inativo' }).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
-  if (error) throw error;
-  return { answer: `Profissional ${data.nome} desativado com sucesso.`, data };
-}
-
-async function deleteProfessional({ supabase, empresaId }, params) {
-  const current = await findByName(supabase, 'agenda_profissionais', empresaId, params.nome);
-  if (!current?.id) badRequest('Profissional nao encontrado para excluir.');
-  const { error } = await supabase.from('agenda_profissionais').delete().eq('empresa_id', empresaId).eq('id', current.id);
-  if (error) throw error;
-  return { answer: `Profissional ${current.nome} excluido com sucesso.` };
-}
-
-// ─── Serviços ────────────────────────────────────────────────────────────────
 
 async function createService({ supabase, empresaId }, params) {
   const nome = String(params.nome || '').trim();
@@ -150,32 +110,14 @@ async function updateService({ supabase, empresaId }, params) {
   const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_servicos', empresaId, params.nome);
   if (!current?.id) badRequest('Servico nao encontrado para atualizar.');
   const updates = {};
-  if (params.novo_nome !== undefined && params.novo_nome !== '')               updates.nome = params.novo_nome;
-  if (params.preco !== undefined && params.preco !== '')                       updates.preco = Number(params.preco);
-  if (params.duracao_minutos !== undefined && params.duracao_minutos !== '')   updates.duracao_minutos = Number(params.duracao_minutos);
-  if (params.status !== undefined && params.status !== '')                     updates.status = params.status;
+  if (params.nome !== undefined && params.nome !== '')                       updates.nome = params.nome;
+  if (params.preco !== undefined && params.preco !== '')                     updates.preco = Number(params.preco);
+  if (params.duracao_minutos !== undefined && params.duracao_minutos !== '') updates.duracao_minutos = Number(params.duracao_minutos);
+  if (params.status !== undefined && params.status !== '')                   updates.status = params.status;
   const { data, error } = await supabase.from('agenda_servicos').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
   if (error) throw error;
   return { answer: `Servico ${data.nome} atualizado.`, data };
 }
-
-async function deactivateService({ supabase, empresaId }, params) {
-  const current = await findByName(supabase, 'agenda_servicos', empresaId, params.nome);
-  if (!current?.id) badRequest('Servico nao encontrado para desativar.');
-  const { data, error } = await supabase.from('agenda_servicos').update({ status: 'inativo' }).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
-  if (error) throw error;
-  return { answer: `Servico ${data.nome} desativado com sucesso.`, data };
-}
-
-async function deleteService({ supabase, empresaId }, params) {
-  const current = await findByName(supabase, 'agenda_servicos', empresaId, params.nome);
-  if (!current?.id) badRequest('Servico nao encontrado para excluir.');
-  const { error } = await supabase.from('agenda_servicos').delete().eq('empresa_id', empresaId).eq('id', current.id);
-  if (error) throw error;
-  return { answer: `Servico ${current.nome} excluido com sucesso.` };
-}
-
-// ─── Agendamentos ────────────────────────────────────────────────────────────
 
 async function createAppointment({ supabase, empresa, empresaId }, params) {
   const clienteNome = String(params.cliente_nome || params.nome || '').trim();
