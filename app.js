@@ -78,7 +78,9 @@ function adicionarMensagemAI(tipo, texto) {
 
   const bubble = document.createElement('div');
   bubble.className = 'ai-bubble';
-  bubble.textContent = texto;
+  // Renderiza quebras de linha e escapa HTML para segurança
+  const safe = texto.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  bubble.innerHTML = safe;
 
   const time = document.createElement('span');
   time.className = 'ai-bubble-time';
@@ -109,7 +111,7 @@ function _aiCarregarMensagensNaTela() {
     }
     const bubble = document.createElement('div');
     bubble.className = 'ai-bubble';
-    bubble.textContent = msg.content;
+    bubble.innerHTML = (msg.content||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
     item.appendChild(bubble);
     lista.appendChild(item);
   });
