@@ -1,5 +1,17 @@
 import { todayISO } from './utils.js';
 
+function toTitleCase(str) {
+  if (!str) return '';
+  return str.toLowerCase().replace(/(?:^|\s|-)\S/g, c => c.toUpperCase());
+}
+function formatPhone(str) {
+  if (!str) return '';
+  const d = str.replace(/\D/g, '');
+  if (d.length === 11) return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return str;
+}
+
 async function countRows(supabase, table, empresaId, build = query => query) {
   let query = supabase.from(table).select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId);
   query = build(query);
@@ -29,7 +41,7 @@ export async function getStatistics({ supabase, empresaId }, intent = { params: 
     if (error) throw error;
     const total = data?.length || 0;
     if (!total) return { answer: 'Nenhum cliente ativo cadastrado ainda.', data: { clientes: 0 } };
-    const lista = data.map(c => `• ${c.nome}${c.telefone ? ` (${c.telefone})` : ''}`).join('\n');
+    const lista = data.map(c => `• ${toTitleCase(c.nome)}${c.telefone ? ` (${formatPhone(c.telefone)})` : ''}`).join('\n');
     return {
       answer: `Você tem ${total} cliente${total !== 1 ? 's' : ''} ativo${total !== 1 ? 's' : ''}:\n\n${lista}`,
       data: { clientes: total }
@@ -46,7 +58,7 @@ export async function getStatistics({ supabase, empresaId }, intent = { params: 
     if (error) throw error;
     const total = data?.length || 0;
     if (!total) return { answer: 'Nenhum profissional ativo cadastrado ainda.', data: { profissionais: 0 } };
-    const lista = data.map(p => `• ${p.nome}${p.especialidade ? ` — ${p.especialidade}` : ''}`).join('\n');
+    const lista = data.map(p => `• ${toTitleCase(p.nome)}${p.especialidade ? ` — ${toTitleCase(p.especialidade)}` : ''}`).join('\n');
     return {
       answer: `Você tem ${total} profissional${total !== 1 ? 'is' : ''} ativo${total !== 1 ? 's' : ''}:\n\n${lista}`,
       data: { profissionais: total }
@@ -82,7 +94,7 @@ export async function getStatistics({ supabase, empresaId }, intent = { params: 
     const total = data?.length || 0;
     if (!total) return { answer: `Nenhum agendamento para hoje (${hoje}).`, data: { agendamentos_hoje: 0 } };
     const lista = data.map(a =>
-      `• ${a.hora?.slice(0,5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${a.profissional_nome}` : ''} [${a.status}]`
+      `• ${a.hora?.slice(0,5)} — ${toTitleCase(a.cliente_nome)}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${toTitleCase(a.profissional_nome)}` : ''} [${a.status}]`
     ).join('\n');
     return {
       answer: `${total} agendamento${total !== 1 ? 's' : ''} para hoje (${hoje}):\n\n${lista}`,
@@ -102,7 +114,7 @@ export async function getStatistics({ supabase, empresaId }, intent = { params: 
     const total = data?.length || 0;
     if (!total) return { answer: `Nenhum agendamento para amanhã (${amanha}).`, data: { agendamentos_amanha: 0 } };
     const lista = data.map(a =>
-      `• ${a.hora?.slice(0,5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${a.profissional_nome}` : ''} [${a.status}]`
+      `• ${a.hora?.slice(0,5)} — ${toTitleCase(a.cliente_nome)}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${toTitleCase(a.profissional_nome)}` : ''} [${a.status}]`
     ).join('\n');
     return {
       answer: `${total} agendamento${total !== 1 ? 's' : ''} para amanhã (${amanha}):\n\n${lista}`,
@@ -127,7 +139,7 @@ export async function getStatistics({ supabase, empresaId }, intent = { params: 
     const total = count || 0;
     if (!total) return { answer: 'Nenhum agendamento registrado ainda.', data: { agendamentos: 0 } };
     const lista = (data || []).map(a =>
-      `• ${a.data} ${a.hora?.slice(0,5)} — ${a.cliente_nome} [${a.status}]`
+      `• ${a.data.split('-').reverse().join('/')} ${a.hora?.slice(0,5)} — ${toTitleCase(a.cliente_nome)} [${a.status}]`
     ).join('\n');
     return {
       answer: `Você tem ${total} agendamento${total !== 1 ? 's' : ''} no total. Últimos registros:\n\n${lista}`,
@@ -146,7 +158,7 @@ export async function getStatistics({ supabase, empresaId }, intent = { params: 
     const total = data?.length || 0;
     if (!total) return { answer: 'Nenhum agendamento pendente no momento. ✅', data: { pendentes: 0 } };
     const lista = data.map(a =>
-      `• ${a.data} ${a.hora?.slice(0,5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}`
+      `• ${a.data.split('-').reverse().join('/')} ${a.hora?.slice(0,5)} — ${toTitleCase(a.cliente_nome)}${a.servico_nome ? ` (${a.servico_nome})` : ''}`
     ).join('\n');
     return {
       answer: `${total} agendamento${total !== 1 ? 's' : ''} pendente${total !== 1 ? 's' : ''} aguardando aprovação:\n\n${lista}`,
@@ -165,7 +177,7 @@ export async function getStatistics({ supabase, empresaId }, intent = { params: 
     const total = data?.length || 0;
     if (!total) return { answer: 'Nenhum agendamento confirmado no momento.', data: { confirmados: 0 } };
     const lista = data.map(a =>
-      `• ${a.data} ${a.hora?.slice(0,5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}`
+      `• ${a.data.split('-').reverse().join('/')} ${a.hora?.slice(0,5)} — ${toTitleCase(a.cliente_nome)}${a.servico_nome ? ` (${a.servico_nome})` : ''}`
     ).join('\n');
     return {
       answer: `${total} agendamento${total !== 1 ? 's' : ''} confirmado${total !== 1 ? 's' : ''}:\n\n${lista}`,
