@@ -68,7 +68,7 @@ async function createProfessional({ supabase, empresaId }, params) {
     nome,
     especialidade: params.especialidade || '',
     telefone: params.telefone || '',
-    ativo: true
+    status: 'ativo'
   }).select('*').single();
   if (error) throw error;
   return { answer: `Profissional ${data.nome} criado com sucesso.`, data };
@@ -78,7 +78,7 @@ async function updateProfessional({ supabase, empresaId }, params) {
   const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_profissionais', empresaId, params.nome);
   if (!current?.id) badRequest('Profissional nao encontrado para atualizar.');
   const updates = {};
-  ['nome', 'especialidade', 'telefone', 'ativo'].forEach(key => {
+  ['nome', 'especialidade', 'telefone', 'status'].forEach(key => {
     if (params[key] !== undefined && params[key] !== '') updates[key] = params[key];
   });
   const { data, error } = await supabase.from('agenda_profissionais').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
@@ -93,8 +93,8 @@ async function createService({ supabase, empresaId }, params) {
     empresa_id: empresaId,
     nome,
     preco: Number(params.preco || 0),
-    duracao: Number(params.duracao_minutos || 60),
-    ativo: true
+    duracao_minutos: Number(params.duracao_minutos || 60),
+    status: 'ativo'
   }).select('*').single();
   if (error) throw error;
   return { answer: `Servico ${data.nome} criado com sucesso.`, data };
@@ -104,10 +104,10 @@ async function updateService({ supabase, empresaId }, params) {
   const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_servicos', empresaId, params.nome);
   if (!current?.id) badRequest('Servico nao encontrado para atualizar.');
   const updates = {};
-  if (params.nome !== undefined && params.nome !== '') updates.nome = params.nome;
-  if (params.preco !== undefined && params.preco !== '') updates.preco = Number(params.preco);
-  if (params.duracao_minutos !== undefined && params.duracao_minutos !== '') updates.duracao = Number(params.duracao_minutos);
-  if (params.status !== undefined && params.status !== '') updates.ativo = params.status === 'ativo' || params.status === true;
+  if (params.nome !== undefined && params.nome !== '')                       updates.nome = params.nome;
+  if (params.preco !== undefined && params.preco !== '')                     updates.preco = Number(params.preco);
+  if (params.duracao_minutos !== undefined && params.duracao_minutos !== '') updates.duracao_minutos = Number(params.duracao_minutos);
+  if (params.status !== undefined && params.status !== '')                   updates.status = params.status;
   const { data, error } = await supabase.from('agenda_servicos').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
   if (error) throw error;
   return { answer: `Servico ${data.nome} atualizado.`, data };
@@ -130,7 +130,7 @@ async function createAppointment({ supabase, empresa, empresaId }, params) {
     servico = await findByName(supabase, 'agenda_servicos', empresaId, params.servico_nome);
   }
   if (!servico) {
-    servico = (await supabase.from('agenda_servicos').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
+    servico = (await supabase.from('agenda_servicos').select('*').eq('empresa_id', empresaId).eq('status', 'ativo').limit(1)).data?.[0];
   }
 
   let profissional = null;
@@ -141,7 +141,7 @@ async function createAppointment({ supabase, empresa, empresaId }, params) {
     profissional = await findByName(supabase, 'agenda_profissionais', empresaId, params.profissional_nome);
   }
   if (!profissional) {
-    profissional = (await supabase.from('agenda_profissionais').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
+    profissional = (await supabase.from('agenda_profissionais').select('*').eq('empresa_id', empresaId).eq('status', 'ativo').limit(1)).data?.[0];
   }
 
   if (!profissional?.id) badRequest('Nenhum profissional ativo encontrado para criar o agendamento.');
@@ -157,7 +157,7 @@ async function createAppointment({ supabase, empresa, empresaId }, params) {
     cliente_nome: cliente.nome,
     cliente_telefone: params.telefone || cliente.telefone || '',
     servico_nome: servico?.nome || '',
-    profissional_nome: profissional?.nome || '',  // corrigido: era "profesional"
+    profissional_nome: profissional?.nome || '',
     data: dataAg,
     hora,
     status: params.status || 'Pendente',
@@ -173,14 +173,12 @@ function validateAppointmentTime(empresa, dataAg, hora) {
   if (empresa?.[dayFields[weekday]] === false) {
     badRequest('A empresa esta fechada nesta data.');
   }
-
   const appointmentMinutes = minutesFromTime(hora);
   const openingMinutes = minutesFromTime(empresa?.horario_abertura || '08:00');
   const closingMinutes = minutesFromTime(empresa?.horario_fechamento || '18:00');
   if (appointmentMinutes < openingMinutes || appointmentMinutes >= closingMinutes) {
     badRequest('Horario fora do funcionamento da empresa.');
   }
-
   if (empresa?.intervalo_ativo) {
     const pauseStart = minutesFromTime(empresa.intervalo_inicio || '12:00');
     const pauseEnd = minutesFromTime(empresa.intervalo_fim || '13:00');
@@ -200,7 +198,6 @@ async function ensureAppointmentSlotIsFree(supabase, empresaId, profissionalId, 
     .eq('hora', hora)
     .limit(10);
   if (error) throw error;
-
   const busy = (data || []).find(appointment =>
     !['Recusado', 'Excluido', 'Excluído', 'excluido'].includes(appointment.status)
   );
@@ -211,7 +208,7 @@ async function ensureAppointmentSlotIsFree(supabase, empresaId, profissionalId, 
 
 async function findAppointment({ supabase, empresaId }, params) {
   let query = supabase.from('agenda_agendamentos').select('*').eq('empresa_id', empresaId);
-  if (params.id) query = query.eq('id', params.id);
+  if (params.id)   query = query.eq('id', params.id);
   if (params.data) query = query.eq('data', params.data);
   if (params.hora) query = query.eq('hora', params.hora);
   const { data, error } = await query.order('data', { ascending: false }).limit(50);
