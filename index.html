@@ -361,6 +361,7 @@
       <button class="nav-btn" onclick="setView('clientes')"><span class="ni">👥</span>Clientes</button>
       <button class="nav-btn" onclick="setView('servicos')"><span class="ni">✦</span>Serviços</button>
       <button class="nav-btn" onclick="setView('profissionais')"><span class="ni">👤</span>Profissionais</button>
+      <button class="nav-btn" onclick="setView('ai')"><span class="ni">✧</span>VyXora AI</button>
     </div>
     <div class="side-nav-sep"></div>
     <div class="side-nav-section">
@@ -425,6 +426,7 @@
         <button class="nav-btn" onclick="setView('clientes');closeMobileMenu()"><span class="ni">👥</span>Clientes</button>
         <button class="nav-btn" onclick="setView('servicos');closeMobileMenu()"><span class="ni">✦</span>Serviços</button>
         <button class="nav-btn" onclick="setView('profissionais');closeMobileMenu()"><span class="ni">👤</span>Profissionais</button>
+        <button class="nav-btn" onclick="setView('ai');closeMobileMenu()"><span class="ni">✧</span>VyXora AI</button>
         <div class="side-nav-sep"></div>
         <div class="side-nav-label">Financeiro</div>
         <button class="nav-btn" onclick="setView('financeiro');closeMobileMenu()"><span class="ni">💰</span>Financeiro</button>
@@ -585,6 +587,35 @@
         <div class="dash-hero-inner"><div><h1>Relatórios <em>e métricas.</em></h1><p>Acompanhe o desempenho detalhado.</p></div></div>
       </div>
       <div class="empty-state"><div class="es-icon">📈</div><p>Relatórios avançados em breve.</p></div>
+    </section>
+
+    <!-- VIEW: VYXORA AI -->
+    <section class="view" id="view-ai">
+      <div class="ai-shell">
+        <div class="ai-hero">
+          <div>
+            <div class="ai-kicker">Assistente inteligente</div>
+            <h1>VyXora AI</h1>
+            <p>Controle sua agenda conversando</p>
+          </div>
+          <div class="ai-status"><span></span> Conectado à sua empresa</div>
+        </div>
+
+        <div class="ai-chat">
+          <div class="ai-messages" id="aiMessages" aria-live="polite">
+            <div class="ai-message ai-message-bot">
+              <div class="ai-bubble">
+                Olá. Posso consultar seus dados e executar ações já validadas na sua agenda.
+              </div>
+            </div>
+          </div>
+
+          <form class="ai-compose" onsubmit="enviarMensagemAI(event)">
+            <input id="aiInput" autocomplete="off" placeholder="Ex: Quantos clientes eu tenho?">
+            <button class="btn btn-primary" id="aiSendBtn" type="submit">Enviar</button>
+          </form>
+        </div>
+      </div>
     </section>
 
     <!-- VIEW: CONFIG -->
@@ -827,6 +858,6 @@
   }
 })();
 </script>
-<script src="app.js?v=20260601-3"></script>
+<script src="app.js?v=20260607-ai"></script>
 </body>
 </html>

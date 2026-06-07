@@ -529,6 +529,7 @@ function setView(view) {
     clientes: ['Clientes', 'Cadastro de clientes.'],
     servicos: ['Serviços', 'Catálogo e preços.'],
     profissionais: ['Profissionais', 'Equipe de atendimento.'],
+    ai: ['VyXora AI', 'Controle sua agenda conversando.'],
     financeiro: ['Financeiro', 'Valores e resultados.'],
     relatorios: ['Relatórios', 'Dados e métricas.'],
     config: ['Configurações', 'Dados do negócio.']
@@ -575,6 +576,53 @@ function showCadastro() {
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
   if (typeof _mostrarStep === 'function') _mostrarStep(1);
   preencherSelectCategorias();
+}
+
+function adicionarMensagemAI(tipo, texto) {
+  const lista = $('aiMessages');
+  if (!lista) return;
+  const item = document.createElement('div');
+  item.className = `ai-message ai-message-${tipo}`;
+  const bubble = document.createElement('div');
+  bubble.className = 'ai-bubble';
+  bubble.textContent = texto;
+  item.appendChild(bubble);
+  lista.appendChild(item);
+  lista.scrollTop = lista.scrollHeight;
+}
+
+async function enviarMensagemAI(event) {
+  if (event) event.preventDefault();
+  const input = $('aiInput');
+  const btn = $('aiSendBtn');
+  const texto = (input?.value || '').trim();
+  if (!texto) return;
+
+  adicionarMensagemAI('user', texto);
+  if (input) input.value = '';
+  if (btn) btn.disabled = true;
+
+  try {
+    const { data } = await window.db.auth.getSession();
+    const token = data?.session?.access_token;
+    if (!token) throw new Error('Sessão expirada. Faça login novamente.');
+
+    const resp = await fetch('/api/ai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      },
+      body: JSON.stringify({ message: texto })
+    });
+    const json = await resp.json();
+    adicionarMensagemAI('bot', json.success ? (json.answer || 'Pronto.') : (json.error || 'Não consegui processar sua solicitação.'));
+  } catch (error) {
+    adicionarMensagemAI('bot', error?.message || 'Erro ao conectar com a VyXora AI.');
+  } finally {
+    if (btn) btn.disabled = false;
+    if (input) input.focus();
+  }
 }
 
 // ── STEPS DO CADASTRO ──
@@ -2631,5 +2679,6 @@ Object.assign(window, {
   closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
   toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu,
-  menuOpenPublic, menuCopyPublicLink, menuNotifications
+  menuOpenPublic, menuCopyPublicLink, menuNotifications,
+  enviarMensagemAI
 });
