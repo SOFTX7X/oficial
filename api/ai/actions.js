@@ -351,4 +351,3 @@ async function reactivateService({ supabase, empresaId }, params) {
   if (error) throw error;
   return { answer: `Servico ${data?.nome || params.nome} reativado com sucesso.`, data };
 }
-
