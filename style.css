@@ -500,8 +500,6 @@ a { text-decoration: none; color: inherit; }
 
 .view { display: none; animation: fadeUp 0.22s ease; }
 .view.active { display: block; }
-#view-ai.active { display: block; padding: 0; }
-#view-ai .ai-shell { height: calc(100vh - 110px); }
 @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
 
 .mobile-nav-bar { display: none; }
@@ -577,7 +575,7 @@ a { text-decoration: none; color: inherit; }
 .cal-day.today { background: var(--accent); color: #fff; font-weight: 700; box-shadow: 0 0 12px rgba(99,102,241,0.3); }
 
 /* VYXORA AI */
-.ai-shell { display: flex; flex-direction: column; gap: 14px; height: calc(100vh - 110px); }
+.ai-shell { display: flex; flex-direction: column; gap: 14px; height: calc(100vh - 132px); }
 .ai-hero {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   padding: 24px 26px; border: 1px solid var(--border); border-radius: var(--radius-2xl);
@@ -1219,10 +1217,10 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .config-grid { grid-template-columns: 1fr; }
   .fin-grid { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr !important; }
-  .ai-shell { height: calc(100vh - 100px); gap: 12px; }
+  .ai-shell { height: calc(100vh - 112px); gap: 12px; }
   .ai-hero { align-items: flex-start; flex-direction: column; padding: 20px; }
   .ai-status { white-space: normal; }
-  .ai-chat { max-height: unset; border-radius: var(--radius-xl); }
+  .ai-chat { border-radius: var(--radius-xl); }
   .ai-messages { padding: 16px; }
   .ai-bubble { max-width: 92%; }
   .ai-compose { grid-template-columns: 1fr; }
@@ -1280,7 +1278,7 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .form-actions { grid-template-columns: 1fr; }
   .hero-title { font-size: clamp(36px, 10vw, 48px); }
   .ai-hero h1 { font-size: 34px; }
-  .ai-chat { max-height: unset; }
+  .ai-chat { }
   .ai-bubble { max-width: 96%; font-size: 13px; }
   .pub-hero { padding: 18px 14px 16px; border-radius: 16px; }
   .pub-hero h1 { font-size: clamp(22px, 8vw, 30px); }
