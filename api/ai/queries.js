@@ -35,6 +35,12 @@ function detectQueryIntent(text) {
   if (matchAny(t, ['agendamento de hoje', 'agenda de hoje', 'agenda do dia', 'hoje tem', 'compromissos de hoje']))
     return { name: 'today_appointments', params: {} };
 
+  if (matchAny(t, ['clientes por periodo', 'clientes do mes', 'novos clientes', 'clientes em ', 'clientes de ']))
+    return { name: 'clients_by_period', params: { text: typeof text === 'string' ? text : '' } };
+
+  if (matchAny(t, ['faturamento por periodo', 'faturamento do mes', 'faturamento em ', 'receita do mes', 'receita por periodo', 'receita em ', 'quanto ganhei em ', 'quanto faturei em ']))
+    return { name: 'revenue_by_period', params: { text: typeof text === 'string' ? text : '' } };
+
   if (matchAny(t, ['faturamento', 'receita', 'ganho', 'lucro', 'quanto ganhei', 'quanto faturei', 'relatorio financeiro']))
     return { name: 'revenue', params: {} };
 
