@@ -50,10 +50,14 @@ function extrairNome(raw, bases) {
   return '';
 }
 
-// ETAPA 1: Assinatura atualizada com o parâmetro contextData contendo fallbacks seguros
-export function interpretIntent(message, payload = {}, contextData = { profissionais: [], servicos: [] }) {
+// ETAPA 1: Lógica robusta que cruza intenções gramaticais com as tabelas reais do Supabase
+export function interpretIntent(message, payload = {}, contextData = { listaProfissionais: [], listaServicos: [] }) {
   const raw  = String(message || payload.intent || '').trim();
   const text = normalizeText(raw);
+
+  // Fallbacks seguros de listas dinâmicas injetadas pela API
+  const profissionaisValidos = contextData.listaProfissionais || [];
+  const servicosValidos = contextData.listaServicos || [];
 
   // action explícita no payload → passa direto
   if (payload.action) {
@@ -64,13 +68,41 @@ export function interpretIntent(message, payload = {}, contextData = { profissio
     };
   }
 
+  // Lógica Auxiliar de Mapeamento Contextual Inteligente
+  let servicoMapeado = payload.servico_id ? servicosValidos.find(s => s.id === payload.servico_id) : null;
+  let profissionalMapeado = payload.profissional_id ? profissionaisValidos.find(p => p.id === payload.profissional_id) : null;
+
+  // Busca textual ativa por serviços se não estiver explícito por ID
+  if (!servicoMapeado && servicosValidos.length > 0) {
+    for (const svc of servicosValidos) {
+      const nomeNormalizado = normalizeText(svc.nome);
+      if (nomeNormalizado && text.includes(nomeNormalizado)) {
+        servicoMapeado = svc;
+        break;
+      }
+    }
+  }
+
+  // Busca textual ativa por profissionais se não estiver explícito por ID
+  if (!profissionalMapeado && profissionaisValidos.length > 0) {
+    for (const prof of profissionaisValidos) {
+      const nomeNormalizado = normalizeText(prof.nome);
+      if (nomeNormalizado && text.includes(nomeNormalizado)) {
+        profissionalMapeado = prof;
+        break;
+      }
+    }
+  }
+
   // ── RETOMADA DE FLUXO ─────────────────────────────────────────────────────
   if (payload.intent === 'create_appointment') {
     const cliente_nome      = payload.cliente_nome;
     const data              = payload.data;
     const hora              = payload.hora;
-    const servico_nome      = payload.servico_nome;
-    const profissional_nome = payload.profissional_nome;
+    const servico_nome      = servicoMapeado ? servicoMapeado.nome : payload.servico_nome;
+    const servico_id        = servicoMapeado ? servicoMapeado.id : payload.servico_id;
+    const profissional_nome = profissionalMapeado ? profesionalMapeado.nome : payload.profissional_nome;
+    const profissional_id   = profissionalMapeado ? profissionalMapeado.id : payload.profissional_id;
 
     if (!hasValue(cliente_nome)) {
       return clarify('Qual é o nome do cliente para este agendamento?');
@@ -81,10 +113,22 @@ export function interpretIntent(message, payload = {}, contextData = { profissio
     if (!hasValue(hora)) {
       return clarify(`Qual horário deseja agendar ${cliente_nome} no dia ${data}?`);
     }
+    if (!hasValue(servico_id) && servicosValidos.length > 0) {
+      return clarify(`Qual serviço você gostaria de associar ao agendamento de ${cliente_nome}?`, `Serviços disponíveis: ${servicosValidos.map(s => s.nome).join(', ')}`);
+    }
     return {
       domain: 'action',
       name:   'create_appointment',
-      params: { cliente_nome, data, hora, servico_nome, profissional_nome, telefone: payload.telefone },
+      params: { 
+        cliente_nome, 
+        data, 
+        hora, 
+        servico_nome, 
+        servico_id, 
+        profissional_nome, 
+        profissional_id, 
+        telefone: payload.telefone 
+      },
     };
   }
 
@@ -147,8 +191,10 @@ export function interpretIntent(message, payload = {}, contextData = { profissio
     const cliente_nome      = payload.cliente_nome      || extrairClienteAgendamento(raw);
     const data              = payload.data              || parseDate(raw);
     const hora              = payload.hora              || parseTime(raw);
-    const servico_nome      = payload.servico_nome;
-    const profissional_nome = payload.profissional_nome;
+    const servico_nome      = servicoMapeado ? servicoMapeado.nome : (payload.servico_nome || undefined);
+    const servico_id        = servicoMapeado ? servicoMapeado.id : (payload.servico_id || undefined);
+    const profissional_nome = profissionalMapeado ? profissionalMapeado.nome : (payload.profissional_nome || undefined);
+    const profissional_id   = profissionalMapeado ? profissionalMapeado.id : (payload.profissional_id || undefined);
 
     if (!hasValue(cliente_nome)) {
       return clarify('Qual é o nome do cliente para este agendamento?');
@@ -159,10 +205,23 @@ export function interpretIntent(message, payload = {}, contextData = { profissio
     if (!hasValue(hora)) {
       return clarify(`Qual horário deseja agendar ${cliente_nome} no dia ${data}?`);
     }
+    if (!hasValue(servico_id) && servicosValidos.length > 0) {
+      return clarify(`Qual serviço você gostaria de associar ao agendamento de ${cliente_nome}?`, `Serviços disponíveis: ${servicosValidos.map(s => s.nome).join(', ')}`);
+    }
+    
     return {
       domain: 'action',
       name:   'create_appointment',
-      params: { cliente_nome, data, hora, servico_nome, profissional_nome, telefone: payload.telefone },
+      params: { 
+        cliente_nome, 
+        data, 
+        hora, 
+        servico_nome, 
+        servico_id, 
+        profissional_nome, 
+        profissional_id, 
+        telefone: payload.telefone 
+      },
     };
   }
 
