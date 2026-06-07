@@ -136,7 +136,7 @@ async function createAppointment({ supabase, empresa, empresaId }, params) {
     cliente_nome: cliente.nome,
     cliente_telefone: params.telefone || cliente.telefone || '',
     servico_nome: servico?.nome || '',
-    profissional_nome: profesional?.nome || '',
+    profissional_nome: profissional?.nome || '',
     data: dataAg,
     hora,
     status: params.status || 'Pendente',
@@ -169,12 +169,12 @@ function validateAppointmentTime(empresa, dataAg, hora) {
   }
 }
 
-async function ensureAppointmentSlotIsFree(supabase, empresaId, profesionalId, dataAg, hora) {
+async function ensureAppointmentSlotIsFree(supabase, empresaId, profissionalId, dataAg, hora) {
   const { data, error } = await supabase
     .from('agenda_agendamentos')
     .select('id,cliente_nome,status')
     .eq('empresa_id', empresaId)
-    .eq('profissional_id', profesionalId)
+    .eq('profissional_id', profissionalId)
     .eq('data', dataAg)
     .eq('hora', hora)
     .limit(10);
