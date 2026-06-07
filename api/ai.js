@@ -19,24 +19,44 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, error: 'Mensagem não informada.' });
     }
 
-    // 1. Monta contexto autenticado (empresa, supabase, etc)
-    const context = await createAuthenticatedContext(req);
+    // 1. Contexto autenticado
+    let context;
+    try {
+      context = await createAuthenticatedContext(req);
+    } catch (authErr) {
+      console.error('[VyXora IA] Auth error:', authErr.message || authErr);
+      return res.status(authErr.statusCode || 401).json({
+        success: false,
+        error: authErr.publicMessage || 'Erro de autenticação.'
+      });
+    }
 
     // 2. Gemini decide o que fazer
-    const geminiResult = await callGemini(context, message, history || []);
+    let geminiResult;
+    try {
+      geminiResult = await callGemini(context, message, history || []);
+    } catch (geminiErr) {
+      console.error('[VyXora IA] Gemini error:', geminiErr.message || geminiErr);
+      return res.status(200).json({
+        success: true,
+        type: 'chat',
+        answer: 'Desculpe, tive um problema ao pensar na resposta. Tente novamente.'
+      });
+    }
 
-    // 3. Se for conversa, suporte ou conteúdo — responde direto
+    // 3. Conversa, suporte, conteúdo ou slot filling — responde direto
     if (geminiResult.type === 'chat' || geminiResult.type === 'slot_filling') {
       return res.status(200).json({
         success: true,
         type: geminiResult.type,
-        answer: geminiResult.answer
+        answer: geminiResult.answer,
+        slotState: null
       });
     }
 
-    // 4. Se for ação no painel — executa
+    // 4. Ação no painel — executa
     if (geminiResult.type === 'action') {
-      const { action, params, answer: confirmMsg } = geminiResult;
+      const { action, params } = geminiResult;
 
       try {
         // Consultas de estatísticas
@@ -46,35 +66,40 @@ export default async function handler(req, res) {
             success: true,
             type: 'statistics',
             answer: stats.answer,
-            data: stats.data
+            data: stats.data,
+            slotState: null
           });
         }
 
-        // Consultas livres de dados
+        // Consultas livres
         if (action === 'query_data') {
-          const queryResult = await runQuery(context, params.query || '');
+          const queryResult = await runQuery(context, params.query || message);
           return res.status(200).json({
             success: true,
             type: 'query',
             answer: queryResult.answer,
-            data: queryResult.data
+            data: queryResult.data,
+            slotState: null
           });
         }
 
-        // Ações de CRUD (criar, editar, cancelar, etc)
+        // CRUD
         const result = await executeAction(context, { name: action, params });
         return res.status(200).json({
           success: true,
           type: 'action',
           answer: result.answer,
-          data: result.data
+          data: result.data,
+          slotState: null
         });
 
-      } catch (actionError) {
+      } catch (actionErr) {
+        console.error('[VyXora IA] Action error:', action, actionErr.message || actionErr);
         return res.status(200).json({
           success: true,
           type: 'error',
-          answer: actionError.publicMessage || 'Não consegui executar essa ação. Verifique os dados e tente novamente.'
+          answer: actionErr.publicMessage || 'Não consegui executar essa ação. Verifique os dados e tente novamente.',
+          slotState: null
         });
       }
     }
@@ -83,15 +108,16 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       type: 'chat',
-      answer: geminiResult.answer || 'Não entendi. Pode reformular?'
+      answer: geminiResult.answer || 'Não entendi. Pode repetir?',
+      slotState: null
     });
 
   } catch (error) {
-    console.error('[VyXora IA] Erro geral:', error.message);
-    return res.status(error.statusCode || 500).json({
+    console.error('[VyXora IA] Erro geral:', error?.message || error);
+    return res.status(500).json({
       success: false,
-      error: error.publicMessage || 'Erro ao processar solicitação.',
-      details: error.message
+      error: 'Erro interno ao processar solicitação.',
+      details: error?.message
     });
   }
 }
