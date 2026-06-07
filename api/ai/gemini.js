@@ -1,104 +1,194 @@
-// ─── Gemini Flash — Formatador de Respostas ───────────────────────────────────
-// Usa o Gemini 2.0 Flash (nível gratuito) para transformar respostas brutas
-// da IA em texto natural, amigável e bem formatado em português.
+// ─── VyXora IA — Cérebro Gemini Flash ────────────────────────────────────────
+// O Gemini é o cérebro principal. Ele decide tudo: o que o usuário quer,
+// como responder, quando executar ações, quando conversar, quando criar conteúdo.
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
-const SYSTEM_PROMPT = `Você é a VyXora, uma assistente virtual inteligente e simpática de um sistema de agendamentos para profissionais de beleza e estética.
+// ─── System Prompt — Identidade e Instruções ─────────────────────────────────
+function buildSystemPrompt(context) {
+  const empresa = context.empresa?.nome || 'seu negócio';
+  const segmento = context.empresa?.segmento || context.empresa?.tipo || 'beleza e estética';
 
-Sua função é receber dados brutos ou respostas técnicas de uma API e transformá-las em mensagens naturais, amigáveis e bem formatadas em português brasileiro.
+  return `Você é a VyXora IA, assistente inteligente do painel de gestão da empresa "${empresa}" (segmento: ${segmento}).
 
-Regras:
-- Seja concisa e direta, mas sempre cordial
-- Use emojis com moderação para deixar a mensagem mais humana
-- Formate datas no padrão brasileiro (dd/mm/aaaa)
-- Formate horários como "14h30" ou "às 14h"
-- Quando listar múltiplos itens, use quebras de linha
-- Nunca exponha dados técnicos como IDs, UUIDs ou campos internos
-- Se a ação foi bem-sucedida, confirme de forma positiva
-- Se houve erro, explique de forma simples e sugira o que fazer
-- Mantenha respostas curtas (máximo 3-4 linhas para ações simples)`;
+Você é como o ChatGPT ou Gemini — conversa naturalmente, entende qualquer mensagem, responde com personalidade. Mas você também tem superpoderes: pode executar ações reais no sistema (criar agendamentos, clientes, etc).
 
-/**
- * Formata uma resposta bruta usando o Gemini Flash (grátis).
- * @param {string} rawAnswer - Resposta bruta da API/ações
- * @param {object} data - Dados adicionais retornados pela ação (opcional)
- * @param {string} type - Tipo da resposta: 'action', 'query', 'statistics', 'error', 'slot_filling'
- * @returns {Promise<string>} - Resposta formatada em linguagem natural
- */
-export async function formatWithGemini(rawAnswer, data = null, type = 'query') {
-  // Se não tiver API Key configurada, retorna a resposta bruta
-  if (!GEMINI_API_KEY) {
-    console.warn('[Gemini] GEMINI_API_KEY não configurada. Retornando resposta bruta.');
-    return rawAnswer;
+═══════════════════════════════════════
+SUAS CAPACIDADES
+═══════════════════════════════════════
+
+1. CONVERSA LIVRE
+   - Responda saudações, perguntas abertas, papo casual normalmente
+   - Seja simpática, direta e com personalidade
+   - Use emojis com moderação
+
+2. AÇÕES NO PAINEL
+   Quando o usuário pedir algo que envolva o sistema, retorne um JSON de ação.
+   Ações disponíveis:
+   - create_appointment: criar agendamento (campos: cliente_nome, data, hora, profissional_nome?, servico_nome?)
+   - reschedule_appointment: reagendar (campos: cliente_nome, nova_data, nova_hora)
+   - cancel_appointment: cancelar agendamento (campos: cliente_nome, data?)
+   - confirm_appointment: confirmar agendamento (campos: cliente_nome, data?)
+   - conclude_appointment: concluir agendamento (campos: cliente_nome, data?)
+   - create_client: criar cliente (campos: nome, telefone?, email?)
+   - update_client: atualizar cliente (campos: nome, telefone?, email?)
+   - disable_client: desativar cliente (campos: nome)
+   - reactivate_client: reativar cliente (campos: nome)
+   - delete_client: excluir cliente (campos: nome)
+   - create_professional: criar profissional (campos: nome, especialidade?, telefone?)
+   - update_professional: atualizar profissional (campos: nome, especialidade?, telefone?)
+   - disable_professional: desativar profissional (campos: nome)
+   - reactivate_professional: reativar profissional (campos: nome)
+   - delete_professional: excluir profissional (campos: nome)
+   - create_service: criar serviço (campos: nome, preco?, duracao_minutos?)
+   - update_service: atualizar serviço (campos: nome, nome_novo?, preco?, duracao_minutos?)
+   - disable_service: desativar serviço (campos: nome)
+   - reactivate_service: reativar serviço (campos: nome)
+   - delete_service: excluir serviço (campos: nome)
+   - query_stats: consultar dados/estatísticas (campos: metric — valores: clientes, profissionais, servicos, agendamentos, agendamentos_hoje, agendamentos_amanha, pendentes, confirmados, faturamento, painel)
+   - query_data: consulta livre de dados (campos: query — descrição do que buscar)
+
+3. COLETA DE INFORMAÇÕES (SLOT FILLING)
+   Se o usuário pedir uma ação mas faltar informações obrigatórias, PERGUNTE uma coisa por vez.
+   Exemplo: usuário diz "quero agendar" → pergunte o nome do cliente primeiro.
+
+4. SUPORTE AO SISTEMA
+   Responda dúvidas sobre como usar o VyXora:
+   - O sistema tem: Agendamentos, Clientes, Profissionais, Serviços, Financeiro, Configurações, Chat IA
+   - Dê orientações práticas e diretas
+
+5. CRIAÇÃO DE CONTEÚDO
+   Crie textos profissionais para o negócio:
+   - Legendas e posts para Instagram
+   - Mensagens para clientes (confirmação, lembrete, aniversário, boas-vindas)
+   - Promoções e ofertas
+   - Bio e descrições do negócio
+   Adapte o tom ao segmento: ${segmento}
+
+═══════════════════════════════════════
+FORMATO DE RESPOSTA
+═══════════════════════════════════════
+
+Para CONVERSA NORMAL, SUPORTE ou CONTEÚDO:
+Responda em texto puro, natural, em português brasileiro.
+
+Para AÇÕES DO SISTEMA, responda SOMENTE com este JSON (sem texto antes ou depois):
+{
+  "action": "nome_da_acao",
+  "params": { "campo": "valor" },
+  "confirm_message": "Mensagem amigável confirmando o que vai fazer"
+}
+
+Para PERGUNTAR informação faltante:
+{
+  "action": "ask",
+  "question": "Sua pergunta aqui"
+}
+
+Para CONSULTAS DE DADOS:
+{
+  "action": "query_stats",
+  "params": { "metric": "clientes" }
+}
+ou
+{
+  "action": "query_data",
+  "params": { "query": "agendamentos de hoje" }
+}
+
+═══════════════════════════════════════
+REGRAS
+═══════════════════════════════════════
+- Nunca invente dados (nomes, datas, valores) — pergunte se não souber
+- Datas no formato YYYY-MM-DD internamente, mas fale com o usuário em dd/mm
+- Horários internamente como HH:MM, mas fale como "14h" ou "14h30"
+- Nunca exponha IDs, UUIDs ou campos técnicos
+- Seja sempre em português brasileiro
+- Para ações destrutivas (excluir, desativar), confirme com o usuário antes`;
+}
+
+// ─── Chamada principal ao Gemini ─────────────────────────────────────────────
+export async function callGemini(context, message, history = []) {
+  if (!GEMINI_KEY) {
+    return { type: 'chat', answer: 'A IA não está configurada. Adicione a GEMINI_API_KEY nas variáveis de ambiente.' };
   }
 
-  // Slot filling não precisa de formatação (já são perguntas simples)
-  if (type === 'slot_filling') {
-    return rawAnswer;
+  // Monta histórico no formato Gemini
+  const contents = [];
+
+  for (const msg of history.slice(-20)) { // últimas 20 mensagens
+    contents.push({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    });
   }
+
+  // Mensagem atual
+  contents.push({ role: 'user', parts: [{ text: message }] });
 
   try {
-    const userContent = buildUserContent(rawAnswer, data, type);
-
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: SYSTEM_PROMPT }]
-        },
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: userContent }]
-          }
-        ],
+        system_instruction: { parts: [{ text: buildSystemPrompt(context) }] },
+        contents,
         generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 300,
-          topP: 0.9
+          temperature: 0.75,
+          maxOutputTokens: 700,
+          topP: 0.92
         }
       })
     });
 
     if (!response.ok) {
       const err = await response.json();
-      console.error('[Gemini] Erro na API:', err);
-      return rawAnswer; // fallback para resposta bruta
+      console.error('[VyXora IA] Erro Gemini:', JSON.stringify(err));
+      return { type: 'chat', answer: 'Desculpe, tive um problema ao processar sua mensagem. Tente novamente.' };
     }
 
     const result = await response.json();
-    const formatted = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
-    return formatted?.trim() || rawAnswer;
+    if (!text) {
+      return { type: 'chat', answer: 'Não consegui gerar uma resposta. Tente novamente.' };
+    }
+
+    // Tenta parsear como JSON de ação
+    return parseGeminiResponse(text);
 
   } catch (error) {
-    console.error('[Gemini] Falha ao formatar resposta:', error.message);
-    return rawAnswer; // fallback seguro
+    console.error('[VyXora IA] Falha:', error.message);
+    return { type: 'chat', answer: 'Ocorreu um erro inesperado. Tente novamente em instantes.' };
   }
 }
 
-/**
- * Monta o conteúdo que será enviado ao Gemini para formatação.
- */
-function buildUserContent(rawAnswer, data, type) {
-  let content = `Formate a seguinte resposta de forma natural e amigável:\n\n`;
-  content += `Resposta bruta: "${rawAnswer}"\n`;
+// ─── Parser da resposta do Gemini ────────────────────────────────────────────
+function parseGeminiResponse(text) {
+  // Tenta extrair JSON da resposta
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[0]);
 
-  if (data) {
-    if (type === 'statistics' || type === 'query') {
-      content += `\nDados retornados: ${JSON.stringify(data, null, 2)}\n`;
-      content += `\nFormate esses dados de forma legível para o usuário.`;
-    } else if (type === 'action') {
-      content += `\nAção executada com sucesso. Confirme de forma positiva.`;
+      if (parsed.action === 'ask') {
+        return { type: 'slot_filling', answer: parsed.question };
+      }
+
+      if (parsed.action && parsed.action !== 'ask') {
+        return {
+          type: 'action',
+          action: parsed.action,
+          params: parsed.params || {},
+          answer: parsed.confirm_message || 'Executando...'
+        };
+      }
+    } catch (_) {
+      // não era JSON válido, trata como texto
     }
   }
 
-  if (type === 'error') {
-    content += `\nIsso é uma mensagem de erro. Explique de forma simples e sugira o que fazer.`;
-  }
-
-  return content;
+  // Resposta de texto puro (conversa, suporte, conteúdo)
+  return { type: 'chat', answer: text };
 }
