@@ -608,6 +608,21 @@ function setView(view) {
   const info = navMap[view] || ['', ''];
   setText('pageTitle', info[0]);
   setText('pageSub', info[1]);
+
+  // Mostrar badge "Conectado" no topbar apenas na view AI
+  const existingBadge = document.getElementById('topbar-ai-status');
+  if (existingBadge) existingBadge.remove();
+  if (view === 'ai') {
+    const actions = document.querySelector('.topbar-actions-clean');
+    if (actions) {
+      const badge = document.createElement('div');
+      badge.id = 'topbar-ai-status';
+      badge.className = 'ai-status';
+      badge.innerHTML = '<span></span> Conectado à sua empresa';
+      actions.prepend(badge);
+    }
+  }
+
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
   });
