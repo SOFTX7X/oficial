@@ -37,7 +37,7 @@ export async function createAuthenticatedContext(req) {
   // 2. Busca as configuracoes da empresa vinculada
   const { data: empresas, error: empresaError } = await supabase
     .from('agenda_empresas')
-    .select('id, horario_abertura, horario_fechamento, intervalo_ativo, intervalo_inicio, intervalo_fim, dom, seg, ter, qua, qui, sex, sab')
+    .select('id, nome, segmento, horario_abertura, horario_fechamento, intervalo_ativo, intervalo_inicio, intervalo_fim, dom, seg, ter, qua, qui, sex, sab')
     .eq('id', empresaIdFinal)
     .limit(1);
 
