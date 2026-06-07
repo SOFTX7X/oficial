@@ -25,9 +25,9 @@ export async function createAuthenticatedContext(req) {
     throw error;
   }
 
-  // Atualizado para a tabela real de perfis do banco
+  // ── CORRIGIDO: Nome real da tabela no banco com o prefixo agenda_ ──
   const { data: perfil, error: perfilError } = await supabase
-    .from('perfis')
+    .from('agenda_perfis')
     .select('*')
     .eq('auth_user_id', user.id)
     .single();
@@ -39,9 +39,9 @@ export async function createAuthenticatedContext(req) {
     throw error;
   }
 
-  // Atualizado para a tabela real de empresas do banco
+  // ── CORRIGIDO: Nome real da tabela no banco com o prefixo agenda_ ──
   const { data: empresa, error: empresaError } = await supabase
-    .from('empresas')
+    .from('agenda_empresas')
     .select('*')
     .eq('id', perfil.empresa_id)
     .single();
