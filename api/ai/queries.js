@@ -46,7 +46,8 @@ async function freeSlots({ supabase, empresa, empresaId }, params) {
   if (empresa[dayFields[weekday]] === false) return { answer: 'A empresa esta fechada nesta data.', data: { data, horarios: [] } };
 
   const [{ data: profissionais, error: profError }, { data: agendamentos, error: agError }] = await Promise.all([
-    supabase.from('profissionais').select('id,nome,ativo').eq('empresa_id', empresaId).eq('ativo', true),
+    // CORRIGIDO: de 'profissionais' para 'agenda_profissionais'
+    supabase.from('agenda_profissionais').select('id,nome,ativo').eq('empresa_id', empresaId).eq('ativo', true),
     supabase.from('agenda_agendamentos').select('profissional_id,hora,status').eq('empresa_id', empresaId).eq('data', data)
   ]);
   if (profError) throw profError;
@@ -66,7 +67,7 @@ async function freeSlots({ supabase, empresa, empresaId }, params) {
     const hora = timeFromMinutes(minute);
     if (profIds.length === 0 || profIds.some(id => !ocupados.has(`${id}:${hora}`))) horarios.push(hora);
   }
-  return { answer: horarios.length ? `Encontrei ${horarios.length} horario(s) livre(s) em ${data}.` : `Nao encontrei horarios livres em ${data}.`, data: { data, horarios } };
+  return { answer: horarios.length ? `Encontrei ${horarios.length} horario(s) livre(s) in ${data}.` : `Nao encontrei horarios livres em ${data}.`, data: { data, horarios } };
 }
 
 async function inactiveClients({ supabase, empresaId }) {
