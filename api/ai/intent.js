@@ -40,16 +40,8 @@ export async function interpretIntent(context, message, body = {}) {
 
     const intent = JSON.parse(response.choices[0].message.content || '{}');
 
-    // Mescla os parâmetros identificados pela IA com os dados forçados enviados pelo console (ex: data, hora)
+    // Mescla os parâmetros identificados pela IA com os dados forçados enviados pelo payload (ex: data, hora)
     intent.params = { ...intent.params, ...body };
-
-    // ── CORREÇÃO DO ERRO 'query.url.includes': Validação segura ──
-    const query = context.req?.query || context.query || {};
-    if (query && typeof query.url === 'string') {
-      if (query.url.includes('api/ai')) {
-        // Lógica interna de rota se necessário
-      }
-    }
 
     if (intent.domain === 'dashboard') {
       return await getDashboardStats(context, intent);
