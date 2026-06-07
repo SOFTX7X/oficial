@@ -13,47 +13,46 @@ export async function createAuthenticatedContext(req) {
 
   const token = authHeader.split(' ')[1];
   const { data: { user }, error } = await supabase.auth.getUser(token);
-
   if (error || !user) {
     throw { statusCode: 401, publicMessage: 'Sessao expirada.', message: error?.message || 'Usuario nao encontrado.' };
   }
 
-  // Limpa o email da sessão para evitar espaços em branco
-  const userEmail = String(user.email || '').trim();
-
-  // 1. Busca o profissional usando ilike para ignorar maiúsculas/minúsculas
-  const { data: profissionais, error: profError } = await supabase
-    .from('agenda_profissionais')
+  // 1. Busca o perfil pelo auth_user_id (fluxo correto original)
+  const { data: perfis, error: perfilError } = await supabase
+    .from('agenda_perfis')
     .select('empresa_id')
-    .ilike('email', userEmail)
-    .eq('status', 'ativo')
+    .eq('auth_user_id', user.id)
     .limit(1);
 
-  if (profError || !profissionais || profissionais.length === 0) {
-    throw { 
-      statusCode: 404, 
-      publicMessage: `Usuario (${userEmail}) nao vinculado a nenhuma empresa.`, 
-      message: profError?.message || 'Nenhum profissional ativo encontrado com este email.' 
+  if (perfilError || !perfis || perfis.length === 0) {
+    throw {
+      statusCode: 404,
+      publicMessage: 'Perfil nao encontrado para este usuario.',
+      message: perfilError?.message || 'Nenhum perfil encontrado com este auth_user_id.'
     };
   }
 
-  const empresaIdFinal = profissionais[0].empresa_id;
+  const empresaIdFinal = perfis[0].empresa_id;
 
-  // 2. Busca as configurações da empresa vinculada
-  const { data: empresas, error: perfilError } = await supabase
+  // 2. Busca as configuracoes da empresa vinculada
+  const { data: empresas, error: empresaError } = await supabase
     .from('agenda_empresas')
     .select('id, horario_abertura, horario_fechamento, intervalo_ativo, intervalo_inicio, intervalo_fim, dom, seg, ter, qua, qui, sex, sab')
     .eq('id', empresaIdFinal)
     .limit(1);
 
-  if (perfilError || !empresas || empresas.length === 0) {
-    throw { statusCode: 404, publicMessage: 'Empresa nao configurada.', message: perfilError?.message || 'Perfil da empresa nao encontrado.' };
+  if (empresaError || !empresas || empresas.length === 0) {
+    throw {
+      statusCode: 404,
+      publicMessage: 'Empresa nao configurada.',
+      message: empresaError?.message || 'Empresa nao encontrada.'
+    };
   }
 
-  return { 
-    supabase, 
-    user, 
-    empresaId: empresas[0].id, 
-    empresa: empresas[0] 
+  return {
+    supabase,
+    user,
+    empresaId: empresas[0].id,
+    empresa: empresas[0]
   };
 }
