@@ -112,7 +112,7 @@ async function createAppointment({ supabase, empresa, empresaId }, params) {
     servico = (await supabase.from('agenda_servicos').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
   }
 
-  let profissional = null;
+  let profesional = null;
   if (params.profissional_id) {
     const { data: prof } = await supabase.from('agenda_profissionais').select('*').eq('id', params.profissional_id).single();
     profissional = prof;
@@ -136,7 +136,7 @@ async function createAppointment({ supabase, empresa, empresaId }, params) {
     cliente_nome: cliente.nome,
     cliente_telefone: params.telefone || cliente.telefone || '',
     servico_nome: servico?.nome || '',
-    profissional_nome: profissional?.nome || '',
+    profissional_nome: profesional?.nome || '',
     data: dataAg,
     hora,
     status: params.status || 'Pendente',
