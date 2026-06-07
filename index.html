@@ -438,7 +438,6 @@
         <button class="nav-btn" data-config-section="mensagens" onclick="openConfigSection('mensagens')"><span class="ni">💬</span>Mensagens</button>
         <button class="nav-btn" data-config-section="fotos" onclick="openConfigSection('fotos')"><span class="ni">📷</span>Fotos</button>
         <div class="side-nav-sep"></div>
-        <button class="nav-btn mobile-menu-support" onclick="openSupportChat()"><span class="ni">💬</span>Suporte</button>
         <button class="btn btn-ghost btn-full btn-sm" onclick="logout()" style="margin-top:8px">Sair da conta</button>
       </div>
     </div>
@@ -829,45 +828,5 @@
 })();
 </script>
 <script src="app.js?v=20260601-3"></script>
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-Tawk_API.customStyle = {
-  visibility: {
-    desktop: { position: 'br', xOffset: 0, yOffset: 0 },
-    mobile: { position: 'br', xOffset: 8, yOffset: 100 }
-  }
-};
-
-function tawkAtualizarVisibilidade() {
-  if (!window.Tawk_API || typeof Tawk_API.showWidget !== 'function') return;
-  var isMobile = window.matchMedia('(max-width: 768px)').matches;
-  if (!isMobile) { Tawk_API.showWidget(); return; }
-  var dashVisible = document.getElementById('dashboardView') &&
-                    document.getElementById('dashboardView').style.display !== 'none';
-  if (dashVisible) {
-    Tawk_API.hideWidget();
-  } else {
-    Tawk_API.showWidget();
-  }
-}
-window.tawkAtualizarVisibilidade = tawkAtualizarVisibilidade;
-
-Tawk_API.onLoad = function() {
-  tawkAtualizarVisibilidade();
-};
-Tawk_API.onChatMinimized = function() {
-  tawkAtualizarVisibilidade();
-};
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6a17a78c4298741c3c115f69/1jpm6cvq1';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
 </body>
 </html>

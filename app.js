@@ -477,7 +477,7 @@ function showDashboard() {
   if (dv) dv.style.display = 'block';
   if (pv) pv.style.display = 'none';
 
-  if (typeof tawkAtualizarVisibilidade === 'function') tawkAtualizarVisibilidade();   closeAuth();
+  closeAuth();
 
   if (state.empresa) {
     renderAvatarPainel();
@@ -515,15 +515,6 @@ function menuNotifications() {
   closeMobileMenu(); clearNotifDot();
   const stack = $('notifStack');
   if (stack) stack.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function openSupportChat() {
-  closeMobileMenu();
-  if (!window.Tawk_API || typeof window.Tawk_API.showWidget !== 'function') {
-    return toast('O suporte ainda está carregando. Tente novamente em instantes.', 'info');
-  }
-  window.Tawk_API.showWidget();
-  window.Tawk_API.maximize();
 }
 
 // ── VIEW NAVIGATION ──
@@ -2345,7 +2336,7 @@ async function loadPublic(slug) {
   const pv = $('publicView');
   if (lv) lv.style.display = 'none';
   if (dv) dv.style.display = 'none';
-  if (pv) pv.style.display = 'block';   if (typeof tawkAtualizarVisibilidade === 'function') tawkAtualizarVisibilidade();
+  if (pv) pv.style.display = 'block';
 
   const { data: empresa, error } = await db.from('agenda_empresas')
     .select('*').eq('slug', slug).single();
@@ -2597,7 +2588,7 @@ function voltarDaPublica() {
     const lv = $('landingView');
     if (lv) lv.style.display = 'block';
   }
-  if (typeof tawkAtualizarVisibilidade === 'function') tawkAtualizarVisibilidade();   window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── PROTEÇÃO DA PÁGINA PÚBLICA ──
@@ -2640,5 +2631,5 @@ Object.assign(window, {
   closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
   toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu,
-  menuOpenPublic, menuCopyPublicLink, menuNotifications, openSupportChat
+  menuOpenPublic, menuCopyPublicLink, menuNotifications
 });
