@@ -7,7 +7,10 @@ function badRequest(message) {
   throw error;
 }
 
-// ─── Detecta qual consulta fazer baseado no texto livre ──────────────────────
+function matchAny(text, terms) {
+  return terms.some(term => text.includes(normalizeText(term)));
+}
+
 function detectQueryIntent(text) {
   const t = normalizeText(typeof text === 'string' ? text : text?.name || '');
 
@@ -38,12 +41,7 @@ function detectQueryIntent(text) {
   return null;
 }
 
-function matchAny(text, terms) {
-  return terms.some(term => text.includes(normalizeText(term)));
-}
-
-// ─── Entry point principal ───────────────────────────────────────────────────
-export async function runQuery(context, intent) {
+export async function executeQuery(context, intent) {
   // Aceita string (texto livre) ou objeto { name, params }
   const resolved = typeof intent === 'string' ? detectQueryIntent(intent) : intent;
 
@@ -52,20 +50,107 @@ export async function runQuery(context, intent) {
   }
 
   const handlers = {
-    best_client: getBestClient,
-    top_professional: getTopProfessional,
-    top_service: getTopService,
-    free_slots: getFreeSlots,
-    inactive_clients: getInactiveClients,
-    pending_appointments: getPendingAppointments,
-    today_appointments: getTodayAppointments,
-    revenue: getRevenue
+    best_client:           getBestClient,
+    top_professional:      getTopProfessional,
+    top_service:           getTopService,
+    free_slots:            getFreeSlots,
+    inactive_clients:      getInactiveClients,
+    pending_appointments:  getPendingAppointments,
+    today_appointments:    getTodayAppointments,
+    tomorrow_appointments: getTomorrowAppointments,
+    revenue:               getRevenue,
+    // ── intents de métricas vindas do intent.js ──────────────────────────────
+    metric:                handleMetric,
   };
 
   const handler = handlers[resolved.name];
   if (!handler) return { answer: 'Consulta nao reconhecida. Tente perguntar de outra forma.' };
 
   return handler(context, resolved.params || {});
+}
+
+// Mantém compatibilidade com chamadas antigas via runQuery
+export { executeQuery as runQuery };
+
+// ─── Handler de métricas (quantos clientes, profissionais, etc.) ─────────────
+async function handleMetric({ supabase, empresaId }, params) {
+  const metric = params.metric || '';
+
+  if (metric === 'clientes') {
+    const { data, error } = await supabase
+      .from('agenda_clientes')
+      .select('id')
+      .eq('empresa_id', empresaId)
+      .eq('status', 'ativo');
+    if (error) throw error;
+    const total = data?.length || 0;
+    return { answer: `Voce tem ${total} cliente${total !== 1 ? 's' : ''} cadastrado${total !== 1 ? 's' : ''}.` };
+  }
+
+  if (metric === 'profissionais') {
+    const { data, error } = await supabase
+      .from('agenda_profissionais')
+      .select('id')
+      .eq('empresa_id', empresaId)
+      .eq('status', 'ativo');
+    if (error) throw error;
+    const total = data?.length || 0;
+    return { answer: `Voce tem ${total} profissional${total !== 1 ? 'is' : ''} ativo${total !== 1 ? 's' : ''}.` };
+  }
+
+  if (metric === 'servicos') {
+    const { data, error } = await supabase
+      .from('agenda_servicos')
+      .select('id')
+      .eq('empresa_id', empresaId)
+      .eq('status', 'ativo');
+    if (error) throw error;
+    const total = data?.length || 0;
+    return { answer: `Voce tem ${total} servico${total !== 1 ? 's' : ''} ativo${total !== 1 ? 's' : ''}.` };
+  }
+
+  if (metric === 'agendamentos_hoje') {
+    const hoje = todayISO(0);
+    const { data, error } = await supabase
+      .from('agenda_agendamentos')
+      .select('id')
+      .eq('empresa_id', empresaId)
+      .eq('data', hoje)
+      .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
+    if (error) throw error;
+    const total = data?.length || 0;
+    return { answer: `Voce tem ${total} agendamento${total !== 1 ? 's' : ''} para hoje.` };
+  }
+
+  if (metric === 'agendamentos_amanha') {
+    const amanha = todayISO(1);
+    const { data, error } = await supabase
+      .from('agenda_agendamentos')
+      .select('id')
+      .eq('empresa_id', empresaId)
+      .eq('data', amanha)
+      .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
+    if (error) throw error;
+    const total = data?.length || 0;
+    return { answer: `Voce tem ${total} agendamento${total !== 1 ? 's' : ''} para amanha.` };
+  }
+
+  if (metric === 'faturamento') {
+    return getRevenue({ supabase, empresaId }, {});
+  }
+
+  if (metric === 'agendamentos') {
+    const { data, error } = await supabase
+      .from('agenda_agendamentos')
+      .select('id')
+      .eq('empresa_id', empresaId)
+      .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
+    if (error) throw error;
+    const total = data?.length || 0;
+    return { answer: `Voce tem ${total} agendamento${total !== 1 ? 's' : ''} no total.` };
+  }
+
+  return { answer: 'Nao consegui identificar a metrica solicitada.' };
 }
 
 // ─── Melhor cliente ──────────────────────────────────────────────────────────
@@ -135,19 +220,28 @@ async function getTopService({ supabase, empresaId }) {
   };
 }
 
-// ─── Horários livres ─────────────────────────────────────────────────────────
+// ─── Horários livres — CORRIGIDO: status em vez de ativo ────────────────────
 async function getFreeSlots({ supabase, empresa, empresaId }, params) {
   const dataAlvo = params.data || todayISO(0);
 
-  let profQuery = supabase.from('agenda_profissionais').select('*').eq('empresa_id', empresaId).eq('ativo', true);
   let profissional;
 
   if (params.profissional_nome) {
     const normName = normalizeText(params.profissional_nome);
-    const { data: profs } = await profQuery;
+    const { data: profs } = await supabase
+      .from('agenda_profissionais')
+      .select('*')
+      .eq('empresa_id', empresaId)
+      .eq('status', 'ativo');
     profissional = (profs || []).find(p => normalizeText(p.nome).includes(normName));
   } else {
-    profissional = (await profQuery.limit(1)).data?.[0];
+    const { data: profs } = await supabase
+      .from('agenda_profissionais')
+      .select('*')
+      .eq('empresa_id', empresaId)
+      .eq('status', 'ativo')
+      .limit(1);
+    profissional = profs?.[0];
   }
 
   if (!profissional) return { answer: 'Nenhum profissional ativo encontrado para checar horarios.' };
@@ -256,6 +350,30 @@ async function getTodayAppointments({ supabase, empresaId }) {
 
   return {
     answer: `Agendamentos de hoje (${hoje}): ${lista}.`,
+    data: { total: data.length, agendamentos: data }
+  };
+}
+
+// ─── Agendamentos de amanhã ──────────────────────────────────────────────────
+async function getTomorrowAppointments({ supabase, empresaId }) {
+  const amanha = todayISO(1);
+  const { data, error } = await supabase
+    .from('agenda_agendamentos')
+    .select('id, cliente_nome, hora, servico_nome, profissional_nome, status')
+    .eq('empresa_id', empresaId)
+    .eq('data', amanha)
+    .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)')
+    .order('hora', { ascending: true });
+
+  if (error) throw error;
+  if (!data?.length) return { answer: `Nao ha agendamentos para amanha (${amanha}).` };
+
+  const lista = data.map(a =>
+    `${a.hora.slice(0, 5)} - ${a.cliente_nome} (${a.servico_nome || 'Geral'}) com ${a.profissional_nome || 'profissional'}`
+  ).join('; ');
+
+  return {
+    answer: `Agendamentos de amanha (${amanha}): ${lista}.`,
     data: { total: data.length, agendamentos: data }
   };
 }
