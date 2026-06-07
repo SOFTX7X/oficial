@@ -1,6 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Cache global da instância do cliente Supabase para reutilização entre funções serverless
+let supabaseInstance = null;
+
 export function getSupabaseAdmin() {
+  if (supabaseInstance) return supabaseInstance;
+
   const url = process.env.URL_SUPABASE || process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -11,7 +16,9 @@ export function getSupabaseAdmin() {
     throw error;
   }
 
-  return createClient(url, key, {
+  supabaseInstance = createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false }
   });
+
+  return supabaseInstance;
 }
