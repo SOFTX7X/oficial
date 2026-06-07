@@ -27,30 +27,17 @@ export default async function handler(req, res) {
     let resultData = null;
     let type = 'action';
 
-    // Varredura direta e segura para identificar o nome da tabela ativa no banco
-    let tableName = 'appointments';
-    const testTables = ['appointments', 'agendamentos', 'appointment', 'agendamento'];
-    
-    for (const t of testTables) {
-      try {
-        const { error: checkError } = await supabase.from(t).select('id').limit(1);
-        if (!checkError || (checkError.code !== 'PGRST116' && !checkError.message.includes('could not find'))) {
-          tableName = t;
-          break;
-        }
-      } catch (e) {
-        // Ignora falhas de tabela inexistente e continua o loop
-      }
-    }
+    // Nome exato obtido da imagem do seu Supabase
+    const tableName = 'agenda_agendamentos'; 
 
     if (text.includes('painel') || text.includes('resumo') || text.includes('estatistica')) {
       type = 'statistics';
-      const { data: appointments } = await supabase.from(tableName).select('*');
-      resultData = { totalAppointments: appointments?.length || 0, tableNameUsed: tableName };
+      const { data: agendamentos } = await supabase.from(tableName).select('*');
+      resultData = { totalAppointments: agendamentos?.length || 0, tableNameUsed: tableName };
 
     } else if (text.includes('melhor cliente') || text.includes('relatorio') || text.includes('faturamento')) {
       type = 'query';
-      resultData = { message: "Consulta executada", tableNameUsed: tableName };
+      resultData = { message: "Consulta executada com sucesso.", tableNameUsed: tableName };
 
     } else {
       type = 'action';
@@ -58,6 +45,7 @@ export default async function handler(req, res) {
       parsedDate.setDate(parsedDate.getDate() + 1);
       const dateString = parsedDate.toISOString().split('T')[0];
 
+      // Insert adaptado para a tabela real 'agenda_agendamentos'
       const { data: newAppointment, error: insertError } = await supabase
         .from(tableName)
         .insert([{
@@ -71,8 +59,10 @@ export default async function handler(req, res) {
         .select()
         .single();
 
+      // Se der erro de coluna específica (ex: se na tabela o campo for 'eu_ia' ou 'id_usuario'),
+      // o catch vai reportar o nome exato da coluna que precisamos ajustar.
       if (insertError) throw insertError;
-      resultData = { message: "Agendamento gravado", appointment: newAppointment, tableNameUsed: tableName };
+      resultData = { message: "Agendamento gravado com sucesso", appointment: newAppointment, tableNameUsed: tableName };
     }
 
     return res.status(200).json({ success: true, type, data: resultData });
@@ -80,7 +70,7 @@ export default async function handler(req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      error: 'Erro no banco de dados.',
+      error: 'Erro de execução no banco de dados.',
       details: error.message
     });
   }
