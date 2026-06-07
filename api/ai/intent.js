@@ -20,7 +20,7 @@ export async function interpretIntent(context, message, fullBody) {
     return { type: 'statistics', answer: stats.answer, data: stats.data };
   }
 
-  // 3. Métricas diretas
+  // 3. Métricas diretas — "quantos X tenho", "listar X", "agendamentos hoje/amanhã"
   const metricIntent = detectMetricIntent(text);
   if (metricIntent) {
     const stats = await getStatistics(context, { params: { metric: metricIntent } });
@@ -64,53 +64,53 @@ export async function interpretIntent(context, message, fullBody) {
     return startSlotFilling('update_client', message, text, context);
   }
 
-  // 10. Desativar cliente
-  if (matchAny(text, ['desativar cliente', 'inativar cliente', 'desabilitar cliente'])) {
-    return startSlotFilling('deactivate_client', message, text, context);
-  }
-
-  // 11. Excluir cliente
-  if (matchAny(text, ['excluir cliente', 'deletar cliente', 'apagar cliente', 'remover cliente'])) {
-    return startSlotFilling('delete_client', message, text, context);
-  }
-
-  // 12. Criar profissional
+  // 10. Criar profissional
   if (matchAny(text, ['cadastrar profissional', 'novo profissional', 'criar profissional'])) {
     return startSlotFilling('create_professional', message, text, context);
   }
 
-  // 13. Editar profissional
-  if (matchAny(text, ['editar profissional', 'atualizar profissional', 'alterar profissional'])) {
-    return startSlotFilling('update_professional', message, text, context);
-  }
-
-  // 14. Desativar profissional
-  if (matchAny(text, ['desativar profissional', 'inativar profissional', 'desabilitar profissional'])) {
-    return startSlotFilling('deactivate_professional', message, text, context);
-  }
-
-  // 15. Excluir profissional
-  if (matchAny(text, ['excluir profissional', 'deletar profissional', 'apagar profissional', 'remover profissional'])) {
-    return startSlotFilling('delete_professional', message, text, context);
-  }
-
-  // 16. Criar serviço
+  // 11. Criar serviço
   if (matchAny(text, ['cadastrar servico', 'novo servico', 'criar servico'])) {
     return startSlotFilling('create_service', message, text, context);
   }
 
-  // 17. Editar serviço
-  if (matchAny(text, ['editar servico', 'atualizar servico', 'alterar servico'])) {
+  // 12. Editar profissional
+  if (matchAny(text, ['editar profissional', 'atualizar profissional', 'alterar profissional', 'mudar profissional'])) {
+    return startSlotFilling('update_professional', message, text, context);
+  }
+
+  // 13. Editar serviço
+  if (matchAny(text, ['editar servico', 'atualizar servico', 'alterar servico', 'mudar servico'])) {
     return startSlotFilling('update_service', message, text, context);
   }
 
-  // 18. Desativar serviço
-  if (matchAny(text, ['desativar servico', 'inativar servico', 'desabilitar servico'])) {
-    return startSlotFilling('deactivate_service', message, text, context);
+  // 14. Desativar cliente
+  if (matchAny(text, ['desativar cliente', 'inativar cliente', 'suspender cliente', 'bloquear cliente'])) {
+    return startSlotFilling('disable_client', message, text, context);
+  }
+
+  // 15. Desativar profissional
+  if (matchAny(text, ['desativar profissional', 'inativar profissional', 'suspender profissional', 'bloquear profissional'])) {
+    return startSlotFilling('disable_professional', message, text, context);
+  }
+
+  // 16. Desativar serviço
+  if (matchAny(text, ['desativar servico', 'inativar servico', 'suspender servico', 'bloquear servico'])) {
+    return startSlotFilling('disable_service', message, text, context);
+  }
+
+  // 17. Excluir cliente
+  if (matchAny(text, ['excluir cliente', 'deletar cliente', 'remover cliente', 'apagar cliente'])) {
+    return startSlotFilling('delete_client', message, text, context);
+  }
+
+  // 18. Excluir profissional
+  if (matchAny(text, ['excluir profissional', 'deletar profissional', 'remover profissional', 'apagar profissional'])) {
+    return startSlotFilling('delete_professional', message, text, context);
   }
 
   // 19. Excluir serviço
-  if (matchAny(text, ['excluir servico', 'deletar servico', 'apagar servico', 'remover servico'])) {
+  if (matchAny(text, ['excluir servico', 'deletar servico', 'remover servico', 'apagar servico'])) {
     return startSlotFilling('delete_service', message, text, context);
   }
 
@@ -121,13 +121,15 @@ export async function interpretIntent(context, message, fullBody) {
   }
 
   // 21. Clientes por período
-  if (matchAny(text, ['clientes por periodo', 'clientes no periodo', 'novos clientes', 'clientes entre'])) {
-    return startSlotFilling('clients_by_period', message, text, context);
+  if (matchAny(text, ['clientes por periodo', 'clientes do mes', 'novos clientes', 'clientes em ', 'clientes de '])) {
+    const queryResult = await runQuery(context, { name: 'clients_by_period', params: { text: message } });
+    return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
 
   // 22. Faturamento por período
-  if (matchAny(text, ['faturamento por periodo', 'faturamento entre', 'receita por periodo', 'receita entre', 'quanto faturei entre', 'ganho por periodo'])) {
-    return startSlotFilling('revenue_by_period', message, text, context);
+  if (matchAny(text, ['faturamento do mes', 'faturamento por periodo', 'faturamento em ', 'receita do mes', 'receita por periodo', 'receita em ', 'quanto ganhei em ', 'quanto faturei em '])) {
+    const queryResult = await runQuery(context, { name: 'revenue_by_period', params: { text: message } });
+    return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
 
   // 23. Fallback — tenta consulta livre
@@ -136,6 +138,7 @@ export async function interpretIntent(context, message, fullBody) {
 }
 
 // ─── Detecta métricas diretas ─────────────────────────────────────────────────
+// Cobre: "quantos clientes", "listar profissionais", "agendamentos hoje", etc.
 function detectMetricIntent(text) {
   if (matchAny(text, [
     'quantos clientes', 'total de clientes', 'listar clientes',
@@ -238,20 +241,6 @@ async function executeSlot(context, intentName, slots) {
   const params = {};
   slots.forEach(s => { if (s.value !== undefined) params[s.key] = s.value; });
 
-  // Intents de query (não são actions)
-  if (intentName === 'clients_by_period' || intentName === 'revenue_by_period') {
-    try {
-      const result = await runQuery(context, { name: intentName, params });
-      return { type: 'query', answer: result.answer, data: result.data, slotState: null };
-    } catch (err) {
-      return {
-        type: 'error',
-        answer: err.publicMessage || err.message || 'Erro ao executar consulta.',
-        slotState: null
-      };
-    }
-  }
-
   try {
     const result = await executeAction(context, { name: intentName, params });
     return { type: 'action', answer: result.answer, data: result.data, slotState: null };
@@ -268,11 +257,11 @@ async function executeSlot(context, intentName, slots) {
 function buildSlots(intentName) {
   const definitions = {
     create_appointment: [
-      { key: 'cliente_nome',      question: 'Qual o nome do cliente?',                                            filled: false },
-      { key: 'data',              question: 'Qual a data do agendamento? (ex: hoje, amanha, 20/06)',              filled: false },
-      { key: 'hora',              question: 'Qual o horario? (ex: 14h, 14:30)',                                   filled: false },
-      { key: 'profissional_nome', question: 'Qual o profissional? (deixe em branco para o primeiro disponivel)', filled: false, optional: true },
-      { key: 'servico_nome',      question: 'Qual o servico? (deixe em branco para o padrao)',                   filled: false, optional: true }
+      { key: 'cliente_nome',      question: 'Qual o nome do cliente?',                                              filled: false },
+      { key: 'data',              question: 'Qual a data do agendamento? (ex: hoje, amanha, 20/06)',                filled: false },
+      { key: 'hora',              question: 'Qual o horario? (ex: 14h, 14:30)',                                     filled: false },
+      { key: 'profissional_nome', question: 'Qual o profissional? (deixe em branco para o primeiro disponivel)',   filled: false, optional: true },
+      { key: 'servico_nome',      question: 'Qual o servico? (deixe em branco para o padrao)',                     filled: false, optional: true }
     ],
     reschedule_appointment: [
       { key: 'cliente_nome', question: 'Qual o nome do cliente do agendamento?', filled: false },
@@ -284,61 +273,52 @@ function buildSlots(intentName) {
       { key: 'data',         question: 'Qual a data do agendamento?',                       filled: false, optional: true }
     ],
     create_client: [
-      { key: 'nome',     question: 'Qual o nome do cliente?',                 filled: false },
-      { key: 'telefone', question: 'Qual o telefone? (opcional, pode pular)', filled: false, optional: true },
-      { key: 'email',    question: 'Qual o email? (opcional, pode pular)',    filled: false, optional: true }
+      { key: 'nome',     question: 'Qual o nome do cliente?',                    filled: false },
+      { key: 'telefone', question: 'Qual o telefone? (opcional, pode pular)',    filled: false, optional: true },
+      { key: 'email',    question: 'Qual o email? (opcional, pode pular)',       filled: false, optional: true }
     ],
     update_client: [
-      { key: 'nome',     question: 'Qual o nome do cliente a editar?', filled: false },
-      { key: 'telefone', question: 'Novo telefone? (opcional)',        filled: false, optional: true },
-      { key: 'email',    question: 'Novo email? (opcional)',           filled: false, optional: true }
+      { key: 'nome',     question: 'Qual o nome do cliente a atualizar?', filled: false },
+      { key: 'telefone', question: 'Novo telefone? (opcional)',           filled: false, optional: true },
+      { key: 'email',    question: 'Novo email? (opcional)',              filled: false, optional: true }
     ],
-    deactivate_client: [
+    create_professional: [
+      { key: 'nome',         question: 'Qual o nome do profissional?',       filled: false },
+      { key: 'especialidade',question: 'Qual a especialidade? (opcional)',   filled: false, optional: true },
+      { key: 'telefone',     question: 'Qual o telefone? (opcional)',        filled: false, optional: true }
+    ],
+    create_service: [
+      { key: 'nome',            question: 'Qual o nome do servico?',                   filled: false },
+      { key: 'preco',           question: 'Qual o preco? (ex: 50.00)',                 filled: false, optional: true },
+      { key: 'duracao_minutos', question: 'Qual a duracao em minutos? (ex: 60)',       filled: false, optional: true }
+    ],
+    update_professional: [
+      { key: 'nome',          question: 'Qual o nome do profissional a editar?', filled: false },
+      { key: 'especialidade', question: 'Nova especialidade? (opcional, pode pular)',  filled: false, optional: true },
+      { key: 'telefone',      question: 'Novo telefone? (opcional, pode pular)',       filled: false, optional: true }
+    ],
+    update_service: [
+      { key: 'nome',            question: 'Qual o nome do servico a editar?',            filled: false },
+      { key: 'preco',           question: 'Novo preco? (opcional, pode pular)',           filled: false, optional: true },
+      { key: 'duracao_minutos', question: 'Nova duracao em minutos? (opcional, pode pular)', filled: false, optional: true }
+    ],
+    disable_client: [
       { key: 'nome', question: 'Qual o nome do cliente a desativar?', filled: false }
+    ],
+    disable_professional: [
+      { key: 'nome', question: 'Qual o nome do profissional a desativar?', filled: false }
+    ],
+    disable_service: [
+      { key: 'nome', question: 'Qual o nome do servico a desativar?', filled: false }
     ],
     delete_client: [
       { key: 'nome', question: 'Qual o nome do cliente a excluir?', filled: false }
     ],
-    create_professional: [
-      { key: 'nome',          question: 'Qual o nome do profissional?',     filled: false },
-      { key: 'especialidade', question: 'Qual a especialidade? (opcional)', filled: false, optional: true },
-      { key: 'telefone',      question: 'Qual o telefone? (opcional)',      filled: false, optional: true }
-    ],
-    update_professional: [
-      { key: 'nome',          question: 'Qual o nome do profissional a editar?', filled: false },
-      { key: 'especialidade', question: 'Nova especialidade? (opcional)',         filled: false, optional: true },
-      { key: 'telefone',      question: 'Novo telefone? (opcional)',              filled: false, optional: true }
-    ],
-    deactivate_professional: [
-      { key: 'nome', question: 'Qual o nome do profissional a desativar?', filled: false }
-    ],
     delete_professional: [
       { key: 'nome', question: 'Qual o nome do profissional a excluir?', filled: false }
     ],
-    create_service: [
-      { key: 'nome',            question: 'Qual o nome do servico?',             filled: false },
-      { key: 'preco',           question: 'Qual o preco? (ex: 50.00)',           filled: false, optional: true },
-      { key: 'duracao_minutos', question: 'Qual a duracao em minutos? (ex: 60)', filled: false, optional: true }
-    ],
-    update_service: [
-      { key: 'nome',            question: 'Qual o nome do servico a editar?',    filled: false },
-      { key: 'novo_nome',       question: 'Novo nome? (opcional)',               filled: false, optional: true },
-      { key: 'preco',           question: 'Novo preco? (opcional)',              filled: false, optional: true },
-      { key: 'duracao_minutos', question: 'Nova duracao em minutos? (opcional)', filled: false, optional: true }
-    ],
-    deactivate_service: [
-      { key: 'nome', question: 'Qual o nome do servico a desativar?', filled: false }
-    ],
     delete_service: [
       { key: 'nome', question: 'Qual o nome do servico a excluir?', filled: false }
-    ],
-    clients_by_period: [
-      { key: 'data_inicio', question: 'Qual a data de inicio do periodo? (ex: 01/06)', filled: false },
-      { key: 'data_fim',    question: 'Qual a data de fim do periodo? (ex: 30/06)',    filled: false }
-    ],
-    revenue_by_period: [
-      { key: 'data_inicio', question: 'Qual a data de inicio do periodo? (ex: 01/06)', filled: false },
-      { key: 'data_fim',    question: 'Qual a data de fim do periodo? (ex: 30/06)',    filled: false }
     ]
   };
 
@@ -349,7 +329,7 @@ function buildSlots(intentName) {
 function extractSlotValue(key, message) {
   const text = normalizeText(message);
 
-  if (key === 'data' || key === 'nova_data' || key === 'data_inicio' || key === 'data_fim') {
+  if (key === 'data' || key === 'nova_data') {
     if (matchAny(text, ['pular', 'tanto faz', 'qualquer', 'nao sei', 'sem data', 'passa'])) return '__skip__';
     return parseDate(message) || null;
   }
