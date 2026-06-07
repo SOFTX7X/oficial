@@ -28,6 +28,7 @@ export async function executeAction(context, intent) {
     create_appointment:    createAppointment,
     reschedule_appointment:rescheduleAppointment,
     cancel_appointment:    cancelAppointment,
+    confirm_appointment:   confirmAppointment,
     disable_client:        disableClient,
     disable_professional:  disableProfessional,
     disable_service:       disableService,
@@ -288,6 +289,16 @@ async function rescheduleAppointment(context, params) {
   const { data, error } = await context.supabase.from('agenda_agendamentos').update(updates).eq('empresa_id', context.empresaId).eq('id', agendamento.id).select('*').maybeSingle();
   if (error) throw error;
   return { answer: `Agendamento de ${data.cliente_nome} reagendado para ${data.data} as ${data.hora}.`, data };
+}
+
+async function confirmAppointment(context, params) {
+  const agendamento = await findAppointment(context, params);
+  if (!agendamento?.id) badRequest('Agendamento nao encontrado para confirmar.');
+  const { data, error } = await context.supabase.from('agenda_agendamentos').update({
+    status: 'Confirmado'
+  }).eq('empresa_id', context.empresaId).eq('id', agendamento.id).select('*').maybeSingle();
+  if (error) throw error;
+  return { answer: `Agendamento de ${data?.cliente_nome || agendamento.cliente_nome} confirmado com sucesso.`, data };
 }
 
 async function cancelAppointment(context, params) {
