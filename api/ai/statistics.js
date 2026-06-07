@@ -8,20 +8,21 @@ async function countRows(supabase, table, empresaId, build = query => query) {
   return count || 0;
 }
 
-export async function getDashboardStats({ supabase, empresaId }, intent = { params: {} }) {
+export async function getStatistics({ supabase, empresaId }, intent = { params: {} }) {
   const hoje = todayISO(0);
   const amanha = todayISO(1);
   
-  // Lista de status ignorados em consultas
+  // Lista de status ignorados em consultas (sem aspas internas para o Supabase)
   const ignoreStatusList = ['Recusado', 'Excluido', 'Excluído', 'excluido'];
+  const ignoreInString = '(Recusado,Excluido,Excluído,excluido)';
 
   const [clientes, profissionais, servicos, agendamentos, agendamentosHoje, agendamentosAmanha, faturamentoRows] = await Promise.all([
     countRows(supabase, 'agenda_clientes', empresaId, activeStatus),
     countRows(supabase, 'agenda_profissionais', empresaId, q => q.eq('ativo', true)),
     countRows(supabase, 'agenda_servicos', empresaId, q => q.eq('ativo', true)),
-    countRows(supabase, 'agenda_agendamentos', empresaId, q => q.not('status', 'in', `(${ignoreStatusList.map(s => `"${s}"`).join(',')})`)),
-    countRows(supabase, 'agenda_agendamentos', empresaId, q => q.eq('data', hoje).not('status', 'in', `(${ignoreStatusList.map(s => `"${s}"`).join(',')})`)),
-    countRows(supabase, 'agenda_agendamentos', empresaId, q => q.eq('data', amanha).not('status', 'in', `(${ignoreStatusList.map(s => `"${s}"`).join(',')})`)),
+    countRows(supabase, 'agenda_agendamentos', empresaId, q => q.not('status', 'in', ignoreInString)),
+    countRows(supabase, 'agenda_agendamentos', empresaId, q => q.eq('data', hoje).not('status', 'in', ignoreInString)),
+    countRows(supabase, 'agenda_agendamentos', empresaId, q => q.eq('data', amanha).not('status', 'in', ignoreInString)),
     supabase.from('agenda_agendamentos').select('valor,status').eq('empresa_id', empresaId)
   ]);
   
@@ -32,7 +33,7 @@ export async function getDashboardStats({ supabase, empresaId }, intent = { para
     .reduce((total, row) => total + Number(row.valor || 0), 0);
 
   const data = { clientes, profissionais, servicos, agendamentos, agendamentos_hoje: agendamentosHoje, agendamentos_amanha: agendamentosAmanha, faturamento };
-  const metric = intent.params?.metric;
+  const metric = intent?.params?.metric;
   return { answer: metric ? formatMetric(metric, data[metric]) : 'Resumo do painel calculado com dados reais da empresa.', data: metric ? { [metric]: data[metric] } : data };
 }
 
