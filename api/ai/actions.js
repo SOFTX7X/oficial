@@ -1,4 +1,4 @@
-import { normalizeText, normStatus, parseDate, parseTime } from './utils.js';
+import { minutesFromTime, normalizeText, normStatus, parseDate, parseTime } from './utils.js';
 
 function badRequest(message) {
   const error = new Error(message);
@@ -90,7 +90,7 @@ async function updateService({ supabase, empresaId }, params) {
   return { answer: `Servico ${data.nome} atualizado.`, data };
 }
 
-async function createAppointment({ supabase, empresaId }, params) {
+async function createAppointment({ supabase, empresa, empresaId }, params) {
   const clienteNome = String(params.cliente_nome || params.nome || '').trim();
   const dataAg = params.data || parseDate(params.text);
   const hora = params.hora || parseTime(params.text);
@@ -101,6 +101,10 @@ async function createAppointment({ supabase, empresaId }, params) {
 
   const servico = params.servico_id ? { id: params.servico_id } : (await findByName(supabase, 'agenda_servicos', empresaId, params.servico_nome) || (await supabase.from('agenda_servicos').select('*').eq('empresa_id', empresaId).eq('status', 'ativo').limit(1)).data?.[0]);
   const profissional = params.profissional_id ? { id: params.profissional_id } : (await findByName(supabase, 'agenda_profissionais', empresaId, params.profissional_nome) || (await supabase.from('agenda_profissionais').select('*').eq('empresa_id', empresaId).eq('status', 'ativo').limit(1)).data?.[0]);
+  if (!profissional?.id) badRequest('Nenhum profissional ativo encontrado para criar o agendamento.');
+
+  validateAppointmentTime(empresa, dataAg, hora);
+  await ensureAppointmentSlotIsFree(supabase, empresaId, profissional.id, dataAg, hora);
 
   const { data, error } = await supabase.from('agenda_agendamentos').insert({
     empresa_id: empresaId,
@@ -118,6 +122,46 @@ async function createAppointment({ supabase, empresaId }, params) {
   }).select('*').single();
   if (error) throw error;
   return { answer: `Agendamento criado para ${data.cliente_nome} em ${data.data} as ${data.hora}.`, data };
+}
+
+function validateAppointmentTime(empresa, dataAg, hora) {
+  const weekday = new Date(`${dataAg}T00:00:00`).getDay();
+  const dayFields = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+  if (empresa?.[dayFields[weekday]] === false) {
+    badRequest('A empresa esta fechada nesta data.');
+  }
+
+  const appointmentMinutes = minutesFromTime(hora);
+  const openingMinutes = minutesFromTime(empresa?.horario_abertura || '08:00');
+  const closingMinutes = minutesFromTime(empresa?.horario_fechamento || '18:00');
+  if (appointmentMinutes < openingMinutes || appointmentMinutes >= closingMinutes) {
+    badRequest('Horario fora do funcionamento da empresa.');
+  }
+
+  if (empresa?.intervalo_ativo) {
+    const pauseStart = minutesFromTime(empresa.intervalo_inicio || '12:00');
+    const pauseEnd = minutesFromTime(empresa.intervalo_fim || '13:00');
+    if (appointmentMinutes >= pauseStart && appointmentMinutes < pauseEnd) {
+      badRequest('Horario indisponivel durante o intervalo da empresa.');
+    }
+  }
+}
+
+async function ensureAppointmentSlotIsFree(supabase, empresaId, profissionalId, dataAg, hora) {
+  const { data, error } = await supabase
+    .from('agenda_agendamentos')
+    .select('id,cliente_nome,status')
+    .eq('empresa_id', empresaId)
+    .eq('profissional_id', profissionalId)
+    .eq('data', dataAg)
+    .eq('hora', hora)
+    .limit(10);
+  if (error) throw error;
+
+  const busy = (data || []).find(appointment => !['Recusado', 'Excluido', 'Excluído', 'excluido'].includes(appointment.status));
+  if (busy) {
+    badRequest('Horario indisponivel: este profissional ja possui agendamento nesta data e horario.');
+  }
 }
 
 async function findAppointment({ supabase, empresaId }, params) {
