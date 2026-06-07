@@ -52,9 +52,15 @@ function _aiLimparHistorico() {
   if (lista) {
     lista.innerHTML = `
       <div class="ai-message ai-message-bot">
-        <div class="ai-bubble">Olá. Posso consultar seus dados e executar ações já validadas na sua agenda.</div>
+        <div class="ai-msg-avatar">✦</div>
+        <div class="ai-bubble">Olá! 👋 Pode me perguntar sobre clientes, agendamentos, faturamento ou pedir para executar ações na sua agenda.</div>
       </div>`;
   }
+}
+
+function _aiHorarioAgora() {
+  const now = new Date();
+  return now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
 function adicionarMensagemAI(tipo, texto) {
@@ -62,9 +68,23 @@ function adicionarMensagemAI(tipo, texto) {
   if (!lista) return;
   const item = document.createElement('div');
   item.className = `ai-message ai-message-${tipo}`;
+
+  if (tipo === 'bot') {
+    const avatar = document.createElement('div');
+    avatar.className = 'ai-msg-avatar';
+    avatar.textContent = '✦';
+    item.appendChild(avatar);
+  }
+
   const bubble = document.createElement('div');
   bubble.className = 'ai-bubble';
   bubble.textContent = texto;
+
+  const time = document.createElement('span');
+  time.className = 'ai-bubble-time';
+  time.textContent = _aiHorarioAgora();
+  bubble.appendChild(time);
+
   item.appendChild(bubble);
   lista.appendChild(item);
   lista.scrollTop = lista.scrollHeight;
@@ -78,8 +98,15 @@ function _aiCarregarMensagensNaTela() {
   if (!lista || !_aiHistory.length) return;
   lista.innerHTML = '';
   _aiHistory.forEach(msg => {
+    const isBot = msg.role !== 'user';
     const item = document.createElement('div');
-    item.className = `ai-message ai-message-${msg.role === 'user' ? 'user' : 'bot'}`;
+    item.className = `ai-message ai-message-${isBot ? 'bot' : 'user'}`;
+    if (isBot) {
+      const avatar = document.createElement('div');
+      avatar.className = 'ai-msg-avatar';
+      avatar.textContent = '✦';
+      item.appendChild(avatar);
+    }
     const bubble = document.createElement('div');
     bubble.className = 'ai-bubble';
     bubble.textContent = msg.content;
@@ -102,9 +129,9 @@ async function enviarMensagemAI(event) {
 
   const lista = $('aiMessages');
   const typing = document.createElement('div');
-  typing.className = 'ai-message ai-message-bot';
+  typing.className = 'ai-message ai-message-bot ai-typing';
   typing.id = 'aiTyping';
-  typing.innerHTML = '<div class="ai-bubble" style="opacity:0.5">✧ digitando...</div>';
+  typing.innerHTML = '<div class="ai-msg-avatar">✦</div><div class="ai-bubble"><div class="ai-typing-dots"><span></span><span></span><span></span></div></div>';
   if (lista) { lista.appendChild(typing); lista.scrollTop = lista.scrollHeight; typing.scrollIntoView({ behavior: 'smooth', block: 'end' }); }
 
   try {
@@ -488,6 +515,10 @@ document.addEventListener('click', function(e) {
 document.addEventListener('scroll', closeAllMenus, { passive: true });
 
 window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('aiWelcomeTime');
+  if (el) el.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+});
 
 async function init() {
   await loadCategorias();
