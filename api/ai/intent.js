@@ -50,7 +50,8 @@ function extrairNome(raw, bases) {
   return '';
 }
 
-export function interpretIntent(message, payload = {}) {
+// ETAPA 1: Assinatura atualizada com o parâmetro contextData contendo fallbacks seguros
+export function interpretIntent(message, payload = {}, contextData = { profissionais: [], servicos: [] }) {
   const raw  = String(message || payload.intent || '').trim();
   const text = normalizeText(raw);
 
@@ -64,9 +65,6 @@ export function interpretIntent(message, payload = {}) {
   }
 
   // ── RETOMADA DE FLUXO ─────────────────────────────────────────────────────
-  // Se o frontend enviou payload.intent, significa que há um fluxo em andamento.
-  // Ignora o message e continua coletando os dados que faltam.
-
   if (payload.intent === 'create_appointment') {
     const cliente_nome      = payload.cliente_nome;
     const data              = payload.data;
