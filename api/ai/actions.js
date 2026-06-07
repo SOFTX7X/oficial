@@ -19,22 +19,26 @@ async function findByName(supabase, table, empresaId, name) {
 
 export async function executeAction(context, intent) {
   const handlers = {
-    create_client:         createClient,
-    update_client:         updateClient,
-    create_professional:   createProfessional,
-    update_professional:   updateProfessional,
-    create_service:        createService,
-    update_service:        updateService,
-    create_appointment:    createAppointment,
-    reschedule_appointment:rescheduleAppointment,
-    cancel_appointment:    cancelAppointment,
-    confirm_appointment:   confirmAppointment,
-    disable_client:        disableClient,
-    disable_professional:  disableProfessional,
-    disable_service:       disableService,
-    delete_client:         deleteClient,
-    delete_professional:   deleteProfessional,
-    delete_service:        deleteService,
+    create_client:           createClient,
+    update_client:           updateClient,
+    create_professional:     createProfessional,
+    update_professional:     updateProfessional,
+    create_service:          createService,
+    update_service:          updateService,
+    create_appointment:      createAppointment,
+    reschedule_appointment:  rescheduleAppointment,
+    cancel_appointment:      cancelAppointment,
+    confirm_appointment:     confirmAppointment,
+    conclude_appointment:    concludeAppointment,
+    disable_client:          disableClient,
+    disable_professional:    disableProfessional,
+    disable_service:         disableService,
+    delete_client:           deleteClient,
+    delete_professional:     deleteProfessional,
+    delete_service:          deleteService,
+    reactivate_client:       reactivateClient,
+    reactivate_professional: reactivateProfessional,
+    reactivate_service:      reactivateService,
   };
   const handler = handlers[intent.name];
   if (!handler) badRequest('Acao nao reconhecida.');
@@ -310,4 +314,40 @@ async function cancelAppointment(context, params) {
   }).eq('empresa_id', context.empresaId).eq('id', agendamento.id).select('*').maybeSingle();
   if (error) throw error;
   return { answer: `Agendamento de ${data.cliente_nome} cancelado.`, data };
+}
+
+async function concludeAppointment(context, params) {
+  const agendamento = await findAppointment(context, params);
+  if (!agendamento?.id) badRequest('Agendamento nao encontrado para concluir.');
+  const { data, error } = await context.supabase.from('agenda_agendamentos').update({
+    status: 'Concluido'
+  }).eq('empresa_id', context.empresaId).eq('id', agendamento.id).select('*').maybeSingle();
+  if (error) throw error;
+  return { answer: `Agendamento de ${data?.cliente_nome || agendamento.cliente_nome} concluido com sucesso.`, data };
+}
+
+// ─── Reativar ────────────────────────────────────────────────────────────────
+
+async function reactivateClient({ supabase, empresaId }, params) {
+  const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_clientes', empresaId, params.nome || params.cliente_nome);
+  if (!current?.id) badRequest('Cliente nao encontrado.');
+  const { data, error } = await supabase.from('agenda_clientes').update({ status: 'ativo' }).eq('empresa_id', empresaId).eq('id', current.id).select('*').maybeSingle();
+  if (error) throw error;
+  return { answer: `Cliente ${data?.nome || params.nome} reativado com sucesso.`, data };
+}
+
+async function reactivateProfessional({ supabase, empresaId }, params) {
+  const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_profissionais', empresaId, params.nome);
+  if (!current?.id) badRequest('Profissional nao encontrado.');
+  const { data, error } = await supabase.from('agenda_profissionais').update({ status: 'ativo' }).eq('empresa_id', empresaId).eq('id', current.id).select('*').maybeSingle();
+  if (error) throw error;
+  return { answer: `Profissional ${data?.nome || params.nome} reativado com sucesso.`, data };
+}
+
+async function reactivateService({ supabase, empresaId }, params) {
+  const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_servicos', empresaId, params.nome);
+  if (!current?.id) badRequest('Servico nao encontrado.');
+  const { data, error } = await supabase.from('agenda_servicos').update({ status: 'ativo' }).eq('empresa_id', empresaId).eq('id', current.id).select('*').maybeSingle();
+  if (error) throw error;
+  return { answer: `Servico ${data?.nome || params.nome} reativado com sucesso.`, data };
 }
