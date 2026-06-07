@@ -17,8 +17,24 @@ export default async function handler(req, res) {
   try {
     const context = await createAuthenticatedContext(req);
     const payload = req.method === 'POST' && req.body && typeof req.body === 'object' ? req.body : {};
-    const intent = interpretIntent(readMessage(req), payload);
+    const intent  = interpretIntent(readMessage(req), payload);
 
+    // ── CLARIFICATION — retorna pergunta sem executar nada ──────────────────
+    if (intent.domain === 'clarification') {
+      return res.status(200).json({
+        success: true,
+        intent,
+        answer: intent.params.question,
+        hint:   intent.params.hint || '',
+        empresa: {
+          id:   context.empresa.id,
+          nome: context.empresa.nome,
+          slug: context.empresa.slug
+        }
+      });
+    }
+
+    // ── demais domains ──────────────────────────────────────────────────────
     const result = intent.domain === 'dashboard'
       ? await getDashboardStats(context, intent)
       : intent.domain === 'action'
@@ -29,17 +45,18 @@ export default async function handler(req, res) {
       success: true,
       intent,
       empresa: {
-        id: context.empresa.id,
+        id:   context.empresa.id,
         nome: context.empresa.nome,
         slug: context.empresa.slug
       },
       ...result
     });
+
   } catch (error) {
     const status = error.statusCode || 500;
     return res.status(status).json({
       success: false,
-      error: error.publicMessage || 'Erro ao processar solicitacao.',
+      error:   error.publicMessage || 'Erro ao processar solicitacao.',
       details: status >= 500 ? undefined : error.message
     });
   }
