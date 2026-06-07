@@ -1,7 +1,5 @@
 import { normalizeText, parseDate, parseTime } from './utils.js';
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
-
 function extractAfter(raw, patterns) {
   for (const pattern of patterns) {
     const match = raw.match(pattern);
@@ -25,74 +23,23 @@ function hasValue(v) {
   return v !== undefined && v !== null && String(v).trim() !== '';
 }
 
-// ─── detecção temporal ────────────────────────────────────────────────────────
-// Trabalha sobre texto JÁ normalizado (sem acento, lowercase)
-// Cobre: hoje, amanha, depois de amanha, dia X, às/as X, Xh, meses, datas numéricas
-
-function temTemporal(t) {
-  return /\b(hoje|amanha|depois\s*de\s*amanha|dia\s+\d{1,2}|as\s+\d{1,2}|\d{1,2}\s*h\d{0,2}|\d{1,2}[\/\-]\d{1,2}|hora|horario|janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\b/.test(t);
-}
-
-// ─── detector de ambiguidade GLOBAL ──────────────────────────────────────────
-// Roda ANTES de qualquer intent.
-// criar + entidade + referência temporal = ambíguo → sempre clarify, nunca executa.
-
-function detectarAmbiguidade(t) {
-  const temCriar        = /\b(crie|criar|cadastre|cadastrar|adicione|adicionar)\b/.test(t);
-  const temCliente      = /\bcliente\b/.test(t);
-  const temProfissional = /\bprofissional\b/.test(t);
-  const temServico      = /\bservico\b/.test(t);
-  const temEntidade     = temCliente || temProfissional || temServico;
-
-  if (!temCriar) return null;
-  if (!temTemporal(t)) return null;
-
-  // criar + entidade conhecida + data
-  if (temEntidade) {
-    const entidade  = temCliente ? 'um cliente' : temProfissional ? 'um profissional' : 'um serviço';
-    const dataMatch = t.match(/\b(hoje|amanha|depois\s*de\s*amanha|dia\s+\d{1,2}|janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\b/);
-    const quando    = dataMatch ? `para ${dataMatch[0]}` : 'nessa data';
-    return clarify(
-      `Você quer criar ${entidade} ou criar um agendamento ${quando}?`,
-      `Para cadastrar: "Criar cliente Maria"\nPara agendar: "Agendar Maria ${quando} às 14h"`
-    );
-  }
-
-  // criar sem entidade + data (ex: "criar para amanhã")
-  return clarify(
-    'Não entendi bem. Deseja criar um agendamento ou cadastrar algo?',
-    'Ex: "Agendar João amanhã às 14h" ou "Criar cliente João"'
-  );
-}
-
-// ─── intenção de agendamento ──────────────────────────────────────────────────
-// Cobre imperativo, infinitivo, 3ª pessoa, substantivo e expressões coloquiais
-
 function isAgendamento(t) {
   if (/\b(agende|agendar|agenda|agendamento|agendamentos|marque|marcar)\b/.test(t)) return true;
   if (/\b(bota|coloca|reserva|deixa)\b.{0,20}\b(dia|horario|hora|marcado|agendado)\b/.test(t)) return true;
-  // "para amanhã/hoje/dia X" sem verbo de criação
   if (/\bpara\b.{0,10}\b(hoje|amanha|dia\s+\d)/.test(t) && !/\b(crie|criar|cadastre|adicione)\b/.test(t)) return true;
   return false;
 }
 
-// ─── extração de nome do cliente em frase de agendamento ─────────────────────
-
 function extrairClienteAgendamento(raw) {
-  // Tenta capturar nome entre o verbo e a primeira referência temporal
   const m = raw.match(
     /\b(?:agende|agendar|agenda|agendamento|marque|marcar|bota|coloca|reserva)\s+(?:o |a |para |pro |pra )?([A-Za-zÀ-ú]+(?:\s+[A-Za-zÀ-ú]+)?)\s+(?:hoje|amanha|dia|\d{1,2}[\/\-]|as?\s|às?\s)/i
   );
   if (m?.[1]) return m[1].trim();
-
-  // Fallback: qualquer nome após o verbo
   const f = raw.match(
     /\b(?:agende|agendar|agenda|agendamento|marque|marcar)\s+(?:o |a )?([A-Za-zÀ-ú]+(?:\s+[A-Za-zÀ-ú]+)?)/i
   );
   return f?.[1]?.trim() || '';
 }
-
-// ─── extração de nome com stop-words ─────────────────────────────────────────
 
 function extrairNome(raw, bases) {
   const stop = '(?:\\s+(?:telefone|email|e-mail|status|especialidade|preco|valor|duracao|dia|as|amanha|hoje|para|\\d))|$';
@@ -103,11 +50,9 @@ function extrairNome(raw, bases) {
   return '';
 }
 
-// ─── intent principal ─────────────────────────────────────────────────────────
-
 export function interpretIntent(message, payload = {}) {
   const raw  = String(message || payload.intent || '').trim();
-  const text = normalizeText(raw); // já normalizado: sem acento, lowercase
+  const text = normalizeText(raw);
 
   // action explícita no payload → passa direto
   if (payload.action) {
@@ -118,31 +63,47 @@ export function interpretIntent(message, payload = {}) {
     };
   }
 
-  // ── 1. dashboard/resumo ───────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════════════════════
+  // PROTEÇÃO GLOBAL — roda sobre raw.toLowerCase() ignorando normalizeText
+  // cliente + qualquer referência temporal = clarification imediata
+  // Posição: ANTES de dashboard, métricas, queries e actions
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    const _raw        = raw.toLowerCase();
+    const _temCliente = /cliente/.test(_raw);
+    const _temTempo   = /(hoje|amanha|amanhã|dia\s*\d|novembro|dezembro|janeiro|fevereiro|março|marco|abril|maio|junho|julho|agosto|setembro|outubro|às\s*\d|as\s+\d|horário|horario)/.test(_raw);
+
+    if (_temCliente && _temTempo) {
+      return {
+        domain: 'clarification',
+        name: 'ask',
+        params: {
+          question: 'Você quer criar um cliente ou criar um agendamento?',
+          hint: "Ex: 'Criar cliente João' ou 'Agendar João dia 10 de novembro às 14h'"
+        }
+      };
+    }
+  }
+
+  // ── dashboard/resumo ──────────────────────────────────────────────────────
   if (!text || /\b(resumo|dashboard|painel|estatisticas|numeros)\b/.test(text)) {
     return { domain: 'dashboard', name: 'summary', params: {} };
   }
 
-  // ── 2. AMBIGUIDADE GLOBAL ─────────────────────────────────────────────────
-  // Intercepta frases mistas ANTES de qualquer intent.
-  // Nenhuma frase com "criar + entidade + data" escapa daqui.
-  const amb = detectarAmbiguidade(text);
-  if (amb) return amb;
-
-  // ── 3. métricas ───────────────────────────────────────────────────────────
+  // ── métricas ──────────────────────────────────────────────────────────────
   if (/\bquantos?\b/.test(text) || /\bfaturamento\b|\breceita\b/.test(text)) {
     const metric =
-      /\bcliente/.test(text)                       ? 'clientes'            :
-      /\bprofissional/.test(text)                  ? 'profissionais'       :
-      /\bservico\b/.test(text)                     ? 'servicos'            :
-      /\bhoje\b/.test(text)                        ? 'agendamentos_hoje'   :
-      /\bamanha\b/.test(text)                      ? 'agendamentos_amanha' :
-      /\bfaturamento\b|\breceita\b/.test(text)     ? 'faturamento'         :
+      /\bcliente/.test(text)                   ? 'clientes'            :
+      /\bprofissional/.test(text)              ? 'profissionais'       :
+      /\bservico\b/.test(text)                 ? 'servicos'            :
+      /\bhoje\b/.test(text)                    ? 'agendamentos_hoje'   :
+      /\bamanha\b/.test(text)                  ? 'agendamentos_amanha' :
+      /\bfaturamento\b|\breceita\b/.test(text) ? 'faturamento'         :
       'agendamentos';
     return { domain: 'dashboard', name: 'metric', params: { metric } };
   }
 
-  // ── 4. AGENDAMENTO (alta prioridade, antes de "criar") ────────────────────
+  // ── agendamento ───────────────────────────────────────────────────────────
   if (isAgendamento(text)) {
     const cliente_nome      = payload.cliente_nome      || extrairClienteAgendamento(raw);
     const data              = payload.data              || parseDate(raw);
@@ -156,15 +117,9 @@ export function interpretIntent(message, payload = {}) {
         'Ex: "Agendar João amanhã às 14h"'
       );
     }
-    if (!hasValue(cliente_nome)) {
-      return clarify('Qual é o nome do cliente para este agendamento?');
-    }
-    if (!hasValue(data)) {
-      return clarify(`Para quando deseja agendar ${cliente_nome}? Informe a data.`);
-    }
-    if (!hasValue(hora)) {
-      return clarify(`Qual horário deseja agendar ${cliente_nome} no dia ${data}?`);
-    }
+    if (!hasValue(cliente_nome)) return clarify('Qual é o nome do cliente para este agendamento?');
+    if (!hasValue(data))         return clarify(`Para quando deseja agendar ${cliente_nome}? Informe a data.`);
+    if (!hasValue(hora))         return clarify(`Qual horário deseja agendar ${cliente_nome} no dia ${data}?`);
 
     return {
       domain: 'action',
@@ -173,17 +128,15 @@ export function interpretIntent(message, payload = {}) {
     };
   }
 
-  // ── 5. REAGENDAR ──────────────────────────────────────────────────────────
+  // ── reagendar ─────────────────────────────────────────────────────────────
   if (/\b(reagende|reagendar)\b/.test(text)) {
     const data = payload.data || parseDate(raw);
     const hora = payload.hora || parseTime(raw);
-    if (!hasValue(data) && !hasValue(hora)) {
-      return clarify('Para reagendar informe a nova data e o novo horário.');
-    }
+    if (!hasValue(data) && !hasValue(hora)) return clarify('Para reagendar informe a nova data e o novo horário.');
     return { domain: 'action', name: 'reschedule_appointment', params: { ...payload, data, hora } };
   }
 
-  // ── 6. CANCELAR ───────────────────────────────────────────────────────────
+  // ── cancelar ──────────────────────────────────────────────────────────────
   if (/\b(cancele|cancelar|recuse|recusar)\b/.test(text)) {
     return {
       domain: 'action',
@@ -192,15 +145,14 @@ export function interpretIntent(message, payload = {}) {
     };
   }
 
-  // ── 7. CRIAR ──────────────────────────────────────────────────────────────
-  // Só chega aqui se NÃO tem referência temporal (detectarAmbiguidade já interceptou)
+  // ── criar ─────────────────────────────────────────────────────────────────
   if (/\b(crie|criar|cadastre|cadastrar|adicione|adicionar)\b/.test(text)) {
     const temCliente      = /\bcliente\b/.test(text);
     const temProfissional = /\bprofissional\b/.test(text);
     const temServico      = /\bservico\b/.test(text);
     const qtd             = [temCliente, temProfissional, temServico].filter(Boolean).length;
 
-    if (qtd > 1)  return clarify('Deseja criar um cliente, um profissional ou um serviço?');
+    if (qtd > 1)   return clarify('Deseja criar um cliente, um profissional ou um serviço?');
     if (qtd === 0) return clarify('O que deseja criar? Um cliente, um profissional ou um serviço?');
 
     if (temCliente) {
@@ -208,13 +160,11 @@ export function interpretIntent(message, payload = {}) {
       if (!hasValue(nome)) return clarify('Qual é o nome do cliente que deseja cadastrar?');
       return { domain: 'action', name: 'create_client', params: { nome, telefone: payload.telefone, email: payload.email } };
     }
-
     if (temProfissional) {
       const nome = payload.nome || extrairNome(raw, ['profissional chamado\\s+', 'profissional\\s+', 'chamado\\s+']);
       if (!hasValue(nome)) return clarify('Qual é o nome do profissional que deseja cadastrar?');
       return { domain: 'action', name: 'create_professional', params: { nome, especialidade: payload.especialidade, telefone: payload.telefone } };
     }
-
     if (temServico) {
       const nome = payload.nome || extrairNome(raw, ['servico chamado\\s+', 'servico\\s+']);
       if (!hasValue(nome)) return clarify('Qual é o nome do serviço que deseja cadastrar?');
@@ -222,7 +172,7 @@ export function interpretIntent(message, payload = {}) {
     }
   }
 
-  // ── 8. ATUALIZAR ──────────────────────────────────────────────────────────
+  // ── atualizar ─────────────────────────────────────────────────────────────
   if (/\b(atualize|atualizar|edite|editar|altere|alterar)\b/.test(text)) {
     const temCliente      = /\bcliente\b/.test(text);
     const temProfissional = /\bprofissional\b/.test(text);
@@ -254,7 +204,7 @@ export function interpretIntent(message, payload = {}) {
     }
   }
 
-  // ── 9. queries analíticas ─────────────────────────────────────────────────
+  // ── queries ───────────────────────────────────────────────────────────────
   if (/\bmelhor cliente\b/.test(text))
     return { domain: 'query', name: 'best_client', params: {} };
 
@@ -273,6 +223,6 @@ export function interpretIntent(message, payload = {}) {
   if (/\bpendentes?\b/.test(text))
     return { domain: 'query', name: 'pending_appointments', params: {} };
 
-  // ── 10. fallback ──────────────────────────────────────────────────────────
+  // ── fallback ──────────────────────────────────────────────────────────────
   return { domain: 'dashboard', name: 'summary', params: {} };
 }
