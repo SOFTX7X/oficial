@@ -56,6 +56,6 @@ export function normStatus(status) {
 }
 
 export function activeStatus(query) {
-  // Retorna apenas registros com status válidos (não excluídos) para tabelas de fluxo
-  return query.not('status', 'in', '("Recusado","Excluido","Excluído","excluido")');
+  // Ajustado para o formato padrão aceito pelo PostgREST do Supabase sem aspas duplas internas
+  return query.not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
 }
