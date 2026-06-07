@@ -575,7 +575,7 @@ a { text-decoration: none; color: inherit; }
 .cal-day.today { background: var(--accent); color: #fff; font-weight: 700; box-shadow: 0 0 12px rgba(99,102,241,0.3); }
 
 /* VYXORA AI */
-.ai-shell { display: grid; gap: 14px; min-height: calc(100vh - 132px); }
+.ai-shell { display: flex; flex-direction: column; gap: 14px; height: calc(100vh - 80px); max-height: calc(100vh - 80px); }
 .ai-hero {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   padding: 24px 26px; border: 1px solid var(--border); border-radius: var(--radius-2xl);
@@ -600,7 +600,7 @@ a { text-decoration: none; color: inherit; }
 }
 .ai-status span { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
 .ai-chat {
-  display: grid; grid-template-rows: 1fr auto; min-height: 560px;
+  display: flex; flex-direction: column; flex: 1; min-height: 0;
   border: 1px solid var(--border); border-radius: var(--radius-2xl); overflow: hidden;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.012)),
@@ -608,7 +608,7 @@ a { text-decoration: none; color: inherit; }
 }
 .ai-messages {
   display: flex; flex-direction: column; gap: 12px; padding: 22px;
-  overflow-y: auto; min-height: 0; scroll-behavior: smooth;
+  overflow-y: auto; flex: 1; min-height: 0; scroll-behavior: smooth;
 }
 .ai-message { display: flex; width: 100%; }
 .ai-message-user { justify-content: flex-end; }
@@ -627,8 +627,9 @@ a { text-decoration: none; color: inherit; }
 }
 .ai-compose {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px;
-  padding: 14px; border-top: 1px solid var(--border);
-  background: rgba(10,10,12,0.72); backdrop-filter: blur(16px);
+  padding: 14px 16px; border-top: 1px solid var(--border);
+  background: rgba(10,10,12,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  flex-shrink: 0;
 }
 .ai-compose input {
   width: 100%; min-height: 46px; border-radius: 12px; border: 1px solid var(--border);
@@ -1215,10 +1216,10 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .config-grid { grid-template-columns: 1fr; }
   .fin-grid { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr !important; }
-  .ai-shell { min-height: calc(100vh - 112px); gap: 12px; }
+  .ai-shell { height: calc(100vh - 68px); max-height: calc(100vh - 68px); gap: 10px; }
   .ai-hero { align-items: flex-start; flex-direction: column; padding: 20px; }
   .ai-status { white-space: normal; }
-  .ai-chat { min-height: 520px; border-radius: var(--radius-xl); }
+  .ai-chat { border-radius: var(--radius-xl); }
   .ai-messages { padding: 16px; }
   .ai-bubble { max-width: 92%; }
   .ai-compose { grid-template-columns: 1fr; }
@@ -1276,7 +1277,7 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .form-actions { grid-template-columns: 1fr; }
   .hero-title { font-size: clamp(36px, 10vw, 48px); }
   .ai-hero h1 { font-size: 34px; }
-  .ai-chat { min-height: 500px; }
+  /* .ai-chat height controlled by flex */
   .ai-bubble { max-width: 96%; font-size: 13px; }
   .pub-hero { padding: 18px 14px 16px; border-radius: 16px; }
   .pub-hero h1 { font-size: clamp(22px, 8vw, 30px); }
