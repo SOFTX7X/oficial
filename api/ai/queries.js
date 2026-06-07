@@ -1,5 +1,28 @@
 import { normalizeText, todayISO, timeFromMinutes, minutesFromTime, parseDate } from './utils.js';
 
+// ── Helpers de formatação de exibição ────────────────────────────────────────
+function toTitleCase(str) {
+  if (!str) return '';
+  return str.toLowerCase().replace(/(?:^|\s|-)\S/g, c => c.toUpperCase());
+}
+
+function formatDate(str) {
+  if (!str) return '';
+  // "2026-06-08" ou "2026-06-08T11:00:00" ou "2026-06-08 11:00"
+  const m = str.match(/(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}:\d{2}))?/);
+  if (!m) return str;
+  const date = `${m[3]}/${m[2]}/${m[1]}`;
+  return m[4] ? `${date} às ${m[4]}` : date;
+}
+
+function formatPhone(str) {
+  if (!str) return '';
+  const d = str.replace(/\D/g, '');
+  if (d.length === 11) return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return str;
+}
+
 function badRequest(message) {
   const error = new Error(message);
   error.statusCode = 400;
@@ -190,7 +213,7 @@ async function getBestClient({ supabase, empresaId }) {
 
   const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
   return {
-    answer: `⭐ Melhor cliente: ${best[0]}\n${best[1]} agendamento${best[1]!==1?'s':''} realizados.`,
+    answer: `⭐ Melhor cliente: ${toTitleCase(best[0])}\n${best[1]} agendamento${best[1]!==1?'s':''} realizados.`,
     data: { cliente: best[0], quantidade: best[1] }
   };
 }
@@ -213,7 +236,7 @@ async function getTopProfessional({ supabase, empresaId }) {
 
   const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
   return {
-    answer: `🏆 Profissional mais ocupado: ${top[0]}\n${top[1]} agendamento${top[1]!==1?'s':''} realizados.`,
+    answer: `🏆 Profissional mais ocupado: ${toTitleCase(top[0])}\n${top[1]} agendamento${top[1]!==1?'s':''} realizados.`,
     data: { profissional: top[0], quantidade: top[1] }
   };
 }
@@ -323,7 +346,7 @@ async function getInactiveClients({ supabase, empresaId }) {
   if (!inativos.length) return { answer: 'Todos os seus clientes possuem agendamentos ativos!' };
 
   const nomes = inativos.map(c => c.nome).slice(0, 10).join(', ');
-  const linhas = inativos.slice(0, 15).map(c => `• ${c.nome}`).join('\n');
+  const linhas = inativos.slice(0, 15).map(c => `• ${toTitleCase(c.nome)}`).join('\n');
   return {
     answer: `😴 ${inativos.length} cliente${inativos.length!==1?'s':''} sem agendamentos:\n\n${linhas}${inativos.length > 15 ? `\n• ...e mais ${inativos.length - 15}` : ''}`,
     data: { total_inativos: inativos.length, lista: inativos.map(c => c.nome) }
@@ -347,7 +370,7 @@ async function getPendingAppointments({ supabase, empresaId }) {
   ).join('; ');
 
   const linhas = data.map(a =>
-    `• ${a.data} ${a.hora?.slice(0,5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}`
+    `• ${formatDate(a.data)} ${a.hora?.slice(0,5)} — ${toTitleCase(a.cliente_nome)}${a.servico_nome ? ` (${a.servico_nome})` : ''}`
   ).join('\n');
   return {
     answer: `⏳ ${data.length} agendamento${data.length!==1?'s':''} pendente${data.length!==1?'s':''} aguardando aprovação:\n\n${linhas}`,
@@ -374,7 +397,7 @@ async function getTodayAppointments({ supabase, empresaId }) {
   ).join('; ');
 
   const linhas = data.map(a =>
-    `• ${a.hora.slice(0, 5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${a.profissional_nome}` : ''} [${a.status}]`
+    `• ${a.hora.slice(0, 5)} — ${toTitleCase(a.cliente_nome)}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${toTitleCase(a.profissional_nome)}` : ''} [${a.status}]`
   ).join('\n');
   return {
     answer: `📅 ${data.length} agendamento${data.length!==1?'s':''} para hoje (${hoje}):\n\n${linhas}`,
@@ -401,7 +424,7 @@ async function getTomorrowAppointments({ supabase, empresaId }) {
   ).join('; ');
 
   const linhas = data.map(a =>
-    `• ${a.hora.slice(0, 5)} — ${a.cliente_nome}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${a.profissional_nome}` : ''} [${a.status}]`
+    `• ${a.hora.slice(0, 5)} — ${toTitleCase(a.cliente_nome)}${a.servico_nome ? ` (${a.servico_nome})` : ''}${a.profissional_nome ? ` com ${toTitleCase(a.profissional_nome)}` : ''} [${a.status}]`
   ).join('\n');
   return {
     answer: `📅 ${data.length} agendamento${data.length!==1?'s':''} para amanhã (${amanha}):\n\n${linhas}`,
@@ -452,7 +475,7 @@ async function listAllAppointments({ supabase, empresaId }) {
   ).join('; ');
 
   const linhas = data.map(a =>
-    `• ${a.data} ${a.hora?.slice(0,5)} — ${a.cliente_nome} (${a.servico_nome || 'Geral'}) com ${a.profissional_nome || 'profissional'} [${a.status}]`
+    `• ${formatDate(a.data)} ${a.hora?.slice(0,5)} — ${toTitleCase(a.cliente_nome)} (${a.servico_nome || 'Geral'}) com ${toTitleCase(a.profissional_nome || 'profissional')} [${a.status}]`
   ).join('\n');
   return {
     answer: `📋 Últimos ${data.length} agendamentos:\n\n${linhas}`,
@@ -510,7 +533,7 @@ async function getClientsByPeriod({ supabase, empresaId }, params) {
   }
 
   const nomes = unicos.slice(0, 10).join(', ');
-  const linhas = unicos.slice(0, 15).map(n => `• ${n}`).join('\n');
+  const linhas = unicos.slice(0, 15).map(n => `• ${toTitleCase(n)}`).join('\n');
   return {
     answer: `👥 ${unicos.length} cliente${unicos.length!==1?'s':''} com agendamento em ${prefixo}:\n\n${linhas}`,
     data: { total: unicos.length, periodo: prefixo, clientes: unicos }
@@ -574,7 +597,7 @@ async function listClients({ supabase, empresaId }) {
   if (!data?.length) return { answer: 'Nenhum cliente cadastrado ainda.' };
 
   const lista = data.map(c => `${c.nome}${c.telefone ? ' (' + c.telefone + ')' : ''}`).join(', ');
-  const linhas = data.map(c => `• ${c.nome}${c.telefone ? ` (${c.telefone})` : ''}`).join('\n');
+  const linhas = data.map(c => `• ${toTitleCase(c.nome)}${c.telefone ? ` (${formatPhone(c.telefone)})` : ''}`).join('\n');
   return {
     answer: `👥 ${data.length} cliente${data.length!==1?'s':''} ativo${data.length!==1?'s':''}:\n\n${linhas}`,
     data: { total: data.length, clientes: data }
@@ -595,7 +618,7 @@ async function listProfessionals({ supabase, empresaId }) {
   if (!data?.length) return { answer: 'Nenhum profissional cadastrado ainda.' };
 
   const lista = data.map(p => `${p.nome}${p.especialidade ? ' — ' + p.especialidade : ''}`).join(', ');
-  const linhas = data.map(p => `• ${p.nome}${p.especialidade ? ` — ${p.especialidade}` : ''}`).join('\n');
+  const linhas = data.map(p => `• ${toTitleCase(p.nome)}${p.especialidade ? ` — ${toTitleCase(p.especialidade)}` : ''}`).join('\n');
   return {
     answer: `👤 ${data.length} profissional${data.length!==1?'is':''} ativo${data.length!==1?'s':''}:\n\n${linhas}`,
     data: { total: data.length, profissionais: data }
