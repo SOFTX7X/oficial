@@ -153,6 +153,14 @@ async function enviarMensagemAI(event) {
       body: JSON.stringify(payload)
     });
 
+    // Protege contra resposta HTML (ex: 404/500 do servidor antes de chegar na API)
+    const contentType = resp.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const rawText = await resp.text();
+      console.error('[VyXora AI] Resposta nao-JSON (status ' + resp.status + '):', rawText.slice(0, 400));
+      throw new Error('Servico indisponivel (HTTP ' + resp.status + '). Verifique se a API esta no ar e as variaveis de ambiente estao configuradas.');
+    }
+
     const json = await resp.json();
     const t = $('aiTyping'); if (t) t.remove();
 
