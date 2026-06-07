@@ -10,11 +10,11 @@ export async function getDashboardStats({ supabase, empresaId }, intent = { para
   const hoje = todayISO(0);
   const amanha = todayISO(1);
   
-  // Atualizado para buscar nas tabelas reais e corrigir filtros de agendamentos válidos
+  // CORRIGIDO: Adicionado o prefixo agenda_ em profissionais e servicos
   const [clientes, profissionais, servicos, agendamentos, agendamentosHoje, agendamentosAmanha, faturamentoRows] = await Promise.all([
     countRows(supabase, 'agenda_clientes', empresaId, activeStatus),
-    countRows(supabase, 'profissionais', empresaId, q => q.eq('ativo', true)),
-    countRows(supabase, 'servicos', empresaId, q => q.eq('ativo', true)),
+    countRows(supabase, 'agenda_profissionais', empresaId, q => q.eq('ativo', true)),
+    countRows(supabase, 'agenda_servicos', empresaId, q => q.eq('ativo', true)),
     countRows(supabase, 'agenda_agendamentos', empresaId, q => q.not('status', 'in', '("Recusado","Excluido","Excluído","excluido")')),
     countRows(supabase, 'agenda_agendamentos', empresaId, q => q.eq('data', hoje).not('status', 'in', '("Recusado","Excluido","Excluído","excluido")')),
     countRows(supabase, 'agenda_agendamentos', empresaId, q => q.eq('data', amanha).not('status', 'in', '("Recusado","Excluido","Excluído","excluido")')),
