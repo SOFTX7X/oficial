@@ -105,7 +105,7 @@ async function enviarMensagemAI(event) {
   typing.className = 'ai-message ai-message-bot';
   typing.id = 'aiTyping';
   typing.innerHTML = '<div class="ai-bubble" style="opacity:0.5">✧ digitando...</div>';
-  if (lista) { lista.appendChild(typing); lista.scrollTop = lista.scrollHeight; }
+  if (lista) { lista.appendChild(typing); lista.scrollTop = lista.scrollHeight; typing.scrollIntoView({ behavior: 'smooth', block: 'end' }); }
 
   try {
     const { data } = await window.db.auth.getSession();
@@ -594,6 +594,10 @@ function setView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const target = $('view-' + view);
   if (target) target.classList.add('active');
+
+  // Ativa modo "tela cheia de chat" no dash-main quando for AI
+  const dashMain = document.querySelector('.dash-main');
+  if (dashMain) dashMain.classList.toggle('view-ai-active', view === 'ai');
   const navMap = {
     dashboard: ['Dashboard', 'Controle completo do seu negócio.'],
     agenda: ['Agenda', 'Criar e acompanhar horários.'],
