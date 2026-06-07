@@ -1,8 +1,5 @@
 import { createAuthenticatedContext } from './ai/auth.js';
-import { executeAction } from './ai/actions.js';
-import { runQuery } from './ai/queries.js';
-import { getStatistics } from './ai/statistics.js';
-import { callGemini } from './ai/gemini.js';
+import { interpretIntent } from './ai/intent.js';
 
 export default async function handler(req, res) {
   // CORS
@@ -13,111 +10,29 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const { message, history } = req.body || {};
+    const { message, history, slotState } = req.body || {};
 
     if (!message) {
-      return res.status(400).json({ success: false, error: 'Mensagem não informada.' });
+      return res.status(400).json({ success: false, error: 'Mensagem nao informada.' });
     }
 
-    // 1. Contexto autenticado
-    let context;
-    try {
-      context = await createAuthenticatedContext(req);
-    } catch (authErr) {
-      console.error('[VyXora IA] Auth error:', authErr.message || authErr);
-      return res.status(authErr.statusCode || 401).json({
-        success: false,
-        error: authErr.publicMessage || 'Erro de autenticação.'
-      });
-    }
+    // 1. Autenticação e montagem do contexto da empresa
+    const context = await createAuthenticatedContext(req);
 
-    // 2. Gemini decide o que fazer
-    let geminiResult;
-    try {
-      geminiResult = await callGemini(context, message, history || []);
-    } catch (geminiErr) {
-      console.error('[VyXora IA] Gemini error:', geminiErr.message || geminiErr);
-      return res.status(200).json({
-        success: true,
-        type: 'chat',
-        answer: 'Desculpe, tive um problema ao pensar na resposta. Tente novamente.'
-      });
-    }
-
-    // 3. Conversa, suporte, conteúdo ou slot filling — responde direto
-    if (geminiResult.type === 'chat' || geminiResult.type === 'slot_filling') {
-      return res.status(200).json({
-        success: true,
-        type: geminiResult.type,
-        answer: geminiResult.answer,
-        slotState: null
-      });
-    }
-
-    // 4. Ação no painel — executa
-    if (geminiResult.type === 'action') {
-      const { action, params } = geminiResult;
-
-      try {
-        // Consultas de estatísticas
-        if (action === 'query_stats') {
-          const stats = await getStatistics(context, { params: { metric: params.metric } });
-          return res.status(200).json({
-            success: true,
-            type: 'statistics',
-            answer: stats.answer,
-            data: stats.data,
-            slotState: null
-          });
-        }
-
-        // Consultas livres
-        if (action === 'query_data') {
-          const queryResult = await runQuery(context, params.query || message);
-          return res.status(200).json({
-            success: true,
-            type: 'query',
-            answer: queryResult.answer,
-            data: queryResult.data,
-            slotState: null
-          });
-        }
-
-        // CRUD
-        const result = await executeAction(context, { name: action, params });
-        return res.status(200).json({
-          success: true,
-          type: 'action',
-          answer: result.answer,
-          data: result.data,
-          slotState: null
-        });
-
-      } catch (actionErr) {
-        console.error('[VyXora IA] Action error:', action, actionErr.message || actionErr);
-        return res.status(200).json({
-          success: true,
-          type: 'error',
-          answer: actionErr.publicMessage || 'Não consegui executar essa ação. Verifique os dados e tente novamente.',
-          slotState: null
-        });
-      }
-    }
-
-    // Fallback
-    return res.status(200).json({
-      success: true,
-      type: 'chat',
-      answer: geminiResult.answer || 'Não entendi. Pode repetir?',
-      slotState: null
+    // 2. Processa a intenção com histórico e estado do slot filling
+    const result = await interpretIntent(context, message, {
+      ...req.body,
+      history: history || [],
+      slotState: slotState || null
     });
 
+    return res.status(200).json({ success: true, ...result });
+
   } catch (error) {
-    console.error('[VyXora IA] Erro geral:', error?.message || error);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      error: 'Erro interno ao processar solicitação.',
-      details: error?.message
+      error: error.publicMessage || 'Erro ao processar solicitacao.',
+      details: error.message
     });
   }
 }
