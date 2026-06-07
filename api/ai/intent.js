@@ -74,6 +74,11 @@ export async function interpretIntent(context, message, fullBody) {
     return startSlotFilling('confirm_appointment', message, text, context);
   }
 
+  // 5c. Concluir agendamento
+  if (matchAny(text, ['concluir agendamento', 'finalizar agendamento', 'marcar como concluido', 'concluir', 'finalizar'])) {
+    return startSlotFilling('conclude_appointment', message, text, context);
+  }
+
   // 6. Reagendar agendamento
   if (matchAny(text, ['reagendar', 'remarcar', 'trocar horario', 'mudar horario', 'alterar data'])) {
     return startSlotFilling('reschedule_appointment', message, text, context);
@@ -142,6 +147,21 @@ export async function interpretIntent(context, message, fullBody) {
   // 19. Excluir serviço
   if (matchAny(text, ['excluir servico', 'deletar servico', 'remover servico', 'apagar servico'])) {
     return startSlotFilling('delete_service', message, text, context);
+  }
+
+  // 19b. Reativar cliente
+  if (matchAny(text, ['reativar cliente', 'ativar cliente', 'reabilitar cliente'])) {
+    return startSlotFilling('reactivate_client', message, text, context);
+  }
+
+  // 19c. Reativar profissional
+  if (matchAny(text, ['reativar profissional', 'ativar profissional', 'reabilitar profissional'])) {
+    return startSlotFilling('reactivate_professional', message, text, context);
+  }
+
+  // 19d. Reativar serviço
+  if (matchAny(text, ['reativar servico', 'ativar servico', 'reabilitar servico'])) {
+    return startSlotFilling('reactivate_service', message, text, context);
   }
 
   // 20. Listar agendamentos completos
@@ -337,8 +357,18 @@ function buildSlots(intentName) {
       { key: 'preco',           question: 'Novo preco em R$? (opcional, pode pular)',                filled: false, optional: true },
       { key: 'duracao_minutos', question: 'Nova duracao em minutos? (opcional, pode pular)',         filled: false, optional: true }
     ],
-    disable_client: [
-      { key: 'nome', question: 'Qual o nome do cliente a desativar?', filled: false }
+    conclude_appointment: [
+      { key: 'cliente_nome', question: 'Qual o nome do cliente do agendamento a concluir?', filled: false },
+      { key: 'data',         question: 'Qual a data do agendamento?',                        filled: false, optional: true }
+    ],
+    reactivate_client: [
+      { key: 'nome', question: 'Qual o nome do cliente a reativar?', filled: false }
+    ],
+    reactivate_professional: [
+      { key: 'nome', question: 'Qual o nome do profissional a reativar?', filled: false }
+    ],
+    reactivate_service: [
+      { key: 'nome', question: 'Qual o nome do servico a reativar?', filled: false }
     ],
     disable_professional: [
       { key: 'nome', question: 'Qual o nome do profissional a desativar?', filled: false }
