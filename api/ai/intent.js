@@ -29,12 +29,19 @@ export async function interpretIntent(context, message, fullBody) {
 
   // 4. Consultas analíticas
   if (matchAny(text, [
-    'melhor cliente', 'relatorio', 'faturamento', 'receita', 'lucro',
+    'melhor cliente', 'relatorio',
     'horario livre', 'tem vaga', 'disponivel', 'disponibilidade',
     'cliente inativo', 'pendente', 'agenda de hoje', 'agendamentos de hoje',
     'profissional mais', 'servico mais', 'top cliente', 'top profissional',
     'agendamento de amanha', 'agenda de amanha', 'amanha tem'
   ])) {
+    const queryResult = await runQuery(context, text);
+    return { type: 'query', answer: queryResult.answer, data: queryResult.data };
+  }
+
+  // 4b. Faturamento geral (sem período específico)
+  if (matchAny(text, ['faturamento', 'receita', 'lucro', 'quanto ganhei', 'quanto faturei']) &&
+      !matchAny(text, ['mes', 'janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro', 'periodo', 'em '])) {
     const queryResult = await runQuery(context, text);
     return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
