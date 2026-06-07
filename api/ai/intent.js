@@ -17,7 +17,14 @@ export async function interpretIntent(context, message, fullBody) {
     return { type: 'query', data: queryResult };
   }
 
-  // 3. Padrão Padrão: Processamento de Agendamentos / Ações do CRUD
-  const actionResult = await executeAction(context, message, fullBody);
+  // 3. Processamento de Ações estruturado como o objeto esperado pelo actions.js
+  // Se o seu fluxo principal usa um objeto de intenção gerado previamente ou vindo do fullBody, 
+  // nós o repassamos aqui; caso contrário, simulamos a estrutura necessária para o handler.
+  const intentObj = fullBody?.intent || { 
+    name: fullBody?.action || 'create_appointment', 
+    params: { text: message, ...fullBody } 
+  };
+
+  const actionResult = await executeAction(context, intentObj);
   return { type: 'action', data: actionResult };
 }
