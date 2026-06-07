@@ -9,13 +9,15 @@ async function countRows(supabase, table, empresaId, build = query => query) {
 export async function getDashboardStats({ supabase, empresaId }, intent = { params: {} }) {
   const hoje = todayISO(0);
   const amanha = todayISO(1);
+  
+  // Atualizado para buscar nas tabelas reais e corrigir filtros de agendamentos válidos
   const [clientes, profissionais, servicos, agendamentos, agendamentosHoje, agendamentosAmanha, faturamentoRows] = await Promise.all([
     countRows(supabase, 'agenda_clientes', empresaId, activeStatus),
-    countRows(supabase, 'agenda_profissionais', empresaId, activeStatus),
-    countRows(supabase, 'agenda_servicos', empresaId, activeStatus),
-    countRows(supabase, 'agenda_agendamentos', empresaId, activeStatus),
-    countRows(supabase, 'agenda_agendamentos', empresaId, q => activeStatus(q).eq('data', hoje)),
-    countRows(supabase, 'agenda_agendamentos', empresaId, q => activeStatus(q).eq('data', amanha)),
+    countRows(supabase, 'profissionais', empresaId, q => q.eq('ativo', true)),
+    countRows(supabase, 'servicos', empresaId, q => q.eq('ativo', true)),
+    countRows(supabase, 'agenda_agendamentos', empresaId, q => q.not('status', 'in', '("Recusado","Excluido","Excluído","excluido")')),
+    countRows(supabase, 'agenda_agendamentos', empresaId, q => q.eq('data', hoje).not('status', 'in', '("Recusado","Excluido","Excluído","excluido")')),
+    countRows(supabase, 'agenda_agendamentos', empresaId, q => q.eq('data', amanha).not('status', 'in', '("Recusado","Excluido","Excluído","excluido")')),
     supabase.from('agenda_agendamentos').select('valor,status').eq('empresa_id', empresaId)
   ]);
   if (faturamentoRows.error) throw faturamentoRows.error;
