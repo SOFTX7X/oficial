@@ -458,11 +458,18 @@ async function getClientsByPeriod({ supabase, empresaId }, params) {
   }
 
   // Busca agendamentos no período e conta clientes únicos
+  // Usa gte/lte pois a coluna 'data' é do tipo DATE (não suporta LIKE/~~)
+  const dataInicio = `${prefixo}-01`;
+  const [ano, mes] = prefixo.split('-').map(Number);
+  const ultimoDia = new Date(ano, mes, 0).getDate();
+  const dataFim = `${prefixo}-${String(ultimoDia).padStart(2, '0')}`;
+
   const { data, error } = await supabase
     .from('agenda_agendamentos')
     .select('cliente_id, cliente_nome')
     .eq('empresa_id', empresaId)
-    .like('data', `${prefixo}%`)
+    .gte('data', dataInicio)
+    .lte('data', dataFim)
     .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
 
   if (error) throw error;
@@ -501,11 +508,18 @@ async function getRevenueByPeriod({ supabase, empresaId }, params) {
     }
   }
 
+  // Usa gte/lte pois a coluna 'data' é do tipo DATE (não suporta LIKE/~~)
+  const dataInicio = `${prefixo}-01`;
+  const [ano, mes] = prefixo.split('-').map(Number);
+  const ultimoDia = new Date(ano, mes, 0).getDate();
+  const dataFim = `${prefixo}-${String(ultimoDia).padStart(2, '0')}`;
+
   const { data, error } = await supabase
     .from('agenda_agendamentos')
     .select('valor, data')
     .eq('empresa_id', empresaId)
-    .like('data', `${prefixo}%`)
+    .gte('data', dataInicio)
+    .lte('data', dataFim)
     .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
 
   if (error) throw error;
