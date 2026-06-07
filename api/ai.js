@@ -9,6 +9,9 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  // Garante que a resposta é sempre JSON
+  res.setHeader('Content-Type', 'application/json');
+
   try {
     const { message, history, slotState } = req.body || {};
 
