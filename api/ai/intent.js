@@ -17,68 +17,116 @@ export async function interpretIntent(context, message, fullBody) {
   // 2. Painel / Estatísticas
   if (matchAny(text, ['painel', 'resumo', 'estatistica', 'dashboard', 'visao geral'])) {
     const stats = await getStatistics(context);
-    return { type: 'statistics', data: stats };
+    return { type: 'statistics', answer: stats.answer, data: stats.data };
   }
 
-  // 3. Consultas
+  // 3. Métricas diretas — "quantos X tenho", "listar X", "agendamentos hoje/amanhã"
+  const metricIntent = detectMetricIntent(text);
+  if (metricIntent) {
+    const stats = await getStatistics(context, { params: { metric: metricIntent } });
+    return { type: 'statistics', answer: stats.answer, data: stats.data };
+  }
+
+  // 4. Consultas analíticas
   if (matchAny(text, [
     'melhor cliente', 'relatorio', 'faturamento', 'receita', 'lucro',
     'horario livre', 'tem vaga', 'disponivel', 'disponibilidade',
     'cliente inativo', 'pendente', 'agenda de hoje', 'agendamentos de hoje',
-    'profissional mais', 'servico mais', 'top cliente', 'top profissional'
+    'profissional mais', 'servico mais', 'top cliente', 'top profissional',
+    'agendamento de amanha', 'agenda de amanha', 'amanha tem'
   ])) {
     const queryResult = await runQuery(context, text);
-    return { type: 'query', data: queryResult };
+    return { type: 'query', answer: queryResult.answer, data: queryResult.data };
   }
 
-  // 4. Cancelar agendamento
+  // 5. Cancelar agendamento
   if (matchAny(text, ['cancelar', 'recusar', 'excluir agendamento', 'remover agendamento'])) {
     return startSlotFilling('cancel_appointment', message, text, context);
   }
 
-  // 5. Reagendar agendamento
+  // 6. Reagendar agendamento
   if (matchAny(text, ['reagendar', 'remarcar', 'trocar horario', 'mudar horario', 'alterar data'])) {
     return startSlotFilling('reschedule_appointment', message, text, context);
   }
 
-  // 6. Criar agendamento
+  // 7. Criar agendamento
   if (matchAny(text, ['agendar', 'marcar', 'criar agendamento', 'novo agendamento', 'reservar', 'marcar horario'])) {
     return startSlotFilling('create_appointment', message, text, context);
   }
 
-  // 7. Criar cliente
+  // 8. Criar cliente
   if (matchAny(text, ['cadastrar cliente', 'novo cliente', 'adicionar cliente', 'criar cliente'])) {
     return startSlotFilling('create_client', message, text, context);
   }
 
-  // 8. Atualizar cliente
+  // 9. Atualizar cliente
   if (matchAny(text, ['atualizar cliente', 'editar cliente', 'alterar cliente'])) {
     return startSlotFilling('update_client', message, text, context);
   }
 
-  // 9. Criar profissional
+  // 10. Criar profissional
   if (matchAny(text, ['cadastrar profissional', 'novo profissional', 'criar profissional'])) {
     return startSlotFilling('create_professional', message, text, context);
   }
 
-  // 10. Criar serviço
+  // 11. Criar serviço
   if (matchAny(text, ['cadastrar servico', 'novo servico', 'criar servico'])) {
     return startSlotFilling('create_service', message, text, context);
   }
 
-  // 11. Fallback — tenta consulta livre
+  // 12. Fallback — tenta consulta livre
   const queryResult = await runQuery(context, text);
-  return { type: 'query', data: queryResult };
+  return { type: 'query', answer: queryResult.answer, data: queryResult.data };
+}
+
+// ─── Detecta métricas diretas ─────────────────────────────────────────────────
+// Cobre: "quantos clientes", "listar profissionais", "agendamentos hoje", etc.
+function detectMetricIntent(text) {
+  if (matchAny(text, [
+    'quantos clientes', 'total de clientes', 'listar clientes',
+    'numero de clientes', 'meus clientes'
+  ])) return 'clientes';
+
+  if (matchAny(text, [
+    'quantos profissionais', 'total de profissionais', 'listar profissionais',
+    'numero de profissionais', 'meus profissionais'
+  ])) return 'profissionais';
+
+  if (matchAny(text, [
+    'quantos servicos', 'total de servicos', 'listar servicos',
+    'numero de servicos', 'meus servicos'
+  ])) return 'servicos';
+
+  if (matchAny(text, [
+    'agendamentos hoje', 'agenda hoje', 'hoje quantos', 'quantos hoje',
+    'compromissos hoje', 'horarios hoje'
+  ])) return 'agendamentos_hoje';
+
+  if (matchAny(text, [
+    'agendamentos amanha', 'agenda amanha', 'amanha quantos', 'quantos amanha',
+    'compromissos amanha', 'horarios amanha'
+  ])) return 'agendamentos_amanha';
+
+  if (matchAny(text, [
+    'quantos agendamentos', 'total de agendamentos', 'numero de agendamentos'
+  ])) return 'agendamentos';
+
+  if (matchAny(text, [
+    'quantos pendentes', 'total pendentes', 'agendamentos pendentes'
+  ])) return 'pendentes';
+
+  if (matchAny(text, [
+    'quantos confirmados', 'total confirmados', 'agendamentos confirmados'
+  ])) return 'confirmados';
+
+  return null;
 }
 
 // ─── Inicia o slot filling para uma intenção ─────────────────────────────────
 async function startSlotFilling(intentName, message, text, context) {
-  // Tenta extrair já da primeira mensagem
   const extracted = extractParams(message);
-
   const slots = buildSlots(intentName);
 
-  // Preenche slots com o que já veio na primeira mensagem
   for (const slot of slots) {
     if (extracted[slot.key] !== undefined) {
       slot.value = extracted[slot.key];
@@ -86,14 +134,12 @@ async function startSlotFilling(intentName, message, text, context) {
     }
   }
 
-  // Verifica se já tem tudo — executa direto
-  const allFilled = slots.every(s => s.filled);
+  const allFilled = slots.every(s => s.filled || s.optional);
   if (allFilled) {
     return executeSlot(context, intentName, slots);
   }
 
-  // Pede o próximo slot em falta
-  const next = slots.find(s => !s.filled);
+  const next = slots.find(s => !s.filled && !s.optional);
   return {
     type: 'slot_filling',
     answer: next.question,
@@ -105,17 +151,14 @@ async function startSlotFilling(intentName, message, text, context) {
 async function continueSlotFilling(context, message, text, slotState, history) {
   const { intent: intentName, slots } = slotState;
 
-  // Encontra o próximo slot não preenchido
   const next = slots.find(s => !s.filled);
   if (!next) return executeSlot(context, intentName, slots);
 
-  // Preenche com a resposta do usuário
   const value = extractSlotValue(next.key, message);
   if (value) {
-    next.value = value;
+    next.value = value === '__skip__' ? undefined : value;
     next.filled = true;
   } else {
-    // Não entendeu — pergunta de novo
     return {
       type: 'slot_filling',
       answer: `Nao entendi. ${next.question}`,
@@ -123,8 +166,7 @@ async function continueSlotFilling(context, message, text, slotState, history) {
     };
   }
 
-  // Verifica se ainda tem slots em falta
-  const remaining = slots.find(s => !s.filled);
+  const remaining = slots.find(s => !s.filled && !s.optional);
   if (remaining) {
     return {
       type: 'slot_filling',
@@ -133,7 +175,6 @@ async function continueSlotFilling(context, message, text, slotState, history) {
     };
   }
 
-  // Todos preenchidos — executa
   return executeSlot(context, intentName, slots);
 }
 
@@ -144,7 +185,7 @@ async function executeSlot(context, intentName, slots) {
 
   try {
     const result = await executeAction(context, { name: intentName, params });
-    return { type: 'action', data: result, slotState: null };
+    return { type: 'action', answer: result.answer, data: result.data, slotState: null };
   } catch (err) {
     return {
       type: 'error',
@@ -158,40 +199,40 @@ async function executeSlot(context, intentName, slots) {
 function buildSlots(intentName) {
   const definitions = {
     create_appointment: [
-      { key: 'cliente_nome', question: 'Qual o nome do cliente?', filled: false },
-      { key: 'data', question: 'Qual a data do agendamento? (ex: hoje, amanha, 20/06)', filled: false },
-      { key: 'hora', question: 'Qual o horario? (ex: 14h, 14:30)', filled: false },
-      { key: 'profissional_nome', question: 'Qual o profissional? (deixe em branco para o primeiro disponivel)', filled: false, optional: true },
-      { key: 'servico_nome', question: 'Qual o servico? (deixe em branco para o padrao)', filled: false, optional: true }
+      { key: 'cliente_nome',      question: 'Qual o nome do cliente?',                                              filled: false },
+      { key: 'data',              question: 'Qual a data do agendamento? (ex: hoje, amanha, 20/06)',                filled: false },
+      { key: 'hora',              question: 'Qual o horario? (ex: 14h, 14:30)',                                     filled: false },
+      { key: 'profissional_nome', question: 'Qual o profissional? (deixe em branco para o primeiro disponivel)',   filled: false, optional: true },
+      { key: 'servico_nome',      question: 'Qual o servico? (deixe em branco para o padrao)',                     filled: false, optional: true }
     ],
     reschedule_appointment: [
       { key: 'cliente_nome', question: 'Qual o nome do cliente do agendamento?', filled: false },
-      { key: 'nova_data', question: 'Qual a nova data?', filled: false },
-      { key: 'nova_hora', question: 'Qual o novo horario?', filled: false }
+      { key: 'nova_data',    question: 'Qual a nova data?',                      filled: false },
+      { key: 'nova_hora',    question: 'Qual o novo horario?',                   filled: false }
     ],
     cancel_appointment: [
       { key: 'cliente_nome', question: 'Qual o nome do cliente do agendamento a cancelar?', filled: false },
-      { key: 'data', question: 'Qual a data do agendamento?', filled: false, optional: true }
+      { key: 'data',         question: 'Qual a data do agendamento?',                       filled: false, optional: true }
     ],
     create_client: [
-      { key: 'nome', question: 'Qual o nome do cliente?', filled: false },
-      { key: 'telefone', question: 'Qual o telefone? (opcional, pode pular)', filled: false, optional: true },
-      { key: 'email', question: 'Qual o email? (opcional, pode pular)', filled: false, optional: true }
+      { key: 'nome',     question: 'Qual o nome do cliente?',                    filled: false },
+      { key: 'telefone', question: 'Qual o telefone? (opcional, pode pular)',    filled: false, optional: true },
+      { key: 'email',    question: 'Qual o email? (opcional, pode pular)',       filled: false, optional: true }
     ],
     update_client: [
-      { key: 'nome', question: 'Qual o nome do cliente a atualizar?', filled: false },
-      { key: 'telefone', question: 'Novo telefone? (opcional)', filled: false, optional: true },
-      { key: 'email', question: 'Novo email? (opcional)', filled: false, optional: true }
+      { key: 'nome',     question: 'Qual o nome do cliente a atualizar?', filled: false },
+      { key: 'telefone', question: 'Novo telefone? (opcional)',           filled: false, optional: true },
+      { key: 'email',    question: 'Novo email? (opcional)',              filled: false, optional: true }
     ],
     create_professional: [
-      { key: 'nome', question: 'Qual o nome do profissional?', filled: false },
-      { key: 'especialidade', question: 'Qual a especialidade? (opcional)', filled: false, optional: true },
-      { key: 'telefone', question: 'Qual o telefone? (opcional)', filled: false, optional: true }
+      { key: 'nome',         question: 'Qual o nome do profissional?',       filled: false },
+      { key: 'especialidade',question: 'Qual a especialidade? (opcional)',   filled: false, optional: true },
+      { key: 'telefone',     question: 'Qual o telefone? (opcional)',        filled: false, optional: true }
     ],
     create_service: [
-      { key: 'nome', question: 'Qual o nome do servico?', filled: false },
-      { key: 'preco', question: 'Qual o preco? (ex: 50.00)', filled: false, optional: true },
-      { key: 'duracao_minutos', question: 'Qual a duracao em minutos? (ex: 60)', filled: false, optional: true }
+      { key: 'nome',            question: 'Qual o nome do servico?',                   filled: false },
+      { key: 'preco',           question: 'Qual o preco? (ex: 50.00)',                 filled: false, optional: true },
+      { key: 'duracao_minutos', question: 'Qual a duracao em minutos? (ex: 60)',       filled: false, optional: true }
     ]
   };
 
@@ -202,25 +243,20 @@ function buildSlots(intentName) {
 function extractSlotValue(key, message) {
   const text = normalizeText(message);
 
-  // Slots de data
   if (key === 'data' || key === 'nova_data') {
-    // "pode pular" / "tanto faz" / "qualquer um" — slot opcional ignorado
     if (matchAny(text, ['pular', 'tanto faz', 'qualquer', 'nao sei', 'sem data', 'passa'])) return '__skip__';
     return parseDate(message) || null;
   }
 
-  // Slots de hora
   if (key === 'hora' || key === 'nova_hora') {
     if (matchAny(text, ['pular', 'tanto faz', 'qualquer', 'nao sei'])) return '__skip__';
     return parseTime(message) || null;
   }
 
-  // Slots opcionais — aceita "pular"
   if (matchAny(text, ['pular', 'nao', 'nao tem', 'sem', 'nenhum', 'nenhuma', 'passa', 'tanto faz'])) {
     return '__skip__';
   }
 
-  // Nome / texto livre — pega a mensagem limpa
   const cleaned = message.trim();
   return cleaned.length >= 2 ? cleaned : null;
 }
@@ -235,19 +271,16 @@ function extractParams(message) {
   const hora = parseTime(message);
   if (hora) params.hora = hora;
 
-  // Nome do cliente após palavras-chave
   const clienteMatch = message.match(
     /(?:cliente|para|de|nome)[:\s]+([A-Za-zÀ-ÿ\s]{2,40}?)(?:\s+(?:dia|data|as|às|horario|no dia|em|\d)|$)/i
   );
   if (clienteMatch) params.cliente_nome = clienteMatch[1].trim();
 
-  // Nome do profissional
   const profMatch = message.match(
     /(?:profissional|com|pelo profissional)[:\s]+([A-Za-zÀ-ÿ\s]{2,40}?)(?:\s+(?:dia|data|as|às|horario|no dia|em|\d)|$)/i
   );
   if (profMatch) params.profissional_nome = profMatch[1].trim();
 
-  // Nome do serviço
   const servicoMatch = message.match(
     /(?:servico|serviço|para o servico|para o serviço)[:\s]+([A-Za-zÀ-ÿ\s]{2,40}?)(?:\s+(?:dia|data|as|às|horario|no dia|em|\d)|$)/i
   );
