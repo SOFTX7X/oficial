@@ -13,10 +13,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // CORREÇÃO: Garante que req.query e req.query.url nunca quebram se forem undefined
-    if (!req.query) req.query = {};
-    if (typeof req.query.url !== 'string') req.query.url = '';
-
     const context = await createAuthenticatedContext(req);
     const { message } = req.body || {};
     
