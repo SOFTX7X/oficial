@@ -18,5 +18,22 @@ export async function createAuthenticatedContext(req) {
     throw { statusCode: 401, publicMessage: 'Sessao expirada.', message: error?.message || 'Usuario nao encontrado.' };
   }
 
-  return { supabase, user };
+  // Busca a empresa vinculada ao usuário logado usando o campo correto (eu_ia)
+  const { data: perfil, error: perfilError } = await supabase
+    .from('agenda_empresas')
+    .select('id, horario_abertura, horario_fechamento, intervalo_ativo, intervalo_inicio, intervalo_fim, dom, seg, ter, qua, qui, sex, sab')
+    .eq('eu_ia', user.id)
+    .single();
+
+  if (perfilError || !perfil) {
+    throw { statusCode: 404, publicMessage: 'Empresa nao configurada.', message: perfilError?.message || 'Perfil nao encontrado.' };
+  }
+
+  // Retorna o contexto exato que o actions.js e as queries esperam receber
+  return { 
+    supabase, 
+    user, 
+    empresaId: perfil.id, 
+    empresa: perfil 
+  };
 }
