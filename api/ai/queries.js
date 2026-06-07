@@ -7,7 +7,7 @@ function badRequest(message) {
   throw error;
 }
 
-export async function executeQuery(context, intent) {
+export async function runQuery(context, intent) {
   const handlers = {
     best_client: getBestClient,
     top_professional: getTopProfessional,
@@ -17,9 +17,9 @@ export async function executeQuery(context, intent) {
     pending_appointments: getPendingAppointments
   };
 
-  const handler = handlers[intent.name];
+  const handler = handlers[intent?.name || intent];
   if (!handler) badRequest('Consulta nao reconhecida no sistema.');
-  return handler(context, intent.params || {});
+  return handler(context, intent?.params || {});
 }
 
 async function getBestClient({ supabase, empresaId }) {
@@ -27,7 +27,7 @@ async function getBestClient({ supabase, empresaId }) {
     .from('agenda_agendamentos')
     .select('cliente_nome')
     .eq('empresa_id', empresaId)
-    .not('status', 'in', '("Recusado","Excluido","Excluído","excluido")');
+    .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
 
   if (error) throw error;
   if (!data?.length) return { answer: 'Nenhum agendamento encontrado para analisar.' };
@@ -47,7 +47,7 @@ async function getTopProfessional({ supabase, empresaId }) {
     .from('agenda_agendamentos')
     .select('profissional_nome')
     .eq('empresa_id', empresaId)
-    .not('status', 'in', '("Recusado","Excluido","Excluído","excluido")');
+    .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
 
   if (error) throw error;
   if (!data?.length) return { answer: 'Nenhum profissional com agendamentos registrados.' };
@@ -67,7 +67,7 @@ async function getTopService({ supabase, empresaId }) {
     .from('agenda_agendamentos')
     .select('servico_nome')
     .eq('empresa_id', empresaId)
-    .not('status', 'in', '("Recusado","Excluido","Excluído","excluido")');
+    .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
 
   if (error) throw error;
   if (!data?.length) return { answer: 'Nenhum servico foi agendado ate o momento.' };
@@ -86,12 +86,13 @@ async function getFreeSlots({ supabase, empresa, empresaId }, params) {
   const dataAlvo = params.data || todayISO(0);
   
   let profQuery = supabase.from('agenda_profissionais').select('*').eq('empresa_id', empresaId).eq('ativo', true);
+  let profissional;
   if (params.profissional_nome) {
     const normName = normalizeText(params.profissional_nome);
     const { data: profs } = await profQuery;
-    var profissional = (profs || []).find(p => normalizeText(p.nome).includes(normName));
+    profissional = (profs || []).find(p => normalizeText(p.nome).includes(normName));
   } else {
-    var profissional = (await profQuery.limit(1)).data?.[0];
+    profissional = (await profQuery.limit(1)).data?.[0];
   }
 
   if (!profissional) return { answer: 'Nenhum profissional ativo encontrado para checar horarios.' };
@@ -108,7 +109,7 @@ async function getFreeSlots({ supabase, empresa, empresaId }, params) {
     .eq('empresa_id', empresaId)
     .eq('profissional_id', profissional.id)
     .eq('data', dataAlvo)
-    .not('status', 'in', '("Recusado","Excluido","Excluído","excluido")');
+    .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
 
   if (error) throw error;
 
@@ -138,7 +139,7 @@ async function getFreeSlots({ supabase, empresa, empresaId }, params) {
 async function getInactiveClients({ supabase, empresaId }) {
   const [clientesRes, agendamentosRes] = await Promise.all([
     supabase.from('agenda_clientes').select('id, nome').eq('empresa_id', empresaId),
-    supabase.from('agenda_agendamentos').select('cliente_id').eq('empresa_id', empresaId).not('status', 'in', '("Recusado","Excluido","Excluído","excluido")')
+    supabase.from('agenda_agendamentos').select('cliente_id').eq('empresa_id', empresaId).not('status', 'in', '(Recusado,Excluido,Excluído,excluido)')
   ]);
 
   if (clientesRes.error) throw clientesRes.error;
