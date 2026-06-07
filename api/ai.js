@@ -17,7 +17,39 @@ export default async function handler(req, res) {
   try {
     const context = await createAuthenticatedContext(req);
     const payload = req.method === 'POST' && req.body && typeof req.body === 'object' ? req.body : {};
-    const intent  = interpretIntent(readMessage(req), payload);
+    
+    // ── ETAPA 1: Busca Dinâmica de Profissionais e Serviços Ativos no Supabase ──
+    // Executa em paralelo usando Promise.all para máxima performance sem travar a requisição
+    const [profissionaisRes, servicosRes] = await Promise.all([
+      context.supabase
+        ? context.supabase
+            .from('profissionais')
+            .select('id, nome')
+            .eq('empresa_id', context.empresa.id)
+            .eq('ativo', true)
+        : { data: [] },
+      context.supabase
+        ? context.supabase
+            .from('servicos')
+            .select('id, nome, duracao, preco')
+            .eq('empresa_id', context.empresa.id)
+            .eq('ativo', true)
+        : { data: [] }
+    ]);
+
+    // Monta as listas limpas obtidas diretamente do banco de dados
+    const listaProfissionais = profissionaisRes.data || [];
+    const listaServicos = servicosRes.data || [];
+
+    // Adiciona as listas reais de profissionais e serviços dentro do payload de contexto enviado ao interpretador
+    const contextData = {
+      ...payload,
+      listaProfissionais,
+      listaServicos
+    };
+
+    // Invoca o interpretIntent injetando os dados reais e atualizados do banco de dados
+    const intent = interpretIntent(readMessage(req), contextData);
 
     // ── CLARIFICATION — retorna pergunta sem executar nada ──────────────────
     if (intent.domain === 'clarification') {
