@@ -44,6 +44,11 @@ export async function interpretIntent(context, message, fullBody) {
     return startSlotFilling('cancel_appointment', message, text, context);
   }
 
+  // 5b. Confirmar agendamento
+  if (matchAny(text, ['confirmar agendamento', 'confirmar agenda', 'aprovar agendamento', 'aceitar agendamento'])) {
+    return startSlotFilling('confirm_appointment', message, text, context);
+  }
+
   // 6. Reagendar agendamento
   if (matchAny(text, ['reagendar', 'remarcar', 'trocar horario', 'mudar horario', 'alterar data'])) {
     return startSlotFilling('reschedule_appointment', message, text, context);
@@ -223,7 +228,8 @@ async function continueSlotFilling(context, message, text, slotState, history) {
     };
   }
 
-  const remaining = slots.find(s => !s.filled && !s.optional);
+  // Próximo slot não preenchido (obrigatório ou opcional)
+  const remaining = slots.find(s => !s.filled);
   if (remaining) {
     return {
       type: 'slot_filling',
@@ -270,6 +276,10 @@ function buildSlots(intentName) {
     cancel_appointment: [
       { key: 'cliente_nome', question: 'Qual o nome do cliente do agendamento a cancelar?', filled: false },
       { key: 'data',         question: 'Qual a data do agendamento?',                       filled: false, optional: true }
+    ],
+    confirm_appointment: [
+      { key: 'cliente_nome', question: 'Qual o nome do cliente do agendamento a confirmar?', filled: false },
+      { key: 'data',         question: 'Qual a data do agendamento?',                        filled: false, optional: true }
     ],
     create_client: [
       { key: 'nome',     question: 'Qual o nome do cliente?',                    filled: false },
