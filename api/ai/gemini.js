@@ -1,4 +1,4 @@
-// ─── VyXora IA — Cérebro Gemini Flash ───────────────────────────────────────
+// ─── VyXora IA — Cérebro Gemini Flash ────────────────────────────────────────
 // O Gemini é o cérebro principal. Ele decide tudo: o que o usuário quer,
 // como responder, quando executar ações, quando conversar, quando criar conteúdo.
 
