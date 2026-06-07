@@ -138,7 +138,6 @@ export async function interpretIntent(context, message, fullBody) {
 }
 
 // ─── Detecta métricas diretas ─────────────────────────────────────────────────
-// Cobre: "quantos clientes", "listar profissionais", "agendamentos hoje", etc.
 function detectMetricIntent(text) {
   if (matchAny(text, [
     'quantos clientes', 'total de clientes', 'listar clientes',
@@ -279,28 +278,29 @@ function buildSlots(intentName) {
     ],
     update_client: [
       { key: 'nome',     question: 'Qual o nome do cliente a atualizar?', filled: false },
-      { key: 'telefone', question: 'Novo telefone? (opcional)',           filled: false, optional: true },
-      { key: 'email',    question: 'Novo email? (opcional)',              filled: false, optional: true }
+      { key: 'telefone', question: 'Novo telefone? (opcional, pode pular)',  filled: false, optional: true },
+      { key: 'email',    question: 'Novo email? (opcional, pode pular)',     filled: false, optional: true }
     ],
     create_professional: [
-      { key: 'nome',         question: 'Qual o nome do profissional?',       filled: false },
-      { key: 'especialidade',question: 'Qual a especialidade? (opcional)',   filled: false, optional: true },
-      { key: 'telefone',     question: 'Qual o telefone? (opcional)',        filled: false, optional: true }
-    ],
-    create_service: [
-      { key: 'nome',            question: 'Qual o nome do servico?',                   filled: false },
-      { key: 'preco',           question: 'Qual o preco? (ex: 50.00)',                 filled: false, optional: true },
-      { key: 'duracao_minutos', question: 'Qual a duracao em minutos? (ex: 60)',       filled: false, optional: true }
+      { key: 'nome',          question: 'Qual o nome do profissional?',         filled: false },
+      { key: 'especialidade', question: 'Qual a especialidade? (opcional)',      filled: false, optional: true },
+      { key: 'telefone',      question: 'Qual o telefone? (opcional)',           filled: false, optional: true }
     ],
     update_professional: [
-      { key: 'nome',          question: 'Qual o nome do profissional a editar?', filled: false },
-      { key: 'especialidade', question: 'Nova especialidade? (opcional, pode pular)',  filled: false, optional: true },
-      { key: 'telefone',      question: 'Novo telefone? (opcional, pode pular)',       filled: false, optional: true }
+      { key: 'nome',          question: 'Qual o nome do profissional a editar?',              filled: false },
+      { key: 'especialidade', question: 'Nova especialidade? (opcional, pode pular)',          filled: false, optional: true },
+      { key: 'telefone',      question: 'Novo telefone? (opcional, pode pular)',               filled: false, optional: true }
+    ],
+    create_service: [
+      { key: 'nome',            question: 'Qual o nome do servico?',               filled: false },
+      { key: 'preco',           question: 'Qual o preco? (ex: 50.00)',             filled: false, optional: true },
+      { key: 'duracao_minutos', question: 'Qual a duracao em minutos? (ex: 60)',   filled: false, optional: true }
     ],
     update_service: [
-      { key: 'nome',            question: 'Qual o nome do servico a editar?',            filled: false },
-      { key: 'preco',           question: 'Novo preco? (opcional, pode pular)',           filled: false, optional: true },
-      { key: 'duracao_minutos', question: 'Nova duracao em minutos? (opcional, pode pular)', filled: false, optional: true }
+      { key: 'nome',            question: 'Qual o nome do servico a editar?',                       filled: false },
+      { key: 'nome_novo',       question: 'Novo nome para o servico? (opcional, pode pular)',        filled: false, optional: true },
+      { key: 'preco',           question: 'Novo preco em R$? (opcional, pode pular)',                filled: false, optional: true },
+      { key: 'duracao_minutos', question: 'Nova duracao em minutos? (opcional, pode pular)',         filled: false, optional: true }
     ],
     disable_client: [
       { key: 'nome', question: 'Qual o nome do cliente a desativar?', filled: false }
