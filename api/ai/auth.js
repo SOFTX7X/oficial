@@ -18,16 +18,15 @@ export async function createAuthenticatedContext(req) {
     throw { statusCode: 401, publicMessage: 'Sessao expirada.', message: error?.message || 'Usuario nao encontrado.' };
   }
 
-  // 1. Busca o profissional correspondente usando o e-mail do usuário autenticado
-  const { data: profissional, error: profError } = await supabase
+  // 1. Busca usando um array para evitar o erro de coerção caso existam múltiplos registros com o mesmo e-mail
+  const { data: profissionais, error: profError } = await supabase
     .from('agenda_profissionais')
     .select('empresa_id')
     .eq('email', user.email)
     .eq('status', 'ativo')
-    .limit(1)
-    .single();
+    .limit(1);
 
-  if (profError || !profissional?.empresa_id) {
+  if (profError || !profissionais || profissionais.length === 0) {
     throw { 
       statusCode: 404, 
       publicMessage: 'Usuario nao vinculado a nenhuma empresa.', 
@@ -35,21 +34,23 @@ export async function createAuthenticatedContext(req) {
     };
   }
 
-  // 2. Com o empresa_id em mãos, busca os dados de configuração da empresa
-  const { data: perfil, error: perfilError } = await supabase
+  const empresaIdFinal = profissionais[0].empresa_id;
+
+  // 2. Busca os dados de configuração da empresa de forma segura
+  const { data: empresas, error: perfilError } = await supabase
     .from('agenda_empresas')
     .select('id, horario_abertura, horario_fechamento, intervalo_ativo, intervalo_inicio, intervalo_fim, dom, seg, ter, qua, qui, sex, sab')
-    .eq('id', profesional.empresa_id)
-    .single();
+    .eq('id', empresaIdFinal)
+    .limit(1);
 
-  if (perfilError || !perfil) {
+  if (perfilError || !empresas || empresas.length === 0) {
     throw { statusCode: 404, publicMessage: 'Empresa nao configurada.', message: perfilError?.message || 'Perfil da empresa nao encontrado.' };
   }
 
   return { 
     supabase, 
     user, 
-    empresaId: perfil.id, 
-    empresa: perfil 
+    empresaId: empresas[0].id, 
+    empresa: empresas[0] 
   };
 }
