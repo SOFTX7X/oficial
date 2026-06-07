@@ -1,4 +1,4 @@
-import { minutesFromTime, normalizeText, normStatus, parseDate, parseTime } from './utils.js';
+import { normalizeText, todayISO, timeFromMinutes, minutesFromTime } from './utils.js';
 
 function badRequest(message) {
   const error = new Error(message);
@@ -7,211 +7,190 @@ function badRequest(message) {
   throw error;
 }
 
-async function findByName(supabase, table, empresaId, name) {
-  if (!name) return null;
-  const normalized = normalizeText(name);
-  const { data, error } = await supabase.from(table).select('*').eq('empresa_id', empresaId).limit(100);
-  if (error) throw error;
-  return (data || []).find(row => normalizeText(row.nome) === normalized)
-    || (data || []).find(row => normalizeText(row.nome).includes(normalized) || normalized.includes(normalizeText(row.nome)))
-    || null;
-}
-
-export async function executeAction(context, intent) {
+export async function executeQuery(context, intent) {
   const handlers = {
-    create_client: createClient,
-    update_client: updateClient,
-    create_professional: createProfessional,
-    update_professional: updateProfessional,
-    create_service: createService,
-    update_service: updateService,
-    create_appointment: createAppointment,
-    reschedule_appointment: rescheduleAppointment,
-    cancel_appointment: cancelAppointment
+    best_client: getBestClient,
+    top_professional: getTopProfessional,
+    top_service: getTopService,
+    free_slots: getFreeSlots,
+    inactive_clients: getInactiveClients,
+    pending_appointments: getPendingAppointments
   };
+
   const handler = handlers[intent.name];
-  if (!handler) badRequest('Acao nao reconhecida.');
+  if (!handler) badRequest('Consulta nao reconhecida no sistema.');
   return handler(context, intent.params || {});
 }
 
-async function createClient({ supabase, empresaId }, params) {
-  const nome = String(params.nome || '').trim();
-  if (!nome) badRequest('Informe o nome do cliente.');
-  const { data, error } = await supabase.from('agenda_clientes').insert({ empresa_id: empresaId, nome, telefone: params.telefone || '', email: params.email || '', status: 'ativo' }).select('*').single();
-  if (error) throw error;
-  return { answer: `Cliente ${data.nome} criado com sucesso.`, data };
-}
-
-async function updateClient({ supabase, empresaId }, params) {
-  const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_clientes', empresaId, params.nome || params.cliente_nome);
-  if (!current?.id) badRequest('Cliente nao encontrado para atualizar.');
-  const updates = {};
-  ['nome', 'telefone', 'email', 'status'].forEach(key => { if (params[key] !== undefined && params[key] !== '') updates[key] = params[key]; });
-  const { data, error } = await supabase.from('agenda_clientes').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
-  if (error) throw error;
-  return { answer: `Cliente ${data.nome} atualizado.`, data };
-}
-
-async function createProfessional({ supabase, empresaId }, params) {
-  const nome = String(params.nome || '').trim();
-  if (!nome) badRequest('Informe o nome do profissional.');
-  const { data, error } = await supabase.from('agenda_profissionais').insert({ empresa_id: empresaId, nome, especialidade: params.especialidade || '', telefone: params.telefone || '', ativo: true }).select('*').single();
-  if (error) throw error;
-  return { answer: `Profissional ${data.nome} criado com sucesso.`, data };
-}
-
-async function updateProfessional({ supabase, empresaId }, params) {
-  const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_profissionais', empresaId, params.nome);
-  if (!current?.id) badRequest('Profissional nao encontrado para atualizar.');
-  const updates = {};
-  ['nome', 'especialidade', 'telefone', 'ativo'].forEach(key => { if (params[key] !== undefined && params[key] !== '') updates[key] = params[key]; });
-  const { data, error } = await supabase.from('agenda_profissionais').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
-  if (error) throw error;
-  return { answer: `Profissional ${data.nome} atualizado.`, data };
-}
-
-async function createService({ supabase, empresaId }, params) {
-  const nome = String(params.nome || '').trim();
-  if (!nome) badRequest('Informe o nome do servico.');
-  const { data, error } = await supabase.from('agenda_servicos').insert({ empresa_id: empresaId, nome, preco: Number(params.preco || 0), duracao: Number(params.duracao_minutos || 60), ativo: true }).select('*').single();
-  if (error) throw error;
-  return { answer: `Servico ${data.nome} criado com sucesso.`, data };
-}
-
-async function updateService({ supabase, empresaId }, params) {
-  const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_servicos', empresaId, params.nome);
-  if (!current?.id) badRequest('Servico nao encontrado para atualizar.');
-  const updates = {};
-  if (params.nome !== undefined && params.nome !== '') updates.nome = params.nome;
-  if (params.preco !== undefined && params.preco !== '') updates.preco = Number(params.preco);
-  if (params.duracao_minutos !== undefined && params.duracao_minutos !== '') updates.duracao = Number(params.duracao_minutos);
-  if (params.status !== undefined && params.status !== '') updates.ativo = params.status === 'ativo' || params.status === true;
-  
-  const { data, error } = await supabase.from('agenda_servicos').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
-  if (error) throw error;
-  return { answer: `Servico ${data.nome} atualizado.`, data };
-}
-
-async function createAppointment({ supabase, empresa, empresaId }, params) {
-  const clienteNome = String(params.cliente_nome || params.nome || '').trim();
-  const dataAg = params.data || parseDate(params.text);
-  const hora = params.hora || parseTime(params.text);
-  if (!clienteNome || !dataAg || !hora) badRequest('Informe cliente, data e horario do agendamento.');
-
-  let cliente = await findByName(supabase, 'agenda_clientes', empresaId, clienteNome);
-  if (!cliente) cliente = (await createClient({ supabase, empresaId }, { nome: clienteNome, telefone: params.telefone })).data;
-
-  let servico = null;
-  if (params.servico_id) {
-    const { data: svc } = await supabase.from('agenda_servicos').select('*').eq('id', params.servico_id).single();
-    servico = svc;
-  } else if (params.servico_nome) {
-    servico = await findByName(supabase, 'agenda_servicos', empresaId, params.servico_nome);
-  }
-  if (!servico) {
-    servico = (await supabase.from('agenda_servicos').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
-  }
-
-  let profissional = null;
-  if (params.profissional_id) {
-    const { data: prof } = await supabase.from('agenda_profissionais').select('*').eq('id', params.profissional_id).single();
-    profissional = prof;
-  } else if (params.profissional_nome) {
-    profissional = await findByName(supabase, 'agenda_profissionais', empresaId, params.profissional_nome);
-  }
-  if (!profissional) {
-    profissional = (await supabase.from('agenda_profissionais').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
-  }
-
-  if (!profissional?.id) badRequest('Nenhum profissional ativo encontrado para criar o agendamento.');
-
-  validateAppointmentTime(empresa, dataAg, hora);
-  await ensureAppointmentSlotIsFree(supabase, empresaId, profissional.id, dataAg, hora);
-
-  const { data, error } = await supabase.from('agenda_agendamentos').insert({
-    empresa_id: empresaId,
-    cliente_id: cliente.id,
-    servico_id: servico?.id || null,
-    profissional_id: profissional?.id || null,
-    cliente_nome: cliente.nome,
-    cliente_telefone: params.telefone || cliente.telefone || '',
-    servico_nome: servico?.nome || '',
-    profissional_nome: profissional?.nome || '',
-    data: dataAg,
-    hora,
-    status: params.status || 'Pendente',
-    valor: Number(servico?.preco || params.valor || 0)
-  }).select('*').single();
-  if (error) throw error;
-  return { answer: `Agendamento criado para ${data.cliente_nome} em ${data.data} as ${data.hora}.`, data };
-}
-
-function validateAppointmentTime(empresa, dataAg, hora) {
-  const weekday = new Date(`${dataAg}T00:00:00`).getDay();
-  const dayFields = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
-  if (empresa?.[dayFields[weekday]] === false) {
-    badRequest('A empresa esta fechada nesta data.');
-  }
-
-  const appointmentMinutes = minutesFromTime(hora);
-  const openingMinutes = minutesFromTime(empresa?.horario_abertura || '08:00');
-  const closingMinutes = minutesFromTime(empresa?.horario_fechamento || '18:00');
-  if (appointmentMinutes < openingMinutes || appointmentMinutes >= closingMinutes) {
-    badRequest('Horario fora do funcionamento da empresa.');
-  }
-
-  if (empresa?.intervalo_ativo) {
-    const pauseStart = minutesFromTime(empresa.intervalo_inicio || '12:00');
-    const pauseEnd = minutesFromTime(empresa.intervalo_fim || '13:00');
-    if (appointmentMinutes >= pauseStart && appointmentMinutes < pauseEnd) {
-      badRequest('Horario indisponivel durante o intervalo da empresa.');
-    }
-  }
-}
-
-async function ensureAppointmentSlotIsFree(supabase, empresaId, profissionalId, dataAg, hora) {
+// 1. Melhor Cliente (Maior volume de agendamentos válidos)
+async function getBestClient({ supabase, empresaId }) {
   const { data, error } = await supabase
     .from('agenda_agendamentos')
-    .select('id,cliente_nome,status')
+    .select('cliente_nome, valor')
     .eq('empresa_id', empresaId)
-    .eq('profissional_id', profissionalId)
-    .eq('data', dataAg)
-    .eq('hora', hora)
-    .limit(10);
-  if (error) throw error;
+    .not('status', 'in', '("Recusado","Excluido","Excluído","excluido")');
 
-  const busy = (data || []).find(appointment => !['Recusado', 'Excluido', 'Excluído', 'excluido'].includes(appointment.status));
-  if (busy) {
-    badRequest('Horario indisponivel: este profissional ja possui agendamento nesta data e horario.');
+  if (error) throw error;
+  if (!data || data.length === 0) return { answer: 'Nenhum agendamento encontrado para analisar.' };
+
+  const counts = {};
+  data.forEach(row => {
+    counts[row.cliente_nome] = (counts[row.cliente_nome] || 0) + 1;
+  });
+
+  const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  return { 
+    answer: `O seu melhor cliente e o(a) ${best[0]}, com um total de ${best[1]} agendamentos realizados.`,
+    data: { cliente: best[0], quantidade: best[1] }
+  };
+}
+
+// 2. Profissional Mais Ocupado
+async function getTopProfessional({ supabase, empresaId }) {
+  const { data, error } = await supabase
+    .from('agenda_agendamentos')
+    .select('profissional_nome')
+    .eq('empresa_id', empresaId)
+    .not('status', 'in', '("Recusado","Excluido","Excluído","excluido")');
+
+  if (error) throw error;
+  if (!data || data.length === 0) return { answer: 'Nenhum profissional com agendamentos registrados.' };
+
+  const counts = {};
+  data.forEach(row => {
+    if (row.profissional_nome) counts[row.profissional_nome] = (counts[row.profissional_nome] || 0) + 1;
+  });
+
+  if (Object.keys(counts).length === 0) return { answer: 'Nenhum profissional associado aos agendamentos encontrados.' };
+
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  return {
+    answer: `O profissional mais ocupado e o(a) ${top[0]}, com ${top[1]} agendamentos marcados.`,
+    data: { profissional: top[0], quantidade: top[1] }
+  };
+}
+
+// 3. Serviço Mais Procurado
+async function getTopService({ supabase, empresaId }) {
+  const { data, error } = await supabase
+    .from('agenda_agendamentos')
+    .select('servico_nome')
+    .eq('empresa_id', empresaId)
+    .not('status', 'in', '("Recusado","Excluido","Excluído","excluido")');
+
+  if (error) throw error;
+  if (!data || data.length === 0) return { answer: 'Nenhum servico foi agendado ate o momento.' };
+
+  const counts = {};
+  data.forEach(row => {
+    if (row.servico_nome) counts[row.servico_nome] = (counts[row.servico_nome] || 0) + 1;
+  });
+
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  return {
+    answer: `O servico mais procurado e o "${top[0]}", tendo sido reservado ${top[1]} vezes.`,
+    data: { servico: top[0], quantidade: top[1] }
+  };
+}
+
+// 4. Listar Horários Livres de um Profissional
+async function getFreeSlots({ supabase, empresa, empresaId }, params) {
+  const dataAlvo = params.data || todayISO(0);
+  
+  // Buscar profissional ativo padrão ou por nome
+  let profQuery = supabase.from('agenda_profissionais').select('*').eq('empresa_id', empresaId).eq('ativo', true);
+  if (params.profissional_nome) {
+    const normName = normalizeText(params.profissional_nome);
+    const { data: profs } = await profQuery;
+    var profissional = (profs || []).find(p => normalizeText(p.nome).includes(normName));
+  } else {
+    var profissional = (await profQuery.limit(1)).data?.[0];
   }
+
+  if (!profissional) return { answer: 'Nenhum profissional ativo encontrado para checar horarios.' };
+
+  // Validar se empresa abre no dia da semana
+  const weekday = new Date(`${dataAlvo}T00:00:00`).getDay();
+  const dayFields = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+  if (empresa?.[dayFields[weekday]] === false) {
+    return { answer: `A empresa nao abre nesta data (${dataAlvo}).` };
+  }
+
+  // Buscar agendamentos ocupados no dia
+  const { data: ocupados, error } = await supabase
+    .from('agenda_agendamentos')
+    .select('hora')
+    .eq('empresa_id', empresaId)
+    .eq('profissional_id', profissional.id)
+    .eq('data', dataAlvo)
+    .not('status', 'in', '("Recusado","Excluido","Excluído","excluido")');
+
+  if (error) throw error;
+
+  const horasOcupadas = (ocupados || []).map(o => o.hora.slice(0, 5));
+
+  // Gerar slots de 1 em 1 hora com base no funcionamento da empresa
+  const inicio = minutesFromTime(empresa?.horario_abertura || '08:00');
+  const fim = minutesFromTime(empresa?.horario_fechamento || '18:00');
+  const breakInicio = empresa?.intervalo_ativo ? minutesFromTime(empresa.intervalo_inicio || '12:00') : -1;
+  const breakFim = empresa?.intervalo_ativo ? minutesFromTime(empresa.intervalo_fim || '13:00') : -1;
+
+  const livres = [];
+  for (let min = inicio; min < fim; min += 60) {
+    if (min >= breakInicio && min < breakFim) continue; // Pula o intervalo
+    const horarioStr = timeFromMinutes(min);
+    if (!horasOcupadas.includes(horarioStr)) {
+      livres.push(horarioStr);
+    }
+  }
+
+  if (livres.length === 0) {
+    return { answer: `O profissional ${profissional.nome} nao possui horarios livres em ${dataAlvo}.` };
+  }
+
+  return {
+    answer: `Horarios livres para ${profissional.nome} no dia ${dataAlvo}: ${livres.join(', ')}.`,
+    data: { profissional: profissional.nome, data: dataAlvo, horarios_livres: livres }
+  };
 }
 
-async function findAppointment({ supabase, empresaId }, params) {
-  let query = supabase.from('agenda_agendamentos').select('*').eq('empresa_id', empresaId);
-  if (params.id) query = query.eq('id', params.id);
-  if (params.data) query = query.eq('data', params.data);
-  if (params.hora) query = query.eq('hora', params.hora);
-  const { data, error } = await query.order('data', { ascending: false }).limit(50);
-  if (error) throw error;
-  const name = normalizeText(params.cliente_nome || params.nome || '');
-  return (data || []).find(item => !name || normalizeText(item.cliente_nome).includes(name)) || null;
+// 5. Clientes Inativos (Clientes cadastrados mas sem agendamentos válidos)
+async function getInactiveClients({ supabase, empresaId }) {
+  const [clientesRes, agendamentosRes] = await Promise.all([
+    supabase.from('agenda_clientes').select('id, nome').eq('empresa_id', empresaId),
+    supabase.from('agenda_agendamentos').select('cliente_id').eq('empresa_id', empresaId).not('status', 'in', '("Recusado","Excluido","Excluído","excluido")')
+  ]);
+
+  if (clientesRes.error) throw clientesRes.error;
+  if (agendamentosRes.error) throw agendamentosRes.error;
+
+  const ativosIds = new Set((agendamentosRes.data || []).map(a => a.cliente_id));
+  const inativos = (clientesRes.data || []).filter(c => !ativosIds.has(c.id));
+
+  if (inativos.length === 0) return { answer: 'Todos os seus clientes cadastrados possuem agendamentos ativos!' };
+
+  const nomes = inativos.map(c => c.nome).slice(0, 10).join(', ');
+  return {
+    answer: `Identifiquei ${inativos.length} clientes inativos. Exemplos: ${nomes}.`,
+    data: { total_inativos: inativos.length, lista: inativos.map(c => c.nome) }
+  };
 }
 
-async function rescheduleAppointment(context, params) {
-  const agendamento = await findAppointment(context, params);
-  if (!agendamento?.id) badRequest('Agendamento nao encontrado para reagendar.');
-  const updates = { status: 'Reagendado' };
-  if (params.nova_data || params.data) updates.data = params.nova_data || params.data;
-  if (params.nova_hora || params.hora) updates.hora = params.nova_hora || params.hora;
-  const { data, error } = await context.supabase.from('agenda_agendamentos').update(updates).eq('empresa_id', context.empresaId).eq('id', agendamento.id).select('*').single();
-  if (error) throw error;
-  return { answer: `Agendamento de ${data.cliente_nome} reagendado para ${data.data} as ${data.hora}.`, data };
-}
+// 6. Agendamentos Pendentes
+async function getPendingAppointments({ supabase, empresaId }) {
+  const { data, error } = await supabase
+    .from('agenda_agendamentos')
+    .select('id, cliente_nome, data, hora, servico_nome')
+    .eq('empresa_id', empresaId)
+    .eq('status', 'Pendente')
+    .order('data', { ascending: true });
 
-async function cancelAppointment(context, params) {
-  const agendamento = await findAppointment(context, params);
-  if (!agendamento?.id) badRequest('Agendamento nao encontrado para cancelar.');
-  const { data, error } = await context.supabase.from('agenda_agendamentos').update({ status: normStatus(params.status || 'Recusado'), observacoes: params.motivo || agendamento.observacoes || '' }).eq('empresa_id', context.empresaId).eq('id', agendamento.id).select('*').single();
   if (error) throw error;
-  return { answer: `Agendamento de ${data.cliente_nome} cancelado.`, data };
+  if (!data || data.length === 0) return { answer: 'Nao existem agendamentos pendentes de aprovacao.' };
+
+  const lista = data.map(a => `${a.cliente_nome} (${a.servico_nome || 'Geral'}) no dia ${a.data} as ${a.hora}`).join('; ');
+  return {
+    answer: `Voce possui ${data.length} agendamentos pendentes: ${lista}.`,
+    data: { total_pendentes: data.length, agendamentos: data }
+  };
 }
