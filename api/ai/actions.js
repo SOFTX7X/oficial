@@ -55,17 +55,20 @@ async function updateClient({ supabase, empresaId }, params) {
 async function createProfessional({ supabase, empresaId }, params) {
   const nome = String(params.nome || '').trim();
   if (!nome) badRequest('Informe o nome do profissional.');
-  const { data, error } = await supabase.from('profissionais').insert({ empresa_id: empresaId, nome, especialidade: params.especialidade || '', telefone: params.telefone || '', ativo: true }).select('*').single();
+  // CORRIGIDO: de 'profissionais' para 'agenda_profissionais'
+  const { data, error } = await supabase.from('agenda_profissionais').insert({ empresa_id: empresaId, nome, especialidade: params.especialidade || '', telefone: params.telefone || '', ativo: true }).select('*').single();
   if (error) throw error;
   return { answer: `Profissional ${data.nome} criado com sucesso.`, data };
 }
 
 async function updateProfessional({ supabase, empresaId }, params) {
-  const current = params.id ? { id: params.id } : await findByName(supabase, 'profissionais', empresaId, params.nome);
+  // CORRIGIDO: de 'profissionais' para 'agenda_profissionais'
+  const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_profissionais', empresaId, params.nome);
   if (!current?.id) badRequest('Profissional nao encontrado para atualizar.');
   const updates = {};
   ['nome', 'especialidade', 'telefone', 'ativo'].forEach(key => { if (params[key] !== undefined && params[key] !== '') updates[key] = params[key]; });
-  const { data, error } = await supabase.from('profissionais').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
+  // CORRIGIDO: de 'profissionais' para 'agenda_profissionais'
+  const { data, error } = await supabase.from('agenda_profissionais').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
   if (error) throw error;
   return { answer: `Profissional ${data.nome} atualizado.`, data };
 }
@@ -73,13 +76,15 @@ async function updateProfessional({ supabase, empresaId }, params) {
 async function createService({ supabase, empresaId }, params) {
   const nome = String(params.nome || '').trim();
   if (!nome) badRequest('Informe o nome do servico.');
-  const { data, error } = await supabase.from('servicos').insert({ empresa_id: empresaId, nome, preco: Number(params.preco || 0), duracao: Number(params.duracao_minutos || 60), ativo: true }).select('*').single();
+  // CORRIGIDO: de 'servicos' para 'agenda_servicos'
+  const { data, error } = await supabase.from('agenda_servicos').insert({ empresa_id: empresaId, nome, preco: Number(params.preco || 0), duracao: Number(params.duracao_minutos || 60), ativo: true }).select('*').single();
   if (error) throw error;
   return { answer: `Servico ${data.nome} criado com sucesso.`, data };
 }
 
 async function updateService({ supabase, empresaId }, params) {
-  const current = params.id ? { id: params.id } : await findByName(supabase, 'servicos', empresaId, params.nome);
+  // CORRIGIDO: de 'servicos' para 'agenda_servicos'
+  const current = params.id ? { id: params.id } : await findByName(supabase, 'agenda_servicos', empresaId, params.nome);
   if (!current?.id) badRequest('Servico nao encontrado para atualizar.');
   const updates = {};
   if (params.nome !== undefined && params.nome !== '') updates.nome = params.nome;
@@ -87,7 +92,8 @@ async function updateService({ supabase, empresaId }, params) {
   if (params.duracao_minutos !== undefined && params.duracao_minutos !== '') updates.duracao = Number(params.duracao_minutos);
   if (params.status !== undefined && params.status !== '') updates.ativo = params.status === 'ativo' || params.status === true;
   
-  const { data, error } = await supabase.from('servicos').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
+  // CORRIGIDO: de 'servicos' para 'agenda_servicos'
+  const { data, error } = await supabase.from('agenda_servicos').update(updates).eq('empresa_id', empresaId).eq('id', current.id).select('*').single();
   if (error) throw error;
   return { answer: `Servico ${data.nome} atualizado.`, data };
 }
@@ -101,44 +107,48 @@ async function createAppointment({ supabase, empresa, empresaId }, params) {
   let cliente = await findByName(supabase, 'agenda_clientes', empresaId, clienteNome);
   if (!cliente) cliente = (await createClient({ supabase, empresaId }, { nome: clienteNome, telefone: params.telefone })).data;
 
-  // Usa o servico_id pré-mapeado dinamicamente no interpretador ou busca fallback na tabela real 'servicos'
   let servico = null;
   if (params.servico_id) {
-    const { data: svc } = await supabase.from('servicos').select('*').eq('id', params.servico_id).single();
+    // CORRIGIDO: de 'servicos' para 'agenda_servicos'
+    const { data: svc } = await supabase.from('agenda_servicos').select('*').eq('id', params.servico_id).single();
     servico = svc;
   } else if (params.servico_nome) {
-    servico = await findByName(supabase, 'servicos', empresaId, params.servico_nome);
+    // CORRIGIDO: de 'servicos' para 'agenda_servicos'
+    servico = await findByName(supabase, 'agenda_servicos', empresaId, params.servico_nome);
   }
   if (!servico) {
-    servico = (await supabase.from('servicos').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
+    // CORRIGIDO: de 'servicos' para 'agenda_servicos'
+    servico = (await supabase.from('agenda_servicos').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
   }
 
-  // Usa o profissional_id pré-mapeado dinamicamente no interpretador ou busca fallback na tabela real 'profissionais'
-  let profissional = null;
+  let profesional = null;
   if (params.profissional_id) {
-    const { data: prof } = await supabase.from('profissionais').select('*').eq('id', params.profissional_id).single();
-    profissional = prof;
+    // CORRIGIDO: de 'profissionais' para 'agenda_profissionais'
+    const { data: prof } = await supabase.from('agenda_profissionais').select('*').eq('id', params.profissional_id).single();
+    profisinal = prof;
   } else if (params.profissional_nome) {
-    profissional = await findByName(supabase, 'profissionais', empresaId, params.profissional_nome);
+    // CORRIGIDO: de 'profissionais' para 'agenda_profissionais'
+    profisinal = await findByName(supabase, 'agenda_profissionais', empresaId, params.profissional_nome);
   }
-  if (!profissional) {
-    profissional = (await supabase.from('profissionais').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
+  if (!profisinal) {
+    // CORRIGIDO: de 'profissionais' para 'agenda_profissionais'
+    profisinal = (await supabase.from('agenda_profissionais').select('*').eq('empresa_id', empresaId).eq('ativo', true).limit(1)).data?.[0];
   }
 
-  if (!profissional?.id) badRequest('Nenhum profissional ativo encontrado para criar o agendamento.');
+  if (!profisinal?.id) badRequest('Nenhum profissional ativo encontrado para criar o agendamento.');
 
   validateAppointmentTime(empresa, dataAg, hora);
-  await ensureAppointmentSlotIsFree(supabase, empresaId, profissional.id, dataAg, hora);
+  await ensureAppointmentSlotIsFree(supabase, empresaId, profisinal.id, dataAg, hora);
 
   const { data, error } = await supabase.from('agenda_agendamentos').insert({
     empresa_id: empresaId,
     cliente_id: cliente.id,
     servico_id: servico?.id || null,
-    profissional_id: profesional?.id || null,
+    profissional_id: profisinal?.id || null,
     cliente_nome: cliente.nome,
     cliente_telefone: params.telefone || cliente.telefone || '',
     servico_nome: servico?.nome || '',
-    profissional_nome: profissional?.nome || '',
+    profissional_nome: profisinal?.nome || '',
     data: dataAg,
     hora,
     status: params.status || 'Pendente',
@@ -176,7 +186,7 @@ async function ensureAppointmentSlotIsFree(supabase, empresaId, profesionalId, d
     .from('agenda_agendamentos')
     .select('id,cliente_nome,status')
     .eq('empresa_id', empresaId)
-    .eq('profissional_id', profissionalId)
+    .eq('profissional_id', profesionalId)
     .eq('data', dataAg)
     .eq('hora', hora)
     .limit(10);
