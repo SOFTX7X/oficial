@@ -98,14 +98,17 @@ ou
 }
 
 ═══════════════════════════════════════
-REGRAS
+REGRAS CRÍTICAS
 ═══════════════════════════════════════
+- NUNCA misture texto com JSON. Se a resposta for JSON, retorne SOMENTE o JSON, nada mais.
+- NUNCA use blocos de código markdown (sem ```) nas respostas JSON.
 - Nunca invente dados (nomes, datas, valores) — pergunte se não souber
 - Datas no formato YYYY-MM-DD internamente, mas fale com o usuário em dd/mm
 - Horários internamente como HH:MM, mas fale como "14h" ou "14h30"
 - Nunca exponha IDs, UUIDs ou campos técnicos
 - Seja sempre em português brasileiro
-- Para ações destrutivas (excluir, desativar), confirme com o usuário antes`;
+- Para ações destrutivas (excluir, desativar), confirme com o usuário antes
+- Saudações ("oi", "olá", "tudo bem") = responda em TEXTO PURO, nunca JSON`;
 }
 
 // ─── Chamada principal ao Gemini ─────────────────────────────────────────────
@@ -166,29 +169,32 @@ export async function callGemini(context, message, history = []) {
 
 // ─── Parser da resposta do Gemini ────────────────────────────────────────────
 function parseGeminiResponse(text) {
-  // Tenta extrair JSON da resposta
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  // Remove blocos de código markdown se houver (```json ... ```)
+  const cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+  // Tenta extrair o JSON mais externo da resposta
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     try {
       const parsed = JSON.parse(jsonMatch[0]);
 
-      if (parsed.action === 'ask') {
-        return { type: 'slot_filling', answer: parsed.question };
-      }
-
-      if (parsed.action && parsed.action !== 'ask') {
+      // Verifica se é realmente uma resposta de ação (tem campo "action")
+      if (parsed && typeof parsed.action === 'string') {
+        if (parsed.action === 'ask') {
+          return { type: 'slot_filling', answer: parsed.question || 'Pode repetir?' };
+        }
         return {
           type: 'action',
           action: parsed.action,
           params: parsed.params || {},
-          answer: parsed.confirm_message || 'Executando...'
+          answer: parsed.confirm_message || 'Processando...'
         };
       }
     } catch (_) {
-      // não era JSON válido, trata como texto
+      // JSON inválido — trata tudo como texto
     }
   }
 
   // Resposta de texto puro (conversa, suporte, conteúdo)
-  return { type: 'chat', answer: text };
+  return { type: 'chat', answer: cleaned || text };
 }
