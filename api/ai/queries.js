@@ -431,7 +431,7 @@ async function listAllAppointments({ supabase, empresaId }) {
 // ─── Clientes por período ─────────────────────────────────────────────────────
 async function getClientsByPeriod({ supabase, empresaId }, params) {
   const texto = String(params.text || '');
-  const mesMatch = texto.match(/(\d{2})\/(\d{4})|(\d{4})-(\d{2})|(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)/i);
+  const mesMatch = texto.match(/(\d{2})\/(\d{4})|(\d{4})-(\d{2})|(janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)/i);
   let prefixo = todayISO(0).slice(0, 7);
 
   if (mesMatch) {
@@ -440,29 +440,40 @@ async function getClientsByPeriod({ supabase, empresaId }, params) {
     } else if (mesMatch[3] && mesMatch[4]) {
       prefixo = `${mesMatch[3]}-${mesMatch[4]}`;
     } else if (mesMatch[5]) {
-      const meses = { jan:'01',fev:'02',mar:'03',abr:'04',mai:'05',jun:'06',jul:'07',ago:'08',set:'09',out:'10',nov:'11',dez:'12' };
+      const meses = {
+        janeiro:'01', fevereiro:'02', marco:'03', abril:'04', maio:'05', junho:'06',
+        julho:'07', agosto:'08', setembro:'09', outubro:'10', novembro:'11', dezembro:'12',
+        jan:'01', fev:'02', mar:'03', abr:'04', mai:'05', jun:'06',
+        jul:'07', ago:'08', set:'09', out:'10', nov:'11', dez:'12'
+      };
       const ano = new Date().getFullYear();
       prefixo = `${ano}-${meses[mesMatch[5].toLowerCase()]}`;
     }
   }
 
-  const dataInicio = `${prefixo}-01`;
-  const dataFim = `${prefixo}-31`;
-
+  // Busca agendamentos no período e conta clientes únicos
   const { data, error } = await supabase
-    .from('agenda_clientes')
-    .select('id, nome, criado_em')
+    .from('agenda_agendamentos')
+    .select('cliente_id, cliente_nome')
     .eq('empresa_id', empresaId)
-    .gte('criado_em', dataInicio)
-    .lte('criado_em', dataFim + 'T23:59:59');
+    .like('data', `${prefixo}%`)
+    .not('status', 'in', '(Recusado,Excluido,Excluído,excluido)');
 
   if (error) throw error;
-  if (!data?.length) return { answer: `Nenhum cliente cadastrado no periodo ${prefixo}.` };
+  if (!data?.length) return { answer: `Nenhum cliente com agendamento em ${prefixo}.` };
 
-  const nomes = data.map(c => c.nome).slice(0, 10).join(', ');
+  // Clientes únicos
+  const vistos = new Set();
+  const unicos = [];
+  for (const row of data) {
+    const key = row.cliente_id || row.cliente_nome;
+    if (!vistos.has(key)) { vistos.add(key); unicos.push(row.cliente_nome); }
+  }
+
+  const nomes = unicos.slice(0, 10).join(', ');
   return {
-    answer: `${data.length} cliente${data.length !== 1 ? 's' : ''} cadastrado${data.length !== 1 ? 's' : ''} em ${prefixo}: ${nomes}.`,
-    data: { total: data.length, periodo: prefixo, clientes: data }
+    answer: `${unicos.length} cliente${unicos.length !== 1 ? 's' : ''} com agendamento em ${prefixo}: ${nomes}.`,
+    data: { total: unicos.length, periodo: prefixo, clientes: unicos }
   };
 }
 
