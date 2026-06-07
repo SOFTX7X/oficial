@@ -663,9 +663,10 @@ function setView(view) {
   // Esconder botão Menu e mostrar botão Voltar na tela da IA (mobile)
   const menuTrigger = document.querySelector('.mobile-menu-trigger');
   const backBtn = document.getElementById('aiBackBtn');
+  const isMobile = window.innerWidth <= 768;
   if (view === 'ai') {
-    if (menuTrigger) menuTrigger.style.display = 'none';
-    if (backBtn) backBtn.style.display = 'inline-flex';
+    if (isMobile && menuTrigger) menuTrigger.style.display = 'none';
+    if (isMobile && backBtn) backBtn.style.display = 'inline-flex';
     _aiCarregarHistoricoLocal();
     _aiCarregarMensagensNaTela();
   } else {
