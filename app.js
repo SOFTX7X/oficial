@@ -600,12 +600,18 @@ function _absorverResposta(textoUsuario, ultimaPergunta) {
   if (!ultimaPergunta) return;
   const p = ultimaPergunta.toLowerCase();
   const t = textoUsuario.trim();
-  if (/nome do cliente|qual.*cliente/.test(p))                    { _aiContext.cliente_nome = t; return; }
-  if (/quando.*agendar|qual.*data|para quando/.test(p))           { _aiContext.data = t; return; }
-  if (/qual.*horário|que hora|horario/.test(p))                   { _aiContext.hora = t; return; }
-  if (/nome.*profissional/.test(p))                               { _aiContext.nome = t; return; }
-  if (/nome.*serviço|nome.*servico/.test(p))                      { _aiContext.nome = t; return; }
-  if (/nome.*cliente.*cadastrar|cadastrar/.test(p))               { _aiContext.nome = t; return; }
+
+  // Pergunta pede tudo junto (nome + data + hora) → absorve como nome
+  if (/informe o nome.*data.*horário|nome.*data.*hora/.test(p)) {
+    _aiContext.cliente_nome = t;
+    return;
+  }
+  if (/nome do cliente|qual.*cliente|nome.*cliente/.test(p)) { _aiContext.cliente_nome = t; return; }
+  if (/quando.*agendar|qual.*data|para quando/.test(p))      { _aiContext.data = t; return; }
+  if (/qual.*horário|que hora|horario/.test(p))              { _aiContext.hora = t; return; }
+  if (/nome.*profissional/.test(p))                         { _aiContext.nome = t; return; }
+  if (/nome.*serviço|nome.*servico/.test(p))                { _aiContext.nome = t; return; }
+  if (/nome.*cliente.*cadastrar|cadastrar/.test(p))         { _aiContext.nome = t; return; }
   if (/cliente.*agendamento|criar.*agendamento/.test(p)) {
     const r = t.toLowerCase();
     if (/agendamento|agendar|marcar/.test(r))  _aiContext.intent = 'create_appointment';
