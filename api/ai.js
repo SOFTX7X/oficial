@@ -1,5 +1,6 @@
 import { createAuthenticatedContext } from './ai/auth.js';
 import { interpretIntent } from './ai/intent.js';
+import { formatWithGemini } from './ai/gemini.js';
 
 export default async function handler(req, res) {
   // CORS
@@ -26,7 +27,18 @@ export default async function handler(req, res) {
       slotState: slotState || null
     });
 
-    return res.status(200).json({ success: true, ...result });
+    // 3. Formata a resposta com Gemini Flash (nível gratuito)
+    const formattedAnswer = await formatWithGemini(
+      result.answer,
+      result.data || null,
+      result.type || 'query'
+    );
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+      answer: formattedAnswer
+    });
 
   } catch (error) {
     return res.status(error.statusCode || 500).json({
