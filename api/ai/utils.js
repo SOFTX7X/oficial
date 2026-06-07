@@ -56,5 +56,10 @@ export function normStatus(status) {
 }
 
 export function activeStatus(query) {
-  return query.neq('status', 'excluido').neq('status', 'Excluido').neq('status', 'Excluído');
+  // Se for uma tabela que usa o padrão booleano 'ativo' (como profissionais ou servicos),
+  // a query falharia ao buscar pela string 'excluido'. Esta verificação dinâmica previne isso.
+  if (query && query.url && (query.url.includes('profissionais') || query.url.includes('servicos'))) {
+    return query.eq('ativo', true);
+  }
+  return query.not('status', 'in', '("Excluido","Excluído","excluido")');
 }
