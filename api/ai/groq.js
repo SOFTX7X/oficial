@@ -1,62 +1,96 @@
 // ─── VyXora AI — Integração Groq completa ─────────────────────────────────────
+// 4 funções principais:
+//   1. askGroq()         → fallback inteligente para perguntas livres
+//   2. polishAnswer()    → formata/embeleza respostas brutas da API
+//   3. generateContent() → gera textos profissionais para publicação
+//   4. buildSystemPrompt() → system prompt rico com contexto do painel
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL   = 'llama-3.3-70b-versatile';
-const GROQ_TIMEOUT = 15000;
+const GROQ_TIMEOUT = 10000;
 
-// ─── System prompt base mínimo — sem descrever o painel ───────────────────────
-function buildSystemPrompt(context, mode = 'chat') {
+// ─── System prompt rico com todo o contexto do painel ─────────────────────────
+function buildSystemPrompt(context, mode = 'assistant') {
   const empresa = context?.company;
   const nome    = empresa?.name || 'esta empresa';
-  const tipo    = empresa?.type || 'negócio';
+  const tipo    = empresa?.type || 'salão/clínica/consultório';
 
-  if (mode === 'chat') {
-    return `Você é a VyXora AI, assistente do painel de agendamentos de "${nome}" (${tipo}).
+  const base = `Você é a VyXora AI, assistente inteligente integrada ao painel de gestão de agendamentos de "${nome}" (${tipo}).
 
-REGRAS — SIGA RIGOROSAMENTE:
-- Responda SEMPRE em português brasileiro
-- Seja simpático e direto
-- NUNCA invente dados do negócio: nomes de clientes, serviços, profissionais, preços, configurações, seções do painel
-- NUNCA descreva funcionalidades do painel como se soubesse que existem — você só sabe o que o sistema te enviar
-- Se o usuário pedir dados (clientes, serviços, agendamentos, faturamento, etc.) e você não os recebeu, responda: "Não encontrei essa informação. Tente digitar o comando novamente."
-- NUNCA mencione Groq, Llama, OpenAI ou qualquer IA
-- Você se chama VyXora AI`;
-  }
+SOBRE O SISTEMA VYXORA:
+O painel possui as seguintes seções e funcionalidades:
 
-  if (mode === 'polish_action') {
-    return `Você é a VyXora AI, assistente do painel de agendamentos de "${nome}".
+📅 AGENDAMENTOS
+- Criar agendamento: cliente, data, hora, profissional (opcional), serviço (opcional)
+- Reagendar: alterar data e horário de um agendamento existente
+- Cancelar, Confirmar ou Concluir agendamentos
+- Visualizar agenda do dia, semana ou período
+- Status possíveis: pendente, confirmado, concluído, cancelado
 
-TAREFA: O sistema executou uma ação e retornou uma confirmação. Transforme em resposta amigável.
-- Mantenha TODOS os dados exatos (nomes, datas, horários, valores) — não altere nada
-- Adicione emoji relevante
-- Seja caloroso e objetivo
-- Máximo 3 linhas
-- NUNCA invente informações além do que foi confirmado
-- Responda em português brasileiro`;
-  }
+👥 CLIENTES
+- Cadastrar com nome, telefone e email
+- Editar, desativar, reativar ou excluir
+- Consultar histórico, inativos, melhores clientes
 
-  if (mode === 'polish_query') {
-    return `Você é a VyXora AI, assistente do painel de agendamentos de "${nome}".
+👤 PROFISSIONAIS
+- Cadastrar com nome, especialidade e telefone
+- Editar, desativar, reativar ou excluir
+- Ver profissional mais ocupado, agenda por profissional
 
-TAREFA: O sistema retornou dados reais do banco. Reformate de forma clara e amigável.
-- Use SOMENTE os dados presentes no texto abaixo — nenhum a mais
-- Copie nomes, valores e datas EXATAMENTE como estão
-- NUNCA invente, complete ou adicione qualquer dado
-- Organize com emojis quando houver lista
-- Adicione no máximo uma dica curta no final, sem citar dados que não foram fornecidos
-- Responda em português brasileiro`;
+✦ SERVIÇOS
+- Cadastrar com nome, preço e duração em minutos
+- Editar, desativar, reativar ou excluir
+- Ver serviço mais popular/agendado
+
+📊 RELATÓRIOS E FINANCEIRO
+- Faturamento total, por mês, por período
+- Estatísticas: agendamentos hoje, amanhã, pendentes, confirmados
+- Clientes inativos, novos clientes por período
+- Top clientes, top profissionais, top serviços
+
+⚙️ CONFIGURAÇÕES
+- Dados da empresa (nome, tipo, horário de funcionamento)
+- Horários disponíveis para agendamento
+
+COMANDOS QUE O USUÁRIO PODE USAR (exemplos):
+"agendar Maria para amanhã às 14h"
+"listar clientes", "cadastrar profissional"
+"faturamento de junho", "agendamentos hoje"
+"cancelar agendamento do João", "confirmar agendamento da Ana"
+"horários livres para sexta", "clientes inativos"
+
+REGRAS OBRIGATÓRIAS:
+- Responda SEMPRE em português brasileiro, de forma simpática e objetiva
+- NUNCA invente dados reais do sistema (clientes, valores, datas)
+- NUNCA mencione Groq, Llama, OpenAI ou qualquer tecnologia de IA
+- Você se chama VyXora AI e só isso
+- Para consultas de dados reais, oriente o usuário a usar os comandos
+- Seja direto — respostas curtas são melhores que longas
+- Use emojis com moderação para tornar as respostas mais amigáveis`;
+
+  if (mode === 'polish') {
+    return `${base}
+
+MODO ATUAL: Formatação de resposta
+Você vai receber uma mensagem de confirmação de ação do sistema (ex: "Agendamento criado para João em 10/06 às 14:00") e deve transformá-la em uma resposta mais amigável, humana e profissional.
+- Mantenha as informações exatas (nomes, datas, horários)
+- Adicione emojis relevantes
+- Seja caloroso mas objetivo
+- Máximo 3 linhas`;
   }
 
   if (mode === 'content') {
-    return `Você é a VyXora AI, assistente do painel de agendamentos de "${nome}" (${tipo}).
+    return `${base}
 
-TAREFA: Gere o texto solicitado para a empresa.
+MODO ATUAL: Geração de conteúdo profissional
+Você vai gerar textos para publicação (redes sociais, WhatsApp, comunicados) para a empresa "${nome}".
 - Adapte o tom ao tipo de negócio (${tipo})
-- Não invente dados como telefone, endereço ou preços a menos que fornecidos
-- Responda em português brasileiro`;
+- Seja profissional mas acessível
+- Inclua call-to-action quando relevante
+- Não invente dados como telefone, endereço ou preços a menos que fornecidos`;
   }
 
-  return `Você é a VyXora AI, assistente do painel de agendamentos de "${nome}". Responda em português brasileiro de forma simpática e direta.`;
+  return base;
 }
 
 // ─── Chamada base ao Groq ──────────────────────────────────────────────────────
@@ -98,63 +132,64 @@ async function callGroq(messages, options = {}) {
   }
 }
 
-// ─── 1. Conversa geral — saudações, dúvidas, orientações ──────────────────────
+// ─── 1. Fallback inteligente para perguntas livres ─────────────────────────────
 export async function askGroq(context, message, history = []) {
-  const recentHistory = (history || []).slice(-8).map(h => ({
+  const recentHistory = (history || []).slice(-6).map(h => ({
     role:    h.role === 'assistant' ? 'assistant' : 'user',
     content: h.content || ''
   }));
 
   const messages = [
-    { role: 'system', content: buildSystemPrompt(context, 'chat') },
+    { role: 'system', content: buildSystemPrompt(context, 'assistant') },
     ...recentHistory,
     { role: 'user',   content: message }
   ];
 
-  const reply = await callGroq(messages, { temperature: 0.7, maxTokens: 400 });
+  const reply = await callGroq(messages, { temperature: 0.7, maxTokens: 512 });
   return { type: 'chat', answer: reply };
 }
 
-// ─── 2. Formata confirmações de AÇÕES vindas da API ───────────────────────────
+// ─── 2. Formata/embeleza respostas brutas da API ───────────────────────────────
+// Recebe: "Agendamento criado para João em 10/06 às 14:00."
+// Retorna: "✅ Agendamento marcado! João está confirmado para 10/06 às 14h. Tudo certo no sistema! 📅"
 export async function polishAnswer(context, rawAnswer, intentName = '') {
   const apiKey = process.env.GROQ_API_KEY;
+  // Se não tiver chave, devolve a resposta original sem quebrar
   if (!apiKey) return rawAnswer;
+
+  // Ações que valem a pena polir
+  const worthPolishing = [
+    'create_appointment', 'reschedule_appointment', 'cancel_appointment',
+    'confirm_appointment', 'conclude_appointment',
+    'create_client', 'create_professional', 'create_service',
+    'update_client', 'update_professional', 'update_service',
+    'disable_client', 'disable_professional', 'disable_service',
+    'reactivate_client', 'reactivate_professional', 'reactivate_service',
+    'delete_client', 'delete_professional', 'delete_service'
+  ];
+
+  if (intentName && !worthPolishing.includes(intentName)) return rawAnswer;
 
   try {
     const messages = [
-      { role: 'system', content: buildSystemPrompt(context, 'polish_action') },
-      { role: 'user',   content: `Confirmação do sistema:\n\n"${rawAnswer}"` }
+      { role: 'system', content: buildSystemPrompt(context, 'polish') },
+      { role: 'user',   content: `Transforme esta mensagem do sistema em uma resposta amigável e profissional:\n\n"${rawAnswer}"` }
     ];
-    const polished = await callGroq(messages, { temperature: 0.4, maxTokens: 200 });
+
+    const polished = await callGroq(messages, { temperature: 0.6, maxTokens: 200 });
     return polished;
   } catch {
+    // Falha silenciosa — usa resposta original
     return rawAnswer;
   }
 }
 
-// ─── 3. Formata dados de CONSULTAS vindos da API ───────────────────────────────
-export async function polishQueryAnswer(context, rawAnswer) {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return rawAnswer;
-  if (!rawAnswer || rawAnswer.length < 20) return rawAnswer;
-
-  try {
-    const messages = [
-      { role: 'system', content: buildSystemPrompt(context, 'polish_query') },
-      { role: 'user',   content: `Dados retornados pelo sistema:\n\n${rawAnswer}` }
-    ];
-    const polished = await callGroq(messages, { temperature: 0.3, maxTokens: 700 });
-    return polished;
-  } catch {
-    return rawAnswer;
-  }
-}
-
-// ─── 4. Gera textos profissionais para publicação ─────────────────────────────
+// ─── 3. Gera textos profissionais para publicação ─────────────────────────────
+// Tipos suportados: post_instagram, post_whatsapp, comunicado, promocao, aviso, descricao_servico
 export async function generateContent(context, request) {
   const { tipo = 'post_whatsapp', tema, detalhes = '', tom = 'profissional' } = request;
 
-  const empresa     = context?.company;
+  const empresa = context?.company;
   const nomeEmpresa = empresa?.name || 'nossa empresa';
   const tipoEmpresa = empresa?.type || 'negócio';
 
@@ -168,9 +203,11 @@ export async function generateContent(context, request) {
   }[tipo] || 'texto (máx. 150 palavras)';
 
   const prompt = `Gere um ${tipoDescricao} para "${nomeEmpresa}" (${tipoEmpresa}).
+
 Tema: ${tema}
-${detalhes ? `Detalhes: ${detalhes}` : ''}
+${detalhes ? `Detalhes adicionais: ${detalhes}` : ''}
 Tom: ${tom}
+
 Retorne apenas o texto final, sem explicações ou títulos.`;
 
   const messages = [
