@@ -226,11 +226,10 @@ export async function interpretIntent(context, message, fullBody) {
   const queryResult = await safeRunQuery(context, text);
 
   if (!queryResult || queryResult.answer?.startsWith('Nao entendi')) {
-    // Tenta responder via Groq antes de usar o fallback genérico
+    // API não reconheceu — Groq entra só para conversar/orientar, SEM inventar dados
     try {
-      return await askGroq(context, message, history);
+      return await askGroq(context, `[SEM DADOS DO SISTEMA] ${message}`, history);
     } catch (err) {
-      // Groq indisponível ou sem chave — usa fallback interno normalmente
       return { type: 'chat', answer: fallbackAnswer(message) };
     }
   }
