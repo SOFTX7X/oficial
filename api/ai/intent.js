@@ -228,7 +228,7 @@ export async function interpretIntent(context, message, fullBody) {
   if (!queryResult || queryResult.answer?.startsWith('Nao entendi')) {
     // API não reconheceu — Groq entra só para conversar/orientar, SEM inventar dados
     try {
-      return await askGroq(context, `[SEM DADOS DO SISTEMA] ${message}`, history);
+      return await askGroq(context, message, history);
     } catch (err) {
       return { type: 'chat', answer: fallbackAnswer(message) };
     }
