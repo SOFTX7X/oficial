@@ -2,14 +2,15 @@
 // 4 funções principais:
 //   1. askGroq()         → fallback inteligente para perguntas livres
 //   2. polishAnswer()    → formata/embeleza respostas brutas da API
-//   3. generateContent() → gera textos profissionais para publicação
-//   4. buildSystemPrompt() → system prompt rico com contexto do painel
+//   3. polishQueryAnswer() → formata respostas de consultas (listas, dados)
+//   4. generateContent() → gera textos profissionais para publicação
+//   5. buildSystemPrompt() → system prompt rico com contexto do painel
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL   = 'llama-3.3-70b-versatile';
-const GROQ_TIMEOUT = 10000;
+const GROQ_TIMEOUT = 15000;
 
-// ─── System prompt rico com todo o contexto do painel ─────────────────────────
+// ─── System prompt — contexto do painel, sem inventar dados ───────────────────
 function buildSystemPrompt(context, mode = 'assistant') {
   const empresa = context?.company;
   const nome    = empresa?.name || 'esta empresa';
@@ -52,38 +53,43 @@ O painel possui as seguintes seções e funcionalidades:
 - Dados da empresa (nome, tipo, horário de funcionamento)
 - Horários disponíveis para agendamento
 
-COMANDOS QUE O USUÁRIO PODE USAR (exemplos):
-"agendar Maria para amanhã às 14h"
-"listar clientes", "cadastrar profissional"
-"faturamento de junho", "agendamentos hoje"
-"cancelar agendamento do João", "confirmar agendamento da Ana"
-"horários livres para sexta", "clientes inativos"
-
 REGRAS OBRIGATÓRIAS:
 - Responda SEMPRE em português brasileiro, de forma simpática e objetiva
-- NUNCA invente dados reais do sistema (clientes, valores, datas)
+- NUNCA invente dados — use apenas o que for fornecido pelo sistema
 - NUNCA mencione Groq, Llama, OpenAI ou qualquer tecnologia de IA
 - Você se chama VyXora AI e só isso
-- Para consultas de dados reais, oriente o usuário a usar os comandos
-- Seja direto — respostas curtas são melhores que longas
+- Seja direto — respostas curtas e claras são melhores que longas
 - Use emojis com moderação para tornar as respostas mais amigáveis`;
 
   if (mode === 'polish') {
     return `${base}
 
-MODO ATUAL: Formatação de resposta
-Você vai receber uma mensagem de confirmação de ação do sistema (ex: "Agendamento criado para João em 10/06 às 14:00") e deve transformá-la em uma resposta mais amigável, humana e profissional.
-- Mantenha as informações exatas (nomes, datas, horários)
+MODO ATUAL: Formatação de ação
+Você recebeu a confirmação de uma ação executada pelo sistema (ex: "Agendamento criado para João em 10/06 às 14:00").
+Transforme em uma resposta amigável, humana e profissional.
+- Mantenha TODAS as informações exatas (nomes, datas, horários, valores)
 - Adicione emojis relevantes
 - Seja caloroso mas objetivo
 - Máximo 3 linhas`;
+  }
+
+  if (mode === 'polish_query') {
+    return `${base}
+
+MODO ATUAL: Apresentação de dados
+Você recebeu dados já buscados pelo sistema (lista de clientes, agendamentos, faturamento, etc.).
+Apresente esses dados de forma clara, organizada e amigável.
+- NUNCA omita, altere ou invente nenhum dado — apenas reformate e apresente
+- Organize com emojis e estrutura visual quando houver lista
+- Adicione um comentário útil ou dica no final quando fizer sentido
+- Seja objetivo e direto`;
   }
 
   if (mode === 'content') {
     return `${base}
 
 MODO ATUAL: Geração de conteúdo profissional
-Você vai gerar textos para publicação (redes sociais, WhatsApp, comunicados) para a empresa "${nome}".
+Gere textos para publicação (redes sociais, WhatsApp, comunicados) para "${nome}".
 - Adapte o tom ao tipo de negócio (${tipo})
 - Seja profissional mas acessível
 - Inclua call-to-action quando relevante
@@ -134,7 +140,7 @@ async function callGroq(messages, options = {}) {
 
 // ─── 1. Fallback inteligente para perguntas livres ─────────────────────────────
 export async function askGroq(context, message, history = []) {
-  const recentHistory = (history || []).slice(-6).map(h => ({
+  const recentHistory = (history || []).slice(-8).map(h => ({
     role:    h.role === 'assistant' ? 'assistant' : 'user',
     content: h.content || ''
   }));
@@ -145,19 +151,15 @@ export async function askGroq(context, message, history = []) {
     { role: 'user',   content: message }
   ];
 
-  const reply = await callGroq(messages, { temperature: 0.7, maxTokens: 512 });
+  const reply = await callGroq(messages, { temperature: 0.7, maxTokens: 600 });
   return { type: 'chat', answer: reply };
 }
 
-// ─── 2. Formata/embeleza respostas brutas da API ───────────────────────────────
-// Recebe: "Agendamento criado para João em 10/06 às 14:00."
-// Retorna: "✅ Agendamento marcado! João está confirmado para 10/06 às 14h. Tudo certo no sistema! 📅"
+// ─── 2. Formata respostas de AÇÕES (criar, cancelar, reagendar, etc.) ─────────
 export async function polishAnswer(context, rawAnswer, intentName = '') {
   const apiKey = process.env.GROQ_API_KEY;
-  // Se não tiver chave, devolve a resposta original sem quebrar
   if (!apiKey) return rawAnswer;
 
-  // Ações que valem a pena polir
   const worthPolishing = [
     'create_appointment', 'reschedule_appointment', 'cancel_appointment',
     'confirm_appointment', 'conclude_appointment',
@@ -173,19 +175,36 @@ export async function polishAnswer(context, rawAnswer, intentName = '') {
   try {
     const messages = [
       { role: 'system', content: buildSystemPrompt(context, 'polish') },
-      { role: 'user',   content: `Transforme esta mensagem do sistema em uma resposta amigável e profissional:\n\n"${rawAnswer}"` }
+      { role: 'user',   content: `Transforme esta confirmação do sistema em uma resposta amigável e profissional:\n\n"${rawAnswer}"` }
     ];
-
     const polished = await callGroq(messages, { temperature: 0.6, maxTokens: 200 });
     return polished;
   } catch {
-    // Falha silenciosa — usa resposta original
     return rawAnswer;
   }
 }
 
-// ─── 3. Gera textos profissionais para publicação ─────────────────────────────
-// Tipos suportados: post_instagram, post_whatsapp, comunicado, promocao, aviso, descricao_servico
+// ─── 3. Formata respostas de CONSULTAS (dados já vindos da API) ────────────────
+export async function polishQueryAnswer(context, rawAnswer) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return rawAnswer;
+
+  // Respostas muito curtas (erros, "nenhum resultado") não precisam de polish
+  if (!rawAnswer || rawAnswer.length < 40) return rawAnswer;
+
+  try {
+    const messages = [
+      { role: 'system', content: buildSystemPrompt(context, 'polish_query') },
+      { role: 'user',   content: `Apresente estes dados do sistema de forma clara e amigável. NÃO altere nenhum dado:\n\n${rawAnswer}` }
+    ];
+    const polished = await callGroq(messages, { temperature: 0.5, maxTokens: 700 });
+    return polished;
+  } catch {
+    return rawAnswer;
+  }
+}
+
+// ─── 4. Gera textos profissionais para publicação ─────────────────────────────
 export async function generateContent(context, request) {
   const { tipo = 'post_whatsapp', tema, detalhes = '', tom = 'profissional' } = request;
 
