@@ -48,7 +48,12 @@ Responda de forma natural e útil. Se o usuário:
 - Perguntar sobre o painel → explique e oriente
 - Tiver dúvida → ajude com exemplos práticos
 - Relatar erro → oriente o que fazer
-- Perguntar o que você faz → explique suas capacidades com entusiasmo`;
+- Perguntar o que você faz → explique suas capacidades com entusiasmo
+
+ATENÇÃO CRÍTICA:
+- NUNCA cite nomes de clientes, profissionais ou serviços que não foram fornecidos nessa mensagem
+- Se o usuário perguntar sobre dados do negócio (ex: "quais meus serviços?"), diga que vai buscar e oriente a usar o comando correto — NUNCA invente uma lista
+- Você só conhece os dados que o sistema te enviar explicitamente`;
   }
 
   if (mode === 'polish_action') {
@@ -135,18 +140,26 @@ async function callGroq(messages, options = {}) {
 
 // ─── 1. Conversa geral — saudações, dúvidas, orientações, erros ───────────────
 export async function askGroq(context, message, history = []) {
+  const semDados = message.startsWith('[SEM DADOS DO SISTEMA]');
+  const mensagemLimpa = semDados ? message.replace('[SEM DADOS DO SISTEMA] ', '') : message;
+
   const recentHistory = (history || []).slice(-8).map(h => ({
     role:    h.role === 'assistant' ? 'assistant' : 'user',
     content: h.content || ''
   }));
 
+  // Se não há dados do sistema, adiciona instrução explícita para não inventar
+  const systemContent = semDados
+    ? buildSystemPrompt(context, 'chat') + '\n\nATENÇÃO: O sistema não retornou dados para esta pergunta. NÃO invente nenhum dado do negócio (nomes, serviços, clientes, preços, etc.). Se o usuário pediu dados, oriente-o a usar o comando correto ou diga que não encontrou informações.'
+    : buildSystemPrompt(context, 'chat');
+
   const messages = [
-    { role: 'system', content: buildSystemPrompt(context, 'chat') },
+    { role: 'system', content: systemContent },
     ...recentHistory,
-    { role: 'user',   content: message }
+    { role: 'user',   content: mensagemLimpa }
   ];
 
-  const reply = await callGroq(messages, { temperature: 0.75, maxTokens: 600 });
+  const reply = await callGroq(messages, { temperature: 0.7, maxTokens: 600 });
   return { type: 'chat', answer: reply };
 }
 
