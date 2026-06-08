@@ -1,16 +1,10 @@
 // ─── VyXora AI — Integração Groq completa ─────────────────────────────────────
-// 4 funções principais:
-//   1. askGroq()         → fallback inteligente para perguntas livres
-//   2. polishAnswer()    → formata/embeleza respostas brutas da API
-//   3. polishQueryAnswer() → formata respostas de consultas (listas, dados)
-//   4. generateContent() → gera textos profissionais para publicação
-//   5. buildSystemPrompt() → system prompt rico com contexto do painel
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL   = 'llama-3.3-70b-versatile';
 const GROQ_TIMEOUT = 15000;
 
-// ─── System prompt — contexto do painel, sem inventar dados ───────────────────
+// ─── System prompt principal ───────────────────────────────────────────────────
 function buildSystemPrompt(context, mode = 'assistant') {
   const empresa = context?.company;
   const nome    = empresa?.name || 'esta empresa';
@@ -19,78 +13,79 @@ function buildSystemPrompt(context, mode = 'assistant') {
   const base = `Você é a VyXora AI, assistente inteligente integrada ao painel de gestão de agendamentos de "${nome}" (${tipo}).
 
 SOBRE O SISTEMA VYXORA:
-O painel possui as seguintes seções e funcionalidades:
+O painel possui as seguintes seções:
 
-📅 AGENDAMENTOS
-- Criar agendamento: cliente, data, hora, profissional (opcional), serviço (opcional)
-- Reagendar: alterar data e horário de um agendamento existente
-- Cancelar, Confirmar ou Concluir agendamentos
-- Visualizar agenda do dia, semana ou período
-- Status possíveis: pendente, confirmado, concluído, cancelado
+📅 AGENDAMENTOS — criar, reagendar, cancelar, confirmar, concluir agendamentos. Status: pendente, confirmado, concluído, cancelado.
+👥 CLIENTES — cadastrar, editar, desativar, reativar, excluir. Ver histórico e inativos.
+👤 PROFISSIONAIS — cadastrar, editar, desativar, reativar, excluir. Ver mais ocupado.
+✦ SERVIÇOS — cadastrar com nome, preço e duração. Editar, desativar, excluir. Ver mais popular.
+📊 RELATÓRIOS — faturamento total, por mês/período, estatísticas, top clientes/profissionais/serviços.
+⚙️ CONFIGURAÇÕES — dados da empresa, horários de funcionamento.
+🌐 PÁGINA PÚBLICA — página da empresa visível para clientes agendarem online.
+📱 REDES SOCIAIS — links das redes da empresa.
+🕐 HORÁRIOS — configurar horários disponíveis para agendamento.
 
-👥 CLIENTES
-- Cadastrar com nome, telefone e email
-- Editar, desativar, reativar ou excluir
-- Consultar histórico, inativos, melhores clientes
-
-👤 PROFISSIONAIS
-- Cadastrar com nome, especialidade e telefone
-- Editar, desativar, reativar ou excluir
-- Ver profissional mais ocupado, agenda por profissional
-
-✦ SERVIÇOS
-- Cadastrar com nome, preço e duração em minutos
-- Editar, desativar, reativar ou excluir
-- Ver serviço mais popular/agendado
-
-📊 RELATÓRIOS E FINANCEIRO
-- Faturamento total, por mês, por período
-- Estatísticas: agendamentos hoje, amanhã, pendentes, confirmados
-- Clientes inativos, novos clientes por período
-- Top clientes, top profissionais, top serviços
-
-⚙️ CONFIGURAÇÕES
-- Dados da empresa (nome, tipo, horário de funcionamento)
-- Horários disponíveis para agendamento
+COMANDOS QUE O USUÁRIO PODE USAR (exemplos):
+"agendar Maria para amanhã às 14h", "listar clientes", "cadastrar profissional",
+"faturamento de junho", "agendamentos hoje", "cancelar agendamento do João",
+"horários livres para sexta", "clientes inativos", "como está meu painel"
 
 REGRAS OBRIGATÓRIAS:
-- Responda SEMPRE em português brasileiro, de forma simpática e objetiva
-- NUNCA invente dados — use apenas o que for fornecido pelo sistema
+- Responda SEMPRE em português brasileiro
+- Seja simpático, próximo e prestativo — como um assistente que realmente conhece o negócio
+- NUNCA invente dados que não foram fornecidos pelo sistema
 - NUNCA mencione Groq, Llama, OpenAI ou qualquer tecnologia de IA
-- Você se chama VyXora AI e só isso
-- Seja direto — respostas curtas e claras são melhores que longas
-- Use emojis com moderação para tornar as respostas mais amigáveis`;
+- Você se chama VyXora AI
+- Use emojis com moderação
+- Seja direto mas completo — ajude de verdade`;
 
-  if (mode === 'polish') {
+  if (mode === 'chat') {
     return `${base}
 
-MODO ATUAL: Formatação de ação
-Você recebeu a confirmação de uma ação executada pelo sistema (ex: "Agendamento criado para João em 10/06 às 14:00").
-Transforme em uma resposta amigável, humana e profissional.
-- Mantenha TODAS as informações exatas (nomes, datas, horários, valores)
-- Adicione emojis relevantes
+MODO: Conversa e orientação
+Responda de forma natural e útil. Se o usuário:
+- Cumprimentar → cumprimente de volta com energia e ofereça ajuda
+- Perguntar sobre o painel → explique e oriente
+- Tiver dúvida → ajude com exemplos práticos
+- Relatar erro → oriente o que fazer
+- Perguntar o que você faz → explique suas capacidades com entusiasmo`;
+  }
+
+  if (mode === 'polish_action') {
+    return `${base}
+
+MODO: Confirmação de ação
+O sistema executou uma ação (criar, editar, excluir, cancelar, confirmar etc.) e retornou uma confirmação.
+Transforme essa confirmação em uma resposta amigável e humana.
+- Mantenha TODOS os dados exatos (nomes, datas, horários, valores)
+- Celebre o sucesso com um emoji relevante
 - Seja caloroso mas objetivo
-- Máximo 3 linhas`;
+- Máximo 3 linhas
+- Se fizer sentido, ofereça uma próxima ação útil (ex: "Quer agendar para ele agora?")`;
   }
 
   if (mode === 'polish_query') {
     return `${base}
 
-MODO ATUAL: Apresentação de dados
-Você recebeu dados já buscados pelo sistema (lista de clientes, agendamentos, faturamento, etc.).
-Apresente esses dados de forma clara, organizada e amigável.
-- NUNCA omita, altere ou invente nenhum dado — apenas reformate e apresente
+MODO: Apresentação de dados
+O sistema já buscou e retornou os dados reais do banco de dados. Sua única função é reformatar esses dados de forma mais bonita e amigável.
+
+REGRAS CRÍTICAS — SIGA À RISCA:
+- Use SOMENTE os nomes, valores, datas e informações presentes no texto recebido
+- NUNCA invente, complete ou suponha nomes de clientes, profissionais ou serviços
+- NUNCA adicione dados ou exemplos que não estejam no texto recebido
+- Copie os nomes EXATAMENTE como estão — não altere nada
 - Organize com emojis e estrutura visual quando houver lista
-- Adicione um comentário útil ou dica no final quando fizer sentido
-- Seja objetivo e direto`;
+- Adicione UMA dica útil no final, sem inventar dados
+- Se a lista estiver vazia, oriente o usuário sobre como adicionar`;
   }
 
   if (mode === 'content') {
     return `${base}
 
-MODO ATUAL: Geração de conteúdo profissional
-Gere textos para publicação (redes sociais, WhatsApp, comunicados) para "${nome}".
-- Adapte o tom ao tipo de negócio (${tipo})
+MODO: Geração de conteúdo profissional
+Gere textos para publicação (redes sociais, WhatsApp, comunicados) para "${nome}" (${tipo}).
+- Adapte o tom ao tipo de negócio
 - Seja profissional mas acessível
 - Inclua call-to-action quando relevante
 - Não invente dados como telefone, endereço ou preços a menos que fornecidos`;
@@ -138,7 +133,7 @@ async function callGroq(messages, options = {}) {
   }
 }
 
-// ─── 1. Fallback inteligente para perguntas livres ─────────────────────────────
+// ─── 1. Conversa geral — saudações, dúvidas, orientações, erros ───────────────
 export async function askGroq(context, message, history = []) {
   const recentHistory = (history || []).slice(-8).map(h => ({
     role:    h.role === 'assistant' ? 'assistant' : 'user',
@@ -146,58 +141,44 @@ export async function askGroq(context, message, history = []) {
   }));
 
   const messages = [
-    { role: 'system', content: buildSystemPrompt(context, 'assistant') },
+    { role: 'system', content: buildSystemPrompt(context, 'chat') },
     ...recentHistory,
     { role: 'user',   content: message }
   ];
 
-  const reply = await callGroq(messages, { temperature: 0.7, maxTokens: 600 });
+  const reply = await callGroq(messages, { temperature: 0.75, maxTokens: 600 });
   return { type: 'chat', answer: reply };
 }
 
-// ─── 2. Formata respostas de AÇÕES (criar, cancelar, reagendar, etc.) ─────────
+// ─── 2. Formata confirmações de AÇÕES (criar, editar, excluir, cancelar…) ──────
 export async function polishAnswer(context, rawAnswer, intentName = '') {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return rawAnswer;
 
-  const worthPolishing = [
-    'create_appointment', 'reschedule_appointment', 'cancel_appointment',
-    'confirm_appointment', 'conclude_appointment',
-    'create_client', 'create_professional', 'create_service',
-    'update_client', 'update_professional', 'update_service',
-    'disable_client', 'disable_professional', 'disable_service',
-    'reactivate_client', 'reactivate_professional', 'reactivate_service',
-    'delete_client', 'delete_professional', 'delete_service'
-  ];
-
-  if (intentName && !worthPolishing.includes(intentName)) return rawAnswer;
-
   try {
     const messages = [
-      { role: 'system', content: buildSystemPrompt(context, 'polish') },
-      { role: 'user',   content: `Transforme esta confirmação do sistema em uma resposta amigável e profissional:\n\n"${rawAnswer}"` }
+      { role: 'system', content: buildSystemPrompt(context, 'polish_action') },
+      { role: 'user',   content: `O sistema retornou esta confirmação. Transforme em resposta amigável:\n\n"${rawAnswer}"` }
     ];
-    const polished = await callGroq(messages, { temperature: 0.6, maxTokens: 200 });
+    const polished = await callGroq(messages, { temperature: 0.65, maxTokens: 250 });
     return polished;
   } catch {
     return rawAnswer;
   }
 }
 
-// ─── 3. Formata respostas de CONSULTAS (dados já vindos da API) ────────────────
+// ─── 3. Formata dados de CONSULTAS vindos da API ───────────────────────────────
 export async function polishQueryAnswer(context, rawAnswer) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return rawAnswer;
-
-  // Respostas muito curtas (erros, "nenhum resultado") não precisam de polish
-  if (!rawAnswer || rawAnswer.length < 40) return rawAnswer;
+  if (!rawAnswer || rawAnswer.length < 20) return rawAnswer;
 
   try {
     const messages = [
       { role: 'system', content: buildSystemPrompt(context, 'polish_query') },
-      { role: 'user',   content: `Apresente estes dados do sistema de forma clara e amigável. NÃO altere nenhum dado:\n\n${rawAnswer}` }
+      { role: 'user',   content: `O sistema retornou estes dados reais do banco. Reformate de forma clara e amigável, usando SOMENTE as informações abaixo — nunca invente nomes ou dados:\n\n${rawAnswer}` }
     ];
-    const polished = await callGroq(messages, { temperature: 0.5, maxTokens: 700 });
+    const polished = await callGroq(messages, { temperature: 0.3, maxTokens: 700 });
     return polished;
   } catch {
     return rawAnswer;
@@ -208,7 +189,7 @@ export async function polishQueryAnswer(context, rawAnswer) {
 export async function generateContent(context, request) {
   const { tipo = 'post_whatsapp', tema, detalhes = '', tom = 'profissional' } = request;
 
-  const empresa = context?.company;
+  const empresa     = context?.company;
   const nomeEmpresa = empresa?.name || 'nossa empresa';
   const tipoEmpresa = empresa?.type || 'negócio';
 
@@ -222,11 +203,9 @@ export async function generateContent(context, request) {
   }[tipo] || 'texto (máx. 150 palavras)';
 
   const prompt = `Gere um ${tipoDescricao} para "${nomeEmpresa}" (${tipoEmpresa}).
-
 Tema: ${tema}
-${detalhes ? `Detalhes adicionais: ${detalhes}` : ''}
+${detalhes ? `Detalhes: ${detalhes}` : ''}
 Tom: ${tom}
-
 Retorne apenas o texto final, sem explicações ou títulos.`;
 
   const messages = [
