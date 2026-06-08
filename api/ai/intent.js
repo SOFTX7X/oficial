@@ -42,16 +42,38 @@ export async function interpretIntent(context, message, fullBody) {
     return continueSlotFilling(context, message, text, slotState, history);
   }
 
-  // ── SAUDAÇÕES ────────────────────────────────────────────────────────────────
-  if (matchAny(text, ['oi', 'ola', 'hello', 'hey', 'bom dia', 'boa tarde', 'boa noite', 'eai', 'e ai', 'tudo bem', 'tudo bom', 'como vai', 'oi vyxora', 'ola vyxora'])) {
-    return { type: 'chat', answer: greet() };
+  // ── SAUDAÇÕES, IDENTIDADE, AGRADECIMENTOS, DESPEDIDAS, AJUDA → TUDO VIA GROQ ──
+  if (matchAny(text, [
+    'oi', 'ola', 'hello', 'hey', 'bom dia', 'boa tarde', 'boa noite', 'eai', 'e ai',
+    'tudo bem', 'tudo bom', 'como vai', 'oi vyxora', 'ola vyxora',
+    'quem e voce', 'o que voce e', 'o que e vyxora', 'o que voce faz', 'me fala sobre voce',
+    'voce e uma ia', 'voce e um bot', 'voce e humano',
+    'obrigado', 'obrigada', 'valeu', 'muito obrigado', 'muito obrigada', 'thanks', 'thank you',
+    'grato', 'grata', 'otimo', 'excelente', 'perfeito', 'mandou bem', 'arrasou',
+    'tchau', 'ate logo', 'ate mais', 'xau', 'bye', 'falou', 'flw', 'encerrando', 'encerrar',
+    'ajuda', 'help', 'socorro', 'o que posso fazer', 'o que voce pode fazer', 'o que voce sabe fazer',
+    'quais comandos', 'como funciona', 'como usar', 'me ajuda', 'preciso de ajuda',
+    'nao sei usar', 'tutorial', 'como comecar',
+    'como agendar', 'como criar agendamento', 'como marcar', 'como marcar horario',
+    'como fazer agendamento', 'ajuda agendamento', 'como funciona agendamento',
+    'como reagendar', 'como cancelar agendamento', 'como confirmar agendamento', 'como concluir agendamento',
+    'como cadastrar cliente', 'como adicionar cliente', 'como criar cliente', 'como editar cliente',
+    'como excluir cliente', 'como desativar cliente', 'ajuda cliente', 'como gerenciar clientes', 'como ver clientes',
+    'como cadastrar profissional', 'como adicionar profissional', 'como criar profissional',
+    'como editar profissional', 'como excluir profissional', 'como desativar profissional',
+    'ajuda profissional', 'como gerenciar profissionais',
+    'como cadastrar servico', 'como adicionar servico', 'como criar servico', 'como editar servico',
+    'como excluir servico', 'como desativar servico', 'ajuda servico', 'como gerenciar servicos', 'como ver servicos',
+    'como ver faturamento', 'como ver relatorio', 'como ver receita', 'como consultar faturamento',
+    'ajuda relatorio', 'ajuda financeiro', 'como ver financeiro', 'como ver estatisticas', 'como ver painel',
+    'como ver horario livre', 'como consultar disponibilidade', 'como saber horarios disponiveis',
+    'ajuda horarios', 'como ver vagas',
+    'como usar o painel', 'como navegar', 'onde fica', 'onde esta', 'como acesso', 'como entro em',
+    'o que e o painel', 'explicar painel', 'me explica o painel',
+    'erro', 'nao funciona', 'problema', 'bug', 'nao consigo', 'nao aparece', 'sumiu'
+  ])) {
+    return await askGroq(context, message, history);
   }
-
-  // ── IDENTIDADE ────────────────────────────────────────────────────────────────
-  if (matchAny(text, ['quem e voce', 'o que voce e', 'o que e vyxora', 'o que voce faz', 'me fala sobre voce', 'voce e uma ia', 'voce e um bot', 'voce e humano'])) {
-    return { type: 'chat', answer: `Sou a VyXora AI, a inteligência artificial integrada ao seu painel de agendamentos. 🤖\n\nPosso te ajudar a:\n• Criar e gerenciar agendamentos, clientes, profissionais e serviços\n• Consultar relatórios, faturamento e estatísticas\n• Responder dúvidas sobre como usar o painel\n• Fazer tudo por comando de texto, sem precisar navegar pelo sistema\n\nÉ só me dizer o que você precisa!` };
-  }
-
 
   // ── GERAÇÃO DE CONTEÚDO PROFISSIONAL ─────────────────────────────────────────
   const contentIntent = detectContentIntent(text, message);
@@ -59,53 +81,8 @@ export async function interpretIntent(context, message, fullBody) {
     try {
       return await generateContent(context, contentIntent);
     } catch (err) {
-      return { type: 'chat', answer: 'Não consegui gerar o texto agora. Tente novamente em instantes. 🙏' };
+      return await askGroq(context, message, history);
     }
-  }
-
-  // ── AGRADECIMENTOS ────────────────────────────────────────────────────────────
-  if (matchAny(text, ['obrigado', 'obrigada', 'valeu', 'muito obrigado', 'muito obrigada', 'thanks', 'thank you', 'grato', 'grata', 'otimo', 'excelente', 'perfeito', 'mandou bem', 'arrasou'])) {
-    return { type: 'chat', answer: randomPick(['Fico feliz em ajudar! 😊 Se precisar de mais alguma coisa, estou aqui.', 'Disponha! Pode me chamar sempre que precisar. 🚀', 'Com prazer! Qualquer coisa é só falar. ✨']) };
-  }
-
-  // ── DESPEDIDAS ────────────────────────────────────────────────────────────────
-  if (matchAny(text, ['tchau', 'ate logo', 'ate mais', 'xau', 'bye', 'falou', 'flw', 'ate', 'encerrando', 'encerrar'])) {
-    return { type: 'chat', answer: 'Até logo! 👋 Estou aqui sempre que precisar.' };
-  }
-
-  // ── AJUDA GERAL ───────────────────────────────────────────────────────────────
-  if (matchAny(text, ['ajuda', 'help', 'socorro', 'o que posso fazer', 'o que voce pode fazer', 'o que voce sabe fazer', 'quais comandos', 'como funciona', 'como usar', 'me ajuda', 'preciso de ajuda', 'nao sei usar', 'tutorial', 'como comecar'])) {
-    return { type: 'chat', answer: helpMessage() };
-  }
-
-  // ── AJUDA POR TEMA ────────────────────────────────────────────────────────────
-
-  if (matchAny(text, ['como agendar', 'como criar agendamento', 'como marcar', 'como marcar horario', 'como fazer agendamento', 'ajuda agendamento', 'como funciona agendamento', 'como reagendar', 'como cancelar agendamento', 'como confirmar agendamento', 'como concluir agendamento'])) {
-    return { type: 'chat', answer: helpAgendamentos() };
-  }
-
-  if (matchAny(text, ['como cadastrar cliente', 'como adicionar cliente', 'como criar cliente', 'como editar cliente', 'como excluir cliente', 'como desativar cliente', 'ajuda cliente', 'como gerenciar clientes', 'como ver clientes'])) {
-    return { type: 'chat', answer: helpClientes() };
-  }
-
-  if (matchAny(text, ['como cadastrar profissional', 'como adicionar profissional', 'como criar profissional', 'como editar profissional', 'como excluir profissional', 'como desativar profissional', 'ajuda profissional', 'como gerenciar profissionais'])) {
-    return { type: 'chat', answer: helpProfissionais() };
-  }
-
-  if (matchAny(text, ['como cadastrar servico', 'como adicionar servico', 'como criar servico', 'como editar servico', 'como excluir servico', 'como desativar servico', 'ajuda servico', 'como gerenciar servicos', 'como ver servicos'])) {
-    return { type: 'chat', answer: helpServicos() };
-  }
-
-  if (matchAny(text, ['como ver faturamento', 'como ver relatorio', 'como ver receita', 'como consultar faturamento', 'ajuda relatorio', 'ajuda financeiro', 'como ver financeiro', 'como ver estatisticas', 'como ver painel'])) {
-    return { type: 'chat', answer: helpRelatorios() };
-  }
-
-  if (matchAny(text, ['como ver horario livre', 'como consultar disponibilidade', 'como saber horarios disponiveis', 'ajuda horarios', 'como ver vagas'])) {
-    return { type: 'chat', answer: `Para verificar horários disponíveis, basta me dizer:\n\n💬 "Quais horários livres para hoje?"\n💬 "Tem vaga amanhã?"\n💬 "Disponibilidade da [nome do profissional] para sexta"\n\nVou mostrar todos os horários livres com base na agenda e no horário de funcionamento da sua empresa.` };
-  }
-
-  if (matchAny(text, ['como usar o painel', 'como navegar', 'onde fica', 'onde esta', 'como acesso', 'como entro em', 'o que e o painel', 'explicar painel', 'me explica o painel'])) {
-    return { type: 'chat', answer: helpPainel() };
   }
 
   // ── PAINEL / ESTATÍSTICAS ─────────────────────────────────────────────────────
