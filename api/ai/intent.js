@@ -2,6 +2,7 @@ import { executeAction } from './actions.js';
 import { runQuery } from './queries.js';
 import { getStatistics } from './statistics.js';
 import { normalizeText, parseDate, parseTime } from './utils.js';
+import { askGroq } from './groq.js';
 
 // ─── Helpers seguros ──────────────────────────────────────────────────────────
 async function safeRunQuery(context, input) {
@@ -227,7 +228,13 @@ export async function interpretIntent(context, message, fullBody) {
   const queryResult = await safeRunQuery(context, text);
 
   if (!queryResult || queryResult.answer?.startsWith('Nao entendi')) {
-    return { type: 'chat', answer: fallbackAnswer(message) };
+    // Tenta responder via Groq antes de usar o fallback genérico
+    try {
+      return await askGroq(context, message, history);
+    } catch (err) {
+      // Groq indisponível ou sem chave — usa fallback interno normalmente
+      return { type: 'chat', answer: fallbackAnswer(message) };
+    }
   }
 
   return { type: 'query', answer: queryResult.answer, data: queryResult.data };
