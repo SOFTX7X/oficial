@@ -2,7 +2,7 @@ import { executeAction } from './actions.js';
 import { runQuery } from './queries.js';
 import { getStatistics } from './statistics.js';
 import { normalizeText, parseDate, parseTime } from './utils.js';
-import { askGroq } from './groq.js';
+import { askGroq, polishAnswer, generateContent } from './groq.js';
 
 // ─── Helpers seguros ──────────────────────────────────────────────────────────
 async function safeRunQuery(context, input) {
@@ -40,6 +40,17 @@ export async function interpretIntent(context, message, fullBody) {
   // ── IDENTIDADE ────────────────────────────────────────────────────────────────
   if (matchAny(text, ['quem e voce', 'o que voce e', 'o que e vyxora', 'o que voce faz', 'me fala sobre voce', 'voce e uma ia', 'voce e um bot', 'voce e humano'])) {
     return { type: 'chat', answer: `Sou a VyXora AI, a inteligência artificial integrada ao seu painel de agendamentos. 🤖\n\nPosso te ajudar a:\n• Criar e gerenciar agendamentos, clientes, profissionais e serviços\n• Consultar relatórios, faturamento e estatísticas\n• Responder dúvidas sobre como usar o painel\n• Fazer tudo por comando de texto, sem precisar navegar pelo sistema\n\nÉ só me dizer o que você precisa!` };
+  }
+
+
+  // ── GERAÇÃO DE CONTEÚDO PROFISSIONAL ─────────────────────────────────────────
+  const contentIntent = detectContentIntent(text, message);
+  if (contentIntent) {
+    try {
+      return await generateContent(context, contentIntent);
+    } catch (err) {
+      return { type: 'chat', answer: 'Não consegui gerar o texto agora. Tente novamente em instantes. 🙏' };
+    }
   }
 
   // ── AGRADECIMENTOS ────────────────────────────────────────────────────────────
@@ -302,7 +313,9 @@ async function executeSlot(context, intentName, slots) {
 
   try {
     const result = await executeAction(context, { name: intentName, params });
-    return { type: 'action', answer: result.answer, data: result.data, slotState: null };
+    // Formata a resposta bruta com o Groq (falha silenciosamente)
+    const polished = await polishAnswer(context, result.answer, intentName);
+    return { type: 'action', answer: polished, data: result.data, slotState: null };
   } catch (err) {
     return { type: 'error', answer: err.publicMessage || err.message || 'Erro ao executar acao.', slotState: null };
   }
@@ -422,6 +435,37 @@ function extractParams(message) {
   if (servicoMatch) params.servico_nome = servicoMatch[1].trim();
 
   return params;
+}
+
+
+// ─── Detecta intenção de geração de conteúdo ─────────────────────────────────
+function detectContentIntent(text, original) {
+  const isContent = matchAny(text, [
+    'gera texto', 'gerar texto', 'cria texto', 'criar texto',
+    'escreve', 'escrever', 'redige', 'redigir',
+    'post instagram', 'post para instagram', 'post no instagram',
+    'mensagem whatsapp', 'mensagem para whatsapp', 'texto whatsapp',
+    'comunicado', 'aviso', 'promocao', 'promoção', 'descricao servico',
+    'texto para', 'texto de', 'gera um post', 'cria um post',
+    'me ajuda a escrever', 'me ajuda escrever', 'texto profissional',
+    'post para redes', 'publicar', 'publicacao'
+  ]);
+  if (!isContent) return null;
+
+  let tipo = 'post_whatsapp';
+  if (matchAny(text, ['instagram', 'insta', 'feed', 'reels', 'stories'])) tipo = 'post_instagram';
+  else if (matchAny(text, ['comunicado', 'formal', 'aviso oficial']))      tipo = 'comunicado';
+  else if (matchAny(text, ['promocao', 'promoção', 'oferta', 'desconto'])) tipo = 'promocao';
+  else if (matchAny(text, ['aviso', 'informativo', 'alerta']))             tipo = 'aviso';
+  else if (matchAny(text, ['descricao', 'descrição', 'servico', 'serviço'])) tipo = 'descricao_servico';
+
+  // Extrai o tema removendo palavras-chave de comando
+  const tema = original
+    .replace(/gera|gerar|cria|criar|escreve|escrever|redige|redigir|post|texto|mensagem|comunicado|aviso|promoção|promocao|para|instagram|whatsapp|insta/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim() || 'sobre nossos serviços';
+
+  return { tipo, tema, detalhes: '', tom: 'profissional' };
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
