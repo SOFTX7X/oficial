@@ -2,12 +2,17 @@ import { executeAction } from './actions.js';
 import { runQuery } from './queries.js';
 import { getStatistics } from './statistics.js';
 import { normalizeText, parseDate, parseTime } from './utils.js';
-import { askGroq, polishAnswer, generateContent } from './groq.js';
+import { askGroq, polishAnswer, polishQueryAnswer, generateContent } from './groq.js';
 
 // ─── Helpers seguros ──────────────────────────────────────────────────────────
 async function safeRunQuery(context, input) {
   try {
-    return await runQuery(context, input);
+    const result = await runQuery(context, input);
+    // API já trouxe os dados — Groq só formata a resposta final para o usuário
+    if (result?.answer && !result.answer.startsWith('Nao entendi')) {
+      result.answer = await polishQueryAnswer(context, result.answer).catch(() => result.answer);
+    }
+    return result;
   } catch (err) {
     return { answer: err.publicMessage || err.message || 'Erro ao consultar dados. Tente novamente.' };
   }
@@ -15,7 +20,12 @@ async function safeRunQuery(context, input) {
 
 async function safeGetStatistics(context, intent) {
   try {
-    return await getStatistics(context, intent);
+    const result = await getStatistics(context, intent);
+    // API já trouxe os dados — Groq só formata a resposta final para o usuário
+    if (result?.answer) {
+      result.answer = await polishQueryAnswer(context, result.answer).catch(() => result.answer);
+    }
+    return result;
   } catch (err) {
     return { answer: err.publicMessage || err.message || 'Erro ao buscar estatisticas. Tente novamente.' };
   }
