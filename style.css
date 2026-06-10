@@ -1357,7 +1357,7 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .ai-chat { border-radius: 0; border-left: none; border-right: none; border-bottom: none; }
   .ai-messages { padding: 12px 10px 8px; gap: 3px; }
   .ai-bubble { max-width: 85%; font-size: 14px; }
-  .ai-compose { padding: 8px 10px 16px; gap: 8px; }
+  .ai-compose { padding: 8px 10px calc(16px + env(safe-area-inset-bottom, 0px)); gap: 8px; flex-shrink: 0; }
   .ai-compose input { min-height: 46px; font-size: 15px; }
   .ai-send-btn { width: 46px; height: 46px; }
   .ai-status { display: none; }
