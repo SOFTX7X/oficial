@@ -2219,9 +2219,19 @@ function renderPubCal() {
   const ultimoDia = new Date(_pubCalAno, _pubCalMes + 1, 0);
   const iniciaSemana = primeiroDia.getDay();
 
+  const totalDias = ultimoDia.getDate();
+
+  // Dias do mês anterior para preencher início
   let html = '';
-  for (let i = 0; i < iniciaSemana; i++) html += '<div class="pub-cal-cell vazio"></div>';
-  for (let d = 1; d <= ultimoDia.getDate(); d++) {
+  if (iniciaSemana > 0) {
+    const diasAnterior = new Date(_pubCalAno, _pubCalMes, 0).getDate();
+    for (let i = iniciaSemana - 1; i >= 0; i--) {
+      html += `<div class="pub-cal-cell fora-mes">${diasAnterior - i}</div>`;
+    }
+  }
+
+  // Dias do mês atual
+  for (let d = 1; d <= totalDias; d++) {
     const data = new Date(_pubCalAno, _pubCalMes, d);
     const diaSemana = data.getDay();
     const passado = data < hoje;
@@ -2232,6 +2242,15 @@ function renderPubCal() {
     const selecionado = document.getElementById('pubData')?.value === iso;
     html += `<div class="pub-cal-cell${bloqueado?' bloqueado':''}${selecionado?' selecionado':''}" ${!bloqueado?`onclick="selecionarDataPublica('${iso}')"`:''}>${d}</div>`;
   }
+
+  // Dias do próximo mês para completar última semana
+  const ultimoDiaSemana = ultimoDia.getDay();
+  if (ultimoDiaSemana < 6) {
+    for (let d = 1; d <= 6 - ultimoDiaSemana; d++) {
+      html += `<div class="pub-cal-cell fora-mes">${d}</div>`;
+    }
+  }
+
   grid.innerHTML = html;
 }
 
