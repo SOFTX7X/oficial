@@ -450,6 +450,9 @@
           <span class="top-notify-dot"></span>
           <span>Notificações aparecem aqui em tempo real</span>
         </div>
+        <button class="btn btn-icon theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Alternar tema" title="Alternar tema claro/escuro" style="margin-left:8px">
+          <span id="themeToggleIcon">🌙</span>
+        </button>
       </div>
     </div>
 
@@ -488,6 +491,7 @@
         <button class="nav-btn" data-config-section="fotos" onclick="openConfigSection('fotos')"><span class="ni">📷</span>Fotos</button>
         <div class="side-nav-sep"></div>
         <button class="btn btn-ghost btn-full btn-sm" onclick="logout()" style="margin-top:8px">Sair da conta</button>
+        <button class="btn btn-ghost btn-full btn-sm" onclick="toggleTheme();closeMobileMenu()" style="margin-top:4px" id="themeToggleMobile">🌙 Modo claro</button>
       </div>
     </div>
 
@@ -926,5 +930,56 @@
 })();
 </script>
 <script src="app.js?v=20260607-ai"></script>
+<script>
+// ── Sistema de Tema Claro/Escuro ─────────────────────────────────
+(function() {
+  function aplicarTema(tema) {
+    if (tema === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      const btn = document.getElementById('themeToggleIcon');
+      const mob = document.getElementById('themeToggleMobile');
+      if (btn) btn.textContent = '☀️';
+      if (mob) mob.textContent = '☀️ Modo escuro';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      const btn = document.getElementById('themeToggleIcon');
+      const mob = document.getElementById('themeToggleMobile');
+      if (btn) btn.textContent = '🌙';
+      if (mob) mob.textContent = '🌙 Modo claro';
+    }
+  }
+
+  function toggleTheme() {
+    const atual = localStorage.getItem('vyxora-tema') || 'dark';
+    const novo = atual === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('vyxora-tema', novo);
+    aplicarTema(novo);
+  }
+
+  // Detecta preferência do sistema na primeira vez
+  function initTema() {
+    const salvo = localStorage.getItem('vyxora-tema');
+    if (salvo) {
+      aplicarTema(salvo);
+    } else {
+      const prefereClaro = window.matchMedia('(prefers-color-scheme: light)').matches;
+      const tema = prefereClaro ? 'light' : 'dark';
+      localStorage.setItem('vyxora-tema', tema);
+      aplicarTema(tema);
+    }
+  }
+
+  window.toggleTheme = toggleTheme;
+  document.addEventListener('DOMContentLoaded', initTema);
+
+  // Atualiza se o sistema mudar enquanto a página está aberta
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+    if (!localStorage.getItem('vyxora-tema')) {
+      aplicarTema(e.matches ? 'light' : 'dark');
+    }
+  });
+})();
+// ────────────────────────────────────────────────────────────────
+</script>
 </body>
 </html>
