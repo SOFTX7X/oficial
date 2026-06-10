@@ -717,32 +717,62 @@
         </div>
         <div class="config-section config-tab-panel" data-config-tab="horarios">
           <div class="config-title"><div class="config-icon">🕐</div>Horários de funcionamento</div>
-          <div class="schedule-grid">
-            <div class="sch-day"><div class="sch-day-name">Seg</div><input type="checkbox" id="diaSeg" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Ter</div><input type="checkbox" id="diaTer" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Qua</div><input type="checkbox" id="diaQua" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Qui</div><input type="checkbox" id="diaQui" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Sex</div><input type="checkbox" id="diaSex" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Sáb</div><input type="checkbox" id="diaSab" checked></div>
-            <div class="sch-day"><div class="sch-day-name">Dom</div><input type="checkbox" id="diaDom"></div>
+
+          <div class="horarios-card">
+            <div class="horarios-section-label">📅 Dias de atendimento</div>
+            <div class="dias-toggle-grid">
+              <button type="button" class="dia-toggle" id="diaSeg" data-campo="seg" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Seg</span>
+                <span class="dia-toggle-full">Segunda</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaTer" data-campo="ter" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Ter</span>
+                <span class="dia-toggle-full">Terça</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaQua" data-campo="qua" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Qua</span>
+                <span class="dia-toggle-full">Quarta</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaQui" data-campo="qui" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Qui</span>
+                <span class="dia-toggle-full">Quinta</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaSex" data-campo="sex" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Sex</span>
+                <span class="dia-toggle-full">Sexta</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaSab" data-campo="sab" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Sáb</span>
+                <span class="dia-toggle-full">Sábado</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaDom" data-campo="dom" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Dom</span>
+                <span class="dia-toggle-full">Domingo</span>
+              </button>
+            </div>
           </div>
-          <div class="form-gap" style="margin-top:18px">
+
+          <div class="horarios-card" style="margin-top:14px">
+            <div class="horarios-section-label">⏰ Horário de funcionamento</div>
             <div class="field-row">
-              <div class="field"><label>Início do expediente</label><input type="time" id="cfgHorarioInicio" value="09:00"></div>
-              <div class="field"><label>Fim do expediente</label><input type="time" id="cfgHorarioFim" value="18:00"></div>
-            </div>
-            <div class="field">
-              <label>Intervalo entre horários</label>
-              <select id="cfgIntervaloSlots">
-                <option value="30">30 minutos</option>
-                <option value="45">45 minutos</option>
-                <option value="60">1 hora</option>
-                <option value="90">1h30</option>
-                <option value="120">2 horas</option>
-              </select>
+              <div class="field"><label>Início</label><input type="time" id="cfgHorarioInicio" value="09:00"></div>
+              <div class="field"><label>Fim</label><input type="time" id="cfgHorarioFim" value="18:00"></div>
             </div>
           </div>
-          <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="salvarHorarios()">Salvar horários</button>
+
+          <div class="horarios-card" style="margin-top:14px">
+            <div class="horarios-section-label">🔁 Intervalo entre horários</div>
+            <div class="intervalo-grid">
+              <button type="button" class="intervalo-btn" data-val="30" onclick="selecionarIntervalo(this)">30 min</button>
+              <button type="button" class="intervalo-btn" data-val="45" onclick="selecionarIntervalo(this)">45 min</button>
+              <button type="button" class="intervalo-btn ativo" data-val="60" onclick="selecionarIntervalo(this)">1 hora</button>
+              <button type="button" class="intervalo-btn" data-val="90" onclick="selecionarIntervalo(this)">1h30</button>
+              <button type="button" class="intervalo-btn" data-val="120" onclick="selecionarIntervalo(this)">2 horas</button>
+            </div>
+            <input type="hidden" id="cfgIntervaloSlots" value="60">
+          </div>
+
+          <button class="btn btn-primary btn-full" style="margin-top:18px" onclick="salvarHorarios()">Salvar horários</button>
         </div>
         <div class="config-section config-tab-panel" data-config-tab="mensagens">
           <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
