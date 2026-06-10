@@ -524,6 +524,62 @@ document.addEventListener('click', function(e) {
 
 document.addEventListener('scroll', closeAllMenus, { passive: true });
 
+// ── Fix: teclado virtual no mobile não cobre o input do chat ──────────────────
+(function() {
+  function fixChatViewport() {
+    const viewAi = document.getElementById('view-ai');
+    if (!viewAi) return;
+
+    function aplicar() {
+      const vv = window.visualViewport;
+      if (!vv) return;
+      // Altura visível - offset do topo = espaço disponível real
+      const alturaVisivel = vv.height;
+      const offsetTop = vv.offsetTop;
+      viewAi.style.height = alturaVisivel + 'px';
+      viewAi.style.top    = offsetTop + 'px';
+      viewAi.style.bottom = 'auto';
+
+      // Rola as mensagens para o final quando o teclado abre
+      const msgs = viewAi.querySelector('.ai-messages');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function resetar() {
+      const viewAi = document.getElementById('view-ai');
+      if (!viewAi) return;
+      viewAi.style.height = '';
+      viewAi.style.top    = '';
+      viewAi.style.bottom = '';
+    }
+
+    const input = document.getElementById('aiInput');
+    if (input) {
+      input.addEventListener('focus', () => {
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('resize', aplicar);
+          window.visualViewport.addEventListener('scroll', aplicar);
+        }
+        setTimeout(aplicar, 100);
+      });
+      input.addEventListener('blur', () => {
+        if (window.visualViewport) {
+          window.visualViewport.removeEventListener('resize', aplicar);
+          window.visualViewport.removeEventListener('scroll', aplicar);
+        }
+        setTimeout(resetar, 150);
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixChatViewport);
+  } else {
+    fixChatViewport();
+  }
+})();
+// ─────────────────────────────────────────────────────────────────────────────
+
 window.addEventListener('DOMContentLoaded', init);
 window.addEventListener('DOMContentLoaded', () => {
   const el = document.getElementById('aiWelcomeTime');
