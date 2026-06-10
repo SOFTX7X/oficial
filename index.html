@@ -782,7 +782,6 @@
           </div>
           <h1 id="pubNomeEmpresa">Agendamento Online</h1>
           <p id="pubDescEmpresa">Escolha seu serviço, profissional, data e horário.</p>
-          <div class="pub-location" id="pubLocalizacao" style="display:none"></div>
           <div id="pubSociais" class="pub-socials" style="display:none"></div>
         </div>
       </div>
@@ -817,12 +816,20 @@
           <div class="field-row">
             <div class="field">
               <label>Data</label>
-              <input id="pubData" type="date">
+              <button class="pub-picker-btn" id="pubDataBtn" onclick="abrirCalendarioPublico()">
+                <span id="pubDataLabel">Escolher data</span>
+                <span class="pub-picker-icon">📅</span>
+              </button>
+              <input id="pubData" type="hidden">
               <div id="pubDataAviso">⛔ Este dia não está disponível. Escolha outra data.</div>
             </div>
             <div class="field">
               <label>Hora</label>
-              <input id="pubHora" type="time">
+              <button class="pub-picker-btn" id="pubHoraBtn" onclick="abrirSlotsPublico()" disabled>
+                <span id="pubHoraLabel">Escolher horário</span>
+                <span class="pub-picker-icon">🕐</span>
+              </button>
+              <input id="pubHora" type="hidden">
             </div>
           </div>
           <div class="field">
@@ -837,6 +844,44 @@
     </div>
   </div>
 </section>
+
+<!-- Modal Calendário Público -->
+<div class="pub-modal-overlay" id="pubCalendarioOverlay" onclick="fecharCalendarioPublico(event)">
+  <div class="pub-modal-full" id="pubCalendarioModal">
+    <div class="pub-modal-header">
+      <button class="pub-modal-back" onclick="fecharCalendarioPublico()">← Voltar</button>
+      <span class="pub-modal-title">Escolha a data</span>
+    </div>
+    <div class="pub-cal-wrap">
+      <div class="pub-cal-nav">
+        <button class="pub-cal-arrow" onclick="pubCalMes(-1)">‹</button>
+        <span id="pubCalTitulo"></span>
+        <button class="pub-cal-arrow" onclick="pubCalMes(1)">›</button>
+      </div>
+      <div class="pub-cal-dias-semana">
+        <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+      </div>
+      <div class="pub-cal-grid" id="pubCalGrid"></div>
+      <div class="pub-cal-legenda">
+        <span><i class="pub-cal-dot disponivel"></i>Disponível</span>
+        <span><i class="pub-cal-dot indisponivel"></i>Indisponível</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Slots de Horário Público -->
+<div class="pub-modal-overlay" id="pubSlotsOverlay" onclick="fecharSlotsPublico(event)">
+  <div class="pub-modal-full" id="pubSlotsModal">
+    <div class="pub-modal-header">
+      <button class="pub-modal-back" onclick="fecharSlotsPublico()">← Voltar</button>
+      <span class="pub-modal-title" id="pubSlotsTitulo">Escolha o horário</span>
+    </div>
+    <div class="pub-slots-wrap">
+      <div class="pub-slots-grid" id="pubSlotsGrid"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Recusa -->
 <div class="modal-overlay" id="modalRecusaOverlay">
