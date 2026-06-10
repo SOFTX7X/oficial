@@ -458,20 +458,20 @@ function calcDiasFechados(empresa) {
     { campo: 'qui', indice: 4 }, { campo: 'sex', indice: 5 },
     { campo: 'sab', indice: 6 }
   ];
-  // Trata null e false como dia fechado — só true explicitamente abre o dia
-  return mapa.filter(d => empresa[d.campo] !== true).map(d => d.indice);
+  // Se empresa nunca configurou os dias (todos null), aplica padrao: seg-sex aberto, sab+dom fechado
+  const nuncaConfigurou = mapa.every(d => empresa[d.campo] === null || empresa[d.campo] === undefined);
+  if (nuncaConfigurou) return [0, 6];
+  return mapa.filter(d => empresa[d.campo] === false).map(d => d.indice);
 }
 
 function parseDiasSemana(valor) {
-  // Retorna null quando não há valor — o chamador decide o fallback adequado
-  if (!valor) return null;
+  if (!valor) return [1,2,3,4,5];
   if (Array.isArray(valor)) return valor.map(Number);
   // Supabase retorna "{1,2,3}" como string para integer[]
   if (typeof valor === 'string') {
-    const parsed = valor.replace(/[{}]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
-    return parsed.length ? parsed : null;
+    return valor.replace(/[{}]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
   }
-  return null;
+  return [1,2,3,4,5];
 }
 
 function isDiaFechado(dataStr, diasFechados) {
@@ -1332,10 +1332,13 @@ function renderConfig() {
     { campo: 'sex', id: 'diaSex' }, { campo: 'sab', id: 'diaSab' },
     { campo: 'dom', id: 'diaDom' }
   ];
+  // Verifica se empresa nunca configurou os dias (todos os campos são null)
+  const nuncaConfigurou = diasMap.every(({ campo }) => e[campo] === null || e[campo] === undefined);
+  const padraoDias = ['seg','ter','qua','qui','sex']; // padrão para empresa nova
   diasMap.forEach(({ campo, id }) => {
     const btn = $(id); if (!btn) return;
-    // Só marca como ativo se o campo for explicitamente true
-    if (e[campo] === true) btn.classList.add('ativo'); else btn.classList.remove('ativo');
+    const ativo = nuncaConfigurou ? padraoDias.includes(campo) : e[campo] === true;
+    if (ativo) btn.classList.add('ativo'); else btn.classList.remove('ativo');
   });
   const hi = $('cfgHorarioInicio'); if (hi) hi.value = e.horario_inicio || '09:00';
   const hf = $('cfgHorarioFim'); if (hf) hf.value = e.horario_fim || '18:00';
@@ -1819,7 +1822,7 @@ function editServico(id) {
 function editProfissional(id) {
   const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
   const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const diasSemana = parseDiasSemana(p.dias_semana) || [0,1,2,3,4,5,6];
+  const diasSemana = parseDiasSemana(p.dias_semana);
   const diasHtml = dias.map((d,i) => `
     <label class="dia-check">
       <input type="checkbox" id="ed_dia_${i}" ${diasSemana.includes(i) ? 'checked' : ''}>
@@ -2214,17 +2217,7 @@ function renderPubCal() {
   const titulo = document.getElementById('pubCalTitulo');
   if (titulo) titulo.textContent = nomes[_pubCalMes] + ' ' + _pubCalAno;
 
-  const prof = state.pubProfissional;
-  // Se o profissional não tem dias_semana configurado, usa os dias abertos da empresa
-  // (em vez de assumir só [1,2,3,4,5] que bloqueia sábado/domingo indevidamente)
-  let diasPermitidos;
-  if (prof?.dias_semana) {
-    diasPermitidos = parseDiasSemana(prof.dias_semana);
-  } else {
-    // Deriva dias permitidos a partir dos dias NÃO fechados da empresa
-    const diasFechadosEmpresa = state.pubDiasFechados || [];
-    diasPermitidos = [0,1,2,3,4,5,6].filter(d => !diasFechadosEmpresa.includes(d));
-  }
+  // Calendário respeita apenas os dias configurados pela empresa
   const diasFechados = state.pubDiasFechados || [];
 
   const grid = document.getElementById('pubCalGrid');
@@ -2252,8 +2245,7 @@ function renderPubCal() {
     const diaSemana = data.getDay();
     const passado = data < hoje;
     const fechadoEmpresa = diasFechados.includes(diaSemana);
-    const feriaProfissional = !diasPermitidos.includes(diaSemana);
-    const bloqueado = passado || fechadoEmpresa || feriaProfissional;
+    const bloqueado = passado || fechadoEmpresa;
     const iso = `${_pubCalAno}-${String(_pubCalMes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const selecionado = document.getElementById('pubData')?.value === iso;
     html += `<div class="pub-cal-cell${bloqueado?' bloqueado':''}${selecionado?' selecionado':''}" ${!bloqueado?`onclick="selecionarDataPublica('${iso}')"`:''}>${d}</div>`;
