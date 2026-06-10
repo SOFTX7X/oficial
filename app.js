@@ -461,6 +461,16 @@ function calcDiasFechados(empresa) {
   return mapa.filter(d => empresa[d.campo] === false).map(d => d.indice);
 }
 
+function parseDiasSemana(valor) {
+  if (!valor) return [1,2,3,4,5];
+  if (Array.isArray(valor)) return valor.map(Number);
+  // Supabase retorna "{1,2,3}" como string para integer[]
+  if (typeof valor === 'string') {
+    return valor.replace(/[{}]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+  }
+  return [1,2,3,4,5];
+}
+
 function isDiaFechado(dataStr, diasFechados) {
   if (!dataStr || !diasFechados || diasFechados.length === 0) return false;
   const d = new Date(dataStr + 'T00:00:00');
@@ -1780,7 +1790,7 @@ function editServico(id) {
 function editProfissional(id) {
   const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
   const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const diasSemana = p.dias_semana || [1,2,3,4,5];
+  const diasSemana = parseDiasSemana(p.dias_semana);
   const diasHtml = dias.map((d,i) => `
     <label class="dia-check">
       <input type="checkbox" id="ed_dia_${i}" ${diasSemana.includes(i) ? 'checked' : ''}>
@@ -2198,7 +2208,7 @@ function renderPubCal() {
   if (titulo) titulo.textContent = nomes[_pubCalMes] + ' ' + _pubCalAno;
 
   const prof = state.pubProfissional;
-  const diasPermitidos = prof?.dias_semana || [1,2,3,4,5];
+  const diasPermitidos = parseDiasSemana(prof?.dias_semana);
   const diasFechados = state.pubDiasFechados || [];
 
   const grid = document.getElementById('pubCalGrid');
