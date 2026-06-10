@@ -691,6 +691,12 @@ function setView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const target = $('view-' + view);
   if (target) target.classList.add('active');
+  // Reseta scroll ao trocar de aba no mobile
+  if (window.innerWidth <= 768 && view !== 'ai') {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    const dm = document.querySelector('.dash-main');
+    if (dm) dm.scrollTop = 0;
+  }
   const navMap = {
     dashboard: ['Dashboard', 'Controle completo do seu negócio.'],
     agenda: ['Agenda', 'Criar e acompanhar horários.'],
@@ -1180,7 +1186,8 @@ function buildActionMenu(id, items) {
     if (_openMenu === drop) { closeAllMenus(); return; }
     closeAllMenus();
     const rect = btn.getBoundingClientRect(), dropW = 200;
-    const viewportW = window.innerWidth, viewportH = window.innerHeight;
+    const viewportW = window.innerWidth;
+    const viewportH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     let left = rect.right - dropW, top = rect.bottom + 6;
     if (left < 8) left = rect.left;
     if (left + dropW > viewportW - 8) left = viewportW - dropW - 8;
@@ -1639,10 +1646,12 @@ function openModalRecusa(id) {
   document.querySelectorAll('.motivo-item').forEach(el => { el.classList.remove('sel'); const r = el.querySelector('.motivo-radio'); if (r) r.innerHTML = ''; });
   const rmc = $('recusaMotivoCustom'); if (rmc) rmc.value = '';
   const overlay = $('modalRecusaOverlay'); if (overlay) overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeModalRecusa() {
   const overlay = $('modalRecusaOverlay'); if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
   _recusaId = null; _recusaMotivo = null;
 }
 
@@ -1672,10 +1681,12 @@ function openModalReagendar(id) {
   const rd = $('reagendarData'); if (rd) rd.value = ag.data || '';
   const rh = $('reagendarHora'); if (rh) rh.value = ag.hora || '';
   const overlay = $('modalReagendarOverlay'); if (overlay) overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeModalReagendar() {
   const overlay = $('modalReagendarOverlay'); if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
   _reagendarId = null;
 }
 
@@ -1700,10 +1711,12 @@ function openConfirmModal({ icon = '⚠️', type = 'danger', title = 'Tem certe
   if (btn) { btn.textContent = btnLabel; btn.className = 'btn ' + (type === 'danger' ? 'btn-danger' : 'btn-primary'); }
   _confirmCb = cb;
   const overlay = $('confirmOverlay'); if (overlay) overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeConfirmModal() {
   const overlay = $('confirmOverlay'); if (overlay) overlay.classList.remove('open'); _confirmCb = null;
+  document.body.style.overflow = '';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1739,10 +1752,12 @@ function openEditModal(title, bodyHtml, saveCb) {
   _editSaveCb = saveCb;
   const saveBtn = $('editSaveBtn'); if (saveBtn) saveBtn.onclick = () => { if (_editSaveCb) _editSaveCb(); };
   const overlay = $('editOverlay'); if (overlay) overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeEditModal() {
   const overlay = $('editOverlay'); if (overlay) overlay.classList.remove('open'); _editSaveCb = null;
+  document.body.style.overflow = '';
 }
 
 function editServico(id) {
