@@ -1586,3 +1586,23 @@ body.menu-open { overflow: hidden; touch-action: none; }
   border-color: rgba(139,92,246,0.12) !important;
 }
 /* ─────────────────────────────────────────────────────────────── */
+
+[data-theme="light"] .ai-compose {
+  background: rgba(245,243,255,0.97) !important;
+  border-top: 1px solid rgba(139,92,246,0.12) !important;
+}
+[data-theme="light"] .ai-compose input {
+  background: #ffffff !important;
+  border: 1px solid rgba(139,92,246,0.2) !important;
+  color: var(--text) !important;
+}
+[data-theme="light"] .ai-compose input:focus {
+  border-color: rgba(124,58,237,0.5) !important;
+  background: #ffffff !important;
+}
+[data-theme="light"] .ai-chat {
+  background: #f8f6ff !important;
+}
+[data-theme="light"] .view#view-ai {
+  background: #f8f6ff !important;
+}
