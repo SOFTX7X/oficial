@@ -462,13 +462,15 @@ function calcDiasFechados(empresa) {
 }
 
 function parseDiasSemana(valor) {
-  if (!valor) return [1,2,3,4,5];
+  // Retorna null quando não há valor — o chamador decide o fallback adequado
+  if (!valor) return null;
   if (Array.isArray(valor)) return valor.map(Number);
   // Supabase retorna "{1,2,3}" como string para integer[]
   if (typeof valor === 'string') {
-    return valor.replace(/[{}]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+    const parsed = valor.replace(/[{}]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+    return parsed.length ? parsed : null;
   }
-  return [1,2,3,4,5];
+  return null;
 }
 
 function isDiaFechado(dataStr, diasFechados) {
@@ -1815,7 +1817,7 @@ function editServico(id) {
 function editProfissional(id) {
   const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
   const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const diasSemana = parseDiasSemana(p.dias_semana);
+  const diasSemana = parseDiasSemana(p.dias_semana) || [0,1,2,3,4,5,6];
   const diasHtml = dias.map((d,i) => `
     <label class="dia-check">
       <input type="checkbox" id="ed_dia_${i}" ${diasSemana.includes(i) ? 'checked' : ''}>
@@ -2211,7 +2213,16 @@ function renderPubCal() {
   if (titulo) titulo.textContent = nomes[_pubCalMes] + ' ' + _pubCalAno;
 
   const prof = state.pubProfissional;
-  const diasPermitidos = parseDiasSemana(prof?.dias_semana);
+  // Se o profissional não tem dias_semana configurado, usa os dias abertos da empresa
+  // (em vez de assumir só [1,2,3,4,5] que bloqueia sábado/domingo indevidamente)
+  let diasPermitidos;
+  if (prof?.dias_semana) {
+    diasPermitidos = parseDiasSemana(prof.dias_semana);
+  } else {
+    // Deriva dias permitidos a partir dos dias NÃO fechados da empresa
+    const diasFechadosEmpresa = state.pubDiasFechados || [];
+    diasPermitidos = [0,1,2,3,4,5,6].filter(d => !diasFechadosEmpresa.includes(d));
+  }
   const diasFechados = state.pubDiasFechados || [];
 
   const grid = document.getElementById('pubCalGrid');
