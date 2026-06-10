@@ -458,7 +458,8 @@ function calcDiasFechados(empresa) {
     { campo: 'qui', indice: 4 }, { campo: 'sex', indice: 5 },
     { campo: 'sab', indice: 6 }
   ];
-  return mapa.filter(d => empresa[d.campo] === false).map(d => d.indice);
+  // Trata null e false como dia fechado — só true explicitamente abre o dia
+  return mapa.filter(d => empresa[d.campo] !== true).map(d => d.indice);
 }
 
 function parseDiasSemana(valor) {
@@ -1333,7 +1334,8 @@ function renderConfig() {
   ];
   diasMap.forEach(({ campo, id }) => {
     const btn = $(id); if (!btn) return;
-    if (e[campo] !== false) btn.classList.add('ativo'); else btn.classList.remove('ativo');
+    // Só marca como ativo se o campo for explicitamente true
+    if (e[campo] === true) btn.classList.add('ativo'); else btn.classList.remove('ativo');
   });
   const hi = $('cfgHorarioInicio'); if (hi) hi.value = e.horario_inicio || '09:00';
   const hf = $('cfgHorarioFim'); if (hf) hf.value = e.horario_fim || '18:00';
