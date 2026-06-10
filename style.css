@@ -668,7 +668,10 @@ a { text-decoration: none; color: inherit; }
   flex: 1 1 0; min-height: 0;
   display: flex; flex-direction: column; gap: 4px;
   padding: 16px 14px 10px;
-  overflow-y: auto; scroll-behavior: smooth;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
 }
 .ai-messages::-webkit-scrollbar { width: 4px; }
 .ai-messages::-webkit-scrollbar-track { background: transparent; }
@@ -928,7 +931,7 @@ a { text-decoration: none; color: inherit; }
 ══════════════════════════════════════════ */
 .modal-overlay { display: none; position: fixed; inset: 0; z-index: 400; background: rgba(9,9,11,0.85); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 16px; }
 .modal-overlay.open { display: flex; }
-.modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: var(--radius-2xl); padding: 28px; width: 100%; max-width: 440px; position: relative; box-shadow: 0 32px 90px rgba(0,0,0,0.65); animation: modalIn 0.2s ease; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: var(--radius-2xl); padding: 28px; width: 100%; max-width: 440px; position: relative; box-shadow: 0 32px 90px rgba(0,0,0,0.65); animation: modalIn 0.2s ease; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 .modal-title { font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 6px; }
 .modal-sub { font-size: 13px; color: var(--text3); margin-bottom: 20px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); line-height: 1.55; }
 .modal-close { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); cursor: pointer; display: grid; place-items: center; font-size: 14px; transition: all 0.15s; z-index: 10; }
@@ -954,7 +957,7 @@ a { text-decoration: none; color: inherit; }
 
 .edit-overlay { display: none; position: fixed; inset: 0; z-index: 450; background: rgba(9,9,11,0.85); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 16px; }
 .edit-overlay.open { display: flex; }
-.edit-modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: var(--radius-2xl); padding: 28px; width: 100%; max-width: 500px; position: relative; box-shadow: 0 32px 90px rgba(0,0,0,0.65); animation: modalIn 0.2s ease; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.edit-modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: var(--radius-2xl); padding: 28px; width: 100%; max-width: 500px; position: relative; box-shadow: 0 32px 90px rgba(0,0,0,0.65); animation: modalIn 0.2s ease; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 .edit-title { font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 20px; }
 
 /* ══════════════════════════════════════════
@@ -1278,7 +1281,8 @@ body.menu-open { overflow: hidden; touch-action: none; }
 ══════════════════════════════════════════ */
 @media (max-width: 768px) {
   html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
-  body { padding-bottom: 84px; overscroll-behavior-x: none; -webkit-text-size-adjust: 100%; }
+  html { overscroll-behavior: none; }
+  body { padding-bottom: 84px; overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
   .view#view-ai.active { height: 100dvh; max-height: 100dvh; overflow: hidden; flex-direction: column; position: fixed; top: 0; left: 0; right: 0; bottom: 0; }
   .view#view-ai.active .ai-chat { flex: 1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
   .view#view-ai.active .ai-messages { flex: 1 1 0; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
@@ -1324,7 +1328,7 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .form-actions .btn { width: 100%; }
 
   .sidebar { display: none; }
-  .dash-main { margin-left: 0; padding: 10px 12px 56px; width: 100%; max-width: 100%; }
+  .dash-main { margin-left: 0; padding: 10px 12px calc(72px + env(safe-area-inset-bottom, 0px)); width: 100%; max-width: 100%; min-height: unset; }
 
   .topbar { position: relative; top: 0; flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; border-radius: 16px; }
   .topbar-actions-clean { width: 100%; }
