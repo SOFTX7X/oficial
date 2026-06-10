@@ -958,6 +958,94 @@ a { text-decoration: none; color: inherit; }
 .sch-day { border: 1px solid var(--border); border-radius: 9px; padding: 10px 8px; text-align: center; }
 .sch-day-name { font-size: 10px; font-weight: 700; color: var(--text4); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 7px; }
 
+/* ── HORÁRIOS PREMIUM ── */
+.horarios-card {
+  background: var(--bg1);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 18px;
+}
+.horarios-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text4);
+  margin-bottom: 14px;
+}
+.dias-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+.dia-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 4px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border2);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all .18s;
+  font-family: inherit;
+}
+.dia-toggle-abrev {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text3);
+}
+.dia-toggle-full {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text4);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.dia-toggle:hover {
+  border-color: var(--accent-border);
+  background: var(--accent3);
+}
+.dia-toggle.ativo {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.dia-toggle.ativo .dia-toggle-abrev,
+.dia-toggle.ativo .dia-toggle-full {
+  color: #fff;
+}
+.intervalo-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.intervalo-btn {
+  flex: 1;
+  min-width: 60px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border2);
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all .18s;
+  font-family: inherit;
+  text-align: center;
+}
+.intervalo-btn:hover {
+  border-color: var(--accent-border);
+  background: var(--accent3);
+  color: var(--accent2);
+}
+.intervalo-btn.ativo {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 /* ══════════════════════════════════════════
    ACTION MENU
 ══════════════════════════════════════════ */
@@ -1440,6 +1528,9 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .notif-stack { left: 10px; right: 10px; top: 10px; width: auto; }
 
   .schedule-grid { grid-template-columns: repeat(4,1fr); }
+  .dias-toggle-grid { grid-template-columns: repeat(4, 1fr); }
+  .dia-toggle-full { display: none; }
+  .intervalo-btn { min-width: 50px; font-size: 12px; padding: 9px 6px; }
   .profile-images-grid { grid-template-columns: 1fr; }
 
   #publicView { padding: 0; }
