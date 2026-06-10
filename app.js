@@ -1329,10 +1329,17 @@ function renderConfig() {
     { campo: 'sex', id: 'diaSex' }, { campo: 'sab', id: 'diaSab' },
     { campo: 'dom', id: 'diaDom' }
   ];
-  diasMap.forEach(({ campo, id }) => { const cb = $(id); if (cb) cb.checked = e[campo] !== false; });
+  diasMap.forEach(({ campo, id }) => {
+    const btn = $(id); if (!btn) return;
+    if (e[campo] !== false) btn.classList.add('ativo'); else btn.classList.remove('ativo');
+  });
   const hi = $('cfgHorarioInicio'); if (hi) hi.value = e.horario_inicio || '09:00';
   const hf = $('cfgHorarioFim'); if (hf) hf.value = e.horario_fim || '18:00';
-  const is = $('cfgIntervaloSlots'); if (is) is.value = String(e.intervalo_slots || 30);
+  const intervaloAtual = String(e.intervalo_slots || 60);
+  const isHidden = $('cfgIntervaloSlots'); if (isHidden) isHidden.value = intervaloAtual;
+  document.querySelectorAll('.intervalo-btn').forEach(b => {
+    b.classList.toggle('ativo', b.dataset.val === intervaloAtual);
+  });
   const lb = $('cfgLinkBox');
   if (lb) lb.textContent = '🔗 ' + publicUrl(e.slug || '');
 }
@@ -1357,6 +1364,18 @@ function setConfigTab(tab, botao) {
   const titulo = $('configHeroTitle'), subtitulo = $('configHeroSub');
   if (titulo) titulo.innerHTML = info[2];
   if (subtitulo) subtitulo.textContent = info[1];
+}
+
+function toggleDia(btn) {
+  if (!btn) return;
+  btn.classList.toggle('ativo');
+}
+
+function selecionarIntervalo(btn) {
+  document.querySelectorAll('.intervalo-btn').forEach(b => b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  const hidden = document.getElementById('cfgIntervaloSlots');
+  if (hidden) hidden.value = btn.dataset.val;
 }
 
 function openConfigSection(tab = 'empresa') { setView('config'); setConfigTab(tab); closeMobileMenu(); }
@@ -1474,10 +1493,10 @@ async function salvarHorarios() {
     { campo: 'dom', id: 'diaDom' }
   ];
   const updates = {};
-  diasMap.forEach(({ campo, id }) => { const cb = $(id); if (cb) updates[campo] = cb.checked; });
+  diasMap.forEach(({ campo, id }) => { const btn = $(id); if (btn) updates[campo] = btn.classList.contains('ativo'); });
   updates.horario_inicio = $('cfgHorarioInicio')?.value || '09:00';
   updates.horario_fim = $('cfgHorarioFim')?.value || '18:00';
-  updates.intervalo_slots = parseInt($('cfgIntervaloSlots')?.value || '30');
+  updates.intervalo_slots = parseInt($('cfgIntervaloSlots')?.value || '60');
   const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
   if (error) return toast('Erro ao salvar horários: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
@@ -2139,6 +2158,7 @@ Object.assign(window, {
   setConfigTab, openConfigSection,
   salvarCliente, salvarServico, salvarProfissional, salvarAgendamento,
   salvarConfig, salvarRedesSociais, salvarHorarios, salvarMensagensWhatsapp, restaurarMensagensWhatsappPadrao,
+  toggleDia, selecionarIntervalo,
   abrirEditorFoto, fecharEditorFoto, atualizarEditorFoto, iniciarArrasteFotoEditor, salvarFotoEditor,
   confirmarAg, concluirAg, abrirWA,
   openModalRecusa, closeModalRecusa, selectMotivo, confirmarRecusa,
