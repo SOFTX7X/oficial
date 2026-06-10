@@ -1330,6 +1330,9 @@ function renderConfig() {
     { campo: 'dom', id: 'diaDom' }
   ];
   diasMap.forEach(({ campo, id }) => { const cb = $(id); if (cb) cb.checked = e[campo] !== false; });
+  const hi = $('cfgHorarioInicio'); if (hi) hi.value = e.horario_inicio || '09:00';
+  const hf = $('cfgHorarioFim'); if (hf) hf.value = e.horario_fim || '18:00';
+  const is = $('cfgIntervaloSlots'); if (is) is.value = String(e.intervalo_slots || 30);
   const lb = $('cfgLinkBox');
   if (lb) lb.textContent = '🔗 ' + publicUrl(e.slug || '');
 }
@@ -1472,6 +1475,9 @@ async function salvarHorarios() {
   ];
   const updates = {};
   diasMap.forEach(({ campo, id }) => { const cb = $(id); if (cb) updates[campo] = cb.checked; });
+  updates.horario_inicio = $('cfgHorarioInicio')?.value || '09:00';
+  updates.horario_fim = $('cfgHorarioFim')?.value || '18:00';
+  updates.intervalo_slots = parseInt($('cfgIntervaloSlots')?.value || '30');
   const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
   if (error) return toast('Erro ao salvar horários: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
@@ -1801,33 +1807,10 @@ function editProfissional(id) {
       <div class="field"><label>Nome</label><input id="ed_pn" value="${p.nome || ''}"></div>
       <div class="field"><label>Especialidade</label><input id="ed_pe" value="${p.especialidade || ''}"></div>
       <div class="field"><label>Telefone</label><input id="ed_pt" value="${p.telefone || ''}"></div>
-      <div class="field-row">
-        <div class="field"><label>Início expediente</label><input id="ed_phi" type="time" value="${p.horario_inicio || '09:00'}"></div>
-        <div class="field"><label>Fim expediente</label><input id="ed_phf" type="time" value="${p.horario_fim || '18:00'}"></div>
-      </div>
-      <div class="field">
-        <label>Intervalo entre horários</label>
-        <select id="ed_pis">
-          <option value="30" ${(p.intervalo_slots||30)==30?'selected':''}>30 minutos</option>
-          <option value="45" ${(p.intervalo_slots||30)==45?'selected':''}>45 minutos</option>
-          <option value="60" ${(p.intervalo_slots||30)==60?'selected':''}>1 hora</option>
-          <option value="90" ${(p.intervalo_slots||30)==90?'selected':''}>1h30</option>
-          <option value="120" ${(p.intervalo_slots||30)==120?'selected':''}>2 horas</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Dias de atendimento</label>
-        <div class="dias-check-row">${diasHtml}</div>
-      </div>
     </div>`, async () => {
     const nome = ($('ed_pn')?.value || '').trim(); if (!nome) return toast('Preencha o nome.', 'err');
-    const diasSel = [0,1,2,3,4,5,6].filter(i => $(`ed_dia_${i}`)?.checked);
     const { error } = await db.from('agenda_profissionais').update({
-      nome, especialidade: ($('ed_pe')?.value || '').trim(), telefone: ($('ed_pt')?.value || '').trim(),
-      horario_inicio: $('ed_phi')?.value || '09:00',
-      horario_fim: $('ed_phf')?.value || '18:00',
-      intervalo_slots: parseInt($('ed_pis')?.value || '30'),
-      dias_semana: diasSel
+      nome, especialidade: ($('ed_pe')?.value || '').trim(), telefone: ($('ed_pt')?.value || '').trim()
     }).eq('id', id);
     if (error) return toast('Erro ao salvar.', 'err');
     closeEditModal(); await loadAll(); showNotif('Profissional atualizado', '', 'ok');
@@ -2281,9 +2264,11 @@ async function abrirSlotsPublico() {
   const prof = state.pubProfissional;
   if (!data || !prof) { return; }
 
-  const inicio = prof.horario_inicio || '09:00';
-  const fim = prof.horario_fim || '18:00';
-  const intervalo = prof.intervalo_slots || 30;
+  // Usa horários da empresa; fallback para os do profissional se empresa não tiver
+  const empresa = state.pubEmpresa || {};
+  const inicio = empresa.horario_inicio || prof.horario_inicio || '09:00';
+  const fim = empresa.horario_fim || prof.horario_fim || '18:00';
+  const intervalo = empresa.intervalo_slots || prof.intervalo_slots || 30;
 
   // Buscar agendamentos ocupados nesse dia para esse profissional
   const { data: ags } = await db.from('agenda_agendamentos')
