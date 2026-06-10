@@ -1779,14 +1779,46 @@ function editServico(id) {
 
 function editProfissional(id) {
   const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
+  const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const diasSemana = p.dias_semana || [1,2,3,4,5];
+  const diasHtml = dias.map((d,i) => `
+    <label class="dia-check">
+      <input type="checkbox" id="ed_dia_${i}" ${diasSemana.includes(i) ? 'checked' : ''}>
+      <span>${d}</span>
+    </label>`).join('');
   openEditModal('Editar Profissional', `
     <div class="form-gap">
       <div class="field"><label>Nome</label><input id="ed_pn" value="${p.nome || ''}"></div>
       <div class="field"><label>Especialidade</label><input id="ed_pe" value="${p.especialidade || ''}"></div>
       <div class="field"><label>Telefone</label><input id="ed_pt" value="${p.telefone || ''}"></div>
+      <div class="field-row">
+        <div class="field"><label>Início expediente</label><input id="ed_phi" type="time" value="${p.horario_inicio || '09:00'}"></div>
+        <div class="field"><label>Fim expediente</label><input id="ed_phf" type="time" value="${p.horario_fim || '18:00'}"></div>
+      </div>
+      <div class="field">
+        <label>Intervalo entre horários</label>
+        <select id="ed_pis">
+          <option value="30" ${(p.intervalo_slots||30)==30?'selected':''}>30 minutos</option>
+          <option value="45" ${(p.intervalo_slots||30)==45?'selected':''}>45 minutos</option>
+          <option value="60" ${(p.intervalo_slots||30)==60?'selected':''}>1 hora</option>
+          <option value="90" ${(p.intervalo_slots||30)==90?'selected':''}>1h30</option>
+          <option value="120" ${(p.intervalo_slots||30)==120?'selected':''}>2 horas</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Dias de atendimento</label>
+        <div class="dias-check-row">${diasHtml}</div>
+      </div>
     </div>`, async () => {
     const nome = ($('ed_pn')?.value || '').trim(); if (!nome) return toast('Preencha o nome.', 'err');
-    const { error } = await db.from('agenda_profissionais').update({ nome, especialidade: ($('ed_pe')?.value || '').trim(), telefone: ($('ed_pt')?.value || '').trim() }).eq('id', id);
+    const diasSel = [0,1,2,3,4,5,6].filter(i => $(`ed_dia_${i}`)?.checked);
+    const { error } = await db.from('agenda_profissionais').update({
+      nome, especialidade: ($('ed_pe')?.value || '').trim(), telefone: ($('ed_pt')?.value || '').trim(),
+      horario_inicio: $('ed_phi')?.value || '09:00',
+      horario_fim: $('ed_phf')?.value || '18:00',
+      intervalo_slots: parseInt($('ed_pis')?.value || '30'),
+      dias_semana: diasSel
+    }).eq('id', id);
     if (error) return toast('Erro ao salvar.', 'err');
     closeEditModal(); await loadAll(); showNotif('Profissional atualizado', '', 'ok');
   });
@@ -1978,6 +2010,8 @@ async function loadPublic(slug) {
   const sociais = $('pubSociais');
   if (sociais) {
     let html = '';
+    const enderecoCompleto = [empresa.endereco, empresa.cidade].filter(Boolean).join(' • ');
+    if (enderecoCompleto) html += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCompleto)}" target="_blank" rel="noopener" class="pub-social">📍 ${escapeHtml(enderecoCompleto)}</a>`;
     if (empresa.instagram) { const h = empresa.instagram.replace('@', '').replace(/.*instagram\.com\//, ''); html += `<a href="${escapeHtml(normalizarUrl(h, 'https://instagram.com/'))}" target="_blank" rel="noopener" class="pub-social">📸 @${escapeHtml(h)}</a>`; }
     if (empresa.facebook) { const url = /facebook\.com\//i.test(empresa.facebook) ? normalizarUrl(empresa.facebook) : normalizarUrl(empresa.facebook, 'https://facebook.com/'); html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="pub-social">f Facebook</a>`; }
     if (empresa.tiktok) { const h = empresa.tiktok.replace('@', '').replace(/.*tiktok\.com\/@?/, ''); html += `<a href="https://tiktok.com/@${escapeHtml(h)}" target="_blank" rel="noopener" class="pub-social">♪ @${escapeHtml(h)}</a>`; }
@@ -2126,5 +2160,158 @@ Object.assign(window, {
   toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu,
   menuOpenPublic, menuCopyPublicLink, menuNotifications,
-  enviarMensagemAI, _aiLimparHistorico, _aiCarregarHistoricoLocal, _aiCarregarMensagensNaTela
+  enviarMensagemAI, _aiLimparHistorico, _aiCarregarHistoricoLocal, _aiCarregarMensagensNaTela,
+  abrirCalendarioPublico, fecharCalendarioPublico, pubCalMes, selecionarDataPublica,
+  abrirSlotsPublico, fecharSlotsPublico, selecionarSlot
 });
+
+// ── CALENDÁRIO PÚBLICO FULLSCREEN ─────────────────────────────────────────────
+let _pubCalAno, _pubCalMes;
+
+function abrirCalendarioPublico() {
+  const hoje = new Date();
+  _pubCalAno = hoje.getFullYear();
+  _pubCalMes = hoje.getMonth();
+  renderPubCal();
+  const ov = document.getElementById('pubCalendarioOverlay');
+  if (ov) { ov.style.display = 'flex'; requestAnimationFrame(() => ov.classList.add('open')); }
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharCalendarioPublico(e) {
+  if (e && e.target !== document.getElementById('pubCalendarioOverlay')) return;
+  const ov = document.getElementById('pubCalendarioOverlay');
+  if (ov) { ov.classList.remove('open'); setTimeout(() => ov.style.display = 'none', 200); }
+  document.body.style.overflow = '';
+}
+
+function pubCalMes(dir) {
+  _pubCalMes += dir;
+  if (_pubCalMes > 11) { _pubCalMes = 0; _pubCalAno++; }
+  if (_pubCalMes < 0) { _pubCalMes = 11; _pubCalAno--; }
+  renderPubCal();
+}
+
+function renderPubCal() {
+  const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const titulo = document.getElementById('pubCalTitulo');
+  if (titulo) titulo.textContent = nomes[_pubCalMes] + ' ' + _pubCalAno;
+
+  const prof = state.pubProfissional;
+  const diasPermitidos = prof?.dias_semana || [1,2,3,4,5];
+  const diasFechados = state.pubDiasFechados || [];
+
+  const grid = document.getElementById('pubCalGrid');
+  if (!grid) return;
+
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const primeiroDia = new Date(_pubCalAno, _pubCalMes, 1);
+  const ultimoDia = new Date(_pubCalAno, _pubCalMes + 1, 0);
+  const iniciaSemana = primeiroDia.getDay();
+
+  let html = '';
+  for (let i = 0; i < iniciaSemana; i++) html += '<div class="pub-cal-cell vazio"></div>';
+  for (let d = 1; d <= ultimoDia.getDate(); d++) {
+    const data = new Date(_pubCalAno, _pubCalMes, d);
+    const diaSemana = data.getDay();
+    const passado = data < hoje;
+    const fechadoEmpresa = diasFechados.includes(diaSemana);
+    const feriaProfissional = !diasPermitidos.includes(diaSemana);
+    const bloqueado = passado || fechadoEmpresa || feriaProfissional;
+    const iso = `${_pubCalAno}-${String(_pubCalMes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const selecionado = document.getElementById('pubData')?.value === iso;
+    html += `<div class="pub-cal-cell${bloqueado?' bloqueado':''}${selecionado?' selecionado':''}" ${!bloqueado?`onclick="selecionarDataPublica('${iso}')"`:''}>${d}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function selecionarDataPublica(iso) {
+  const input = document.getElementById('pubData');
+  const btn = document.getElementById('pubDataBtn');
+  const label = document.getElementById('pubDataLabel');
+  if (input) input.value = iso;
+  if (label) {
+    const [y,m,d] = iso.split('-');
+    const nomes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    label.textContent = `${parseInt(d)} de ${nomes[parseInt(m)-1]} de ${y}`;
+  }
+  if (btn) btn.classList.add('selecionado');
+  const horaBtn = document.getElementById('pubHoraBtn');
+  if (horaBtn) horaBtn.disabled = false;
+  const horaLabel = document.getElementById('pubHoraLabel');
+  if (horaLabel) { horaLabel.textContent = 'Escolher horário'; }
+  const horaInput = document.getElementById('pubHora');
+  if (horaInput) horaInput.value = '';
+  fecharCalendarioPublico();
+  renderPubCal();
+}
+
+// ── SLOTS DE HORÁRIO ────────────────────────────────────────────────────────────
+async function abrirSlotsPublico() {
+  const data = document.getElementById('pubData')?.value;
+  const prof = state.pubProfissional;
+  if (!data || !prof) { return; }
+
+  const inicio = prof.horario_inicio || '09:00';
+  const fim = prof.horario_fim || '18:00';
+  const intervalo = prof.intervalo_slots || 30;
+
+  // Buscar agendamentos ocupados nesse dia para esse profissional
+  const { data: ags } = await db.from('agenda_agendamentos')
+    .select('hora, status')
+    .eq('profissional_id', prof.id)
+    .eq('data', data)
+    .in('status', ['Pendente','Confirmado','Reagendado']);
+
+  const ocupados = new Set((ags || []).map(a => a.hora?.slice(0,5)));
+
+  // Gerar slots
+  const slots = [];
+  const [hIni, mIni] = inicio.split(':').map(Number);
+  const [hFim, mFim] = fim.split(':').map(Number);
+  let atual = hIni * 60 + mIni;
+  const fimMin = hFim * 60 + mFim;
+  while (atual < fimMin) {
+    const h = String(Math.floor(atual/60)).padStart(2,'0');
+    const m = String(atual%60).padStart(2,'0');
+    slots.push(`${h}:${m}`);
+    atual += intervalo;
+  }
+
+  const grid = document.getElementById('pubSlotsGrid');
+  if (grid) {
+    grid.innerHTML = slots.length ? slots.map(s => {
+      const ocup = ocupados.has(s);
+      return `<div class="pub-slot${ocup?' ocupado':' livre'}" ${!ocup?`onclick="selecionarSlot('${s}')"`:''}>${s}${ocup?'<span class="slot-tag">Ocupado</span>':''}</div>`;
+    }).join('') : '<p style="color:var(--text3);text-align:center;padding:24px">Nenhum horário disponível neste dia.</p>';
+  }
+
+  const titulo = document.getElementById('pubSlotsTitulo');
+  if (titulo) {
+    const [y,m,d] = data.split('-');
+    const nomes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    titulo.textContent = `Horários — ${parseInt(d)} ${nomes[parseInt(m)-1]}`;
+  }
+
+  const ov = document.getElementById('pubSlotsOverlay');
+  if (ov) { ov.style.display = 'flex'; requestAnimationFrame(() => ov.classList.add('open')); }
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharSlotsPublico(e) {
+  if (e && e.target !== document.getElementById('pubSlotsOverlay')) return;
+  const ov = document.getElementById('pubSlotsOverlay');
+  if (ov) { ov.classList.remove('open'); setTimeout(() => ov.style.display = 'none', 200); }
+  document.body.style.overflow = '';
+}
+
+function selecionarSlot(hora) {
+  const input = document.getElementById('pubHora');
+  const btn = document.getElementById('pubHoraBtn');
+  const label = document.getElementById('pubHoraLabel');
+  if (input) input.value = hora;
+  if (label) label.textContent = hora;
+  if (btn) btn.classList.add('selecionado');
+  fecharSlotsPublico();
+}
+// ─────────────────────────────────────────────────────────────────────────────
