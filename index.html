@@ -49,6 +49,24 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 <script src="calendar.js?v=20260601-3"></script>
+<style>
+  .nav-v {
+    font-family: 'Instrument Serif', serif !important;
+    font-style: italic;
+    font-weight: 700;
+    color: #fff !important;
+    background: linear-gradient(135deg, #7c3aed, #a855f7) !important;
+    letter-spacing: -0.5px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 12px rgba(139,92,246,0.45);
+  }
+  .ai-avatar.nav-v, .ai-msg-avatar.nav-v {
+    border-radius: 50% !important;
+  }
+</style>
 </head>
 <body>
 
@@ -60,7 +78,7 @@
 <div id="landingView">
   <nav class="land-nav" id="landNav">
     <div class="nav-brand" onclick="window.scrollTo(0,0)">
-      <div class="nav-dot">✦</div>
+      <div class="nav-dot nav-v">V</div>
       VyXora Agendas
     </div>
     <div class="nav-links">
@@ -81,7 +99,7 @@
     </h1>
     <p class="hero-sub">Receba agendamentos, gerencie equipe, clientes e faturamento — tudo em um painel profissional.</p>
     <div class="hero-cta">
-      <button class="btn btn-primary btn-lg" onclick="openAuth('register')">✦ Criar minha agenda grátis</button>
+      <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar minha agenda grátis →</button>
       <button class="btn btn-ghost btn-lg" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Ver como funciona →</button>
     </div>
     <div class="hero-trust">
@@ -112,7 +130,7 @@
           <div class="ms-item active"><div class="ms-icon">📊</div>Dashboard</div>
           <div class="ms-item"><div class="ms-icon">📅</div>Agenda</div>
           <div class="ms-item"><div class="ms-icon">👥</div>Clientes</div>
-          <div class="ms-item"><div class="ms-icon">✦</div>Serviços</div>
+          <div class="ms-item"><div class="ms-icon">◈</div>Serviços</div>
           <div class="ms-label" style="margin-top:8px">Financeiro</div>
           <div class="ms-item"><div class="ms-icon">💰</div>Financeiro</div>
           <div class="ms-item"><div class="ms-icon">⚙</div>Config</div>
@@ -138,7 +156,7 @@
   <section class="land-section" id="sec-como">
     <div class="section-wrap">
       <div class="section-header">
-        <div class="section-tag">✦ Como funciona</div>
+        <div class="section-tag">Como funciona</div>
         <h2 class="section-title">Comece a receber agendamentos <em>em minutos.</em></h2>
         <p class="section-sub">Sem complicação. Sem mensalidade obrigatória. Tudo online.</p>
       </div>
@@ -151,7 +169,7 @@
         </div>
         <div class="step-card">
           <div class="step-num">02</div>
-          <div class="step-icon">✦</div>
+          <div class="step-icon">◈</div>
           <div class="step-title">Cadastre serviços, profissionais e horários</div>
           <p class="step-desc">Adicione catálogo com preços, duração e profissionais responsáveis.</p>
         </div>
@@ -168,14 +186,14 @@
   <section class="land-section" id="sec-features" style="padding-top:40px">
     <div class="section-wrap">
       <div class="section-header">
-        <div class="section-tag">✦ Funcionalidades</div>
+        <div class="section-tag">Funcionalidades</div>
         <h2 class="section-title">Tudo que você precisa para <em>crescer.</em></h2>
       </div>
       <div class="features-grid">
         <div class="feat-card"><div class="feat-icon">📅</div><div class="feat-title">Agenda online</div><p class="feat-desc">Painel completo por data e profissional.</p></div>
         <div class="feat-card"><div class="feat-icon">🔗</div><div class="feat-title">Link exclusivo</div><p class="feat-desc">Compartilhe onde quiser, sem app.</p></div>
         <div class="feat-card"><div class="feat-icon">👥</div><div class="feat-title">Gestão de clientes</div><p class="feat-desc">Histórico, total gasto e contatos.</p></div>
-        <div class="feat-card"><div class="feat-icon">✦</div><div class="feat-title">Catálogo de serviços</div><p class="feat-desc">Preços, duração e profissionais.</p></div>
+        <div class="feat-card"><div class="feat-icon">◈</div><div class="feat-title">Catálogo de serviços</div><p class="feat-desc">Preços, duração e profissionais.</p></div>
         <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">Dashboard em tempo real</div><p class="feat-desc">Métricas completas e precisas.</p></div>
         <div class="feat-card"><div class="feat-icon">💰</div><div class="feat-title">Controle financeiro</div><p class="feat-desc">Receita, ticket médio e histórico.</p></div>
         <div class="feat-card"><div class="feat-icon">📱</div><div class="feat-title">WhatsApp integrado</div><p class="feat-desc">Confirme agendamentos em segundos.</p></div>
@@ -189,7 +207,7 @@
   <section class="land-section" style="padding-top:40px">
     <div class="section-wrap">
       <div class="section-header">
-        <div class="section-tag">✦ Para quem é</div>
+        <div class="section-tag">Para quem é</div>
         <h2 class="section-title">Para todo profissional que <em>trabalha com hora marcada.</em></h2>
       </div>
       <div class="segs-wrap">
@@ -214,7 +232,7 @@
   <section class="land-section" id="sec-depo" style="padding-top:40px">
     <div class="section-wrap">
       <div class="section-header">
-        <div class="section-tag">✦ Depoimentos</div>
+        <div class="section-tag">Depoimentos</div>
         <h2 class="section-title">O que nossos clientes <em>dizem.</em></h2>
       </div>
       <div class="test-grid">
@@ -239,18 +257,18 @@
 
   <section class="land-cta">
     <div class="cta-inner">
-      <div class="section-tag" style="display:inline-flex;margin:0 auto 20px">✦ Comece agora</div>
+      <div class="section-tag" style="display:inline-flex;margin:0 auto 20px">Comece agora</div>
       <h2 class="cta-title">Sua agenda profissional<br>começa <em>agora.</em></h2>
       <p class="cta-sub">Crie sua conta em menos de 3 minutos e receba seu link exclusivo na hora.</p>
       <div class="cta-actions">
-        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">✦ Criar minha agenda grátis</button>
+        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar minha agenda grátis →</button>
         <button class="btn btn-ghost btn-lg" onclick="openAuth('login')">Já tenho uma conta</button>
       </div>
     </div>
   </section>
 
  <footer class="land-footer">
-    <div class="nav-brand"><div class="nav-dot" style="width:24px;height:24px;font-size:10px">✦</div>VyXora Agendas</div>
+    <div class="nav-brand"><div class="nav-dot nav-v" style="width:24px;height:24px;font-size:11px">V</div>VyXora Agendas</div>
     <div>© 2025 VyXora Agendas · Plataforma de Agendamento</div>
     <div class="footer-contact">
       <a href="https://instagram.com/vyxoraoficial" target="_blank" rel="noopener" class="footer-contact-link">
@@ -272,7 +290,7 @@
     <button class="auth-close" onclick="closeAuth()">✕</button>
     <div class="auth-panel-left">
       <div>
-        <div class="auth-left-brand"><div class="nav-dot">✦</div>VyXora Agendas</div>
+        <div class="auth-left-brand"><div class="nav-dot nav-v">V</div>VyXora Agendas</div>
         <h2 class="auth-left-title">Seu painel<br><em>premium</em><br>em minutos.</h2>
         <p class="auth-left-desc">Login real com e-mail e senha. Dados protegidos por empresa com RLS.</p>
         <div class="auth-left-perks">
@@ -353,13 +371,13 @@
 <!-- DASHBOARD -->
 <section id="dashboardView" style="display:none">
   <aside class="sidebar" id="sidebar">
-    <div class="side-brand"><div class="nav-dot">✦</div>VyXora Agendas</div>
+    <div class="side-brand"><div class="nav-dot nav-v">V</div>VyXora Agendas</div>
     <div class="side-nav-section">
       <div class="side-nav-label">Gestão</div>
       <button class="nav-btn" onclick="setView('dashboard')"><span class="ni">📊</span>Dashboard</button>
       <button class="nav-btn" onclick="setView('agenda')"><span class="ni">📅</span>Agenda</button>
       <button class="nav-btn" onclick="setView('clientes')"><span class="ni">👥</span>Clientes</button>
-      <button class="nav-btn" onclick="setView('servicos')"><span class="ni">✦</span>Serviços</button>
+      <button class="nav-btn" onclick="setView('servicos')"><span class="ni">◈</span>Serviços</button>
       <button class="nav-btn" onclick="setView('profissionais')"><span class="ni">👤</span>Profissionais</button>
       <button class="nav-btn" onclick="setView('ai')"><span class="ni">✧</span>VyXora AI</button>
     </div>
@@ -415,7 +433,7 @@
     <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
     <div class="mobile-menu-drawer" id="mobileMenuDrawer">
       <div class="mobile-menu-header">
-        <div class="nav-brand" style="font-size:17px"><div class="nav-dot" style="width:24px;height:24px;font-size:10px">✦</div>VyXora Agendas</div>
+        <div class="nav-brand" style="font-size:17px"><div class="nav-dot nav-v" style="width:24px;height:24px;font-size:11px">V</div>VyXora Agendas</div>
         <button class="modal-close" onclick="closeMobileMenu()" style="position:static">✕</button>
       </div>
       <div class="mobile-menu-body">
@@ -424,7 +442,7 @@
         <button class="nav-btn mobile-menu-new" onclick="setView('agenda');closeMobileMenu();setTimeout(()=>{var el=document.getElementById('agCliente');if(el)el.focus()},200)"><span class="ni">＋</span>Novo agendamento</button>
         <button class="nav-btn" onclick="setView('agenda');closeMobileMenu()"><span class="ni">📅</span>Agenda</button>
         <button class="nav-btn" onclick="setView('clientes');closeMobileMenu()"><span class="ni">👥</span>Clientes</button>
-        <button class="nav-btn" onclick="setView('servicos');closeMobileMenu()"><span class="ni">✦</span>Serviços</button>
+        <button class="nav-btn" onclick="setView('servicos');closeMobileMenu()"><span class="ni">◈</span>Serviços</button>
         <button class="nav-btn" onclick="setView('profissionais');closeMobileMenu()"><span class="ni">👤</span>Profissionais</button>
         <button class="nav-btn" onclick="setView('ai');closeMobileMenu()"><span class="ni">✧</span>VyXora AI</button>
         <div class="side-nav-sep"></div>
@@ -473,7 +491,7 @@
         <div class="stat-card"><span class="stat-icon">💵</span><div class="stat-label">Fat. hoje</div><div class="stat-value" id="statFatHoje">R$0</div></div>
         <div class="stat-card"><span class="stat-icon">💰</span><div class="stat-label">Fat. mês</div><div class="stat-value" id="statFatMes">R$0</div></div>
         <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div></div>
-        <div class="stat-card"><span class="stat-icon">✦</span><div class="stat-label">Serviços</div><div class="stat-value" id="statServicos">0</div></div>
+        <div class="stat-card"><span class="stat-icon">◈</span><div class="stat-label">Serviços</div><div class="stat-value" id="statServicos">0</div></div>
         <div class="stat-card"><span class="stat-icon">👤</span><div class="stat-label">Profissionais</div><div class="stat-value" id="statProfissionais">0</div></div>
         <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">Total ags.</div><div class="stat-value" id="statTotal">0</div></div>
       </div>
@@ -597,7 +615,7 @@
         <div class="ai-hero">
           <div class="ai-hero-left">
             <button id="aiBackBtn" class="ai-back-btn" onclick="setView('dashboard')" aria-label="Voltar">&#8592; Voltar</button>
-            <div class="ai-avatar">✦</div>
+            <div class="ai-avatar nav-v">V</div>
             <div class="ai-hero-info">
               <span class="ai-hero-name">VyXora AI</span>
               <span class="ai-hero-sub">online</span>
@@ -611,7 +629,7 @@
         <div class="ai-chat">
           <div class="ai-messages" id="aiMessages" aria-live="polite">
             <div class="ai-message ai-message-bot">
-              <div class="ai-msg-avatar">✦</div>
+              <div class="ai-msg-avatar nav-v">V</div>
               <div class="ai-bubble">
                 Olá! 👋 Pode me perguntar sobre clientes, agendamentos, faturamento ou pedir para executar ações na sua agenda.
                 <span class="ai-bubble-time" id="aiWelcomeTime"></span>
@@ -720,7 +738,7 @@
         <div class="pub-cover" id="pubFotoPublica" style="display:none"></div>
         <div class="pub-hero-content">
           <div class="pub-hero-brand">
-            <div class="nav-dot" style="width:18px;height:18px;font-size:8px">✦</div>
+            <div class="nav-dot nav-v" style="width:18px;height:18px;font-size:8px">V</div>
             VyXora Agendas
           </div>
           <h1 id="pubNomeEmpresa">Agendamento Online</h1>
