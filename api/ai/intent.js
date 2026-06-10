@@ -478,7 +478,7 @@ function randomPick(arr) {
 }
 
 function greet() {
-  const hora = new Date().getHours();
+  const hora = parseInt(new Date().toLocaleString('pt-BR', { hour: 'numeric', hour12: false, timeZone: 'America/Sao_Paulo' }), 10);
   const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
   return randomPick([
     `${saudacao}! 👋 Sou a VyXora AI. Como posso te ajudar hoje?\n\nPode me pedir para agendar, consultar, cadastrar ou tirar dúvidas sobre o painel. Estou aqui!`,
