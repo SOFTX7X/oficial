@@ -928,7 +928,7 @@ a { text-decoration: none; color: inherit; }
 ══════════════════════════════════════════ */
 .modal-overlay { display: none; position: fixed; inset: 0; z-index: 400; background: rgba(9,9,11,0.85); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 16px; }
 .modal-overlay.open { display: flex; }
-.modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: var(--radius-2xl); padding: 28px; width: 100%; max-width: 440px; position: relative; box-shadow: 0 32px 90px rgba(0,0,0,0.65); animation: modalIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
+.modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: var(--radius-2xl); padding: 28px; width: 100%; max-width: 440px; position: relative; box-shadow: 0 32px 90px rgba(0,0,0,0.65); animation: modalIn 0.2s ease; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .modal-title { font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 6px; }
 .modal-sub { font-size: 13px; color: var(--text3); margin-bottom: 20px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); line-height: 1.55; }
 .modal-close { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text3); cursor: pointer; display: grid; place-items: center; font-size: 14px; transition: all 0.15s; z-index: 10; }
@@ -954,7 +954,7 @@ a { text-decoration: none; color: inherit; }
 
 .edit-overlay { display: none; position: fixed; inset: 0; z-index: 450; background: rgba(9,9,11,0.85); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 16px; }
 .edit-overlay.open { display: flex; }
-.edit-modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: var(--radius-2xl); padding: 28px; width: 100%; max-width: 500px; position: relative; box-shadow: 0 32px 90px rgba(0,0,0,0.65); animation: modalIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
+.edit-modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: var(--radius-2xl); padding: 28px; width: 100%; max-width: 500px; position: relative; box-shadow: 0 32px 90px rgba(0,0,0,0.65); animation: modalIn 0.2s ease; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .edit-title { font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 20px; }
 
 /* ══════════════════════════════════════════
@@ -1353,6 +1353,9 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .config-grid { grid-template-columns: 1fr; }
   .fin-grid { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr !important; }
+  /* Modais no mobile: padding com safe-area, altura máxima correta, alinhamento ao topo */
+  .modal-overlay, .edit-overlay { align-items: flex-end; padding: 0; }
+  .modal, .edit-modal { border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; max-width: 100%; max-height: calc(92dvh - env(safe-area-inset-bottom, 0px)); padding: 22px 18px calc(18px + env(safe-area-inset-bottom, 0px)); }
   .ai-hero { padding: 12px 14px; border-radius: 0; border-left: none; border-right: none; border-top: none; }
   .ai-chat { border-radius: 0; border-left: none; border-right: none; border-bottom: none; }
   .ai-messages { padding: 12px 10px 8px; gap: 3px; }
