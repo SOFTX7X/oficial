@@ -1208,6 +1208,25 @@ a { text-decoration: none; color: inherit; }
   display: block;
 }
 
+/* Avatar com iniciais quando não há foto */
+.pub-cover-inicial {
+  background: linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(192,132,252,0.15) 100%) !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.pub-cover-letra {
+  font-family: 'Instrument Serif', serif;
+  font-size: 46px;
+  font-style: italic;
+  color: var(--accent2);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  user-select: none;
+  text-shadow: 0 2px 16px rgba(139,92,246,0.3);
+}
+
 .pub-hero-content { min-width: 0; }
 
 .pub-hero-brand {
@@ -1539,6 +1558,7 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .pub-hero { padding: 22px 18px 20px; border-radius: 20px; }
   .pub-hero-inner { grid-template-columns: 1fr; gap: 16px; justify-items: center; text-align: center; }
   .pub-cover { width: 100px; height: 100px; }
+  .pub-cover-letra { font-size: 36px; }
   .pub-hero-content { display: flex; flex-direction: column; align-items: center; }
   .pub-hero h1 { font-size: clamp(24px, 7vw, 34px); }
   .pub-socials { justify-content: center; }
