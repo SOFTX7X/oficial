@@ -1818,3 +1818,68 @@ body.menu-open { overflow: hidden; touch-action: none; }
 }
 .dia-check input:checked + span { background: var(--accent3); border-color: var(--accent-border); color: var(--accent2); }
 /* ─────────────────────────────────────────────────────────────────── */
+
+/* ── CEP e Autocomplete de Endereço ─────────────────────────────────────── */
+.endereco-cep-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.endereco-cep-wrap input {
+  flex: 1;
+}
+.cep-spinner {
+  position: absolute;
+  right: 12px;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.endereco-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  z-index: 999;
+  overflow: hidden;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.endereco-suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+  line-height: 1.4;
+}
+.endereco-suggestion-item:last-child {
+  border-bottom: none;
+}
+.endereco-suggestion-item:hover {
+  background: var(--accent4);
+  color: var(--text);
+}
+.endereco-suggestion-item .es-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 14px;
+}
+.endereco-suggestion-item strong {
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+}
+.endereco-suggestion-item small {
+  font-size: 11.5px;
+  color: var(--text4);
+}
