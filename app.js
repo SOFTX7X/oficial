@@ -2015,10 +2015,26 @@ async function loadPublic(slug) {
   setText('pubDescEmpresa', (empresa.area_atuacao || 'Agendamento Online') + ' • WhatsApp: ' + (empresa.whatsapp || 'Não informado'));
   const fotoPublica = $('pubFotoPublica');
   if (fotoPublica) {
-    aplicarImagemFundo(fotoPublica, empresa.foto_publica_url);
-    const enquadramento = getEnquadramentoFoto('publica', empresa);
-    aplicarEnquadramentoFoto(fotoPublica, enquadramento.x, enquadramento.y, enquadramento.zoom);
-    fotoPublica.style.display = empresa.foto_publica_url ? 'block' : 'none';
+    if (empresa.foto_publica_url) {
+      aplicarImagemFundo(fotoPublica, empresa.foto_publica_url);
+      const enquadramento = getEnquadramentoFoto('publica', empresa);
+      aplicarEnquadramentoFoto(fotoPublica, enquadramento.x, enquadramento.y, enquadramento.zoom);
+      fotoPublica.className = 'pub-cover';
+      fotoPublica.innerHTML = '';
+      fotoPublica.style.display = 'block';
+    } else {
+      // Sem foto: exibe avatar com iniciais do nome da empresa
+      const iniciais = (empresa.nome || 'VY')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(p => p[0].toUpperCase())
+        .join('');
+      fotoPublica.className = 'pub-cover pub-cover-inicial';
+      fotoPublica.style.backgroundImage = '';
+      fotoPublica.innerHTML = `<span class="pub-cover-letra">${iniciais}</span>`;
+      fotoPublica.style.display = 'block';
+    }
   }
   const localizacao = $('pubLocalizacao');
   if (localizacao) {
