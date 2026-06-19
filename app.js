@@ -2054,6 +2054,15 @@ async function loadPublic(slug) {
     if (empresa.site) { const url = normalizarUrl(empresa.site); const lbl = empresa.site.replace(/^https?:\/\//, '').replace(/\/$/, ''); html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="pub-social">🌐 ${escapeHtml(lbl)}</a>`; }
     sociais.innerHTML = html; sociais.style.display = html ? 'flex' : 'none';
   }
+  // Botão WhatsApp flutuante
+  const fab = $('pubWhatsappFab');
+  if (fab && empresa.whatsapp) {
+    const num = empresa.whatsapp.replace(/\D/g, '');
+    fab.href = `https://wa.me/${num}`;
+    fab.style.display = 'flex';
+  } else if (fab) {
+    fab.style.display = 'none';
+  }
   const [svcs, profs] = await Promise.all([
     db.from('agenda_servicos').select('*').eq('empresa_id', empresa.id).eq('status', 'ativo').order('nome'),
     db.from('agenda_profissionais').select('*').eq('empresa_id', empresa.id).eq('status', 'ativo').order('nome')
@@ -2121,6 +2130,17 @@ async function confirmarAgendamentoPublico() {
   const pubData = $('pubData')?.value, pubHora = $('pubHora')?.value;
   if (!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !pubNome || !pubTel || !pubData || !pubHora) return toast('Preencha tudo para confirmar.', 'err');
   if (isDiaFechado(pubData, state.pubDiasFechados || [])) { validarDataPublica(pubData); return toast('Este dia não está disponível. Escolha outra data.', 'err'); }
+  // Mostra tela de observação antes de salvar
+  const mb = $('pubMainBody'), ob = $('pubObsScreen');
+  if (mb) mb.style.display = 'none';
+  if (ob) ob.style.display = 'block';
+}
+
+async function finalizarAgendamentoPublico() {
+  const pubNome = $('pubClienteNome')?.value?.trim(), pubTel = $('pubClienteTel')?.value?.trim();
+  const pubData = $('pubData')?.value, pubHora = $('pubHora')?.value;
+  const ob = $('pubObsScreen'), cs = $('pubConfirmScreen');
+  if (ob) ob.style.display = 'none';
   try {
     let clienteId = null;
     const { data: cli } = await db.from('agenda_clientes').insert({ empresa_id: state.pubEmpresa.id, nome: pubNome, telefone: pubTel, status: 'ativo' }).select('*').single();
@@ -2134,14 +2154,15 @@ async function confirmarAgendamentoPublico() {
       valor: Number(state.pubServico.preco || 0), observacoes: $('pubObs')?.value || ''
     });
     if (error) { console.error(error); return toast('Erro ao confirmar: ' + error.message, 'err'); }
-    const mb = $('pubMainBody'), cs = $('pubConfirmScreen');
-    if (mb) mb.style.display = 'none'; if (cs) cs.style.display = 'block';
+    if (cs) cs.style.display = 'block';
   } catch (e) { console.error('Erro ao confirmar agendamento público:', e); toast('Erro inesperado. Tente novamente.', 'err'); }
 }
 
 function resetPublic() {
-  const mb = $('pubMainBody'), cs = $('pubConfirmScreen');
-  if (mb) mb.style.display = ''; if (cs) cs.style.display = 'none';
+  const mb = $('pubMainBody'), cs = $('pubConfirmScreen'), ob = $('pubObsScreen');
+  if (mb) mb.style.display = '';
+  if (cs) cs.style.display = 'none';
+  if (ob) ob.style.display = 'none';
   ['pubClienteNome', 'pubClienteTel', 'pubData', 'pubHora', 'pubObs'].forEach(id => { const el = $(id); if (el) el.value = ''; });
   const aviso = $('pubDataAviso'); if (aviso) aviso.style.display = 'none';
   const inputData = $('pubData'); if (inputData) { inputData.style.borderColor = ''; inputData.style.boxShadow = ''; }
@@ -2192,7 +2213,7 @@ Object.assign(window, {
   toggleCliente, toggleServico, toggleProfissional,
   excluirCliente, excluirServico, excluirProfissional, excluirAgendamento,
   copyPublicLink, openPublic, voltarDaPublica,
-  selectPubSvc, selectPubProf, confirmarAgendamentoPublico, resetPublic,
+  selectPubSvc, selectPubProf, confirmarAgendamentoPublico, finalizarAgendamentoPublico, resetPublic,
   closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
   toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu,
