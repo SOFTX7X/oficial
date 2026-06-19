@@ -699,7 +699,18 @@
             <div class="field"><label>Nome da empresa</label><input id="cfgNome"></div>
             <div class="field"><label>WhatsApp</label><input id="cfgWhatsapp"></div>
             <div class="field"><label>Slug / link</label><input id="cfgSlug"></div>
-            <div class="field"><label>Endereço</label><input id="cfgEndereco" placeholder="Rua, número, bairro"></div>
+            <div class="field">
+              <label>CEP</label>
+              <div class="endereco-cep-wrap">
+                <input id="cfgCep" placeholder="00000-000" maxlength="9" oninput="formatarCep(this)" onblur="buscarCep(this.value)">
+                <span class="cep-spinner" id="cepSpinner" style="display:none">⏳</span>
+              </div>
+            </div>
+            <div class="field" style="position:relative">
+              <label>Endereço</label>
+              <input id="cfgEndereco" placeholder="Rua, número, bairro" autocomplete="off" oninput="autocompleteEndereco(this.value)" onfocus="autocompleteEndereco(this.value)">
+              <div class="endereco-suggestions" id="enderecoSuggestions" style="display:none"></div>
+            </div>
             <div class="field"><label>Cidade / Estado</label><input id="cfgCidade" placeholder="Ex: Manaus, AM"></div>
             <button class="btn btn-primary btn-full" onclick="salvarConfig()">Salvar alterações</button>
             <div id="cfgLinkBox" style="font-size:10.5px;color:var(--text4);padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);word-break:break-all"></div>
