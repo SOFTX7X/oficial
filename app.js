@@ -1314,7 +1314,7 @@ function renderConfig() {
   const e = state.empresa || {};
   const set = (id, v) => { const el = $(id); if (el) el.value = v || ''; };
   set('cfgNome', e.nome); set('cfgWhatsapp', e.whatsapp); set('cfgSlug', e.slug);
-  set('cfgEndereco', e.endereco); set('cfgCidade', e.cidade);
+  set('cfgCep', e.cep); set('cfgEndereco', e.endereco); set('cfgCidade', e.cidade);
   set('cfgInstagram', e.instagram); set('cfgFacebook', e.facebook);
   set('cfgTiktok', e.tiktok); set('cfgSite', e.site);
   renderPreviewImagem('previewFotoPerfil', e.foto_perfil_url);
@@ -1476,6 +1476,7 @@ async function salvarConfig() {
   const slugNovo = slugify($('cfgSlug')?.value || slugAtual);
   const updates = {
     nome, whatsapp: ($('cfgWhatsapp')?.value || '').trim(),
+    cep: ($('cfgCep')?.value || '').trim(),
     endereco: ($('cfgEndereco')?.value || '').trim(), cidade: ($('cfgCidade')?.value || '').trim()
   };
   if (slugNovo !== slugAtual) {
@@ -2370,3 +2371,83 @@ function selecionarSlot(hora) {
   fecharSlotsPublico();
 }
 // ─────────────────────────────────────────────────────────────────────────────
+
+
+// ── CEP e Autocomplete de Endereço ───────────────────────────────────────────
+function formatarCep(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 8);
+  if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5);
+  input.value = v;
+  if (v.replace('-', '').length === 8) buscarCep(v);
+}
+
+async function buscarCep(cep) {
+  const limpo = (cep || '').replace(/\D/g, '');
+  if (limpo.length !== 8) return;
+  const spinner = $('cepSpinner');
+  if (spinner) spinner.style.display = 'inline';
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${limpo}/json/`);
+    const d = await res.json();
+    if (d.erro) { toast('CEP não encontrado.', 'err'); return; }
+    const end = $('cfgEndereco');
+    const cid = $('cfgCidade');
+    if (end) end.value = [d.logradouro, d.bairro].filter(Boolean).join(', ');
+    if (cid) cid.value = [d.localidade, d.uf].filter(Boolean).join(', ');
+    toast('Endereço preenchido automaticamente!', 'ok');
+  } catch (e) {
+    toast('Erro ao buscar CEP.', 'err');
+  } finally {
+    if (spinner) spinner.style.display = 'none';
+  }
+}
+
+let _enderecoTimer = null;
+async function autocompleteEndereco(valor) {
+  const box = $('enderecoSuggestions');
+  if (!box) return;
+  if (!valor || valor.length < 4) { box.style.display = 'none'; return; }
+  clearTimeout(_enderecoTimer);
+  _enderecoTimer = setTimeout(async () => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=br&q=${encodeURIComponent(valor)}`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } });
+      const lista = await res.json();
+      if (!lista.length) { box.style.display = 'none'; return; }
+      box.innerHTML = lista.map((item, i) => {
+        const a = item.address || {};
+        const rua = [a.road, a.house_number].filter(Boolean).join(', ');
+        const bairro = a.suburb || a.neighbourhood || a.quarter || '';
+        const cidade = a.city || a.town || a.village || a.municipality || '';
+        const estado = a.state_code || a.state || '';
+        const linha1 = rua || item.display_name.split(',')[0];
+        const linha2 = [bairro, cidade, estado].filter(Boolean).join(', ');
+        return `<div class="endereco-suggestion-item" onclick="selecionarEndereco(${i})" data-rua="${escapeHtml(linha1)}" data-cidade="${escapeHtml([cidade, estado].filter(Boolean).join(', '))}">
+          <span class="es-icon">📍</span>
+          <span><strong>${escapeHtml(linha1)}</strong>${linha2 ? '<br><small>' + escapeHtml(linha2) + '</small>' : ''}</span>
+        </div>`;
+      }).join('');
+      box.style.display = 'block';
+    } catch (e) { box.style.display = 'none'; }
+  }, 400);
+}
+
+function selecionarEndereco(idx) {
+  const box = $('enderecoSuggestions');
+  if (!box) return;
+  const items = box.querySelectorAll('.endereco-suggestion-item');
+  const item = items[idx];
+  if (!item) return;
+  const end = $('cfgEndereco');
+  const cid = $('cfgCidade');
+  if (end) end.value = item.dataset.rua || '';
+  if (cid && item.dataset.cidade) cid.value = item.dataset.cidade;
+  box.style.display = 'none';
+}
+
+document.addEventListener('click', (e) => {
+  const box = $('enderecoSuggestions');
+  if (box && !box.contains(e.target) && e.target.id !== 'cfgEndereco') {
+    box.style.display = 'none';
+  }
+});
