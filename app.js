@@ -326,11 +326,29 @@ function buildWaLink(tel, msg) {
   const n = (tel || '').replace(/\D/g, '');
   if (!n) return null;
   const f = n.startsWith('55') ? n : '55' + n;
-  const params = '?phone=' + f + '&text=' + encodeURIComponent(msg);
-  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  return isMobile
-    ? 'https://api.whatsapp.com/send' + params
-    : 'whatsapp://send' + params;
+  return 'https://wa.me/' + f + '?text=' + encodeURIComponent(msg || '');
+}
+
+function reservarJanelaWhatsapp(tel) {
+  if (!(tel || '').replace(/\D/g, '')) return null;
+  const janela = window.open('about:blank', '_blank');
+  if (janela) {
+    janela.document.title = 'Abrindo WhatsApp...';
+    janela.opener = null;
+  }
+  return janela;
+}
+
+function abrirLinkWhatsapp(tel, msg, janelaReservada = null) {
+  const link = buildWaLink(tel, msg);
+  if (!link) return false;
+  if (janelaReservada && !janelaReservada.closed) {
+    janelaReservada.location.replace(link);
+    return true;
+  }
+  const janela = window.open(link, '_blank', 'noopener');
+  if (!janela) toast('O navegador bloqueou o WhatsApp. Libere pop-ups para este site.', 'warn');
+  return Boolean(janela);
 }
 
 const MENSAGENS_WHATSAPP_PADRAO = {
@@ -1647,6 +1665,8 @@ function restaurarMensagensWhatsappPadrao() {
 
 async function confirmarAg(id) {
   let ag = (state.agendamentos || []).find(a => a.id === id);
+  let tel = (ag?.cliente_telefone || ag?.telefone || '').replace(/\D/g, '');
+  let janelaWhatsapp = reservarJanelaWhatsapp(tel);
   if (!ag) {
     // Agendamento criado/atualizado pela IA pode não estar no state ainda — busca no Supabase
     const { data, error: fetchErr } = await db.from('agenda_agendamentos').select('*').eq('id', id).single();
@@ -1655,13 +1675,17 @@ async function confirmarAg(id) {
     // Adiciona ao state para manter consistência
     if (state.agendamentos) state.agendamentos.push(ag);
     else state.agendamentos = [ag];
+    tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
+    if (tel && !janelaWhatsapp) janelaWhatsapp = reservarJanelaWhatsapp(tel);
   }
   const { error } = await db.from('agenda_agendamentos').update({ status: 'Confirmado' }).eq('id', id);
-  if (error) return toast('Erro ao confirmar.', 'err');
+  if (error) {
+    if (janelaWhatsapp && !janelaWhatsapp.closed) janelaWhatsapp.close();
+    return toast('Erro ao confirmar.', 'err');
+  }
   ag.status = 'Confirmado'; renderAll();
   showNotif('Confirmado!', ag.cliente_nome + ' — ' + formatDate(ag.data) + ' às ' + (ag.hora || '—'), 'ok');
-  const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
-  if (tel) { const msg = montarMensagemWhatsapp('confirmacao', ag); const link = buildWaLink(tel, msg); if (link) window.open(link, '_blank'); }
+  if (tel) abrirLinkWhatsapp(tel, montarMensagemWhatsapp('confirmacao', ag), janelaWhatsapp);
 }
 
 async function concluirAg(id) {
@@ -1678,7 +1702,7 @@ function abrirWA(id) {
   const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
   if (!tel) return toast('Telefone não cadastrado.', 'err');
   const msg = montarMensagemWhatsapp('contato', ag);
-  const link = buildWaLink(tel, msg); if (link) window.open(link, '_blank');
+  abrirLinkWhatsapp(tel, msg);
 }
 
 function openModalRecusa(id) {
@@ -1708,12 +1732,19 @@ async function confirmarRecusa() {
   const motivo = ($('recusaMotivoCustom')?.value || '').trim() || _recusaMotivo;
   if (!motivo) return toast('Escolha um motivo.', 'err');
   const ag = (state.agendamentos || []).find(a => a.id === _recusaId); if (!ag) return;
+  const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
+  const janelaWhatsapp = reservarJanelaWhatsapp(tel);
   const { error } = await db.from('agenda_agendamentos').update({ status: 'Recusado', observacoes: motivo }).eq('id', _recusaId);
-  if (error) return toast('Erro ao recusar.', 'err');
+  if (error) {
+    if (janelaWhatsapp && !janelaWhatsapp.closed) janelaWhatsapp.close();
+    return toast('Erro ao recusar.', 'err');
+  }
   ag.status = 'Recusado'; closeModalRecusa(); renderAll();
   showNotif('Recusado', ag.cliente_nome + ' — ' + motivo, 'info');
-  const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
-  if (tel) { const pubLink = state.empresa ? publicUrl(state.empresa.slug) : ''; const msg = montarMensagemWhatsapp('recusa', ag, { motivo, link: pubLink }); const link = buildWaLink(tel, msg); if (link) window.open(link, '_blank'); }
+  if (tel) {
+    const pubLink = state.empresa ? publicUrl(state.empresa.slug) : '';
+    abrirLinkWhatsapp(tel, montarMensagemWhatsapp('recusa', ag, { motivo, link: pubLink }), janelaWhatsapp);
+  }
 }
 
 function openModalReagendar(id) {
@@ -1738,13 +1769,17 @@ async function confirmarReagendar() {
   const data = $('reagendarData')?.value, hora = $('reagendarHora')?.value;
   if (!data || !hora) return toast('Escolha nova data e hora.', 'err');
   const ag = (state.agendamentos || []).find(a => a.id === _reagendarId); if (!ag) return;
+  const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
+  const janelaWhatsapp = reservarJanelaWhatsapp(tel);
   const { error } = await db.from('agenda_agendamentos').update({ data, hora, status: 'Reagendado' }).eq('id', _reagendarId);
-  if (error) return toast('Erro ao reagendar.', 'err');
+  if (error) {
+    if (janelaWhatsapp && !janelaWhatsapp.closed) janelaWhatsapp.close();
+    return toast('Erro ao reagendar.', 'err');
+  }
   ag.data = data; ag.hora = hora; ag.status = 'Reagendado';
   closeModalReagendar(); renderAll();
   showNotif('Reagendado!', ag.cliente_nome + ' → ' + formatDate(data) + ' às ' + hora, 'ok');
-  const tel = (ag.cliente_telefone || '').replace(/\D/g, '');
-  if (tel) { const msg = montarMensagemWhatsapp('reagendamento', ag, { novaData: data, novaHora: hora }); const link = buildWaLink(tel, msg); if (link) window.open(link, '_blank'); }
+  if (tel) abrirLinkWhatsapp(tel, montarMensagemWhatsapp('reagendamento', ag, { novaData: data, novaHora: hora }), janelaWhatsapp);
 }
 
 function openConfirmModal({ icon = '⚠️', type = 'danger', title = 'Tem certeza?', body = 'Esta ação não pode ser desfeita.', btnLabel = 'Confirmar', cb }) {
