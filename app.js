@@ -618,7 +618,7 @@ function showDashboard() {
     const lb = $('sideLinkBox');
     if (lb) lb.textContent = publicUrl(state.empresa.slug);
   }
-  document.body.style.overflow = '';
+  unlockPublicModalScroll();
   setView('dashboard');
   loadStoredNotifications();
   setupRealtime();
@@ -691,14 +691,14 @@ function openAuth(mode) {
   const overlay = $('authOverlay');
   if (!overlay) return;
   overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockPublicModalScroll();
   if (mode === 'login') showLogin(); else showCadastro();
 }
 
 function closeAuth() {
   const overlay = $('authOverlay');
   if (overlay) overlay.classList.remove('open');
-  document.body.style.overflow = '';
+  unlockPublicModalScroll();
 }
 
 function showLogin() {
@@ -1641,7 +1641,7 @@ function openModalRecusa(id) {
   document.querySelectorAll('.motivo-item').forEach(el => { el.classList.remove('sel'); const r = el.querySelector('.motivo-radio'); if (r) r.innerHTML = ''; });
   const rmc = $('recusaMotivoCustom'); if (rmc) rmc.value = '';
   const overlay = $('modalRecusaOverlay'); if (overlay) overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockPublicModalScroll();
 }
 
 function closeModalRecusa() {
@@ -1986,7 +1986,7 @@ async function loadPublic(slug) {
   state.pubDiasFechados = calcDiasFechados(empresa);
   aplicarBloqueioDataPublica(state.pubDiasFechados);
   setText('pubNomeEmpresa', empresa.nome);
-  setText('pubDescEmpresa', (empresa.area_atuacao || 'Agendamento Online') + ' • WhatsApp: ' + (empresa.whatsapp || 'Não informado'));
+  setText('pubDescEmpresa', '');
   const fotoPublica = $('pubFotoPublica');
   if (fotoPublica) {
     if (empresa.foto_publica_url) {
@@ -2055,7 +2055,7 @@ async function loadPublic(slug) {
     pp.innerHTML = state.profissionais.map(p => `
       <div class="choice" onclick="selectPubProf('${p.id}',this)">
         <div class="choice-icon">👤</div>
-        <div style="flex:1;min-width:0"><div class="choice-title">${p.nome}</div><div class="choice-sub">${p.especialidade || 'Profissional'}</div></div>
+        <div style="flex:1;min-width:0"><div class="choice-title">${p.nome}</div></div>
       </div>`).join('') || '<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional disponível.</p></div>';
   }
 }
@@ -2241,6 +2241,32 @@ Object.assign(window, {
   abrirCalendarioPublico, fecharCalendarioPublico, pubCalMes, selecionarDataPublica,
   abrirSlotsPublico, fecharSlotsPublico, selecionarSlot
 });
+
+
+// ── TRAVA DE ROLAGEM DOS MODAIS PÚBLICOS ─────────────────────────────────────
+let _publicModalScrollY = 0;
+let _publicModalLockCount = 0;
+
+function lockPublicModalScroll() {
+  _publicModalLockCount += 1;
+  if (_publicModalLockCount > 1) return;
+
+  _publicModalScrollY = window.scrollY || window.pageYOffset || 0;
+  document.documentElement.classList.add('public-modal-open');
+  document.body.classList.add('public-modal-open');
+  document.body.style.top = `-${_publicModalScrollY}px`;
+}
+
+function unlockPublicModalScroll() {
+  _publicModalLockCount = Math.max(0, _publicModalLockCount - 1);
+  if (_publicModalLockCount > 0) return;
+
+  document.documentElement.classList.remove('public-modal-open');
+  document.body.classList.remove('public-modal-open');
+  document.body.style.top = '';
+  window.scrollTo(0, _publicModalScrollY);
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ── CALENDÁRIO PÚBLICO FULLSCREEN ─────────────────────────────────────────────
 let _pubCalAno, _pubCalMes;
