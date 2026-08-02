@@ -3271,3 +3271,324 @@ body.vyxora-safe-layer-open {
   opacity: .85;
   filter: invert(1) brightness(1.2);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   V6 — REAGENDAMENTO VISUAL: CALENDÁRIO + GRADE DE HORÁRIOS
+═══════════════════════════════════════════════════════════════ */
+
+#modalReagendarOverlay {
+  padding: 18px;
+}
+
+#modalReagendarOverlay .reagendar-modal {
+  width: min(720px, calc(100vw - 36px));
+  max-width: 720px;
+  max-height: calc(100dvh - 36px);
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.reagendar-resumo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.reagendar-resumo-btn {
+  min-height: 62px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+
+.reagendar-resumo-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(189, 101, 255, .55);
+  background: rgba(128, 38, 203, .10);
+}
+
+.reagendar-resumo-btn.selecionado {
+  border-color: rgba(194, 104, 255, .72);
+  background: rgba(126, 34, 206, .16);
+}
+
+.reagendar-resumo-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text3);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.reagendar-resumo-btn strong {
+  color: #f8f1ff;
+  font-size: 14px;
+}
+
+.reagendar-etapa {
+  min-height: 0;
+  max-height: calc(100dvh - 270px);
+  padding: 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(180, 88, 255, .20);
+  border-radius: 9px;
+  background: rgba(255,255,255,.012);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(177, 81, 238, .45) transparent;
+}
+
+.reagendar-etapa[hidden] {
+  display: none !important;
+}
+
+.reagendar-etapa-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.reagendar-etapa-topo span {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.reagendar-etapa-topo small {
+  color: var(--text3);
+  font-size: 11px;
+}
+
+.reagendar-cal-nav {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+
+.reagendar-cal-nav button {
+  width: 40px;
+  height: 38px;
+  border: 1px solid rgba(181, 91, 244, .28);
+  border-radius: 7px;
+  background: rgba(255,255,255,.03);
+  color: #d8b8ff;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.reagendar-cal-nav strong {
+  text-align: center;
+  color: #fff;
+  font-size: 17px;
+}
+
+.reagendar-cal-semana,
+.reagendar-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.reagendar-cal-semana {
+  margin-bottom: 7px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(176, 76, 255, .12);
+}
+
+.reagendar-cal-semana span {
+  text-align: center;
+  color: #9274aa;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.reagendar-cal-dia {
+  position: relative;
+  min-height: 46px;
+  border: 1px solid rgba(176, 76, 255, .13);
+  border-radius: 6px;
+  background: rgba(255,255,255,.035);
+  color: #f3ebf9;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .14s ease, border-color .14s ease, background .14s ease;
+}
+
+.reagendar-cal-dia:not(.bloqueado):not(.fora)::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #25df7a;
+  box-shadow: 0 0 8px rgba(37, 223, 122, .55);
+}
+
+.reagendar-cal-dia:not(.bloqueado):not(.fora):hover {
+  transform: translateY(-1px);
+  border-color: rgba(203, 128, 255, .68);
+  background: rgba(135, 42, 211, .17);
+}
+
+.reagendar-cal-dia.selecionado {
+  border-color: rgba(231, 194, 255, .85);
+  background: linear-gradient(145deg, #7024d8, #9b2aee);
+  color: #fff;
+  box-shadow: 0 9px 20px rgba(116, 34, 196, .30);
+}
+
+.reagendar-cal-dia.bloqueado,
+.reagendar-cal-dia.fora {
+  border-color: transparent;
+  background: rgba(255,255,255,.008);
+  color: rgba(168, 140, 184, .24);
+  cursor: not-allowed;
+}
+
+.reagendar-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.reagendar-slot {
+  position: relative;
+  min-height: 58px;
+  padding: 9px 7px;
+  border: 1px solid rgba(176, 76, 255, .22);
+  border-radius: 7px;
+  background: rgba(105, 28, 164, .10);
+  color: #dca6ff;
+  cursor: pointer;
+  transition: transform .14s ease, border-color .14s ease, background .14s ease;
+}
+
+.reagendar-slot span {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.reagendar-slot small {
+  display: block;
+  margin-top: 4px;
+  color: #4ee793;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.reagendar-slot:hover:not(.ocupado) {
+  transform: translateY(-1px);
+  border-color: rgba(206, 135, 255, .72);
+  background: rgba(133, 38, 211, .18);
+}
+
+.reagendar-slot.selecionado {
+  border-color: rgba(234, 204, 255, .85);
+  background: linear-gradient(145deg, #6f24d9, #9828e9);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(117, 35, 195, .28);
+}
+
+.reagendar-slot.ocupado {
+  border-color: rgba(255, 78, 108, .12);
+  background: rgba(255, 55, 91, .025);
+  color: rgba(196, 163, 205, .34);
+  cursor: not-allowed;
+}
+
+.reagendar-slot.ocupado small {
+  color: #ff617e;
+}
+
+.reagendar-carregando,
+.reagendar-vazio {
+  grid-column: 1 / -1;
+  padding: 28px 12px;
+  color: var(--text3);
+  text-align: center;
+}
+
+.reagendar-acoes {
+  margin-top: 14px;
+}
+
+@media (max-width: 700px) {
+  #modalReagendarOverlay {
+    align-items: stretch;
+    padding: 0;
+  }
+
+  #modalReagendarOverlay .reagendar-modal {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    border: 0;
+    border-radius: 0;
+    padding: max(16px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+  }
+
+  .reagendar-resumo {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    margin: 12px 0;
+  }
+
+  .reagendar-resumo-btn {
+    min-height: 52px;
+  }
+
+  .reagendar-etapa {
+    flex: 1 1 auto;
+    max-height: none;
+    padding: 11px;
+  }
+
+  .reagendar-etapa-topo {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .reagendar-cal-grid,
+  .reagendar-cal-semana {
+    gap: 4px;
+  }
+
+  .reagendar-cal-dia {
+    min-height: clamp(40px, 11vw, 49px);
+    font-size: 13px;
+  }
+
+  .reagendar-slots-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .reagendar-slot {
+    min-height: 54px;
+  }
+
+  .reagendar-acoes {
+    flex: 0 0 auto;
+  }
+}
