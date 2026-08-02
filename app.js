@@ -51,6 +51,9 @@ let _editSaveCb = null;
 let _recusaId = null;
 let _recusaMotivo = null;
 let _reagendarId = null;
+let _reagendarCalAno = null;
+let _reagendarCalMes = null;
+let _reagendarAgendamento = null;
 let _openMenu = null;
 let _openMenuBtn = null;
 let autoSyncTimer = null;
@@ -1713,39 +1716,308 @@ async function confirmarRecusa() {
   }
 }
 
+function formatarDataReagendamento(iso) {
+  if (!iso) return 'Escolher data';
+  const [ano, mes, dia] = iso.split('-').map(Number);
+  const nomes = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  return `${dia} de ${nomes[mes - 1]} de ${ano}`;
+}
+
 function openModalReagendar(id) {
-  const ag = (state.agendamentos || []).find(a => a.id === id); if (!ag) return;
+  const ag = (state.agendamentos || []).find(a => a.id === id);
+  if (!ag) return;
   if (!podeTerAcoes(ag)) return toast('Este agendamento não permite reagendamento.', 'warn');
+
   _reagendarId = id;
-  setText('reagendarInfo', `${ag.cliente_nome} · ${formatDate(ag.data)} às ${ag.hora || '—'}`);
-  const rd = $('reagendarData'); if (rd) rd.value = ag.data || '';
-  const rh = $('reagendarHora'); if (rh) rh.value = ag.hora || '';
-  const overlay = $('modalReagendarOverlay'); if (overlay) overlay.classList.add('open');
+  _reagendarAgendamento = ag;
+
+  setText('reagendarInfo', `${ag.cliente_nome} · ${formatDate(ag.data)} às ${(ag.hora || '—').slice(0, 5)}`);
+
+  const hoje = new Date();
+  const dataAtual = ag.data ? new Date(`${ag.data}T12:00:00`) : hoje;
+  _reagendarCalAno = Math.max(dataAtual.getFullYear(), hoje.getFullYear());
+  _reagendarCalMes = (_reagendarCalAno === dataAtual.getFullYear())
+    ? dataAtual.getMonth()
+    : hoje.getMonth();
+
+  const dataInput = $('reagendarData');
+  const horaInput = $('reagendarHora');
+  if (dataInput) dataInput.value = '';
+  if (horaInput) horaInput.value = '';
+
+  setText('reagendarDataLabel', 'Escolher data');
+  setText('reagendarHoraLabel', 'Escolher horário');
+  $('reagendarDataBtn')?.classList.remove('selecionado');
+  $('reagendarHoraBtn')?.classList.remove('selecionado');
+
+  abrirEtapaDataReagendar();
+
+  const overlay = $('modalReagendarOverlay');
+  if (overlay) overlay.classList.add('open');
   lockSecondScreen();
 }
 
 function closeModalReagendar() {
-  const overlay = $('modalReagendarOverlay'); if (overlay) overlay.classList.remove('open');
+  const overlay = $('modalReagendarOverlay');
+  if (overlay) overlay.classList.remove('open');
+
   unlockSecondScreen();
   _reagendarId = null;
+  _reagendarAgendamento = null;
+}
+
+function abrirEtapaDataReagendar() {
+  const dataEtapa = $('reagendarEtapaData');
+  const horaEtapa = $('reagendarEtapaHora');
+  if (dataEtapa) dataEtapa.hidden = false;
+  if (horaEtapa) horaEtapa.hidden = true;
+  renderCalendarioReagendar();
+}
+
+async function abrirEtapaHoraReagendar() {
+  const data = $('reagendarData')?.value;
+  if (!data) {
+    toast('Escolha a nova data primeiro.', 'warn');
+    abrirEtapaDataReagendar();
+    return;
+  }
+
+  const dataEtapa = $('reagendarEtapaData');
+  const horaEtapa = $('reagendarEtapaHora');
+  if (dataEtapa) dataEtapa.hidden = true;
+  if (horaEtapa) horaEtapa.hidden = false;
+
+  await renderHorariosReagendar();
+}
+
+function mudarMesReagendar(direcao) {
+  _reagendarCalMes += direcao;
+
+  if (_reagendarCalMes > 11) {
+    _reagendarCalMes = 0;
+    _reagendarCalAno += 1;
+  }
+
+  if (_reagendarCalMes < 0) {
+    _reagendarCalMes = 11;
+    _reagendarCalAno -= 1;
+  }
+
+  const hoje = new Date();
+  const primeiroMesPermitido = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const mesPretendido = new Date(_reagendarCalAno, _reagendarCalMes, 1);
+
+  if (mesPretendido < primeiroMesPermitido) {
+    _reagendarCalAno = hoje.getFullYear();
+    _reagendarCalMes = hoje.getMonth();
+  }
+
+  renderCalendarioReagendar();
+}
+
+function renderCalendarioReagendar() {
+  const grid = $('reagendarCalGrid');
+  if (!grid || _reagendarCalAno === null || _reagendarCalMes === null) return;
+
+  const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+  setText('reagendarCalTitulo', `${meses[_reagendarCalMes]} ${_reagendarCalAno}`);
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const primeiro = new Date(_reagendarCalAno, _reagendarCalMes, 1);
+  const ultimo = new Date(_reagendarCalAno, _reagendarCalMes + 1, 0);
+  const inicioSemana = primeiro.getDay();
+  const selecionadoAtual = $('reagendarData')?.value || '';
+
+  let conteudo = '';
+
+  if (inicioSemana > 0) {
+    const totalAnterior = new Date(_reagendarCalAno, _reagendarCalMes, 0).getDate();
+    for (let i = inicioSemana - 1; i >= 0; i -= 1) {
+      conteudo += `<button type="button" class="reagendar-cal-dia fora" disabled>${totalAnterior - i}</button>`;
+    }
+  }
+
+  for (let dia = 1; dia <= ultimo.getDate(); dia += 1) {
+    const data = new Date(_reagendarCalAno, _reagendarCalMes, dia);
+    data.setHours(0, 0, 0, 0);
+
+    const passado = data < hoje;
+    const iso = `${_reagendarCalAno}-${String(_reagendarCalMes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    const selecionado = iso === selecionadoAtual;
+
+    conteudo += `
+      <button
+        type="button"
+        class="reagendar-cal-dia${passado ? ' bloqueado' : ''}${selecionado ? ' selecionado' : ''}"
+        ${passado ? 'disabled' : `onclick="selecionarDataReagendar('${iso}')"`}>
+        ${dia}
+      </button>`;
+  }
+
+  const fimSemana = ultimo.getDay();
+  if (fimSemana < 6) {
+    for (let dia = 1; dia <= 6 - fimSemana; dia += 1) {
+      conteudo += `<button type="button" class="reagendar-cal-dia fora" disabled>${dia}</button>`;
+    }
+  }
+
+  grid.innerHTML = conteudo;
+}
+
+async function selecionarDataReagendar(iso) {
+  const dataInput = $('reagendarData');
+  const horaInput = $('reagendarHora');
+
+  if (dataInput) dataInput.value = iso;
+  if (horaInput) horaInput.value = '';
+
+  setText('reagendarDataLabel', formatarDataReagendamento(iso));
+  setText('reagendarHoraLabel', 'Escolher horário');
+
+  $('reagendarDataBtn')?.classList.add('selecionado');
+  $('reagendarHoraBtn')?.classList.remove('selecionado');
+
+  renderCalendarioReagendar();
+  await abrirEtapaHoraReagendar();
+}
+
+function gerarSlotsReagendamento() {
+  const empresa = state.empresa || {};
+  const inicio = empresa.horario_inicio || '09:00';
+  const fim = empresa.horario_fim || '18:00';
+  const intervalo = Number(empresa.intervalo_slots || 30);
+
+  const [horaInicio, minutoInicio] = inicio.split(':').map(Number);
+  const [horaFim, minutoFim] = fim.split(':').map(Number);
+
+  let atual = horaInicio * 60 + minutoInicio;
+  const limite = horaFim * 60 + minutoFim;
+  const slots = [];
+
+  while (atual < limite) {
+    slots.push(
+      `${String(Math.floor(atual / 60)).padStart(2, '0')}:${String(atual % 60).padStart(2, '0')}`
+    );
+    atual += intervalo;
+  }
+
+  return slots;
+}
+
+async function renderHorariosReagendar() {
+  const grid = $('reagendarSlotsGrid');
+  const data = $('reagendarData')?.value;
+  if (!grid || !data || !_reagendarAgendamento) return;
+
+  grid.innerHTML = '<div class="reagendar-carregando">Carregando horários...</div>';
+  setText('reagendarHoraSubtitulo', formatarDataReagendamento(data));
+
+  const profissionalId = _reagendarAgendamento.profissional_id;
+  let consulta = db.from('agenda_agendamentos')
+    .select('id, hora, status')
+    .eq('data', data)
+    .in('status', ['Pendente', 'Confirmado', 'Reagendado']);
+
+  if (profissionalId) {
+    consulta = consulta.eq('profissional_id', profissionalId);
+  }
+
+  const { data: agendamentos, error } = await consulta;
+
+  if (error) {
+    grid.innerHTML = '<div class="reagendar-vazio">Não foi possível carregar os horários.</div>';
+    return;
+  }
+
+  const ocupados = new Set(
+    (agendamentos || [])
+      .filter(item => String(item.id) !== String(_reagendarId))
+      .map(item => (item.hora || '').slice(0, 5))
+  );
+
+  const selecionadoAtual = $('reagendarHora')?.value || '';
+  const slots = gerarSlotsReagendamento();
+
+  grid.innerHTML = slots.length
+    ? slots.map(hora => {
+        const ocupado = ocupados.has(hora);
+        const selecionado = selecionadoAtual === hora;
+
+        return `
+          <button
+            type="button"
+            class="reagendar-slot${ocupado ? ' ocupado' : ''}${selecionado ? ' selecionado' : ''}"
+            ${ocupado ? 'disabled' : `onclick="selecionarHoraReagendar('${hora}')"`}>
+            <span>${hora}</span>
+            <small>${ocupado ? 'Ocupado' : 'Livre'}</small>
+          </button>`;
+      }).join('')
+    : '<div class="reagendar-vazio">Nenhum horário configurado.</div>';
+}
+
+function selecionarHoraReagendar(hora) {
+  const input = $('reagendarHora');
+  if (input) input.value = hora;
+
+  setText('reagendarHoraLabel', hora);
+  $('reagendarHoraBtn')?.classList.add('selecionado');
+
+  renderHorariosReagendar();
 }
 
 async function confirmarReagendar() {
   if (!_reagendarId) return;
-  const data = $('reagendarData')?.value, hora = $('reagendarHora')?.value;
-  if (!data || !hora) return toast('Escolha nova data e hora.', 'err');
-  const ag = (state.agendamentos || []).find(a => a.id === _reagendarId); if (!ag) return;
+
+  const data = $('reagendarData')?.value;
+  const hora = $('reagendarHora')?.value;
+
+  if (!data) {
+    toast('Escolha a nova data.', 'warn');
+    abrirEtapaDataReagendar();
+    return;
+  }
+
+  if (!hora) {
+    toast('Escolha o novo horário.', 'warn');
+    await abrirEtapaHoraReagendar();
+    return;
+  }
+
+  const ag = (state.agendamentos || []).find(a => a.id === _reagendarId);
+  if (!ag) return;
+
   const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
   const janelaWhatsapp = reservarJanelaWhatsapp(tel);
-  const { error } = await db.from('agenda_agendamentos').update({ data, hora, status: 'Reagendado' }).eq('id', _reagendarId);
+
+  const { error } = await db.from('agenda_agendamentos')
+    .update({ data, hora, status: 'Reagendado' })
+    .eq('id', _reagendarId);
+
   if (error) {
     if (janelaWhatsapp && !janelaWhatsapp.closed) janelaWhatsapp.close();
     return toast('Erro ao reagendar.', 'err');
   }
-  ag.data = data; ag.hora = hora; ag.status = 'Reagendado';
-  closeModalReagendar(); renderAll();
-  showNotif('Reagendado!', ag.cliente_nome + ' → ' + formatDate(data) + ' às ' + hora, 'ok');
-  if (tel) abrirLinkWhatsapp(tel, montarMensagemWhatsapp('reagendamento', ag, { novaData: data, novaHora: hora }), janelaWhatsapp);
+
+  ag.data = data;
+  ag.hora = hora;
+  ag.status = 'Reagendado';
+
+  closeModalReagendar();
+  renderAll();
+
+  showNotif('Reagendado!', `${ag.cliente_nome} → ${formatDate(data)} às ${hora}`, 'ok');
+
+  if (tel) {
+    abrirLinkWhatsapp(
+      tel,
+      montarMensagemWhatsapp('reagendamento', ag, { novaData: data, novaHora: hora }),
+      janelaWhatsapp
+    );
+  }
 }
 
 function openConfirmModal({ icon = '⚠️', type = 'danger', title = 'Tem certeza?', body = 'Esta ação não pode ser desfeita.', btnLabel = 'Confirmar', cb }) {
@@ -2582,20 +2854,4 @@ document.addEventListener('click', (e) => {
   }
 });
 
-
-// Garante que os seletores nativos de data e hora abram dentro dos modais.
-document.addEventListener('DOMContentLoaded', () => {
-  ['reagendarData', 'reagendarHora'].forEach((id) => {
-    const input = document.getElementById(id);
-    if (!input) return;
-
-    input.addEventListener('click', () => {
-      try {
-        if (typeof input.showPicker === 'function') input.showPicker();
-      } catch (_) {
-        // Alguns navegadores abrem o seletor automaticamente.
-      }
-    });
-  });
-});
 
