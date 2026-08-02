@@ -2644,3 +2644,205 @@ body.notification-center-open { overflow: hidden; }
     gap: 14px;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   AJUSTE FINAL — CALENDÁRIO FIXO COM STATUS NOS DIAS
+   Disponível: ponto verde | Indisponível: círculo vermelho com X
+═══════════════════════════════════════════════════════════════ */
+
+#pubCalendarioOverlay .pub-modal-full {
+  height: auto !important;
+  max-height: calc(100dvh - 28px) !important;
+  overflow: hidden !important;
+}
+
+#pubCalendarioOverlay .pub-cal-wrap {
+  overflow: visible !important;
+  scrollbar-width: none !important;
+  padding-bottom: 20px !important;
+}
+
+#pubCalendarioOverlay .pub-cal-wrap::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Remove a legenda inferior */
+#pubCalendarioOverlay .pub-cal-legenda {
+  display: none !important;
+}
+
+/* Reserva espaço para o indicador no canto */
+#pubCalendarioOverlay .pub-cal-cell {
+  position: relative;
+  padding: 8px 6px;
+  cursor: pointer;
+}
+
+/* Dia disponível: bolinha verde */
+#pubCalendarioOverlay .pub-cal-cell:not(.bloqueado):not(.fora-mes):not(.vazio)::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #20d875;
+  box-shadow:
+    0 0 0 2px rgba(32, 216, 117, 0.10),
+    0 0 9px rgba(32, 216, 117, 0.56);
+}
+
+/* Dia indisponível: círculo vermelho com X */
+#pubCalendarioOverlay .pub-cal-cell.bloqueado::after {
+  content: "×";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(255, 81, 112, 0.72);
+  border-radius: 50%;
+  background: rgba(255, 55, 91, 0.16);
+  color: #ff5878;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Indisponíveis não reagem ao mouse/toque */
+#pubCalendarioOverlay .pub-cal-cell.bloqueado {
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  border-color: rgba(255, 70, 103, 0.10) !important;
+  background: rgba(255, 55, 91, 0.025) !important;
+  color: rgba(184, 151, 193, 0.34) !important;
+}
+
+/* Dias externos ao mês continuam neutros, sem indicador */
+#pubCalendarioOverlay .pub-cal-cell.fora-mes {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+#pubCalendarioOverlay .pub-cal-cell.fora-mes::after {
+  display: none !important;
+}
+
+/* Selecionado mantém o verde visível com destaque */
+#pubCalendarioOverlay .pub-cal-cell.selecionado::after {
+  background: #55f49a !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.16),
+    0 0 11px rgba(85, 244, 154, 0.72) !important;
+}
+
+/* PC: compacta o suficiente para não criar rolagem */
+@media (min-width: 701px) {
+  #pubCalendarioOverlay .pub-modal-full {
+    width: min(680px, calc(100vw - 36px)) !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-wrap {
+    padding-top: 18px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-nav {
+    margin-bottom: 14px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-dias-semana {
+    margin-bottom: 7px !important;
+    padding-bottom: 7px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-grid {
+    gap: 6px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-cell {
+    min-height: 48px !important;
+  }
+}
+
+/* Android: tela fixa, sem rolagem interna */
+@media (max-width: 700px) {
+  #pubCalendarioOverlay {
+    overflow: hidden !important;
+  }
+
+  #pubCalendarioOverlay .pub-modal-full {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-wrap {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    padding-top: 14px !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-nav {
+    margin-bottom: 12px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-dias-semana {
+    margin-bottom: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-grid {
+    gap: 5px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-cell {
+    min-height: clamp(39px, 10.8vw, 49px) !important;
+    padding: 6px 4px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-cell:not(.bloqueado):not(.fora-mes):not(.vazio)::after {
+    top: 5px;
+    right: 5px;
+    width: 6px;
+    height: 6px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-cell.bloqueado::after {
+    top: 4px;
+    right: 4px;
+    width: 13px;
+    height: 13px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 390px), (max-height: 690px) {
+  #pubCalendarioOverlay .pub-modal-header {
+    min-height: 56px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-wrap {
+    padding-top: 10px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-nav {
+    margin-bottom: 8px !important;
+  }
+
+  #pubCalendarioOverlay .pub-cal-cell {
+    min-height: 38px !important;
+    font-size: 13px !important;
+  }
+}
