@@ -42,7 +42,7 @@
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
 <link rel="preload" as="image" href="mascote-vyxora.png?v=7">
-<link rel="stylesheet" href="style.css?v=20260802-5">
+<link rel="stylesheet" href="style.css?v=20260802-6">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -917,21 +917,62 @@
 
 <!-- Modal Reagendar -->
 <div class="modal-overlay" id="modalReagendarOverlay">
-  <div class="modal">
+  <div class="modal reagendar-modal">
     <button class="modal-close" onclick="closeModalReagendar()">✕</button>
+
     <div class="modal-title">Reagendar horário</div>
     <div class="modal-sub" id="reagendarInfo">Cliente · data · hora</div>
-    <div class="field-row">
-      <div class="field"><label>Nova data</label><input id="reagendarData" type="date"></div>
-      <div class="field"><label>Novo horário</label><input id="reagendarHora" type="time"></div>
+
+    <input id="reagendarData" type="hidden">
+    <input id="reagendarHora" type="hidden">
+
+    <div class="reagendar-resumo">
+      <button type="button" class="reagendar-resumo-btn" id="reagendarDataBtn" onclick="abrirEtapaDataReagendar()">
+        <span class="reagendar-resumo-label">Nova data</span>
+        <strong id="reagendarDataLabel">Escolher data</strong>
+      </button>
+
+      <button type="button" class="reagendar-resumo-btn" id="reagendarHoraBtn" onclick="abrirEtapaHoraReagendar()">
+        <span class="reagendar-resumo-label">Novo horário</span>
+        <strong id="reagendarHoraLabel">Escolher horário</strong>
+      </button>
     </div>
-    <div class="modal-actions">
+
+    <section class="reagendar-etapa" id="reagendarEtapaData">
+      <div class="reagendar-etapa-topo">
+        <span>Escolha a nova data</span>
+        <small>Todos os dias futuros estão liberados</small>
+      </div>
+
+      <div class="reagendar-cal-nav">
+        <button type="button" onclick="mudarMesReagendar(-1)">‹</button>
+        <strong id="reagendarCalTitulo">Mês 2026</strong>
+        <button type="button" onclick="mudarMesReagendar(1)">›</button>
+      </div>
+
+      <div class="reagendar-cal-semana">
+        <span>DOM</span><span>SEG</span><span>TER</span><span>QUA</span>
+        <span>QUI</span><span>SEX</span><span>SÁB</span>
+      </div>
+
+      <div class="reagendar-cal-grid" id="reagendarCalGrid"></div>
+    </section>
+
+    <section class="reagendar-etapa" id="reagendarEtapaHora" hidden>
+      <div class="reagendar-etapa-topo">
+        <span>Escolha o novo horário</span>
+        <small id="reagendarHoraSubtitulo">Selecione uma data primeiro</small>
+      </div>
+
+      <div class="reagendar-slots-grid" id="reagendarSlotsGrid"></div>
+    </section>
+
+    <div class="modal-actions reagendar-acoes">
       <button class="btn btn-ghost" onclick="closeModalReagendar()">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmarReagendar()">📅 Reagendar</button>
+      <button class="btn btn-primary" id="reagendarConfirmarBtn" onclick="confirmarReagendar()">📅 Reagendar</button>
     </div>
   </div>
 </div>
-
 <!-- Modal Editar -->
 <div class="edit-overlay" id="editOverlay">
   <div class="edit-modal">
@@ -1013,6 +1054,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script src="app.js?v=20260802-5"></script>
+<script src="app.js?v=20260802-6"></script>
 </body>
 </html>
