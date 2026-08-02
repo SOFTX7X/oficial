@@ -3592,3 +3592,109 @@ body.vyxora-safe-layer-open {
     flex: 0 0 auto;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   V7 — CORREÇÃO DO REAGENDAMENTO VISUAL
+═══════════════════════════════════════════════════════════════ */
+
+/* Campos usados apenas pelo JavaScript nunca podem aparecer */
+#modalReagendarOverlay input[type="hidden"] {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  position: absolute !important;
+  visibility: hidden !important;
+}
+
+/* Modal mais compacto e sem barra lateral na etapa do calendário */
+#modalReagendarOverlay .reagendar-modal {
+  width: min(680px, calc(100vw - 36px));
+  max-width: 680px;
+  max-height: calc(100dvh - 24px);
+  overflow: hidden !important;
+}
+
+#modalReagendarOverlay .reagendar-resumo {
+  margin: 12px 0;
+}
+
+#modalReagendarOverlay .reagendar-etapa {
+  max-height: none !important;
+  overflow: hidden !important;
+  padding: 12px;
+}
+
+#modalReagendarOverlay #reagendarEtapaHora {
+  overflow-y: auto !important;
+  max-height: calc(100dvh - 300px) !important;
+  overscroll-behavior: contain;
+}
+
+#modalReagendarOverlay .reagendar-cal-grid,
+#modalReagendarOverlay .reagendar-cal-semana {
+  gap: 5px;
+}
+
+#modalReagendarOverlay .reagendar-cal-dia {
+  min-height: 42px;
+}
+
+#modalReagendarOverlay .reagendar-etapa-topo {
+  margin-bottom: 10px;
+}
+
+#modalReagendarOverlay .reagendar-cal-nav {
+  margin-bottom: 10px;
+}
+
+#modalReagendarOverlay .reagendar-acoes {
+  margin-top: 11px;
+}
+
+@media (max-height: 760px) and (min-width: 701px) {
+  #modalReagendarOverlay .reagendar-modal {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  #modalReagendarOverlay .modal-title {
+    margin-bottom: 5px;
+  }
+
+  #modalReagendarOverlay .reagendar-resumo-btn {
+    min-height: 54px;
+    padding: 8px 11px;
+  }
+
+  #modalReagendarOverlay .reagendar-cal-dia {
+    min-height: 38px;
+  }
+}
+
+@media (max-width: 700px) {
+  #modalReagendarOverlay .reagendar-modal {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  #modalReagendarOverlay .reagendar-etapa {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden !important;
+  }
+
+  #modalReagendarOverlay #reagendarEtapaHora {
+    max-height: none !important;
+    overflow-y: auto !important;
+  }
+
+  #modalReagendarOverlay .reagendar-cal-dia {
+    min-height: clamp(38px, 10.5vw, 46px);
+  }
+}
