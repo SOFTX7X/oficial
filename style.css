@@ -673,15 +673,6 @@ a { text-decoration: none; color: inherit; }
   background: #07040d;
   box-shadow: 0 24px 80px rgba(76, 29, 149, 0.18);
 }
-.mascot-calm-wrap::after {
-  content: '';
-  position: absolute;
-  z-index: 1;
-  inset: auto 0 0;
-  height: 34%;
-  pointer-events: none;
-  background: linear-gradient(to top, rgba(5,2,11,0.88), rgba(5,2,11,0.08));
-}
 .mascot-calm-banner {
   display: grid;
   place-items: center;
@@ -703,17 +694,9 @@ a { text-decoration: none; color: inherit; }
   border-top: 0;
   background: none;
 }
-.mascot-calm-copy > div {
-  max-width: 590px;
-  padding: 11px 16px 13px;
-  border: 1px solid rgba(196, 144, 255, 0.2);
-  border-radius: 16px;
-  background: rgba(8, 4, 15, 0.76);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.38);
-  backdrop-filter: blur(14px);
-}
-.mascot-calm-copy .section-title { max-width: 560px; margin-top: 6px; font-size: clamp(23px, 2.35vw, 31px); line-height: 1.04; text-shadow: 0 3px 18px rgba(0,0,0,0.95); }
-.mascot-calm-copy .section-tag { margin-bottom: 0; padding: 3px 9px; font-size: 10px; background: rgba(124,58,237,0.13); backdrop-filter: blur(10px); }
+.mascot-calm-copy > div { max-width: 68%; }
+.mascot-calm-copy .section-title { max-width: none; margin-top: 7px; font-size: clamp(21px, 2.05vw, 28px); line-height: 1.08; white-space: nowrap; text-shadow: 0 3px 18px rgba(0,0,0,0.95); }
+.mascot-calm-copy .section-tag { margin-bottom: 0; padding: 3px 9px; font-size: 10px; background: rgba(10,6,18,0.56); backdrop-filter: blur(8px); }
 .mascot-calm-copy .btn { flex: 0 0 auto; min-height: 40px; padding: 9px 17px; border-radius: 12px; font-size: 13px; }
 .dash-hero-featured::after {
   inset: auto 0 0;
@@ -1468,11 +1451,10 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .landing-banner-actions .btn { min-width: 0; width: 100%; }
 
   .mascot-calm-wrap { height: auto; border-radius: 20px; }
-  .mascot-calm-wrap::after { display: none; }
   .mascot-calm-banner { height: auto; aspect-ratio: 16 / 9; }
   .mascot-calm-copy { position: static; padding: 20px 16px; align-items: stretch; flex-direction: column; border-top: 1px solid rgba(168, 85, 247, 0.2); background: linear-gradient(135deg, rgba(88,28,135,0.18), rgba(9,9,11,0.92)); }
-  .mascot-calm-copy > div { max-width: none; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; backdrop-filter: none; }
-  .mascot-calm-copy .section-title { text-align: left; font-size: 32px; }
+  .mascot-calm-copy > div { max-width: none; }
+  .mascot-calm-copy .section-title { text-align: left; font-size: 30px; white-space: normal; }
   .mascot-calm-copy .btn { width: 100%; }
 
   .land-hero { min-height: auto; padding: 88px 18px 48px; text-align: center; align-items: center; justify-content: flex-start; }
