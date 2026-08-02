@@ -16,6 +16,7 @@ let _reagendarId = null;
 let _openMenu = null;
 let _openMenuBtn = null;
 let autoSyncTimer = null;
+let horariosDirty = false;
 let lastIds = new Set();
 let realtimeChannel = null;
 let _fotoEditor = null;
@@ -823,7 +824,7 @@ function renderAll() {
     renderTimeline(); renderClientes(); renderServicos(); renderProfissionais(); renderFinanceiro();
     const active = document.activeElement;
     const editingConfig = active && active.closest && active.closest('#view-config');
-    if (!editingConfig) renderConfig();
+    if (!editingConfig && !horariosDirty) renderConfig();
   });
   ajustarFontesCampos();
 }
@@ -1186,6 +1187,7 @@ function setConfigTab(tab, botao) {
 function toggleDia(btn) {
   if (!btn) return;
   btn.classList.toggle('ativo');
+  horariosDirty = true;
 }
 
 function selecionarIntervalo(btn) {
@@ -1193,9 +1195,22 @@ function selecionarIntervalo(btn) {
   btn.classList.add('ativo');
   const hidden = document.getElementById('cfgIntervaloSlots');
   if (hidden) hidden.value = btn.dataset.val;
+  horariosDirty = true;
 }
 
-function openConfigSection(tab = 'empresa') { setView('config'); setConfigTab(tab); closeMobileMenu(); }
+
+
+function instalarControleHorariosDirty() {
+  ['cfgHorarioInicio', 'cfgHorarioFim'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || el.dataset.dirtyListener === '1') return;
+    el.dataset.dirtyListener = '1';
+    el.addEventListener('input', () => { horariosDirty = true; });
+    el.addEventListener('change', () => { horariosDirty = true; });
+  });
+}
+
+function openConfigSection(tab = 'empresa') { setView('config'); setConfigTab(tab); instalarControleHorariosDirty(); closeMobileMenu(); }
 
 async function salvarCliente() {
   const nome = ($('cliNome')?.value || '').trim();
@@ -1318,6 +1333,8 @@ async function salvarHorarios() {
   const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
   if (error) return toast('Erro ao salvar horários: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
+  horariosDirty = false;
+  renderConfig();
   showNotif('Horários de funcionamento salvos', '', 'ok');
 }
 
