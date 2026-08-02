@@ -1936,21 +1936,21 @@ body.menu-open { overflow: hidden; touch-action: none; }
 .mobile-menu-body > button[onclick="logout()"] {
   min-height: 46px;
   border-radius: 6px !important;
-  border: 1px solid rgba(248,113,113,0.58) !important;
-  background: linear-gradient(180deg, rgba(127,29,29,0.34), rgba(69,10,10,0.42)) !important;
-  color: #fecaca !important;
+  border: 1px solid rgba(192,90,255,0.48) !important;
+  background: linear-gradient(180deg, rgba(124,34,232,0.22), rgba(76,29,149,0.24)) !important;
+  color: #eadcff !important;
   font-weight: 750;
   letter-spacing: 0.01em;
-  box-shadow: 0 10px 24px rgba(69,10,10,0.26), inset 0 1px 0 rgba(255,255,255,0.055);
+  box-shadow: 0 10px 24px rgba(76,29,149,0.2), inset 0 1px 0 rgba(255,255,255,0.055);
 }
 
 .side-bottom > button[onclick="logout()"]:hover,
 .mobile-menu-body > button[onclick="logout()"]:hover {
-  border-color: rgba(252,165,165,0.82) !important;
-  background: linear-gradient(180deg, rgba(153,27,27,0.48), rgba(91,13,13,0.56)) !important;
-  color: #fff1f2 !important;
+  border-color: rgba(209,109,255,0.82) !important;
+  background: linear-gradient(180deg, rgba(139,37,235,0.38), rgba(91,33,182,0.4)) !important;
+  color: #ffffff !important;
   transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(69,10,10,0.36), 0 0 0 2px rgba(248,113,113,0.08);
+  box-shadow: 0 12px 28px rgba(76,29,149,0.32), 0 0 0 2px rgba(192,90,255,0.09);
 }
 
 .side-bottom > button[onclick="logout()"]:active,
@@ -1968,4 +1968,22 @@ body.menu-open { overflow: hidden; touch-action: none; }
 .mobile-menu-body .side-nav-label {
   margin-top: 2px;
   padding: 8px 6px 6px;
+}
+
+/* CORREÇÃO FINAL — BOTÃO SAIR ROXO (v2) */
+html body #dashboardView .sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm[onclick="logout()"],
+html body #dashboardView .mobile-menu-drawer .mobile-menu-body .btn.btn-ghost.btn-full.btn-sm[onclick="logout()"] {
+  background: linear-gradient(180deg, #7c22e8 0%, #5b21b6 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #c05aff !important;
+  border-radius: 6px !important;
+  box-shadow: 0 8px 20px rgba(91, 33, 182, 0.34) !important;
+}
+
+html body #dashboardView .sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm[onclick="logout()"]:hover,
+html body #dashboardView .mobile-menu-drawer .mobile-menu-body .btn.btn-ghost.btn-full.btn-sm[onclick="logout()"]:hover {
+  background: linear-gradient(180deg, #9333ea 0%, #6d28d9 100%) !important;
+  color: #ffffff !important;
+  border-color: #d8b4fe !important;
+  box-shadow: 0 10px 26px rgba(124, 34, 232, 0.46) !important;
 }
