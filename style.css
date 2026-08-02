@@ -3226,108 +3226,48 @@ body.public-modal-open {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   V4 — ROLAGEM GLOBAL DAS SEGUNDAS TELAS
-   A página atrás fica fixa; a camada aberta rola só se necessário.
+   V5 — FUNDO FIXO SEM BLOQUEAR DATA/HORA
 ═══════════════════════════════════════════════════════════════ */
 
-html.vyxora-layer-open,
-body.vyxora-layer-open {
+html.vyxora-safe-layer-open,
+body.vyxora-safe-layer-open {
   width: 100%;
   height: 100%;
   overflow: hidden !important;
   overscroll-behavior: none !important;
 }
 
-body.vyxora-layer-open {
+body.vyxora-safe-layer-open {
   position: fixed !important;
   left: 0;
   right: 0;
-  touch-action: none;
 }
 
-/* Camadas conhecidas não repassam o gesto para o fundo */
-#notificationPanel,
-#notificationOverlay,
-#pubCalendarioOverlay,
-#pubSlotsOverlay,
-#modalReagendar,
-#reagendarModal,
-.notification-drawer,
-.notification-panel,
-.modal-overlay,
-.pub-modal-overlay,
-.drawer-overlay,
-.side-panel-overlay {
+/* Não usar touch-action:none: isso bloqueava o calendário nativo. */
+#modalReagendarOverlay {
   overscroll-behavior: contain !important;
 }
 
-/* Conteúdo interno: só ganha rolagem quando realmente ultrapassa a altura */
-#notificationPanel .notification-list,
-#notificationOverlay .notification-list,
-.notification-drawer .notification-list,
-.notification-panel .notification-list,
-#pubSlotsOverlay .pub-slots-grid,
-#modalReagendar .modal-content,
-#reagendarModal .modal-content,
-.modal-overlay .modal-content,
-.pub-modal-overlay .pub-modal-full,
-.drawer-overlay .drawer-content,
-.side-panel-overlay .panel-content {
+#modalReagendarOverlay .modal {
   max-height: calc(100dvh - 32px);
   overflow-y: auto;
   overscroll-behavior: contain !important;
   -webkit-overflow-scrolling: touch;
 }
 
-/* O calendário continua fixo e sem rolagem interna */
-#pubCalendarioOverlay .pub-modal-full,
-#pubCalendarioOverlay .pub-cal-wrap {
-  overflow: hidden !important;
-  overscroll-behavior: none !important;
+#reagendarData,
+#reagendarHora {
+  cursor: pointer;
+  color-scheme: dark;
+  touch-action: manipulation !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
 }
 
-/* Central de notificações:
-   apenas a lista rola; cabeçalho e ações ficam parados. */
-#notificationPanel,
-#notificationOverlay,
-.notification-drawer,
-.notification-panel {
-  overflow: hidden !important;
-}
-
-#notificationPanel .notification-list,
-#notificationOverlay .notification-list,
-.notification-drawer .notification-list,
-.notification-panel .notification-list {
-  min-height: 0;
-  max-height: none;
-  flex: 1 1 auto;
-}
-
-/* Mobile/WebView */
-@media (max-width: 768px) {
-  #notificationPanel,
-  #notificationOverlay,
-  .notification-drawer,
-  .notification-panel,
-  #pubCalendarioOverlay,
-  #pubSlotsOverlay,
-  #modalReagendar,
-  #reagendarModal,
-  .modal-overlay,
-  .pub-modal-overlay {
-    height: 100dvh;
-    max-height: 100dvh;
-  }
-
-  #notificationPanel .notification-list,
-  #notificationOverlay .notification-list,
-  .notification-drawer .notification-list,
-  .notification-panel .notification-list,
-  #pubSlotsOverlay .pub-slots-grid,
-  #modalReagendar .modal-content,
-  #reagendarModal .modal-content,
-  .modal-overlay .modal-content {
-    max-height: calc(100dvh - 120px);
-  }
+#reagendarData::-webkit-calendar-picker-indicator,
+#reagendarHora::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: .85;
+  filter: invert(1) brightness(1.2);
 }
