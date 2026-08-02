@@ -1,3 +1,48 @@
+
+// ═══════════════════════════════════════════════════════════════
+// TRAVA GLOBAL DE SEGUNDAS TELAS
+// Fundo fixo; somente o conteúdo da camada aberta pode rolar.
+// ═══════════════════════════════════════════════════════════════
+const VYXORA_LAYER_SCROLL = {
+  count: 0,
+  scrollY: 0,
+
+  lock() {
+    this.count += 1;
+    if (this.count > 1) return;
+
+    this.scrollY = window.scrollY || window.pageYOffset || 0;
+    document.documentElement.classList.add('vyxora-layer-open');
+    document.body.classList.add('vyxora-layer-open');
+    document.body.style.top = `-${this.scrollY}px`;
+  },
+
+  unlock() {
+    this.count = Math.max(0, this.count - 1);
+    if (this.count > 0) return;
+
+    document.documentElement.classList.remove('vyxora-layer-open');
+    document.body.classList.remove('vyxora-layer-open');
+    document.body.style.top = '';
+    window.scrollTo(0, this.scrollY);
+  },
+
+  reset() {
+    this.count = 0;
+    document.documentElement.classList.remove('vyxora-layer-open');
+    document.body.classList.remove('vyxora-layer-open');
+    document.body.style.top = '';
+  }
+};
+
+function lockSecondScreen() {
+  VYXORA_LAYER_SCROLL.lock();
+}
+
+function unlockSecondScreen() {
+  VYXORA_LAYER_SCROLL.unlock();
+}
+
 // ── STATE ──
 let state = {
   user: null, empresa: null, perfil: null,
@@ -618,7 +663,7 @@ function showDashboard() {
     const lb = $('sideLinkBox');
     if (lb) lb.textContent = publicUrl(state.empresa.slug);
   }
-  unlockPublicModalScroll();
+  unlockSecondScreen();
   setView('dashboard');
   loadStoredNotifications();
   setupRealtime();
@@ -691,14 +736,14 @@ function openAuth(mode) {
   const overlay = $('authOverlay');
   if (!overlay) return;
   overlay.classList.add('open');
-  lockPublicModalScroll();
+  lockSecondScreen();
   if (mode === 'login') showLogin(); else showCadastro();
 }
 
 function closeAuth() {
   const overlay = $('authOverlay');
   if (overlay) overlay.classList.remove('open');
-  unlockPublicModalScroll();
+  unlockSecondScreen();
 }
 
 function showLogin() {
@@ -1641,7 +1686,7 @@ function openModalRecusa(id) {
   document.querySelectorAll('.motivo-item').forEach(el => { el.classList.remove('sel'); const r = el.querySelector('.motivo-radio'); if (r) r.innerHTML = ''; });
   const rmc = $('recusaMotivoCustom'); if (rmc) rmc.value = '';
   const overlay = $('modalRecusaOverlay'); if (overlay) overlay.classList.add('open');
-  lockPublicModalScroll();
+  lockSecondScreen();
 }
 
 function closeModalRecusa() {
@@ -2243,30 +2288,6 @@ Object.assign(window, {
 });
 
 
-// ── TRAVA DE ROLAGEM DOS MODAIS PÚBLICOS ─────────────────────────────────────
-let _publicModalScrollY = 0;
-let _publicModalLockCount = 0;
-
-function lockPublicModalScroll() {
-  _publicModalLockCount += 1;
-  if (_publicModalLockCount > 1) return;
-
-  _publicModalScrollY = window.scrollY || window.pageYOffset || 0;
-  document.documentElement.classList.add('public-modal-open');
-  document.body.classList.add('public-modal-open');
-  document.body.style.top = `-${_publicModalScrollY}px`;
-}
-
-function unlockPublicModalScroll() {
-  _publicModalLockCount = Math.max(0, _publicModalLockCount - 1);
-  if (_publicModalLockCount > 0) return;
-
-  document.documentElement.classList.remove('public-modal-open');
-  document.body.classList.remove('public-modal-open');
-  document.body.style.top = '';
-  window.scrollTo(0, _publicModalScrollY);
-}
-// ─────────────────────────────────────────────────────────────────────────────
 
 // ── CALENDÁRIO PÚBLICO FULLSCREEN ─────────────────────────────────────────────
 let _pubCalAno, _pubCalMes;
@@ -2543,3 +2564,63 @@ document.addEventListener('click', (e) => {
     box.style.display = 'none';
   }
 });
+
+
+// Vincula automaticamente a trava global às segundas telas existentes.
+document.addEventListener('DOMContentLoaded', () => {
+  const selectors = [
+    '#notificationPanel',
+    '#notificationOverlay',
+    '#pubCalendarioOverlay',
+    '#pubSlotsOverlay',
+    '#modalReagendar',
+    '#reagendarModal',
+    '.notification-drawer',
+    '.notification-panel',
+    '.modal-overlay',
+    '.pub-modal-overlay',
+    '.drawer-overlay',
+    '.side-panel-overlay'
+  ];
+
+  const layers = [...new Set(
+    selectors.flatMap(selector => [...document.querySelectorAll(selector)])
+  )];
+
+  const isVisible = (el) => {
+    if (!el || !el.isConnected) return false;
+    const style = getComputedStyle(el);
+    const ariaHidden = el.getAttribute('aria-hidden');
+    return (
+      style.display !== 'none' &&
+      style.visibility !== 'hidden' &&
+      style.opacity !== '0' &&
+      ariaHidden !== 'true' &&
+      (
+        el.classList.contains('open') ||
+        el.classList.contains('active') ||
+        el.classList.contains('show') ||
+        el.classList.contains('visible') ||
+        style.position === 'fixed'
+      )
+    );
+  };
+
+  layers.forEach((layer) => {
+    let previous = isVisible(layer);
+    if (previous) lockSecondScreen();
+
+    const observer = new MutationObserver(() => {
+      const current = isVisible(layer);
+      if (current === previous) return;
+      previous = current;
+      current ? lockSecondScreen() : unlockSecondScreen();
+    });
+
+    observer.observe(layer, {
+      attributes: true,
+      attributeFilter: ['class', 'style', 'aria-hidden', 'hidden']
+    });
+  });
+});
+
