@@ -889,7 +889,16 @@ async function finalizarCadastro() {
   const btnFin = $('btnFinalizar');
   if (btnFin) { btnFin.disabled = true; btnFin.textContent = 'Criando...'; }
   try {
-    const { data: authData, error: authErr } = await db.auth.signUp({ email, password: senha, options: { data: { nome: nomeUser } } });
+    // O cadastro passa pelo mesmo dominio do site. Isso evita que bloqueadores de
+    // privacidade interrompam a rota externa /auth/v1/signup com "Failed to fetch".
+    const signupResponse = await fetch('/api/auth-signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha, nome: nomeUser })
+    });
+    const signupPayload = await signupResponse.json().catch(() => ({}));
+    const authErr = signupResponse.ok ? null : new Error(signupPayload.error || 'Nao foi possivel criar a conta.');
+    const authData = signupPayload.data || null;
     if (authErr) {
       if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
       if (authErr.message && authErr.message.toLowerCase().includes('already registered')) return toast('Este e-mail já está cadastrado. Faça login.', 'err');
@@ -898,6 +907,13 @@ async function finalizarCadastro() {
     if (!authData?.user) {
       if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
       return toast('Erro ao criar conta. Tente novamente.', 'err');
+    }
+    if (authData.session?.access_token && authData.session?.refresh_token) {
+      const { error: sessionErr } = await db.auth.setSession({
+        access_token: authData.session.access_token,
+        refresh_token: authData.session.refresh_token
+      });
+      if (sessionErr) throw sessionErr;
     }
     const user = authData.user;
     const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', empSlugVal).maybeSingle();
