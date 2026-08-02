@@ -156,13 +156,12 @@ function buildWaLink(tel, msg) {
   const f = n.startsWith('55') ? n : '55' + n;
   const params = '?phone=' + f + '&text=' + encodeURIComponent(msg || '');
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  return isMobile
-    ? 'https://api.whatsapp.com/send' + params
-    : 'whatsapp://send' + params;
+  return isMobile ? 'whatsapp://send' + params : 'https://web.whatsapp.com/send' + params;
 }
 
 function reservarJanelaWhatsapp(tel) {
   if (!(tel || '').replace(/\D/g, '')) return null;
+  if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return null;
   const janela = window.open('about:blank', '_blank');
   if (janela) {
     janela.document.title = 'Abrindo WhatsApp...';
@@ -174,13 +173,18 @@ function reservarJanelaWhatsapp(tel) {
 function abrirLinkWhatsapp(tel, msg, janelaReservada = null) {
   const link = buildWaLink(tel, msg);
   if (!link) return false;
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = link;
+    return true;
+  }
   if (janelaReservada && !janelaReservada.closed) {
     janelaReservada.location.replace(link);
     return true;
   }
   const janela = window.open(link, '_blank', 'noopener');
-  if (!janela) toast('O navegador bloqueou o WhatsApp. Libere pop-ups para este site.', 'warn');
-  return Boolean(janela);
+  if (!janela) window.location.href = link;
+  return true;
 }
 
 const MENSAGENS_WHATSAPP_PADRAO = {
@@ -386,6 +390,22 @@ document.addEventListener('click', function(e) {
 });
 
 document.addEventListener('scroll', closeAllMenus, { passive: true });
+
+const vyxoraLoaderStartedAt = Date.now();
+
+function esconderTelaCarregamento() {
+  const loader = $('vyxoraLoader');
+  if (!loader) return;
+  loader.classList.add('is-hidden');
+  setTimeout(() => loader.remove(), 500);
+}
+
+window.addEventListener('load', () => {
+  const isNativeApp = /VyXoraAndroidApp/i.test(navigator.userAgent);
+  const minDuration = isNativeApp ? 0 : 2200;
+  const remaining = Math.max(0, minDuration - (Date.now() - vyxoraLoaderStartedAt));
+  setTimeout(esconderTelaCarregamento, remaining);
+});
 
 window.addEventListener('DOMContentLoaded', init);
 
