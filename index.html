@@ -42,7 +42,7 @@
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
 <link rel="preload" as="image" href="mascote-vyxora.png?v=7">
-<link rel="stylesheet" href="style.css?v=20260802-11">
+<link rel="stylesheet" href="style.css?v=20260802-12">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -915,55 +915,7 @@
   </div>
 </div>
 
-<!-- Reagendamento: calendário visual -->
-<div class="pub-modal-overlay" id="reagendarCalendarioOverlay" onclick="fecharCalendarioReagendar(event)">
-  <div class="pub-modal-full" id="reagendarCalendarioModal">
-    <div class="pub-modal-header">
-      <button class="pub-modal-back" onclick="fecharCalendarioReagendar()">← Voltar</button>
-      <span class="pub-modal-title">Escolha a nova data</span>
-    </div>
-    <div class="pub-cal-wrap">
-      <div class="reagendar-cliente-info" id="reagendarInfo">Cliente · data · hora</div>
-      <div class="pub-cal-nav">
-        <button class="pub-cal-arrow" onclick="reagendarCalMes(-1)">‹</button>
-        <span id="reagendarCalTitulo"></span>
-        <button class="pub-cal-arrow" onclick="reagendarCalMes(1)">›</button>
-      </div>
-      <div class="pub-cal-dias-semana">
-        <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
-      </div>
-      <div class="pub-cal-grid" id="reagendarCalGrid"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Reagendamento: horários visuais -->
-<div class="pub-modal-overlay" id="reagendarSlotsOverlay" onclick="fecharSlotsReagendar(event)">
-  <div class="pub-modal-full" id="reagendarSlotsModal">
-    <div class="pub-modal-header">
-      <button class="pub-modal-back" onclick="voltarDataReagendar()">← Voltar</button>
-      <span class="pub-modal-title" id="reagendarSlotsTitulo">Escolha o novo horário</span>
-    </div>
-    <div class="pub-slots-wrap">
-      <div class="reagendar-horario-atual" id="reagendarHorarioAtual"></div>
-      <div class="pub-slots-grid" id="reagendarSlotsGrid"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Confirmação final do reagendamento -->
-<div class="modal-overlay" id="modalReagendarConfirmOverlay">
-  <div class="modal confirm-modal">
-    <button class="modal-close" onclick="fecharConfirmacaoReagendar()">✕</button>
-    <div class="confirm-icon-wrap info">📅</div>
-    <div class="confirm-title">Confirmar reagendamento?</div>
-    <p class="confirm-body" id="reagendarConfirmResumo"></p>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="fecharConfirmacaoReagendar()">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmarReagendar()">Reagendar</button>
-    </div>
-  </div>
-</div>
+<!-- O reagendamento reutiliza o calendário e os horários da página pública. -->
 
 <!-- Modal Editar -->
 <div class="edit-overlay" id="editOverlay">
@@ -1046,6 +998,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script src="app.js?v=20260802-11"></script>
+<script src="app.js?v=20260802-12"></script>
 </body>
 </html>
