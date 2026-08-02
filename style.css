@@ -3271,12 +3271,3 @@ body.vyxora-safe-layer-open {
   opacity: .85;
   filter: invert(1) brightness(1.2);
 }
-
-
-
-
-/* V8 — reagendamento usa os mesmos componentes da página pública */
-#pubCalendarioOverlay .pub-modal-title,
-#pubSlotsOverlay .pub-modal-title {
-  text-align: center;
-}
