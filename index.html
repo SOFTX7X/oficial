@@ -69,26 +69,12 @@
     height: 100%;
     background: none;
   }
-  .nav-dot.nav-v svg,
-  .ai-avatar.nav-v svg,
-  .ai-msg-avatar.nav-v svg {
+  .nav-dot.nav-v svg {
     display: block;
-  }
-  .ai-avatar.nav-v,
-  .ai-msg-avatar.nav-v {
-    background: none !important;
-    border-radius: 50% !important;
-    box-shadow: none !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    font-size: 0 !important;
-    color: transparent !important;
   }
 </style>
 </head>
 <body>
-
 <div class="bg-noise"></div>
 <div class="bg-grid"></div>
 <div class="bg-glow-tl"></div>
@@ -406,7 +392,6 @@
       <button class="nav-btn" onclick="setView('clientes')"><span class="ni">👥</span>Clientes</button>
       <button class="nav-btn" onclick="setView('servicos')"><span class="ni">◈</span>Serviços</button>
       <button class="nav-btn" onclick="setView('profissionais')"><span class="ni">👤</span>Profissionais</button>
-      <button class="nav-btn" onclick="setView('ai')"><span class="ni">✧</span>VyXora AI</button>
     </div>
     <div class="side-nav-sep"></div>
     <div class="side-nav-section">
@@ -476,7 +461,6 @@
         <button class="nav-btn" onclick="setView('clientes');closeMobileMenu()"><span class="ni">👥</span>Clientes</button>
         <button class="nav-btn" onclick="setView('servicos');closeMobileMenu()"><span class="ni">◈</span>Serviços</button>
         <button class="nav-btn" onclick="setView('profissionais');closeMobileMenu()"><span class="ni">👤</span>Profissionais</button>
-        <button class="nav-btn" onclick="setView('ai');closeMobileMenu()"><span class="ni">✧</span>VyXora AI</button>
         <div class="side-nav-sep"></div>
         <div class="side-nav-label">Financeiro</div>
         <button class="nav-btn" onclick="setView('financeiro');closeMobileMenu()"><span class="ni">💰</span>Financeiro</button>
@@ -640,52 +624,6 @@
       <div class="empty-state"><div class="es-icon">📈</div><p>Relatórios avançados em breve.</p></div>
     </section>
 
-    <!-- VIEW: VYXORA AI -->
-    <section class="view" id="view-ai">
-      <div class="ai-shell">
-
-        <!-- Header estilo WhatsApp -->
-        <div class="ai-hero">
-          <div class="ai-hero-left">
-            <button id="aiBackBtn" class="ai-back-btn" onclick="setView('dashboard')" aria-label="Voltar">&#8592; Voltar</button>
-            <div class="ai-avatar nav-v"><svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M4 6 L18 30 L32 6" stroke="#a855f7" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg></div>
-            <div class="ai-hero-info">
-              <span class="ai-hero-name">VyXora AI</span>
-              <span class="ai-hero-sub">online</span>
-            </div>
-          </div>
-          <div class="ai-status">
-            <span></span> Conectado à sua empresa
-          </div>
-        </div>
-
-        <div class="ai-chat">
-          <div class="ai-messages" id="aiMessages" aria-live="polite">
-            <div class="ai-message ai-message-bot">
-              <div class="ai-msg-avatar nav-v"><svg width="20" height="20" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M4 6 L18 30 L32 6" stroke="#a855f7" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg></div>
-              <div class="ai-bubble">
-                Olá! 👋 Pode me perguntar sobre clientes, agendamentos, faturamento ou pedir para executar ações na sua agenda.
-                <span class="ai-bubble-time" id="aiWelcomeTime"></span>
-              </div>
-            </div>
-          </div>
-
-          <form class="ai-compose" onsubmit="enviarMensagemAI(event)">
-            <input id="aiInput" autocomplete="off" placeholder="Ex: Quantos clientes eu tenho?">
-            <button class="ai-send-btn" id="aiSendBtn" type="submit" title="Enviar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
-          </form>
-        </div>
-      </div>
-    </section>
 
     <!-- VIEW: CONFIG -->
     <section class="view" id="view-config">

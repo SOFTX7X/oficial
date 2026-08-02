@@ -20,178 +20,6 @@ let lastIds = new Set();
 let realtimeChannel = null;
 let _fotoEditor = null;
 
-// ── AI CONTEXT ────────────────────────────────────────────────────────────────
-let _aiSlotState = null;
-let _aiHistory = [];
-const AI_MAX_HISTORY = 20;
-
-function _aiSalvarHistoricoLocal() {
-  try {
-    localStorage.setItem('vyxora_ai_history', JSON.stringify(_aiHistory.slice(-AI_MAX_HISTORY)));
-    localStorage.setItem('vyxora_ai_slot', JSON.stringify(_aiSlotState));
-  } catch(e) {}
-}
-
-function _aiCarregarHistoricoLocal() {
-  try {
-    const h = localStorage.getItem('vyxora_ai_history');
-    const s = localStorage.getItem('vyxora_ai_slot');
-    if (h) _aiHistory = JSON.parse(h) || [];
-    if (s) _aiSlotState = JSON.parse(s) || null;
-  } catch(e) {}
-}
-
-function _aiLimparHistorico() {
-  _aiSlotState = null;
-  _aiHistory = [];
-  try {
-    localStorage.removeItem('vyxora_ai_history');
-    localStorage.removeItem('vyxora_ai_slot');
-  } catch(e) {}
-  const lista = $('aiMessages');
-  if (lista) {
-    lista.innerHTML = `
-      <div class="ai-message ai-message-bot">
-        <div class="ai-msg-avatar">✦</div>
-        <div class="ai-bubble">Olá! 👋 Pode me perguntar sobre clientes, agendamentos, faturamento ou pedir para executar ações na sua agenda.</div>
-      </div>`;
-  }
-}
-
-function _aiHorarioAgora() {
-  const now = new Date();
-  return now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-}
-
-function adicionarMensagemAI(tipo, texto) {
-  const lista = $('aiMessages');
-  if (!lista) return;
-  const item = document.createElement('div');
-  item.className = `ai-message ai-message-${tipo}`;
-
-  if (tipo === 'bot') {
-    const avatar = document.createElement('div');
-    avatar.className = 'ai-msg-avatar';
-    avatar.textContent = '✦';
-    item.appendChild(avatar);
-  }
-
-  const bubble = document.createElement('div');
-  bubble.className = 'ai-bubble';
-  // Renderiza quebras de linha e escapa HTML para segurança
-  const safe = texto.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-  bubble.innerHTML = safe;
-
-  const time = document.createElement('span');
-  time.className = 'ai-bubble-time';
-  time.textContent = _aiHorarioAgora();
-  bubble.appendChild(time);
-
-  item.appendChild(bubble);
-  lista.appendChild(item);
-  lista.scrollTop = lista.scrollHeight;
-  _aiHistory.push({ role: tipo === 'user' ? 'user' : 'assistant', content: texto });
-  if (_aiHistory.length > AI_MAX_HISTORY) _aiHistory = _aiHistory.slice(-AI_MAX_HISTORY);
-  _aiSalvarHistoricoLocal();
-}
-
-function _aiCarregarMensagensNaTela() {
-  const lista = $('aiMessages');
-  if (!lista || !_aiHistory.length) return;
-  lista.innerHTML = '';
-  _aiHistory.forEach(msg => {
-    const isBot = msg.role !== 'user';
-    const item = document.createElement('div');
-    item.className = `ai-message ai-message-${isBot ? 'bot' : 'user'}`;
-    if (isBot) {
-      const avatar = document.createElement('div');
-      avatar.className = 'ai-msg-avatar';
-      avatar.textContent = '✦';
-      item.appendChild(avatar);
-    }
-    const bubble = document.createElement('div');
-    bubble.className = 'ai-bubble';
-    bubble.innerHTML = (msg.content||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-    item.appendChild(bubble);
-    lista.appendChild(item);
-  });
-  lista.scrollTop = lista.scrollHeight;
-}
-
-async function enviarMensagemAI(event) {
-  if (event) event.preventDefault();
-  const input = $('aiInput');
-  const btn = $('aiSendBtn');
-  const texto = (input?.value || '').trim();
-  if (!texto) return;
-
-  adicionarMensagemAI('user', texto);
-  if (input) input.value = '';
-  if (btn) btn.disabled = true;
-
-  const lista = $('aiMessages');
-  const typing = document.createElement('div');
-  typing.className = 'ai-message ai-message-bot ai-typing';
-  typing.id = 'aiTyping';
-  typing.innerHTML = '<div class="ai-msg-avatar">✦</div><div class="ai-bubble"><div class="ai-typing-dots"><span></span><span></span><span></span></div></div>';
-  if (lista) { lista.appendChild(typing); lista.scrollTop = lista.scrollHeight; typing.scrollIntoView({ behavior: 'smooth', block: 'end' }); }
-
-  try {
-    const { data } = await window.db.auth.getSession();
-    const token = data?.session?.access_token;
-    if (!token) throw new Error('Sessão expirada. Faça login novamente.');
-
-    const payload = {
-      message: texto,
-      history: _aiHistory.slice(-10),
-      slotState: _aiSlotState || null
-    };
-
-    const resp = await fetch('/api/ai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify(payload)
-    });
-
-    // Protege contra resposta HTML (ex: 404/500 do servidor antes de chegar na API)
-    const contentType = resp.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      const rawText = await resp.text();
-      console.error('[VyXora AI] Resposta nao-JSON (status ' + resp.status + '):', rawText.slice(0, 400));
-      throw new Error('Servico indisponivel (HTTP ' + resp.status + '). Verifique se a API esta no ar e as variaveis de ambiente estao configuradas.');
-    }
-
-    const json = await resp.json();
-    const t = $('aiTyping'); if (t) t.remove();
-
-    if (!json.success) {
-      adicionarMensagemAI('bot', json.error || 'Não consegui processar sua solicitação.');
-      _aiSlotState = null;
-      _aiSalvarHistoricoLocal();
-      return;
-    }
-
-    _aiSlotState = json.slotState || null;
-    _aiSalvarHistoricoLocal();
-
-    const resposta = json.answer || json.data?.answer || 'Pronto.';
-    adicionarMensagemAI('bot', resposta);
-
-    if (json.type === 'action' && !_aiSlotState) {
-      try { await loadAll(); } catch(e) {}
-    }
-
-  } catch (error) {
-    const t = $('aiTyping'); if (t) t.remove();
-    adicionarMensagemAI('bot', error?.message || 'Erro ao conectar com a VyXora AI.');
-    _aiSlotState = null;
-    _aiSalvarHistoricoLocal();
-  } finally {
-    if (btn) btn.disabled = false;
-    // Não chama input.focus() para não abrir o teclado no mobile automaticamente
-  }
-}
-
 // ── UTILS ──
 function $(id) { return document.getElementById(id); }
 
@@ -559,67 +387,7 @@ document.addEventListener('click', function(e) {
 
 document.addEventListener('scroll', closeAllMenus, { passive: true });
 
-// ── Fix: teclado virtual no mobile não cobre o input do chat ──────────────────
-(function() {
-  function fixChatViewport() {
-    const viewAi = document.getElementById('view-ai');
-    if (!viewAi) return;
-
-    function aplicar() {
-      const vv = window.visualViewport;
-      if (!vv) return;
-      // Altura visível - offset do topo = espaço disponível real
-      const alturaVisivel = vv.height;
-      const offsetTop = vv.offsetTop;
-      viewAi.style.height = alturaVisivel + 'px';
-      viewAi.style.top    = offsetTop + 'px';
-      viewAi.style.bottom = 'auto';
-
-      // Rola as mensagens para o final quando o teclado abre
-      const msgs = viewAi.querySelector('.ai-messages');
-      if (msgs) msgs.scrollTop = msgs.scrollHeight;
-    }
-
-    function resetar() {
-      const viewAi = document.getElementById('view-ai');
-      if (!viewAi) return;
-      viewAi.style.height = '';
-      viewAi.style.top    = '';
-      viewAi.style.bottom = '';
-    }
-
-    const input = document.getElementById('aiInput');
-    if (input) {
-      input.addEventListener('focus', () => {
-        if (window.visualViewport) {
-          window.visualViewport.addEventListener('resize', aplicar);
-          window.visualViewport.addEventListener('scroll', aplicar);
-        }
-        setTimeout(aplicar, 100);
-      });
-      input.addEventListener('blur', () => {
-        if (window.visualViewport) {
-          window.visualViewport.removeEventListener('resize', aplicar);
-          window.visualViewport.removeEventListener('scroll', aplicar);
-        }
-        setTimeout(resetar, 150);
-      });
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fixChatViewport);
-  } else {
-    fixChatViewport();
-  }
-})();
-// ─────────────────────────────────────────────────────────────────────────────
-
 window.addEventListener('DOMContentLoaded', init);
-window.addEventListener('DOMContentLoaded', () => {
-  const el = document.getElementById('aiWelcomeTime');
-  if (el) el.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-});
 
 async function init() {
   await loadCategorias();
@@ -698,6 +466,15 @@ function showDashboard() {
   setView('dashboard');
   setupRealtime();
   startAutoSync();
+  syncNativePushSubscription();
+}
+
+function syncNativePushSubscription() {
+  try {
+    if (state?.empresa?.id && window.VyxoraAndroid?.subscribeToCompany) {
+      window.VyxoraAndroid.subscribeToCompany(String(state.empresa.id));
+    }
+  } catch (e) { console.warn('NÃ£o foi possÃ­vel ativar o push nativo:', e); }
 }
 
 function openMobileMenu() {
@@ -727,7 +504,7 @@ function setView(view) {
   const target = $('view-' + view);
   if (target) target.classList.add('active');
   // Reseta scroll ao trocar de aba no mobile
-  if (window.innerWidth <= 768 && view !== 'ai') {
+  if (window.innerWidth <= 768) {
     window.scrollTo({ top: 0, behavior: 'instant' });
     const dm = document.querySelector('.dash-main');
     if (dm) dm.scrollTop = 0;
@@ -738,7 +515,6 @@ function setView(view) {
     clientes: ['Clientes', 'Cadastro de clientes.'],
     servicos: ['Serviços', 'Catálogo e preços.'],
     profissionais: ['Profissionais', 'Equipe de atendimento.'],
-    ai: ['VyXora AI', 'Controle sua agenda conversando.'],
     financeiro: ['Financeiro', 'Valores e resultados.'],
     relatorios: ['Relatórios', 'Dados e métricas.'],
     config: ['Configurações', 'Dados do negócio.']
@@ -747,39 +523,12 @@ function setView(view) {
   setText('pageTitle', info[0]);
   setText('pageSub', info[1]);
 
-  // Mostrar badge "Conectado" no topbar apenas na view AI
-  const existingBadge = document.getElementById('topbar-ai-status');
-  if (existingBadge) existingBadge.remove();
-  if (view === 'ai') {
-    const actions = document.querySelector('.topbar-actions-clean');
-    if (actions) {
-      const badge = document.createElement('div');
-      badge.id = 'topbar-ai-status';
-      badge.className = 'ai-status';
-      badge.innerHTML = '<span></span> Conectado à sua empresa';
-      actions.prepend(badge);
-    }
-  }
-
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
   });
   document.querySelectorAll('.mob-nav-btn').forEach(b => {
     b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
   });
-  // Esconder botão Menu e mostrar botão Voltar na tela da IA (mobile)
-  const menuTrigger = document.querySelector('.mobile-menu-trigger');
-  const backBtn = document.getElementById('aiBackBtn');
-  const isMobile = window.innerWidth <= 768;
-  if (view === 'ai') {
-    if (isMobile && menuTrigger) menuTrigger.style.display = 'none';
-    if (isMobile && backBtn) backBtn.style.display = 'inline-flex';
-    _aiCarregarHistoricoLocal();
-    _aiCarregarMensagensNaTela();
-  } else {
-    if (menuTrigger) menuTrigger.style.removeProperty('display');
-    if (backBtn) backBtn.style.display = 'none';
-  }
 }
 
 function openAuth(mode) {
@@ -961,6 +710,9 @@ async function finalizarCadastro() {
 
 async function logout() {
   try {
+    if (window.VyxoraAndroid?.clearCompanySubscription) {
+      window.VyxoraAndroid.clearCompanySubscription();
+    }
     if (autoSyncTimer) { clearInterval(autoSyncTimer); autoSyncTimer = null; }
     if (realtimeChannel) { try { db.removeChannel(realtimeChannel); } catch(e) {} realtimeChannel = null; }
     await db.auth.signOut();
@@ -2200,15 +1952,25 @@ async function finalizarAgendamentoPublico() {
     let clienteId = null;
     const { data: cli } = await db.from('agenda_clientes').insert({ empresa_id: state.pubEmpresa.id, nome: pubNome, telefone: pubTel, status: 'ativo' }).select('*').single();
     if (cli) clienteId = cli.id;
-    const { error } = await db.from('agenda_agendamentos').insert({
+    const { data: novoAgendamento, error } = await db.from('agenda_agendamentos').insert({
       empresa_id: state.pubEmpresa.id, cliente_id: clienteId,
       servico_id: state.pubServico.id, profissional_id: state.pubProfissional.id,
       cliente_nome: pubNome, cliente_telefone: pubTel,
       servico_nome: state.pubServico.nome, profissional_nome: state.pubProfissional.nome,
       data: pubData, hora: pubHora, status: 'Pendente',
       valor: Number(state.pubServico.preco || 0), observacoes: $('pubObs')?.value || ''
-    });
+    }).select('id, empresa_id').single();
     if (error) { console.error(error); return toast('Erro ao confirmar: ' + error.message, 'err'); }
+    if (novoAgendamento?.id) {
+      fetch('/api/push/new-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appointmentId: novoAgendamento.id,
+          companyId: novoAgendamento.empresa_id
+        })
+      }).catch(e => console.warn('Falha ao enviar notificaÃ§Ã£o push:', e));
+    }
     if (cs) cs.style.display = 'block';
   } catch (e) { console.error('Erro ao confirmar agendamento público:', e); toast('Erro inesperado. Tente novamente.', 'err'); }
 }
@@ -2273,7 +2035,6 @@ Object.assign(window, {
   toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu,
   menuOpenPublic, menuCopyPublicLink, menuNotifications,
-  enviarMensagemAI, _aiLimparHistorico, _aiCarregarHistoricoLocal, _aiCarregarMensagensNaTela,
   abrirCalendarioPublico, fecharCalendarioPublico, pubCalMes, selecionarDataPublica,
   abrirSlotsPublico, fecharSlotsPublico, selecionarSlot
 });
