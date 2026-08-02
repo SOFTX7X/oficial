@@ -2068,3 +2068,9 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .pub-success-card::before,
   .pub-success-mascot { animation: none !important; }
 }
+
+
+/* Página pública: remove o botão Voltar */
+#publicView .pub-back {
+  display: none !important;
+}
