@@ -339,37 +339,173 @@ function toast(msg, type = 'info') {
   showNotif(msg, '', typeMap[type] || 'info');
 }
 
-function showNotif(title, msg = '', type = 'info', duration = 5000) {
+const NOTIFICATION_LIMIT = 100;
+let appNotifications = [];
+
+function notificationStorageKey() {
+  return `vyxora_notifications_${state?.empresa?.id || 'guest'}`;
+}
+
+function loadStoredNotifications() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(notificationStorageKey()) || '[]');
+    appNotifications = Array.isArray(saved) ? saved.slice(0, NOTIFICATION_LIMIT) : [];
+  } catch (_) {
+    appNotifications = [];
+  }
+  renderNotificationCenter();
+}
+
+function saveStoredNotifications() {
+  try {
+    localStorage.setItem(notificationStorageKey(), JSON.stringify(appNotifications.slice(0, NOTIFICATION_LIMIT)));
+  } catch (_) {}
+}
+
+function escapeNotificationText(value) {
+  return String(value || '').replace(/[&<>'"]/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  })[char]);
+}
+
+function addAppNotification(title, message = '', type = 'new', sourceId = '') {
+  const sourceKey = sourceId ? `${type}:${sourceId}` : '';
+  if (sourceKey && appNotifications.some(item => item.sourceKey === sourceKey)) return;
+  appNotifications.unshift({
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    sourceKey,
+    title,
+    message,
+    type,
+    read: false,
+    createdAt: new Date().toISOString()
+  });
+  appNotifications = appNotifications.slice(0, NOTIFICATION_LIMIT);
+  saveStoredNotifications();
+  renderNotificationCenter();
+  playNotificationSound();
+}
+
+function playNotificationSound() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(740, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(980, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.20);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.21);
+    setTimeout(() => ctx.close().catch(() => {}), 350);
+  } catch (_) {}
+}
+
+function formatNotificationDate(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+  return sameDay
+    ? `Hoje, ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+    : date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderNotificationCenter() {
+  const list = $('notificationList');
+  const empty = $('notificationEmpty');
+  const unread = appNotifications.filter(item => !item.read).length;
+  [$('notificationBadge'), $('mobileNotificationBadge')].forEach(badge => {
+    if (!badge) return;
+    badge.textContent = unread > 99 ? '99+' : String(unread);
+    badge.hidden = unread === 0;
+  });
+  if (!list || !empty) return;
+  empty.style.display = appNotifications.length ? 'none' : 'flex';
+  list.innerHTML = appNotifications.map(item => `
+    <article class="notification-row ${item.read ? '' : 'unread'}" data-id="${item.id}">
+      <button class="notification-row-main" onclick="markNotificationRead('${item.id}')">
+        <span class="notification-row-icon">${item.type === 'new' ? '📅' : '🔔'}</span>
+        <span class="notification-row-content">
+          <strong>${escapeNotificationText(item.title)}</strong>
+          ${item.message ? `<span>${escapeNotificationText(item.message)}</span>` : ''}
+          <small>${formatNotificationDate(item.createdAt)}</small>
+        </span>
+        ${item.read ? '' : '<i aria-label="Não lida"></i>'}
+      </button>
+      <button class="notification-row-delete" onclick="deleteNotification('${item.id}')" aria-label="Excluir">✕</button>
+    </article>
+  `).join('');
+}
+
+function openNotificationCenter() {
+  const overlay = $('notificationCenterOverlay');
+  if (!overlay) return;
+  renderNotificationCenter();
+  overlay.classList.add('open');
+  document.body.classList.add('notification-center-open');
+}
+
+function closeNotificationCenter(event) {
+  if (event && event.target !== $('notificationCenterOverlay')) return;
+  $('notificationCenterOverlay')?.classList.remove('open');
+  document.body.classList.remove('notification-center-open');
+}
+
+function markNotificationRead(id) {
+  const item = appNotifications.find(notification => notification.id === id);
+  if (!item) return;
+  item.read = true;
+  saveStoredNotifications();
+  renderNotificationCenter();
+}
+
+function markAllNotificationsRead() {
+  appNotifications.forEach(item => { item.read = true; });
+  saveStoredNotifications();
+  renderNotificationCenter();
+}
+
+function deleteNotification(id) {
+  appNotifications = appNotifications.filter(item => item.id !== id);
+  saveStoredNotifications();
+  renderNotificationCenter();
+}
+
+function clearAllNotifications() {
+  appNotifications = [];
+  saveStoredNotifications();
+  renderNotificationCenter();
+}
+
+// Mensagens operacionais continuam discretas e nunca se acumulam.
+function showNotif(title, msg = '', type = 'info', duration = 2800) {
   const stack = $('notifStack');
   if (!stack) return;
+  stack.innerHTML = '';
   const item = document.createElement('div');
-  item.className = 'notif-item';
-  const now = new Date();
-  const t = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+  item.className = 'notif-item compact';
   const icons = { new: '📅', ok: '✅', err: '⚠️', info: '💬' };
   item.innerHTML = `
     <div class="notif-icon ${type}">${icons[type] || '🔔'}</div>
     <div class="notif-body">
-      <div class="notif-title">${title}</div>
-      ${msg ? `<div class="notif-msg">${msg}</div>` : ''}
-      <div class="notif-time">${t}</div>
+      <div class="notif-title">${escapeNotificationText(title)}</div>
+      ${msg ? `<div class="notif-msg">${escapeNotificationText(msg)}</div>` : ''}
     </div>
     <button class="notif-close" onclick="this.parentElement.remove()">✕</button>
   `;
-  stack.prepend(item);
-  while (stack.children.length > 4) stack.lastChild.remove();
+  stack.appendChild(item);
   setTimeout(() => {
     item.classList.add('out');
-    setTimeout(() => { if (item.parentElement) item.remove(); }, 450);
+    setTimeout(() => item.remove(), 350);
   }, duration);
-  const dot = $('notifDot');
-  if (dot) dot.classList.add('on');
 }
 
-function clearNotifDot() {
-  const dot = $('notifDot');
-  if (dot) dot.classList.remove('on');
-}
+function clearNotifDot() { renderNotificationCenter(); }
 
 window.addEventListener('scroll', () => {
   const nav = $('landNav');
@@ -484,6 +620,7 @@ function showDashboard() {
   }
   document.body.style.overflow = '';
   setView('dashboard');
+  loadStoredNotifications();
   setupRealtime();
   startAutoSync();
   syncNativePushSubscription();
@@ -514,9 +651,8 @@ function closeMobileMenu() {
 function menuOpenPublic() { closeMobileMenu(); openPublic(); }
 function menuCopyPublicLink() { closeMobileMenu(); copyPublicLink(); }
 function menuNotifications() {
-  closeMobileMenu(); clearNotifDot();
-  const stack = $('notifStack');
-  if (stack) stack.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  closeMobileMenu();
+  openNotificationCenter();
 }
 
 function setView(view) {
@@ -752,7 +888,7 @@ function setupRealtime() {
   tables.forEach(table => {
     ch = ch.on('postgres_changes', { event: '*', schema: 'public', table, filter: `empresa_id=eq.${id}` }, payload => {
       if (table === 'agenda_agendamentos' && payload.eventType === 'INSERT') {
-        showNotif('Novo agendamento!', `${payload.new?.cliente_nome || 'Cliente'} acabou de agendar.`, 'new', 6000);
+        addAppNotification('Novo agendamento!', `${payload.new?.cliente_nome || 'Cliente'} acabou de agendar.`, 'new', payload.new?.id || '');
       }
       scheduleReload();
     });
@@ -775,7 +911,7 @@ function startAutoSync() {
       const { data } = await db.from('agenda_agendamentos').select('*').eq('empresa_id', state.empresa.id).order('criado_em', { ascending: false });
       const novos = (data || []).filter(a => !lastIds.has(String(a.id)));
       state.agendamentos = ordenarAgendamentosRecentes(data);
-      if (novos.length) novos.forEach(a => showNotif('Novo agendamento!', `${a.cliente_nome || 'Cliente'} agendou.`, 'new', 6000));
+      if (novos.length) novos.forEach(a => addAppNotification('Novo agendamento!', `${a.cliente_nome || 'Cliente'} agendou.`, 'new', a.id || ''));
       lastIds = new Set(state.agendamentos.map(a => String(a.id)));
       renderAll();
     } catch (e) {}
@@ -2094,6 +2230,8 @@ Object.assign(window, {
   toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu,
   menuOpenPublic, menuCopyPublicLink, menuNotifications,
+  openNotificationCenter, closeNotificationCenter, markNotificationRead,
+  markAllNotificationsRead, deleteNotification, clearAllNotifications,
   abrirCalendarioPublico, fecharCalendarioPublico, pubCalMes, selecionarDataPublica,
   abrirSlotsPublico, fecharSlotsPublico, selecionarSlot
 });
