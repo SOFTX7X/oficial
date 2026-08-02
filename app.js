@@ -2101,7 +2101,13 @@ function selectPubProf(id, el) {
 async function confirmarAgendamentoPublico() {
   const pubNome = $('pubClienteNome')?.value?.trim(), pubTel = $('pubClienteTel')?.value?.trim();
   const pubData = $('pubData')?.value, pubHora = $('pubHora')?.value;
-  if (!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !pubNome || !pubTel || !pubData || !pubHora) return toast('Preencha tudo para confirmar.', 'err');
+  if (!state.pubEmpresa) return toast('Empresa não carregada. Atualize a página e tente novamente.', 'err');
+  if (!state.pubServico) return toast('Escolha um serviço antes de confirmar.', 'warn');
+  if (!state.pubProfissional) return toast('Escolha um profissional antes de confirmar.', 'warn');
+  if (!pubData) return toast('Escolha uma data antes de confirmar.', 'warn');
+  if (!pubHora) return toast('Escolha um horário antes de confirmar.', 'warn');
+  if (!pubNome) return toast('Informe seu nome completo.', 'warn');
+  if (!pubTel || pubTel.replace(/\D/g, '').length < 10) return toast('Informe um WhatsApp válido.', 'warn');
   if (isDiaFechado(pubData, state.pubDiasFechados || [])) { validarDataPublica(pubData); return toast('Este dia não está disponível. Escolha outra data.', 'err'); }
 
   const botao = document.querySelector('.pub-confirm-btn');
@@ -2240,6 +2246,17 @@ Object.assign(window, {
 let _pubCalAno, _pubCalMes;
 
 function abrirCalendarioPublico() {
+  if (!state.pubServico) {
+    toast('Escolha um serviço antes de selecionar a data.', 'warn');
+    document.getElementById('pubServicos')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!state.pubProfissional) {
+    toast('Escolha um profissional antes de selecionar a data.', 'warn');
+    document.getElementById('pubProfissionais')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
   const hoje = new Date();
   _pubCalAno = hoje.getFullYear();
   _pubCalMes = hoje.getMonth();
@@ -2338,7 +2355,22 @@ function selecionarDataPublica(iso) {
 async function abrirSlotsPublico() {
   const data = document.getElementById('pubData')?.value;
   const prof = state.pubProfissional;
-  if (!data || !prof) { return; }
+
+  if (!state.pubServico) {
+    toast('Escolha um serviço antes de ver os horários.', 'warn');
+    document.getElementById('pubServicos')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!prof) {
+    toast('Escolha um profissional para ver os horários disponíveis.', 'warn');
+    document.getElementById('pubProfissionais')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!data) {
+    toast('Escolha uma data antes de selecionar o horário.', 'warn');
+    document.getElementById('pubDataBtn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
 
   // Usa horários da empresa; fallback para os do profissional se empresa não tiver
   const empresa = state.pubEmpresa || {};
