@@ -771,27 +771,25 @@
       </div>
     </div>
 
-    <!-- Tela de sucesso -->
+    <!-- Tela de sucesso: aparece na mesma página após salvar -->
     <div id="pubConfirmScreen" class="pub-confirm-screen" style="display:none">
-      <div class="pub-tick">✓</div>
-      <h2>Agendamento enviado!</h2>
-      <p>Entraremos em contato pelo WhatsApp para confirmar seu horário.</p>
-      <button class="btn btn-primary" style="margin-top:24px" onclick="resetPublic()">Fazer novo agendamento</button>
-    </div>
+      <div class="pub-success-card">
+        <div class="pub-success-visual">
+          <img src="mascote-icone-vyxora.png?v=8" alt="Mascote VyXora" class="pub-success-mascot">
+          <div class="pub-success-check" aria-hidden="true">✓</div>
+        </div>
+        <div class="pub-success-kicker">AGENDAMENTO CONCLUÍDO</div>
+        <h2>Agendamento confirmado!</h2>
+        <p>Seu horário foi reservado. Confira os dados abaixo.</p>
 
-    <!-- Tela de observação (pós-confirmar) -->
-    <div id="pubObsScreen" class="pub-obs-screen" style="display:none">
-      <div class="pub-obs-inner">
-        <div class="pub-obs-icon">💬</div>
-        <h2>Alguma observação?</h2>
-        <p>Se quiser deixar um recado para a profissional, escreva abaixo. Caso não tenha, é só prosseguir.</p>
-        <div class="field" style="margin-top:20px">
-          <textarea id="pubObs" placeholder="Ex: Tenho alergia a determinado produto, prefiro atendimento no período da manhã..." rows="4"></textarea>
+        <div class="pub-success-summary">
+          <div class="pub-success-row"><span>Serviço</span><strong id="pubSuccessServico">—</strong></div>
+          <div class="pub-success-row"><span>Profissional</span><strong id="pubSuccessProfissional">—</strong></div>
+          <div class="pub-success-row"><span>Data</span><strong id="pubSuccessData">—</strong></div>
+          <div class="pub-success-row"><span>Horário</span><strong id="pubSuccessHora">—</strong></div>
         </div>
-        <div class="pub-obs-actions">
-          <button class="btn btn-ghost" onclick="finalizarAgendamentoPublico()">Pular</button>
-          <button class="btn btn-primary" onclick="finalizarAgendamentoPublico()">Enviar ✓</button>
-        </div>
+
+        <button class="btn btn-primary pub-success-new" onclick="resetPublic()">Fazer novo agendamento</button>
       </div>
     </div>
 
