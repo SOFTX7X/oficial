@@ -2311,3 +2311,336 @@ body.notification-center-open { overflow: hidden; }
     border-radius: 5px !important;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   TESTE — CALENDÁRIO PÚBLICO MODERNO E RESPONSIVO
+   Escopo restrito ao #pubCalendarioOverlay
+═══════════════════════════════════════════════════════════════ */
+
+#pubCalendarioOverlay {
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(3, 2, 8, 0.76);
+  backdrop-filter: blur(12px) saturate(115%);
+  -webkit-backdrop-filter: blur(12px) saturate(115%);
+}
+
+#pubCalendarioOverlay .pub-modal-full {
+  position: relative;
+  width: min(680px, calc(100vw - 40px));
+  max-width: 680px;
+  max-height: min(760px, calc(100dvh - 40px));
+  border: 1px solid rgba(180, 88, 255, 0.34);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(143, 49, 229, 0.13), transparent 38%),
+    linear-gradient(180deg, rgba(17, 10, 26, 0.99), rgba(8, 6, 14, 0.99));
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.62),
+    0 0 0 1px rgba(194, 112, 255, 0.05),
+    0 0 55px rgba(126, 34, 206, 0.14);
+  transform: scale(0.96) translateY(12px);
+}
+
+#pubCalendarioOverlay.open .pub-modal-full {
+  transform: scale(1) translateY(0);
+}
+
+#pubCalendarioOverlay .pub-modal-header {
+  position: relative;
+  justify-content: center;
+  min-height: 66px;
+  padding: 16px 64px;
+  border-bottom: 1px solid rgba(180, 88, 255, 0.20);
+  background: rgba(255, 255, 255, 0.012);
+}
+
+#pubCalendarioOverlay .pub-modal-title {
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: #f7efff;
+}
+
+#pubCalendarioOverlay .pub-modal-back {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  left: auto;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(190, 104, 255, 0.30);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  color: transparent;
+  font-size: 0;
+  transform: translateY(-50%);
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+#pubCalendarioOverlay .pub-modal-back::after {
+  content: "×";
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: #d9b7ff;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+#pubCalendarioOverlay .pub-modal-back:hover {
+  border-color: rgba(215, 154, 255, 0.65);
+  background: rgba(151, 55, 220, 0.15);
+  transform: translateY(-50%) scale(1.04);
+}
+
+#pubCalendarioOverlay .pub-cal-wrap {
+  padding: 24px 28px 26px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(177, 81, 238, .55) transparent;
+}
+
+#pubCalendarioOverlay .pub-cal-wrap::-webkit-scrollbar {
+  width: 5px;
+}
+
+#pubCalendarioOverlay .pub-cal-wrap::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: rgba(177, 81, 238, .50);
+}
+
+#pubCalendarioOverlay .pub-cal-nav {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+#pubCalendarioOverlay .pub-cal-nav span {
+  text-align: center;
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+}
+
+#pubCalendarioOverlay .pub-cal-arrow {
+  width: 44px;
+  height: 42px;
+  border: 1px solid rgba(185, 96, 244, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #d7b2ff;
+  font-size: 25px;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+#pubCalendarioOverlay .pub-cal-arrow:hover {
+  transform: translateY(-1px);
+  border-color: rgba(207, 139, 255, 0.66);
+  background: rgba(140, 44, 214, 0.16);
+}
+
+#pubCalendarioOverlay .pub-cal-dias-semana {
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 0 2px 9px;
+  border-bottom: 1px solid rgba(178, 83, 238, 0.12);
+}
+
+#pubCalendarioOverlay .pub-cal-dias-semana span {
+  padding: 5px 0;
+  color: #9d7db8;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .05em;
+}
+
+#pubCalendarioOverlay .pub-cal-grid {
+  gap: 8px;
+}
+
+#pubCalendarioOverlay .pub-cal-cell {
+  min-height: 54px;
+  aspect-ratio: auto;
+  border: 1px solid rgba(176, 76, 255, 0.12);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.038);
+  color: #f1e9f8;
+  font-size: 15px;
+  font-weight: 650;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.018);
+  transition:
+    transform .14s ease,
+    border-color .14s ease,
+    background .14s ease,
+    box-shadow .14s ease;
+}
+
+#pubCalendarioOverlay .pub-cal-cell:not(.bloqueado):not(.vazio):not(.fora-mes):hover {
+  transform: translateY(-2px);
+  border-color: rgba(194, 104, 255, 0.66);
+  background: rgba(134, 39, 209, 0.20);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(76, 19, 116, 0.20);
+}
+
+#pubCalendarioOverlay .pub-cal-cell.selecionado {
+  border-color: rgba(225, 177, 255, 0.76) !important;
+  border-radius: 7px;
+  background: linear-gradient(145deg, #6f24d9, #9d29ee) !important;
+  color: #fff !important;
+  box-shadow:
+    0 10px 24px rgba(125, 34, 210, .34),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+#pubCalendarioOverlay .pub-cal-cell.bloqueado {
+  border-color: rgba(255,255,255,.018);
+  background: rgba(255, 255, 255, 0.012);
+  color: rgba(173, 145, 191, 0.34);
+  opacity: 0.72;
+}
+
+#pubCalendarioOverlay .pub-cal-cell.fora-mes {
+  border-color: transparent;
+  background: rgba(255,255,255,.006);
+  color: rgba(163, 128, 184, 0.20);
+  opacity: 1;
+}
+
+#pubCalendarioOverlay .pub-cal-legenda {
+  gap: 22px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(176, 76, 255, 0.14);
+}
+
+#pubCalendarioOverlay .pub-cal-legenda span {
+  gap: 8px;
+  color: #a98abd;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#pubCalendarioOverlay .pub-cal-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+#pubCalendarioOverlay .pub-cal-dot.disponivel {
+  background: #a13df0;
+  box-shadow: 0 0 9px rgba(161, 61, 240, .42);
+}
+
+#pubCalendarioOverlay .pub-cal-dot.indisponivel {
+  background: #504158;
+}
+
+/* Android / telas menores */
+@media (max-width: 700px) {
+  #pubCalendarioOverlay {
+    align-items: stretch;
+    padding: 0;
+  }
+
+  #pubCalendarioOverlay .pub-modal-full {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(143, 49, 229, 0.13), transparent 34%),
+      linear-gradient(180deg, #100918, #08060e);
+    transform: translateY(20px);
+  }
+
+  #pubCalendarioOverlay .pub-modal-header {
+    min-height: 62px;
+    padding: max(14px, env(safe-area-inset-top)) 58px 14px;
+    background: rgba(13, 8, 20, .92);
+  }
+
+  #pubCalendarioOverlay .pub-modal-title {
+    font-size: 17px;
+  }
+
+  #pubCalendarioOverlay .pub-modal-back {
+    right: 14px;
+    width: 38px;
+    height: 38px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 20px 14px calc(20px + env(safe-area-inset-bottom));
+  }
+
+  #pubCalendarioOverlay .pub-cal-nav {
+    grid-template-columns: 42px 1fr 42px;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-nav span {
+    font-size: 18px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-arrow {
+    width: 42px;
+    height: 40px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-dias-semana {
+    gap: 5px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-grid {
+    gap: 6px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-cell {
+    min-height: clamp(44px, 11.5vw, 54px);
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-legenda {
+    margin-top: auto;
+    padding-top: 18px;
+    padding-bottom: 2px;
+  }
+}
+
+/* Celulares muito estreitos */
+@media (max-width: 390px) {
+  #pubCalendarioOverlay .pub-cal-wrap {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-grid {
+    gap: 4px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-cell {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  #pubCalendarioOverlay .pub-cal-legenda {
+    gap: 14px;
+  }
+}
