@@ -16,7 +16,6 @@ let _reagendarId = null;
 let _openMenu = null;
 let _openMenuBtn = null;
 let autoSyncTimer = null;
-let horariosDirty = false;
 let lastIds = new Set();
 let realtimeChannel = null;
 let _fotoEditor = null;
@@ -824,7 +823,7 @@ function renderAll() {
     renderTimeline(); renderClientes(); renderServicos(); renderProfissionais(); renderFinanceiro();
     const active = document.activeElement;
     const editingConfig = active && active.closest && active.closest('#view-config');
-    if (!editingConfig && !horariosDirty) renderConfig();
+    if (!editingConfig) renderConfig();
   });
   ajustarFontesCampos();
 }
@@ -1187,7 +1186,6 @@ function setConfigTab(tab, botao) {
 function toggleDia(btn) {
   if (!btn) return;
   btn.classList.toggle('ativo');
-  horariosDirty = true;
 }
 
 function selecionarIntervalo(btn) {
@@ -1195,22 +1193,9 @@ function selecionarIntervalo(btn) {
   btn.classList.add('ativo');
   const hidden = document.getElementById('cfgIntervaloSlots');
   if (hidden) hidden.value = btn.dataset.val;
-  horariosDirty = true;
 }
 
-
-
-function instalarControleHorariosDirty() {
-  ['cfgHorarioInicio', 'cfgHorarioFim'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el || el.dataset.dirtyListener === '1') return;
-    el.dataset.dirtyListener = '1';
-    el.addEventListener('input', () => { horariosDirty = true; });
-    el.addEventListener('change', () => { horariosDirty = true; });
-  });
-}
-
-function openConfigSection(tab = 'empresa') { setView('config'); setConfigTab(tab); instalarControleHorariosDirty(); closeMobileMenu(); }
+function openConfigSection(tab = 'empresa') { setView('config'); setConfigTab(tab); closeMobileMenu(); }
 
 async function salvarCliente() {
   const nome = ($('cliNome')?.value || '').trim();
@@ -1333,8 +1318,6 @@ async function salvarHorarios() {
   const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
   if (error) return toast('Erro ao salvar horários: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
-  horariosDirty = false;
-  renderConfig();
   showNotif('Horários de funcionamento salvos', '', 'ok');
 }
 
@@ -1984,17 +1967,20 @@ async function confirmarAgendamentoPublico() {
   const pubData = $('pubData')?.value, pubHora = $('pubHora')?.value;
   if (!state.pubEmpresa || !state.pubServico || !state.pubProfissional || !pubNome || !pubTel || !pubData || !pubHora) return toast('Preencha tudo para confirmar.', 'err');
   if (isDiaFechado(pubData, state.pubDiasFechados || [])) { validarDataPublica(pubData); return toast('Este dia não está disponível. Escolha outra data.', 'err'); }
-  // Mostra tela de observação antes de salvar
-  const mb = $('pubMainBody'), ob = $('pubObsScreen');
-  if (mb) mb.style.display = 'none';
-  if (ob) ob.style.display = 'block';
+
+  const botao = document.querySelector('.pub-confirm-btn');
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Confirmando...';
+  }
+
+  await finalizarAgendamentoPublico();
 }
 
 async function finalizarAgendamentoPublico() {
   const pubNome = $('pubClienteNome')?.value?.trim(), pubTel = $('pubClienteTel')?.value?.trim();
   const pubData = $('pubData')?.value, pubHora = $('pubHora')?.value;
-  const ob = $('pubObsScreen'), cs = $('pubConfirmScreen');
-  if (ob) ob.style.display = 'none';
+  const mb = $('pubMainBody'), cs = $('pubConfirmScreen');
   try {
     let clienteId = null;
     const { data: cli } = await db.from('agenda_clientes').insert({ empresa_id: state.pubEmpresa.id, nome: pubNome, telefone: pubTel, status: 'ativo' }).select('*').single();
@@ -2005,7 +1991,7 @@ async function finalizarAgendamentoPublico() {
       cliente_nome: pubNome, cliente_telefone: pubTel,
       servico_nome: state.pubServico.nome, profissional_nome: state.pubProfissional.nome,
       data: pubData, hora: pubHora, status: 'Pendente',
-      valor: Number(state.pubServico.preco || 0), observacoes: $('pubObs')?.value || ''
+      valor: Number(state.pubServico.preco || 0), observacoes: ''
     }).select('id, empresa_id').single();
     if (error) { console.error(error); return toast('Erro ao confirmar: ' + error.message, 'err'); }
     if (novoAgendamento?.id) {
@@ -2018,16 +2004,38 @@ async function finalizarAgendamentoPublico() {
         })
       }).catch(e => console.warn('Falha ao enviar notificaÃ§Ã£o push:', e));
     }
+    const dataFormatada = (() => {
+      try {
+        return new Date(pubData + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+      } catch (_) { return pubData; }
+    })();
+
+    const preencher = (id, valor) => { const el = $(id); if (el) el.textContent = valor || '—'; };
+    preencher('pubSuccessServico', state.pubServico?.nome);
+    preencher('pubSuccessProfissional', state.pubProfissional?.nome);
+    preencher('pubSuccessData', dataFormatada);
+    preencher('pubSuccessHora', pubHora);
+
+    if (mb) mb.style.display = 'none';
     if (cs) cs.style.display = 'block';
-  } catch (e) { console.error('Erro ao confirmar agendamento público:', e); toast('Erro inesperado. Tente novamente.', 'err'); }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    console.error('Erro ao confirmar agendamento público:', e);
+    toast('Erro inesperado. Tente novamente.', 'err');
+  } finally {
+    const botao = document.querySelector('.pub-confirm-btn');
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = 'Confirmar agendamento ✓';
+    }
+  }
 }
 
 function resetPublic() {
-  const mb = $('pubMainBody'), cs = $('pubConfirmScreen'), ob = $('pubObsScreen');
+  const mb = $('pubMainBody'), cs = $('pubConfirmScreen');
   if (mb) mb.style.display = '';
   if (cs) cs.style.display = 'none';
-  if (ob) ob.style.display = 'none';
-  ['pubClienteNome', 'pubClienteTel', 'pubData', 'pubHora', 'pubObs'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+  ['pubClienteNome', 'pubClienteTel', 'pubData', 'pubHora'].forEach(id => { const el = $(id); if (el) el.value = ''; });
   const aviso = $('pubDataAviso'); if (aviso) aviso.style.display = 'none';
   const inputData = $('pubData'); if (inputData) { inputData.style.borderColor = ''; inputData.style.boxShadow = ''; }
   state.pubServico = null; state.pubProfissional = null;
