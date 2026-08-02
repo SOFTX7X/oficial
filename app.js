@@ -2016,7 +2016,9 @@ async function finalizarAgendamentoPublico() {
     preencher('pubSuccessData', dataFormatada);
     preencher('pubSuccessHora', pubHora);
 
+    const hero = document.querySelector('#publicView .pub-hero');
     if (mb) mb.style.display = 'none';
+    if (hero) hero.style.display = 'none';
     if (cs) cs.style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (e) {
@@ -2033,7 +2035,9 @@ async function finalizarAgendamentoPublico() {
 
 function resetPublic() {
   const mb = $('pubMainBody'), cs = $('pubConfirmScreen');
+  const hero = document.querySelector('#publicView .pub-hero');
   if (mb) mb.style.display = '';
+  if (hero) hero.style.display = '';
   if (cs) cs.style.display = 'none';
   ['pubClienteNome', 'pubClienteTel', 'pubData', 'pubHora'].forEach(id => { const el = $(id); if (el) el.value = ''; });
   const aviso = $('pubDataAviso'); if (aviso) aviso.style.display = 'none';
