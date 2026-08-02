@@ -2074,3 +2074,163 @@ body.menu-open { overflow: hidden; touch-action: none; }
 #publicView .pub-back {
   display: none !important;
 }
+
+
+/* ══════════════════════════════════════════
+   AJUSTE FINAL — MENU LATERAL MAIS QUADRADO
+   Mantém a tela pública e a confirmação intactas
+══════════════════════════════════════════ */
+
+.sidebar .side-nav-section {
+  margin: 0 0 12px;
+  padding: 10px;
+  border: 1px solid rgba(176, 76, 255, 0.22);
+  border-radius: 8px;
+  background: linear-gradient(
+    180deg,
+    rgba(78, 25, 118, 0.10),
+    rgba(255, 255, 255, 0.012)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    0 8px 24px rgba(0, 0, 0, 0.10);
+}
+
+.sidebar .side-nav-label {
+  padding: 0 2px 9px;
+  margin: 0 0 8px;
+  border-bottom: 1px solid rgba(176, 76, 255, 0.17);
+  color: #b997ff;
+}
+
+.sidebar .nav-btn {
+  min-height: 44px;
+  margin: 0 0 7px;
+  padding: 8px 10px;
+  border: 1px solid rgba(176, 76, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.018);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.018);
+}
+
+.sidebar .nav-btn:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar .nav-btn:hover {
+  transform: translateX(2px);
+  border-color: rgba(190, 104, 255, 0.48);
+  background: rgba(137, 45, 214, 0.12);
+  box-shadow:
+    0 8px 20px rgba(87, 25, 139, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.sidebar .nav-btn.active {
+  border-color: rgba(202, 120, 255, 0.78);
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(124, 34, 232, 0.34),
+    rgba(168, 85, 247, 0.20)
+  );
+  box-shadow:
+    0 9px 24px rgba(105, 31, 173, 0.20),
+    inset 3px 0 0 #b84cff;
+}
+
+.sidebar .nav-btn .ni {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  border-color: rgba(176, 76, 255, 0.15);
+}
+
+.sidebar .side-user-card {
+  border-radius: 7px;
+  border-color: rgba(176, 76, 255, 0.22);
+}
+
+.sidebar .side-link-box {
+  border-radius: 5px;
+}
+
+.sidebar .side-bottom > .btn[onclick="logout()"] {
+  min-height: 44px;
+  border-radius: 6px !important;
+  border: 1px solid rgba(190, 104, 255, 0.48) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(91, 30, 145, 0.92),
+    rgba(126, 34, 206, 0.92)
+  ) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow:
+    0 10px 26px rgba(93, 28, 155, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+.sidebar .side-bottom > .btn[onclick="logout()"]:hover {
+  transform: translateY(-1px);
+  border-color: rgba(220, 168, 255, 0.78) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(111, 36, 176, 0.98),
+    rgba(148, 42, 232, 0.98)
+  ) !important;
+}
+
+/* Menu móvel */
+.mobile-menu-body .side-nav-section {
+  margin: 0 0 11px;
+  padding: 9px;
+  border: 1px solid rgba(176, 76, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(92, 30, 142, 0.07);
+}
+
+.mobile-menu-body .side-nav-label {
+  padding: 0 2px 8px;
+  margin-bottom: 7px;
+  border-bottom: 1px solid rgba(176, 76, 255, 0.16);
+}
+
+.mobile-menu-body .nav-btn {
+  min-height: 46px;
+  margin-bottom: 7px;
+  border: 1px solid rgba(176, 76, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.mobile-menu-body .nav-btn:last-child {
+  margin-bottom: 0;
+}
+
+.mobile-menu-body > .btn[onclick="logout()"] {
+  min-height: 46px;
+  border-radius: 6px !important;
+  border: 1px solid rgba(190, 104, 255, 0.48) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(91, 30, 145, 0.94),
+    rgba(126, 34, 206, 0.94)
+  ) !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .sidebar .side-nav-section,
+  .mobile-menu-body .side-nav-section {
+    border-radius: 7px;
+  }
+
+  .sidebar .nav-btn,
+  .mobile-menu-body .nav-btn,
+  .sidebar .side-bottom > .btn[onclick="logout()"],
+  .mobile-menu-body > .btn[onclick="logout()"] {
+    border-radius: 5px !important;
+  }
+}
