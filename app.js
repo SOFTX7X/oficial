@@ -1,9 +1,9 @@
 
 // ═══════════════════════════════════════════════════════════════
-// TRAVA GLOBAL DE SEGUNDAS TELAS
-// Fundo fixo; somente o conteúdo da camada aberta pode rolar.
+// V5 — TRAVA SEGURA DE SEGUNDAS TELAS
+// Mantém o fundo parado sem bloquear seletores nativos de data/hora.
 // ═══════════════════════════════════════════════════════════════
-const VYXORA_LAYER_SCROLL = {
+const VYXORA_SAFE_LAYER = {
   count: 0,
   scrollY: 0,
 
@@ -12,8 +12,8 @@ const VYXORA_LAYER_SCROLL = {
     if (this.count > 1) return;
 
     this.scrollY = window.scrollY || window.pageYOffset || 0;
-    document.documentElement.classList.add('vyxora-layer-open');
-    document.body.classList.add('vyxora-layer-open');
+    document.documentElement.classList.add('vyxora-safe-layer-open');
+    document.body.classList.add('vyxora-safe-layer-open');
     document.body.style.top = `-${this.scrollY}px`;
   },
 
@@ -21,26 +21,19 @@ const VYXORA_LAYER_SCROLL = {
     this.count = Math.max(0, this.count - 1);
     if (this.count > 0) return;
 
-    document.documentElement.classList.remove('vyxora-layer-open');
-    document.body.classList.remove('vyxora-layer-open');
+    document.documentElement.classList.remove('vyxora-safe-layer-open');
+    document.body.classList.remove('vyxora-safe-layer-open');
     document.body.style.top = '';
     window.scrollTo(0, this.scrollY);
-  },
-
-  reset() {
-    this.count = 0;
-    document.documentElement.classList.remove('vyxora-layer-open');
-    document.body.classList.remove('vyxora-layer-open');
-    document.body.style.top = '';
   }
 };
 
 function lockSecondScreen() {
-  VYXORA_LAYER_SCROLL.lock();
+  VYXORA_SAFE_LAYER.lock();
 }
 
 function unlockSecondScreen() {
-  VYXORA_LAYER_SCROLL.unlock();
+  VYXORA_SAFE_LAYER.unlock();
 }
 
 // ── STATE ──
@@ -663,7 +656,7 @@ function showDashboard() {
     const lb = $('sideLinkBox');
     if (lb) lb.textContent = publicUrl(state.empresa.slug);
   }
-  unlockSecondScreen();
+  unlockPublicModalScroll();
   setView('dashboard');
   loadStoredNotifications();
   setupRealtime();
@@ -736,14 +729,14 @@ function openAuth(mode) {
   const overlay = $('authOverlay');
   if (!overlay) return;
   overlay.classList.add('open');
-  lockSecondScreen();
+  lockPublicModalScroll();
   if (mode === 'login') showLogin(); else showCadastro();
 }
 
 function closeAuth() {
   const overlay = $('authOverlay');
   if (overlay) overlay.classList.remove('open');
-  unlockSecondScreen();
+  unlockPublicModalScroll();
 }
 
 function showLogin() {
@@ -1686,7 +1679,7 @@ function openModalRecusa(id) {
   document.querySelectorAll('.motivo-item').forEach(el => { el.classList.remove('sel'); const r = el.querySelector('.motivo-radio'); if (r) r.innerHTML = ''; });
   const rmc = $('recusaMotivoCustom'); if (rmc) rmc.value = '';
   const overlay = $('modalRecusaOverlay'); if (overlay) overlay.classList.add('open');
-  lockSecondScreen();
+  lockPublicModalScroll();
 }
 
 function closeModalRecusa() {
@@ -1728,12 +1721,12 @@ function openModalReagendar(id) {
   const rd = $('reagendarData'); if (rd) rd.value = ag.data || '';
   const rh = $('reagendarHora'); if (rh) rh.value = ag.hora || '';
   const overlay = $('modalReagendarOverlay'); if (overlay) overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockSecondScreen();
 }
 
 function closeModalReagendar() {
   const overlay = $('modalReagendarOverlay'); if (overlay) overlay.classList.remove('open');
-  document.body.style.overflow = '';
+  unlockSecondScreen();
   _reagendarId = null;
 }
 
@@ -2288,6 +2281,30 @@ Object.assign(window, {
 });
 
 
+// ── TRAVA DE ROLAGEM DOS MODAIS PÚBLICOS ─────────────────────────────────────
+let _publicModalScrollY = 0;
+let _publicModalLockCount = 0;
+
+function lockPublicModalScroll() {
+  _publicModalLockCount += 1;
+  if (_publicModalLockCount > 1) return;
+
+  _publicModalScrollY = window.scrollY || window.pageYOffset || 0;
+  document.documentElement.classList.add('public-modal-open');
+  document.body.classList.add('public-modal-open');
+  document.body.style.top = `-${_publicModalScrollY}px`;
+}
+
+function unlockPublicModalScroll() {
+  _publicModalLockCount = Math.max(0, _publicModalLockCount - 1);
+  if (_publicModalLockCount > 0) return;
+
+  document.documentElement.classList.remove('public-modal-open');
+  document.body.classList.remove('public-modal-open');
+  document.body.style.top = '';
+  window.scrollTo(0, _publicModalScrollY);
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ── CALENDÁRIO PÚBLICO FULLSCREEN ─────────────────────────────────────────────
 let _pubCalAno, _pubCalMes;
@@ -2566,60 +2583,18 @@ document.addEventListener('click', (e) => {
 });
 
 
-// Vincula automaticamente a trava global às segundas telas existentes.
+// Garante que os seletores nativos de data e hora abram dentro dos modais.
 document.addEventListener('DOMContentLoaded', () => {
-  const selectors = [
-    '#notificationPanel',
-    '#notificationOverlay',
-    '#pubCalendarioOverlay',
-    '#pubSlotsOverlay',
-    '#modalReagendar',
-    '#reagendarModal',
-    '.notification-drawer',
-    '.notification-panel',
-    '.modal-overlay',
-    '.pub-modal-overlay',
-    '.drawer-overlay',
-    '.side-panel-overlay'
-  ];
+  ['reagendarData', 'reagendarHora'].forEach((id) => {
+    const input = document.getElementById(id);
+    if (!input) return;
 
-  const layers = [...new Set(
-    selectors.flatMap(selector => [...document.querySelectorAll(selector)])
-  )];
-
-  const isVisible = (el) => {
-    if (!el || !el.isConnected) return false;
-    const style = getComputedStyle(el);
-    const ariaHidden = el.getAttribute('aria-hidden');
-    return (
-      style.display !== 'none' &&
-      style.visibility !== 'hidden' &&
-      style.opacity !== '0' &&
-      ariaHidden !== 'true' &&
-      (
-        el.classList.contains('open') ||
-        el.classList.contains('active') ||
-        el.classList.contains('show') ||
-        el.classList.contains('visible') ||
-        style.position === 'fixed'
-      )
-    );
-  };
-
-  layers.forEach((layer) => {
-    let previous = isVisible(layer);
-    if (previous) lockSecondScreen();
-
-    const observer = new MutationObserver(() => {
-      const current = isVisible(layer);
-      if (current === previous) return;
-      previous = current;
-      current ? lockSecondScreen() : unlockSecondScreen();
-    });
-
-    observer.observe(layer, {
-      attributes: true,
-      attributeFilter: ['class', 'style', 'aria-hidden', 'hidden']
+    input.addEventListener('click', () => {
+      try {
+        if (typeof input.showPicker === 'function') input.showPicker();
+      } catch (_) {
+        // Alguns navegadores abrem o seletor automaticamente.
+      }
     });
   });
 });
