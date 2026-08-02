@@ -1816,10 +1816,20 @@ function excluirAgendamento(id) {
   });
 }
 
-function copyPublicLink() {
+function copyPublicLink(button = null) {
   if (!state?.empresa?.slug) return;
   const link = publicUrl(state.empresa.slug);
   if (navigator.clipboard) navigator.clipboard.writeText(link).catch(() => {});
+  if (button?.classList?.contains('dash-copy-button')) {
+    const label = button.querySelector('.dash-copy-label');
+    button.classList.add('is-copied');
+    if (label) label.textContent = '✓ Link copiado!';
+    clearTimeout(button._copyResetTimer);
+    button._copyResetTimer = setTimeout(() => {
+      button.classList.remove('is-copied');
+      if (label) label.textContent = 'Copiar link da agenda';
+    }, 2400);
+  }
   showNotif('Link copiado!', link, 'ok', 3000);
 }
 

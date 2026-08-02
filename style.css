@@ -613,6 +613,85 @@ a { text-decoration: none; color: inherit; }
 .dash-hero-inner h1 em { font-style: italic; color: var(--accent2); }
 .dash-hero-inner p { color: var(--text2); margin-top: 6px; font-size: 13px; }
 
+.dash-hero-featured {
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  background: #05030b;
+  border-color: rgba(168, 85, 247, 0.35);
+  box-shadow: 0 22px 70px rgba(76, 29, 149, 0.22), inset 0 0 0 1px rgba(255,255,255,0.025);
+  isolation: isolate;
+}
+.dash-hero-featured::after {
+  inset: auto 0 0;
+  width: 100%;
+  height: 38%;
+  border-radius: 0;
+  background: linear-gradient(to top, rgba(4, 2, 10, 0.72), transparent);
+  z-index: 1;
+}
+.dash-hero-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.dash-hero-action {
+  position: absolute;
+  z-index: 3;
+  left: 4.6%;
+  bottom: 7.5%;
+  width: min(40%, 370px);
+  display: grid;
+  gap: 8px;
+}
+.dash-hero-action-label {
+  color: rgba(255,255,255,0.76);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+}
+.dash-copy-button {
+  position: relative;
+  width: 100%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 20px;
+  overflow: hidden;
+  border: 1px solid rgba(233, 213, 255, 0.72);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7 55%, #7c3aed);
+  background-size: 180% 180%;
+  color: #fff;
+  font-family: 'Geist', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(168,85,247,0.25), 0 10px 34px rgba(126,34,206,0.62), 0 0 30px rgba(192,132,252,0.34);
+  animation: dash-copy-glow 2.4s ease-in-out infinite, dash-copy-gradient 4s ease infinite;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.dash-copy-button::after {
+  content: '';
+  position: absolute;
+  inset: -40% auto -40% -35%;
+  width: 28%;
+  transform: rotate(18deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.72), transparent);
+  animation: dash-copy-shine 3s ease-in-out infinite;
+}
+.dash-copy-button:hover { transform: translateY(-2px) scale(1.015); box-shadow: 0 14px 42px rgba(126,34,206,0.72), 0 0 40px rgba(192,132,252,0.48); }
+.dash-copy-button:active { transform: scale(0.98); }
+.dash-copy-button.is-copied { background: linear-gradient(135deg, #059669, #10b981); animation: none; }
+@keyframes dash-copy-glow { 50% { box-shadow: 0 0 0 4px rgba(168,85,247,0.12), 0 12px 40px rgba(126,34,206,0.72), 0 0 42px rgba(192,132,252,0.45); } }
+@keyframes dash-copy-gradient { 50% { background-position: 100% 50%; } }
+@keyframes dash-copy-shine { 0%, 62% { left: -35%; } 88%, 100% { left: 120%; } }
+
 .section-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text4); font-weight: 600; margin: 20px 0 10px; padding-left: 2px; }
 
 .stats-grid { display: grid; gap: 10px; margin-bottom: 10px; }
@@ -1334,6 +1413,11 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .mob-nav-fab .mni { background: rgba(255,255,255,0.15) !important; width: 30px !important; height: 30px !important; font-size: 15px !important; }
 
   .dash-hero { border-radius: 18px; padding: 18px 20px; }
+  .dash-hero-featured { padding: 0; border-radius: 18px; }
+  .dash-hero-action { left: 4%; bottom: 5.5%; width: 50%; gap: 0; }
+  .dash-hero-action-label { display: none; }
+  .dash-copy-button { min-height: 34px; padding: 7px 9px; border-radius: 10px; gap: 5px; font-size: 10px; }
+  .dash-copy-icon { font-size: 11px; }
   .dash-hero-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
   .dash-hero-inner h1 { font-size: 32px; }
   .dash-hero-inner .btn { width: 100%; }

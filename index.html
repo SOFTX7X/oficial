@@ -453,13 +453,14 @@
 
     <!-- VIEW: DASHBOARD -->
     <section class="view active" id="view-dashboard">
-      <div class="dash-hero">
-        <div class="dash-hero-inner">
-          <div>
-            <h1>Centro de <em>comando.</em></h1>
-            <p>Visão completa do seu negócio em tempo real.</p>
-          </div>
-          <button class="btn btn-primary" onclick="copyPublicLink()">🔗 Copiar link</button>
+      <div class="dash-hero dash-hero-featured">
+        <img class="dash-hero-art" src="banner-dashboard-vyxora.png?v=1" alt="Mascote VyXora em um ambiente de agendamento">
+        <div class="dash-hero-action">
+          <span class="dash-hero-action-label">Sua agenda pronta para compartilhar</span>
+          <button class="dash-copy-button" onclick="copyPublicLink(this)">
+            <span class="dash-copy-icon">🔗</span>
+            <span class="dash-copy-label">Copiar link da agenda</span>
+          </button>
         </div>
       </div>
       <div class="section-label">Agendamentos</div>
