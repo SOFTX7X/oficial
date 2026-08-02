@@ -664,6 +664,8 @@ a { text-decoration: none; color: inherit; }
 .landing-banner-actions .btn { min-width: 220px; backdrop-filter: blur(14px); }
 
 .mascot-calm-wrap {
+  position: relative;
+  height: clamp(300px, 32vw, 390px);
   overflow: hidden;
   padding: 0;
   border: 1px solid rgba(168, 85, 247, 0.28);
@@ -674,20 +676,26 @@ a { text-decoration: none; color: inherit; }
 .mascot-calm-banner {
   display: grid;
   place-items: center;
-  height: clamp(280px, 34vw, 470px);
+  height: 100%;
   background: #050208;
 }
 .mascot-calm-banner img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .mascot-calm-copy {
+  position: absolute;
+  z-index: 2;
+  left: 3%;
+  right: 3%;
+  bottom: 4%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 24px 30px 28px;
-  border-top: 1px solid rgba(168, 85, 247, 0.2);
-  background: linear-gradient(135deg, rgba(88,28,135,0.18), rgba(9,9,11,0.92));
+  padding: 0;
+  border-top: 0;
+  background: none;
 }
-.mascot-calm-copy .section-title { max-width: 760px; margin-top: 10px; font-size: clamp(30px, 4vw, 52px); }
+.mascot-calm-copy .section-title { max-width: 620px; margin-top: 8px; font-size: clamp(26px, 3vw, 38px); text-shadow: 0 3px 18px rgba(0,0,0,0.95); }
+.mascot-calm-copy .section-tag { margin-bottom: 0; background: rgba(10,6,18,0.75); backdrop-filter: blur(10px); }
 .mascot-calm-copy .btn { flex: 0 0 auto; }
 .dash-hero-featured::after {
   inset: auto 0 0;
@@ -1441,9 +1449,9 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .landing-banner-actions { position: static; transform: none; width: 100%; padding: 12px; display: grid; grid-template-columns: 1fr; background: #09060f; border-radius: 0 0 18px 18px; }
   .landing-banner-actions .btn { min-width: 0; width: 100%; }
 
-  .mascot-calm-wrap { border-radius: 20px; }
+  .mascot-calm-wrap { height: auto; border-radius: 20px; }
   .mascot-calm-banner { height: auto; aspect-ratio: 16 / 9; }
-  .mascot-calm-copy { padding: 20px 16px; align-items: stretch; flex-direction: column; }
+  .mascot-calm-copy { position: static; padding: 20px 16px; align-items: stretch; flex-direction: column; border-top: 1px solid rgba(168, 85, 247, 0.2); background: linear-gradient(135deg, rgba(88,28,135,0.18), rgba(9,9,11,0.92)); }
   .mascot-calm-copy .section-title { text-align: left; font-size: 32px; }
   .mascot-calm-copy .btn { width: 100%; }
 
