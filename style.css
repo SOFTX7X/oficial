@@ -614,13 +614,79 @@ a { text-decoration: none; color: inherit; }
 .dash-hero-inner p { color: var(--text2); margin-top: 6px; font-size: 13px; }
 
 .dash-hero-featured {
-  aspect-ratio: 16 / 9;
+  height: clamp(300px, 32vw, 390px);
   padding: 0;
   background: #05030b;
   border-color: rgba(168, 85, 247, 0.35);
   box-shadow: 0 22px 70px rgba(76, 29, 149, 0.22), inset 0 0 0 1px rgba(255,255,255,0.025);
   isolation: isolate;
 }
+
+#landingView > .land-hero,
+#landingView > .hero-mockup { display: none; }
+
+.landing-banner-hero {
+  position: relative;
+  width: min(100% - 36px, 1500px);
+  margin: 78px auto 32px;
+  overflow: hidden;
+  border: 1px solid rgba(168, 85, 247, 0.34);
+  border-radius: 28px;
+  background: #050208;
+  box-shadow: 0 30px 100px rgba(76, 29, 149, 0.28), 0 0 60px rgba(168, 85, 247, 0.1);
+}
+.landing-banner-hero > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.landing-banner-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 26%;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(4,2,9,0.82), transparent);
+}
+.landing-banner-actions {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 5.5%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: min(92%, 660px);
+}
+.landing-banner-actions .btn { min-width: 220px; backdrop-filter: blur(14px); }
+
+.mascot-calm-wrap {
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  border-radius: 28px;
+  background: #07040d;
+  box-shadow: 0 24px 80px rgba(76, 29, 149, 0.18);
+}
+.mascot-calm-banner {
+  display: grid;
+  place-items: center;
+  height: clamp(280px, 34vw, 470px);
+  background: #050208;
+}
+.mascot-calm-banner img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.mascot-calm-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 30px 28px;
+  border-top: 1px solid rgba(168, 85, 247, 0.2);
+  background: linear-gradient(135deg, rgba(88,28,135,0.18), rgba(9,9,11,0.92));
+}
+.mascot-calm-copy .section-title { max-width: 760px; margin-top: 10px; font-size: clamp(30px, 4vw, 52px); }
+.mascot-calm-copy .btn { flex: 0 0 auto; }
 .dash-hero-featured::after {
   inset: auto 0 0;
   width: 100%;
@@ -640,9 +706,11 @@ a { text-decoration: none; color: inherit; }
 .dash-hero-action {
   position: absolute;
   z-index: 3;
-  left: 4.6%;
-  bottom: 7.5%;
-  width: min(40%, 370px);
+  left: auto;
+  right: 3.8%;
+  top: 5.5%;
+  bottom: auto;
+  width: min(31%, 330px);
   display: grid;
   gap: 8px;
 }
@@ -1364,6 +1432,18 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .nav-actions { gap: 6px; }
   .nav-actions .btn { padding: 7px 10px; font-size: 12px; }
 
+  .landing-banner-hero { width: calc(100% - 20px); margin: 68px auto 24px; border-radius: 18px; overflow: visible; }
+  .landing-banner-hero > img { border-radius: 18px; }
+  .landing-banner-hero::after { display: none; }
+  .landing-banner-actions { position: static; transform: none; width: 100%; padding: 12px; display: grid; grid-template-columns: 1fr; background: #09060f; border-radius: 0 0 18px 18px; }
+  .landing-banner-actions .btn { min-width: 0; width: 100%; }
+
+  .mascot-calm-wrap { border-radius: 20px; }
+  .mascot-calm-banner { height: auto; aspect-ratio: 16 / 9; }
+  .mascot-calm-copy { padding: 20px 16px; align-items: stretch; flex-direction: column; }
+  .mascot-calm-copy .section-title { text-align: left; font-size: 32px; }
+  .mascot-calm-copy .btn { width: 100%; }
+
   .land-hero { min-height: auto; padding: 88px 18px 48px; text-align: center; align-items: center; justify-content: flex-start; }
   .hero-title { font-size: clamp(40px, 11vw, 56px); max-width: 340px; }
   .hero-sub { font-size: 14.5px; max-width: 320px; }
@@ -1413,8 +1493,8 @@ body.menu-open { overflow: hidden; touch-action: none; }
   .mob-nav-fab .mni { background: rgba(255,255,255,0.15) !important; width: 30px !important; height: 30px !important; font-size: 15px !important; }
 
   .dash-hero { border-radius: 18px; padding: 18px 20px; }
-  .dash-hero-featured { padding: 0; border-radius: 18px; }
-  .dash-hero-action { left: 4%; bottom: 5.5%; width: 50%; gap: 0; }
+  .dash-hero-featured { height: auto; aspect-ratio: 16 / 9; padding: 0; border-radius: 18px; }
+  .dash-hero-action { left: auto; right: 3%; top: 4%; bottom: auto; width: 48%; gap: 0; }
   .dash-hero-action-label { display: none; }
   .dash-copy-button { min-height: 34px; padding: 7px 9px; border-radius: 10px; gap: 5px; font-size: 10px; }
   .dash-copy-icon { font-size: 11px; }
