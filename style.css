@@ -4669,3 +4669,64 @@ body.vx-ready {
 .directory-empty span { display:block; margin-top:5px; color:var(--text4); font-size:10.5px; }
 @media(max-width:1150px){.directory-form-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}.directory-submit{grid-column:span 2}}
 @media(max-width:680px){.directory-intro{padding:16px}.directory-intro h2{font-size:23px}.directory-icon{width:44px;height:44px}.directory-form-head{align-items:flex-start}.directory-form-badge{display:none}.directory-form-grid{grid-template-columns:1fr !important;padding:14px}.directory-submit{grid-column:auto}.directory-cards-grid{grid-template-columns:1fr}.premium-record-card{min-height:0}.directory-add-btn{min-height:45px}}
+
+
+/* =========================================================
+   V29 — AVISOS NO TOPO E TROCA DE TELAS ESTÁVEL NO ANDROID
+   ========================================================= */
+
+@media (max-width: 768px) {
+  /* Avisos operacionais no padrão de notificação de aplicativo. */
+  .notif-stack {
+    top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: 520px;
+    margin-inline: auto;
+    align-items: stretch;
+    z-index: 100500 !important;
+  }
+
+  .notif-item {
+    width: 100%;
+    min-height: 54px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #100a18;
+    border-color: rgba(168, 85, 247, .32);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .42);
+    animation: vxNotifTopIn .2s ease-out both;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+
+  .notif-item.out {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  @keyframes vxNotifTopIn {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Remove o fade/translate que fazia a tela anterior piscar no WebView. */
+  .view,
+  .view.active,
+  body.vx-view-switching .view,
+  body.vx-view-switching .view.active {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .dash-main,
+  .view.active {
+    background-color: var(--bg);
+  }
+
+  .view.active {
+    contain: layout paint;
+  }
+}
