@@ -4555,3 +4555,168 @@ body.vyxora-safe-layer-open {
     min-height: 46px;
   }
 }
+
+
+/* =========================================================
+   V21 — AUTENTICAÇÃO PREMIUM LEVE
+   ========================================================= */
+
+/* Remove efeitos caros */
+.auth-overlay,
+.login-overlay,
+.signup-overlay,
+.modal-overlay:has(.auth-container),
+.modal-overlay:has(.login-modal),
+.modal-overlay:has(.signup-modal) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(3, 2, 7, .96) !important;
+}
+
+/* Containers mais leves */
+.auth-container,
+.auth-modal,
+.login-modal,
+.signup-modal,
+.login-container,
+.signup-container {
+  background: #0b0712 !important;
+  border: 1px solid rgba(168, 85, 247, .22) !important;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, .38),
+    0 0 0 1px rgba(255,255,255,.02) inset !important;
+}
+
+/* Remove ornamentos e glows contínuos */
+.auth-container::before,
+.auth-container::after,
+.auth-modal::before,
+.auth-modal::after,
+.login-modal::before,
+.login-modal::after,
+.signup-modal::before,
+.signup-modal::after,
+.login-container::before,
+.login-container::after,
+.signup-container::before,
+.signup-container::after {
+  display: none !important;
+}
+
+/* Transições curtas */
+.auth-container *,
+.auth-modal *,
+.login-modal *,
+.signup-modal *,
+.login-container *,
+.signup-container * {
+  transition-duration: .12s !important;
+}
+
+/* Botões leves */
+.vx-premium-btn,
+#landingView button,
+.auth-container button,
+.auth-modal button,
+.login-modal button,
+.signup-modal button {
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.vx-premium-btn:not(.vx-premium-btn-outline),
+#landingView .btn-primary,
+#landingView .landing-btn-primary,
+.auth-container .btn-primary,
+.auth-modal .btn-primary,
+.login-modal .btn-primary,
+.signup-modal .btn-primary {
+  background: #8b2be2 !important;
+  border-color: #a855f7 !important;
+  box-shadow: 0 8px 18px rgba(88, 28, 135, .2) !important;
+}
+
+.vx-premium-btn-outline,
+#landingView .btn-outline,
+#landingView .landing-btn-secondary,
+.auth-container .btn-outline,
+.auth-modal .btn-outline,
+.login-modal .btn-outline,
+.signup-modal .btn-outline {
+  background: #100919 !important;
+  border-color: rgba(168, 85, 247, .24) !important;
+  box-shadow: none !important;
+}
+
+.vx-premium-btn:hover,
+#landingView button:hover,
+.auth-container button:hover,
+.auth-modal button:hover,
+.login-modal button:hover,
+.signup-modal button:hover {
+  transform: none !important;
+  box-shadow: 0 8px 18px rgba(88, 28, 135, .22) !important;
+}
+
+/* Campos sem gradientes ou sombras pesadas */
+.auth-container input,
+.auth-container select,
+.auth-container textarea,
+.auth-modal input,
+.auth-modal select,
+.auth-modal textarea,
+.login-modal input,
+.login-modal select,
+.login-modal textarea,
+.signup-modal input,
+.signup-modal select,
+.signup-modal textarea,
+.login-container input,
+.signup-container input {
+  background: #0f0a17 !important;
+  box-shadow: none !important;
+  border-color: rgba(168, 85, 247, .16) !important;
+}
+
+.auth-container input:focus,
+.auth-container select:focus,
+.auth-container textarea:focus,
+.auth-modal input:focus,
+.auth-modal select:focus,
+.auth-modal textarea:focus,
+.login-modal input:focus,
+.login-modal select:focus,
+.login-modal textarea:focus,
+.signup-modal input:focus,
+.signup-modal select:focus,
+.signup-modal textarea:focus,
+.login-container input:focus,
+.signup-container input:focus {
+  background: #120b1d !important;
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, .10) !important;
+}
+
+/* Evita animações pesadas na autenticação */
+.auth-overlay *,
+.login-overlay *,
+.signup-overlay *,
+.auth-container *,
+.auth-modal *,
+.login-modal *,
+.signup-modal * {
+  animation: none !important;
+  filter: none !important;
+}
+
+/* Otimização de composição */
+.auth-overlay,
+.login-overlay,
+.signup-overlay,
+.auth-container,
+.auth-modal,
+.login-modal,
+.signup-modal {
+  will-change: auto !important;
+  contain: layout paint;
+}
