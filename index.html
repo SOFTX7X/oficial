@@ -41,43 +41,22 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="preload" as="image" href="mascote-vyxora.png?v=7">
-<link rel="stylesheet" href="style.css?v=20260803-29">
+<link rel="stylesheet" href="style.css?v=20260803-31">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" href="calendar.css?v=20260601-3">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
-<script src="calendar.js?v=20260601-3"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script defer src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+<script defer src="calendar.js?v=20260601-3"></script>
 </head>
 <body class="vx-booting">
-<div class="vyxora-loader vx-lite-loader" id="vyxoraLoader" role="status" aria-label="Carregando VyXora Agendas">
-  <div class="vx-lite-orb vx-lite-orb-a" aria-hidden="true"></div>
-  <div class="vx-lite-orb vx-lite-orb-b" aria-hidden="true"></div>
-
-  <div class="vx-lite-content">
-    <div class="vx-lite-mark" aria-hidden="true">
-      <span class="vx-lite-ring vx-lite-ring-a"></span>
-      <span class="vx-lite-ring vx-lite-ring-b"></span>
-      <span class="vx-lite-core">V</span>
-    </div>
-
-    <div class="vx-lite-brand">
-      <strong>VYXORA</strong>
-      <span>AGENDAS</span>
-    </div>
-
-    <p class="vx-lite-copy">Preparando sua experiência</p>
-
-    <div class="vx-lite-progress" aria-hidden="true">
-      <span></span>
-    </div>
-
-    <div class="vx-lite-dots" aria-hidden="true">
-      <i></i><i></i><i></i>
-    </div>
+<div class="vyxora-loader vx-clean-loader" id="vyxoraLoader" role="status" aria-live="polite" aria-label="Carregando VyXora Agendas">
+  <div class="vx-clean-loader__content">
+    <div class="vx-clean-loader__brand">VYXORA <span>AGENDAS</span></div>
+    <div class="vx-clean-loader__line" aria-hidden="true"><span></span></div>
+    <p>Preparando seu ambiente</p>
   </div>
 </div>
 <div class="bg-noise"></div>
@@ -124,24 +103,24 @@
       </div>
     </div>
 
-    <div class="vx-home-visual landing-reveal">
-      <div class="vx-visual-shell">
-        <div class="vx-visual-topline">
-          <span class="vx-visual-status"><i></i> Sistema ativo</span>
-          <span>VyXora OS</span>
+    <div class="vx-home-visual landing-reveal" aria-label="Visão geral da plataforma">
+      <div class="vx-product-preview">
+        <div class="vx-preview-head">
+          <div><span class="vx-preview-dot"></span> Painel online</div>
+          <small>Hoje</small>
         </div>
-        <div class="vx-visual-image">
-          <img src="banner-inicio-vyxora.png?v=1" loading="eager" decoding="async" fetchpriority="high" alt="Mascote VyXora apresentando a plataforma de agendamentos">
-          <span class="vx-scanline" aria-hidden="true"></span>
+        <div class="vx-preview-stats">
+          <article><span>Agendamentos</span><strong>18</strong><small>+12% esta semana</small></article>
+          <article><span>Clientes</span><strong>248</strong><small>24 novos</small></article>
+          <article><span>Receita</span><strong>R$ 4,2 mil</strong><small>Resumo mensal</small></article>
         </div>
-        <div class="vx-visual-footer">
-          <span>Agenda inteligente</span>
-          <span>Gestão em tempo real</span>
-          <span>Experiência premium</span>
+        <div class="vx-preview-agenda">
+          <div class="vx-preview-title"><strong>Próximos horários</strong><span>Agenda sincronizada</span></div>
+          <div class="vx-preview-row"><time>09:00</time><i></i><div><strong>Ana Clara</strong><span>Design de sobrancelhas</span></div><b>Confirmado</b></div>
+          <div class="vx-preview-row"><time>10:30</time><i></i><div><strong>Mariana Silva</strong><span>Atendimento premium</span></div><b>Confirmado</b></div>
+          <div class="vx-preview-row"><time>13:00</time><i></i><div><strong>Camila Souza</strong><span>Serviço personalizado</span></div><b class="pending">Pendente</b></div>
         </div>
       </div>
-      <div class="vx-float-card vx-float-card-a"><span>Novos agendamentos</span><strong>+18 hoje</strong></div>
-      <div class="vx-float-card vx-float-card-b"><span>Disponibilidade</span><strong>Sincronizada</strong></div>
     </div>
   </section>
 
@@ -1072,7 +1051,7 @@
     </div>
   </aside>
 </div>
-<script src="supabase.js?v=20260802-1"></script>
+<script defer src="supabase.js?v=20260802-1"></script>
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -1086,6 +1065,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script src="app.js?v=20260803-29"></script>
+<script defer src="app.js?v=20260803-31"></script>
 </body>
 </html>
