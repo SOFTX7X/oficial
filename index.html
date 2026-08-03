@@ -52,12 +52,26 @@
 <script defer src="calendar.js?v=20260601-3"></script>
 </head>
 <body class="vx-booting">
-<div class="vyxora-loader vx-clean-loader" id="vyxoraLoader" role="status" aria-live="polite" aria-label="Carregando VyXora Agendas">
-  <div class="vx-clean-loader__content">
-    <div class="vx-clean-loader__brand">VYXORA <span>AGENDAS</span></div>
-    <div class="vx-clean-loader__line" aria-hidden="true"><span></span></div>
-    <p class="vx-clean-loader__title" id="vyxoraLoaderTitle">Finalizando sua experiência</p>
-    <small id="vyxoraLoaderDetail">Organizando o aplicativo para você</small>
+<div class="vyxora-loader vx-premium-loader" id="vyxoraLoader" role="status" aria-live="polite" aria-label="Carregando VyXora Agendas">
+  <div class="vx-premium-loader__shell">
+    <div class="vx-premium-loader__visual" aria-hidden="true">
+      <img src="loader-mascote-vyxora.webp?v=33" alt="" width="760" height="640" fetchpriority="high" decoding="async">
+    </div>
+
+    <div class="vx-premium-loader__content">
+      <div class="vx-premium-loader__eyebrow">VYXORA AGENDAS</div>
+      <h1 id="vyxoraLoaderTitle">Preparando sua experiência</h1>
+      <p id="vyxoraLoaderDetail">Organizando o aplicativo para você</p>
+
+      <div class="vx-premium-loader__progress" aria-hidden="true">
+        <span id="vyxoraLoaderBar"></span>
+      </div>
+
+      <div class="vx-premium-loader__meta">
+        <span id="vyxoraLoaderStage">Iniciando</span>
+        <strong id="vyxoraLoaderPercent">12%</strong>
+      </div>
+    </div>
   </div>
 </div>
 <div class="bg-noise"></div>
