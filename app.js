@@ -565,7 +565,6 @@ document.addEventListener('click', function(e) {
 
 document.addEventListener('scroll', closeAllMenus, { passive: true });
 
-const vyxoraLoaderStartedAt = performance.now();
 let _vyxoraLoaderFinished = false;
 
 function esconderTelaCarregamento() {
@@ -573,38 +572,28 @@ function esconderTelaCarregamento() {
   _vyxoraLoaderFinished = true;
 
   const loader = $('vyxoraLoader');
-
   document.documentElement.classList.remove('auth-performance-mode');
   document.body.classList.remove('auth-performance-mode', 'vx-booting');
   document.body.classList.add('vx-ready');
   document.body.style.overflow = '';
 
   if (!loader) return;
-
   loader.classList.add('is-hidden');
   loader.style.pointerEvents = 'none';
-
-  setTimeout(() => {
-    loader.style.display = 'none';
-    loader.remove();
-  }, 220);
+  setTimeout(() => loader.remove(), 240);
 }
 
-function agendarFimDoCarregamento() {
-  const elapsed = performance.now() - vyxoraLoaderStartedAt;
-  const minDuration = 2200;
-  const remaining = Math.max(0, minDuration - elapsed);
-  setTimeout(esconderTelaCarregamento, remaining);
-}
-
-// Não espera imagens grandes terminarem para liberar a interface.
+// A tela aparece no primeiro HTML e nunca segura a interface artificialmente.
 document.addEventListener('DOMContentLoaded', () => {
-  init();
-  agendarFimDoCarregamento();
+  const startup = init();
+  const paintDeadline = new Promise(resolve => setTimeout(resolve, 900));
+  Promise.race([startup, paintDeadline]).finally(() => {
+    requestAnimationFrame(() => requestAnimationFrame(esconderTelaCarregamento));
+  });
 }, { once: true });
 
-// Segurança para nunca deixar o loader preso.
-setTimeout(esconderTelaCarregamento, 4200);
+// Proteção para falhas externas de rede ou bibliotecas.
+setTimeout(esconderTelaCarregamento, 1800);
 
 async function init() {
   await loadCategorias();
@@ -2958,5 +2947,7 @@ function initLandingPremiumMotion() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', initLandingPremiumMotion);
-setTimeout(initLandingPremiumMotion, 150);
+// A home leve não usa observadores ou animações de entrada contínuas.
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#landingView .landing-reveal').forEach(el => el.classList.add('is-visible'));
+}, { once: true });
