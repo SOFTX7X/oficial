@@ -21,24 +21,33 @@ window.closeAuth = function() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* ── FLATPICKR DATAS ── */
+  /* ── FLATPICKR DATAS — PADRÃO ÚNICO EM TODO O SISTEMA ── */
   const dateConfig = {
-   locale: "pt",
-disableMobile: true,
-dateFormat: "Y-m-d",
-altInput: true,
-altFormat: "d/m/Y",
-allowInput: false,
-clickOpens: true,
-minDate: "today",
-onChange(selectedDates, dateStr, instance) {
-  instance.close();
-}
+    locale: "pt",
+    disableMobile: true,
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "d/m/Y",
+    allowInput: false,
+    clickOpens: true,
+    minDate: "today",
+    onChange(selectedDates, dateStr, instance) {
+      instance.close();
+    }
   };
-  ["#agData", "#reagendarData"].forEach(sel => {
-    const el = document.querySelector(sel);
-    if (el) flatpickr(el, dateConfig);
-  });
+
+  function bindDatePicker(el) {
+    if (!el || el.dataset.vyxoraDatePicker === "1") return;
+    el.dataset.vyxoraDatePicker = "1";
+    flatpickr(el, { ...dateConfig });
+  }
+
+  function bindAllDatePickers(root = document) {
+    if (root.matches?.('input[type="date"]')) bindDatePicker(root);
+    root.querySelectorAll?.('input[type="date"]').forEach(bindDatePicker);
+  }
+
+  bindAllDatePickers();
 
   /* ══════════════════════════════════════
      TIME PICKER — RODINHA INFINITA
@@ -472,15 +481,49 @@ onChange(selectedDates, dateStr, instance) {
   document.getElementById("tpOk").addEventListener("click", confirmTP);
   overlay.addEventListener("click", e => { if (e.target === overlay) closeTP(); });
 
-  /* ── BIND NOS INPUTS ── */
-  ["#agHora", "#reagendarHora"].forEach(sel => {
-    const el = document.querySelector(sel);
-    if (!el) return;
+  /* ── BIND NOS INPUTS — RELÓGIO ÚNICO EM TODO O SISTEMA ── */
+  function bindTimePicker(el) {
+    if (!el || el.dataset.vyxoraTimePicker === "1") return;
+
+    el.dataset.vyxoraTimePicker = "1";
+    el.dataset.originalType = "time";
     el.type = "text";
     el.readOnly = true;
+    el.inputMode = "none";
+    el.autocomplete = "off";
     el.style.cursor = "pointer";
-    el.addEventListener("click", () => openTP(el));
-    el.addEventListener("focus", () => openTP(el));
+
+    const open = () => {
+      if (!overlay.classList.contains("open") || currentInput !== el) {
+        openTP(el);
+      }
+    };
+
+    el.addEventListener("click", open);
+    el.addEventListener("focus", open);
+  }
+
+  function bindAllTimePickers(root = document) {
+    if (root.matches?.('input[type="time"]')) bindTimePicker(root);
+    root.querySelectorAll?.('input[type="time"]').forEach(bindTimePicker);
+  }
+
+  bindAllTimePickers();
+
+  /* Campos de edição e modais podem nascer depois do carregamento. */
+  const pickerObserver = new MutationObserver(mutations => {
+    for (const mutation of mutations) {
+      mutation.addedNodes.forEach(node => {
+        if (!(node instanceof Element)) return;
+        bindAllDatePickers(node);
+        bindAllTimePickers(node);
+      });
+    }
+  });
+
+  pickerObserver.observe(document.body, {
+    childList: true,
+    subtree: true
   });
 
 });
