@@ -42,7 +42,7 @@
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
 <link rel="preload" as="image" href="mascote-vyxora.png?v=7">
-<link rel="stylesheet" href="style.css?v=20260802-10">
+<link rel="stylesheet" href="style.css?v=20260802-15">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -54,8 +54,21 @@
 </head>
 <body>
 <div class="vyxora-loader" id="vyxoraLoader" role="status" aria-label="Carregando VyXora Agendas">
-  <img src="mascote-vyxora.png?v=7" alt="Mascote VyXora">
-  <div class="vyxora-loader-spinner" aria-hidden="true"></div>
+  <div class="vyxora-loader-aurora" aria-hidden="true"></div>
+  <div class="vyxora-loader-grid" aria-hidden="true"></div>
+  <div class="vyxora-loader-stage">
+    <div class="vyxora-loader-frame">
+      <div class="vyxora-loader-shine" aria-hidden="true"></div>
+      <img class="vyxora-loader-banner" src="banner-loader-vyxora.png?v=15" alt="VyXora Agendas">
+    </div>
+    <div class="vyxora-loader-status">
+      <div class="vyxora-loader-status-row">
+        <span>PREPARANDO SUA AGENDA</span>
+        <span class="vyxora-loader-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      </div>
+      <div class="vyxora-loader-progress" aria-hidden="true"><span></span></div>
+    </div>
+  </div>
 </div>
 <div class="bg-noise"></div>
 <div class="bg-grid"></div>
@@ -1013,6 +1026,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script src="app.js?v=20260802-14"></script>
+<script src="app.js?v=20260802-15"></script>
 </body>
 </html>
