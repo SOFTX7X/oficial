@@ -583,17 +583,19 @@ function esconderTelaCarregamento() {
   setTimeout(() => loader.remove(), 240);
 }
 
-// A tela aparece no primeiro HTML e nunca segura a interface artificialmente.
+// Mantém a etapa web visível tempo suficiente para completar a transição
+// do carregamento nativo, sem prolongar a abertura excessivamente.
 document.addEventListener('DOMContentLoaded', () => {
+  const minimumDisplay = new Promise(resolve => setTimeout(resolve, 1500));
   const startup = init();
-  const paintDeadline = new Promise(resolve => setTimeout(resolve, 900));
-  Promise.race([startup, paintDeadline]).finally(() => {
+
+  Promise.allSettled([startup, minimumDisplay]).finally(() => {
     requestAnimationFrame(() => requestAnimationFrame(esconderTelaCarregamento));
   });
 }, { once: true });
 
 // Proteção para falhas externas de rede ou bibliotecas.
-setTimeout(esconderTelaCarregamento, 1800);
+setTimeout(esconderTelaCarregamento, 3000);
 
 async function init() {
   await loadCategorias();
@@ -602,6 +604,9 @@ async function init() {
   try {
     const { data: { session } } = await db.auth.getSession();
     if (session?.user) {
+      const detail = $('vyxoraLoaderDetail');
+      if (detail) detail.textContent = 'Organizando seu painel';
+
       const ok = await carregarConta(session.user);
       if (!ok) await db.auth.signOut();
     }
