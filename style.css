@@ -4435,9 +4435,6 @@ body.vx-booting > :not(#vyxoraLoader) {
   visibility: hidden !important;
 }
 
-body.vx-ready > :not(#vyxoraLoader) {
-  visibility: visible;
-}
 
 #vyxoraLoader {
   backface-visibility: hidden;
@@ -4575,4 +4572,28 @@ body.vx-ready > :not(#vyxoraLoader) {
 .nav-links {
   position: relative;
   z-index: 5;
+}
+
+
+/* =========================================================
+   V27 — CLIQUES RESTAURADOS
+   ========================================================= */
+
+.notification-center-overlay {
+  pointer-events: none !important;
+}
+
+.notification-center-overlay.open {
+  pointer-events: auto !important;
+}
+
+/* O loader controla somente o estado inicial, sem alterar
+   a visibilidade própria de modais e overlays. */
+body.vx-booting > :not(#vyxoraLoader) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.vx-ready {
+  overflow: auto;
 }
