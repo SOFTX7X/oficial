@@ -4411,3 +4411,77 @@ body.vyxora-safe-layer-open {
     margin-top: 12px !important;
   }
 }
+
+
+/* =========================================================
+   V23 — PERFORMANCE REAL DA AUTENTICAÇÃO
+   ========================================================= */
+
+/*
+  Quando Entrar/Criar conta abre, todos os elementos pesados da página inicial
+  deixam de ser renderizados. O modal permanece ativo.
+*/
+html.auth-performance-mode,
+body.auth-performance-mode {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+body.auth-performance-mode #landingView > :not(#authOverlay) {
+  display: none !important;
+}
+
+body.auth-performance-mode #authOverlay {
+  display: flex !important;
+  position: fixed !important;
+  inset: 0 !important;
+  contain: strict;
+  isolation: isolate;
+}
+
+/* Nenhum efeito herdado da landing continua rodando dentro do modal. */
+body.auth-performance-mode #authOverlay,
+body.auth-performance-mode #authOverlay *,
+body.auth-performance-mode #authOverlay *::before,
+body.auth-performance-mode #authOverlay *::after {
+  animation: none !important;
+  transition: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  text-shadow: none !important;
+  will-change: auto !important;
+}
+
+/* Mantém somente os estilos funcionais e leves. */
+body.auth-performance-mode #authOverlay {
+  background: #050308 !important;
+}
+
+body.auth-performance-mode .auth-modal {
+  contain: layout paint style;
+  transform: translateZ(0);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .28) !important;
+}
+
+body.auth-performance-mode .auth-form-area input,
+body.auth-performance-mode .auth-form-area select,
+body.auth-performance-mode .auth-form-area textarea,
+body.auth-performance-mode .auth-form-area button {
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Em Android/WebView, evita repintura da página inteira ao abrir teclado. */
+@media (max-width: 768px) {
+  body.auth-performance-mode #authOverlay {
+    align-items: flex-start !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.auth-performance-mode .auth-modal {
+    margin: max(10px, env(safe-area-inset-top)) 10px
+      max(10px, env(safe-area-inset-bottom)) !important;
+  }
+}
