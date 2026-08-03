@@ -42,7 +42,7 @@
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
 <link rel="preload" as="image" href="mascote-vyxora.png?v=7">
-<link rel="stylesheet" href="style.css?v=20260802-15">
+<link rel="stylesheet" href="style.css?v=20260803-17">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -92,11 +92,46 @@
     </div>
   </nav>
 
-  <section class="landing-banner-hero" aria-label="Conheça a VyXora Agendas">
-    <img src="banner-inicio-vyxora.png?v=1" alt="Mascote VyXora apresentando a plataforma de agendamentos">
-    <div class="landing-banner-actions">
-      <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar minha agenda grátis →</button>
-      <button class="btn btn-ghost btn-lg" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Ver como funciona →</button>
+  <section class="vx-home-hero" aria-label="Conheça a VyXora Agendas">
+    <div class="vx-home-grid" aria-hidden="true"></div>
+    <div class="vx-home-orb vx-home-orb-a" aria-hidden="true"></div>
+    <div class="vx-home-orb vx-home-orb-b" aria-hidden="true"></div>
+
+    <div class="vx-home-copy landing-reveal">
+      <div class="vx-home-kicker"><span></span> Plataforma premium de agendamentos</div>
+      <h1>Transforme horários em uma experiência <em>profissional.</em></h1>
+      <p>Agenda online, equipe, clientes, serviços e resultados em um único painel criado para negócios que trabalham com hora marcada.</p>
+
+      <div class="vx-home-actions">
+        <button class="btn vx-btn-primary" onclick="openAuth('register')">Criar minha agenda <span>→</span></button>
+        <button class="btn vx-btn-secondary" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Explorar plataforma <span>↓</span></button>
+      </div>
+
+      <div class="vx-home-proof">
+        <div><strong>24h</strong><span>Agendamento online</span></div>
+        <div><strong>100%</strong><span>Responsivo</span></div>
+        <div><strong>3 min</strong><span>Para começar</span></div>
+      </div>
+    </div>
+
+    <div class="vx-home-visual landing-reveal">
+      <div class="vx-visual-shell">
+        <div class="vx-visual-topline">
+          <span class="vx-visual-status"><i></i> Sistema ativo</span>
+          <span>VyXora OS</span>
+        </div>
+        <div class="vx-visual-image">
+          <img src="banner-inicio-vyxora.png?v=1" alt="Mascote VyXora apresentando a plataforma de agendamentos">
+          <span class="vx-scanline" aria-hidden="true"></span>
+        </div>
+        <div class="vx-visual-footer">
+          <span>Agenda inteligente</span>
+          <span>Gestão em tempo real</span>
+          <span>Experiência premium</span>
+        </div>
+      </div>
+      <div class="vx-float-card vx-float-card-a"><span>Novos agendamentos</span><strong>+18 hoje</strong></div>
+      <div class="vx-float-card vx-float-card-b"><span>Disponibilidade</span><strong>Sincronizada</strong></div>
     </div>
   </section>
 
@@ -163,25 +198,25 @@
 
   <section class="land-section" id="sec-como">
     <div class="section-wrap">
-      <div class="section-header">
+      <div class="section-header landing-reveal">
         <div class="section-tag">Como funciona</div>
         <h2 class="section-title">Comece a receber agendamentos <em>em minutos.</em></h2>
         <p class="section-sub">Sem complicação. Sem mensalidade obrigatória. Tudo online.</p>
       </div>
       <div class="steps-grid">
-        <div class="step-card">
+        <div class="step-card landing-reveal">
           <div class="step-num">01</div>
           <div class="step-icon">🏢</div>
           <div class="step-title">Crie sua conta e configure seu negócio</div>
           <p class="step-desc">Preencha nome, área e link personalizado. Em 3 minutos seu painel está pronto.</p>
         </div>
-        <div class="step-card">
+        <div class="step-card landing-reveal">
           <div class="step-num">02</div>
           <div class="step-icon">◈</div>
           <div class="step-title">Cadastre serviços, profissionais e horários</div>
           <p class="step-desc">Adicione catálogo com preços, duração e profissionais responsáveis.</p>
         </div>
-        <div class="step-card">
+        <div class="step-card landing-reveal">
           <div class="step-num">03</div>
           <div class="step-icon">🔗</div>
           <div class="step-title">Compartilhe seu link e receba agendamentos</div>
@@ -193,21 +228,21 @@
 
   <section class="land-section" id="sec-features" style="padding-top:40px">
     <div class="section-wrap">
-      <div class="section-header">
+      <div class="section-header landing-reveal">
         <div class="section-tag">Funcionalidades</div>
         <h2 class="section-title">Tudo que você precisa para <em>crescer.</em></h2>
       </div>
       <div class="features-grid">
-        <div class="feat-card"><div class="feat-icon">📅</div><div class="feat-title">Agenda online</div><p class="feat-desc">Painel completo por data e profissional.</p></div>
-        <div class="feat-card"><div class="feat-icon">🔗</div><div class="feat-title">Link exclusivo</div><p class="feat-desc">Compartilhe onde quiser, sem app.</p></div>
-        <div class="feat-card"><div class="feat-icon">👥</div><div class="feat-title">Gestão de clientes</div><p class="feat-desc">Histórico, total gasto e contatos.</p></div>
-        <div class="feat-card"><div class="feat-icon">◈</div><div class="feat-title">Catálogo de serviços</div><p class="feat-desc">Preços, duração e profissionais.</p></div>
-        <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">Dashboard em tempo real</div><p class="feat-desc">Métricas completas e precisas.</p></div>
-        <div class="feat-card"><div class="feat-icon">💰</div><div class="feat-title">Controle financeiro</div><p class="feat-desc">Receita, ticket médio e histórico.</p></div>
-        <div class="feat-card"><div class="feat-icon">📱</div><div class="feat-title">WhatsApp integrado</div><p class="feat-desc">Confirme agendamentos em segundos.</p></div>
-        <div class="feat-card"><div class="feat-icon">🌐</div><div class="feat-title">Página pública</div><p class="feat-desc">Página elegante de auto-agendamento.</p></div>
-        <div class="feat-card"><div class="feat-icon">🔔</div><div class="feat-title">Notificações em tempo real</div><p class="feat-desc">Alertas instantâneos de novos pedidos.</p></div>
-        <div class="feat-card"><div class="feat-icon">📲</div><div class="feat-title">100% mobile</div><p class="feat-desc">Funciona perfeitamente no celular.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">📅</div><div class="feat-title">Agenda online</div><p class="feat-desc">Painel completo por data e profissional.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">🔗</div><div class="feat-title">Link exclusivo</div><p class="feat-desc">Compartilhe onde quiser, sem app.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">👥</div><div class="feat-title">Gestão de clientes</div><p class="feat-desc">Histórico, total gasto e contatos.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">◈</div><div class="feat-title">Catálogo de serviços</div><p class="feat-desc">Preços, duração e profissionais.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">📊</div><div class="feat-title">Dashboard em tempo real</div><p class="feat-desc">Métricas completas e precisas.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">💰</div><div class="feat-title">Controle financeiro</div><p class="feat-desc">Receita, ticket médio e histórico.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">📱</div><div class="feat-title">WhatsApp integrado</div><p class="feat-desc">Confirme agendamentos em segundos.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">🌐</div><div class="feat-title">Página pública</div><p class="feat-desc">Página elegante de auto-agendamento.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">🔔</div><div class="feat-title">Notificações em tempo real</div><p class="feat-desc">Alertas instantâneos de novos pedidos.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">📲</div><div class="feat-title">100% mobile</div><p class="feat-desc">Funciona perfeitamente no celular.</p></div>
       </div>
     </div>
   </section>
@@ -228,47 +263,47 @@
 
   <section class="land-section" style="padding-top:40px">
     <div class="section-wrap">
-      <div class="section-header">
+      <div class="section-header landing-reveal">
         <div class="section-tag">Para quem é</div>
         <h2 class="section-title">Para todo profissional que <em>trabalha com hora marcada.</em></h2>
       </div>
       <div class="segs-wrap">
-        <div class="seg-pill">💅 Nail Designer</div>
-        <div class="seg-pill">✂️ Barbearia</div>
-        <div class="seg-pill">💇 Salão de Beleza</div>
-        <div class="seg-pill">🧖 Estética</div>
-        <div class="seg-pill">🏥 Clínica de Saúde</div>
-        <div class="seg-pill">🏋️ Personal Trainer</div>
-        <div class="seg-pill">🎨 Tatuador</div>
-        <div class="seg-pill">💆 Massoterapia</div>
-        <div class="seg-pill">🦷 Odontologia</div>
-        <div class="seg-pill">👁️ Sobrancelha &amp; Cílios</div>
-        <div class="seg-pill">🧘 Yoga &amp; Pilates</div>
-        <div class="seg-pill">💼 Consultor</div>
-        <div class="seg-pill">📸 Fotógrafo</div>
-        <div class="seg-pill">🐾 Pet Shop</div>
+        <div class="seg-pill landing-reveal">💅 Nail Designer</div>
+        <div class="seg-pill landing-reveal">✂️ Barbearia</div>
+        <div class="seg-pill landing-reveal">💇 Salão de Beleza</div>
+        <div class="seg-pill landing-reveal">🧖 Estética</div>
+        <div class="seg-pill landing-reveal">🏥 Clínica de Saúde</div>
+        <div class="seg-pill landing-reveal">🏋️ Personal Trainer</div>
+        <div class="seg-pill landing-reveal">🎨 Tatuador</div>
+        <div class="seg-pill landing-reveal">💆 Massoterapia</div>
+        <div class="seg-pill landing-reveal">🦷 Odontologia</div>
+        <div class="seg-pill landing-reveal">👁️ Sobrancelha &amp; Cílios</div>
+        <div class="seg-pill landing-reveal">🧘 Yoga &amp; Pilates</div>
+        <div class="seg-pill landing-reveal">💼 Consultor</div>
+        <div class="seg-pill landing-reveal">📸 Fotógrafo</div>
+        <div class="seg-pill landing-reveal">🐾 Pet Shop</div>
       </div>
     </div>
   </section>
 
   <section class="land-section" id="sec-depo" style="padding-top:40px">
     <div class="section-wrap">
-      <div class="section-header">
+      <div class="section-header landing-reveal">
         <div class="section-tag">Depoimentos</div>
         <h2 class="section-title">O que nossos clientes <em>dizem.</em></h2>
       </div>
       <div class="test-grid">
-        <div class="test-card">
+        <div class="test-card landing-reveal">
           <div class="test-stars">★★★★★</div>
           <p class="test-quote">Antes anotava tudo no WhatsApp e me perdia toda semana. Agora minhas clientes agendam sozinhas e minha agenda fica organizada.</p>
           <div class="test-author"><div class="test-av">C</div><div><div class="test-name">Camila Ferreira</div><div class="test-role">Nail Designer · Manaus, AM</div></div></div>
         </div>
-        <div class="test-card">
+        <div class="test-card landing-reveal">
           <div class="test-stars">★★★★★</div>
           <p class="test-quote">O sistema passa uma imagem muito mais profissional. Parece que minha barbearia ficou maior do dia para a noite. Recomendo demais.</p>
           <div class="test-author"><div class="test-av">R</div><div><div class="test-name">Rafael Costa</div><div class="test-role">Barbearia Black · Fortaleza, CE</div></div></div>
         </div>
-        <div class="test-card">
+        <div class="test-card landing-reveal">
           <div class="test-stars">★★★★★</div>
           <p class="test-quote">A página de agendamento ficou linda. Minhas clientes elogiaram muito a facilidade. Deixei de perder horários por falta de confirmação.</p>
           <div class="test-author"><div class="test-av">J</div><div><div class="test-name">Juliana Lima</div><div class="test-role">Estética Premium · São Paulo, SP</div></div></div>
@@ -1026,6 +1061,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script src="app.js?v=20260802-16"></script>
+<script src="app.js?v=20260803-17"></script>
 </body>
 </html>
