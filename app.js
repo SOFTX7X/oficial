@@ -573,12 +573,21 @@ function esconderTelaCarregamento() {
   _vyxoraLoaderFinished = true;
 
   const loader = $('vyxoraLoader');
-  document.body.classList.remove('vx-booting');
+
+  document.documentElement.classList.remove('auth-performance-mode');
+  document.body.classList.remove('auth-performance-mode', 'vx-booting');
   document.body.classList.add('vx-ready');
+  document.body.style.overflow = '';
 
   if (!loader) return;
+
   loader.classList.add('is-hidden');
-  setTimeout(() => loader.remove(), 420);
+  loader.style.pointerEvents = 'none';
+
+  setTimeout(() => {
+    loader.style.display = 'none';
+    loader.remove();
+  }, 220);
 }
 
 function agendarFimDoCarregamento() {
