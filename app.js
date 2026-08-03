@@ -576,7 +576,7 @@ function esconderTelaCarregamento() {
 
 window.addEventListener('load', () => {
   const isNativeApp = /VyXoraAndroidApp/i.test(navigator.userAgent);
-  const minDuration = isNativeApp ? 0 : 2200;
+  const minDuration = isNativeApp ? 1800 : 2300;
   const remaining = Math.max(0, minDuration - (Date.now() - vyxoraLoaderStartedAt));
   setTimeout(esconderTelaCarregamento, remaining);
 });
