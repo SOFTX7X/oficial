@@ -4522,3 +4522,57 @@ body.vx-ready > :not(#vyxoraLoader) {
 #publicView[style*="display: none"] {
   contain: strict;
 }
+
+
+/* =========================================================
+   V26 — CORREÇÃO DE CLIQUES E CAMADAS INVISÍVEIS
+   ========================================================= */
+
+#vyxoraLoader.is-hidden,
+.vyxora-loader.is-hidden {
+  pointer-events: none !important;
+}
+
+.auth-overlay:not(.open),
+#authOverlay:not(.open) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.auth-overlay.open,
+#authOverlay.open {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+#landingView,
+#landingView nav,
+#landingView section,
+#landingView button,
+#landingView a {
+  pointer-events: auto;
+}
+
+.bg-noise,
+.bg-grid,
+.bg-glow-tl,
+.bg-glow-br,
+.vx-home-grid,
+.vx-home-orb,
+.vx-scanline,
+.vx-float-card,
+.vx-home-hero::before,
+.vx-home-hero::after {
+  pointer-events: none !important;
+}
+
+/* Impede qualquer camada decorativa de cobrir os controles. */
+.land-nav,
+.vx-home-content,
+.vx-home-actions,
+.nav-actions,
+.nav-links {
+  position: relative;
+  z-index: 5;
+}
