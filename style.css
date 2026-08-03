@@ -4982,3 +4982,134 @@ body.vx-booting { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .vx-clean-loader__line span { animation-duration: 1.8s; }
 }
+
+
+/* ===== V33 — LOADER PREMIUM COM MASCOTE OTIMIZADO ===== */
+.vyxora-loader.vx-premium-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 4vw, 56px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(124, 58, 237, .12), transparent 34%),
+    #050507;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .28s ease, visibility .28s ease;
+}
+.vyxora-loader.vx-premium-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.vx-premium-loader__shell {
+  width: min(980px, 100%);
+  display: grid;
+  grid-template-columns: minmax(280px, 1.08fr) minmax(280px, .92fr);
+  align-items: center;
+  gap: clamp(26px, 6vw, 76px);
+}
+.vx-premium-loader__visual {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+.vx-premium-loader__visual img {
+  display: block;
+  width: min(100%, 620px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 34px rgba(88, 28, 135, .18));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.vx-premium-loader__content {
+  width: min(100%, 420px);
+  min-width: 0;
+}
+.vx-premium-loader__eyebrow {
+  margin-bottom: 16px;
+  color: #a78bfa;
+  font: 700 11px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: .24em;
+}
+.vx-premium-loader__content h1 {
+  margin: 0;
+  color: #faf7ff;
+  font: 650 clamp(25px, 3.4vw, 42px)/1.06 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: -.035em;
+}
+.vx-premium-loader__content p {
+  min-height: 24px;
+  margin: 14px 0 26px;
+  color: #a9a2b1;
+  font: 500 14px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.vx-premium-loader__progress {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #211b2a;
+}
+.vx-premium-loader__progress span {
+  display: block;
+  width: 12%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7c3aed, #c084fc);
+  box-shadow: 0 0 14px rgba(168, 85, 247, .42);
+  transition: width .48s cubic-bezier(.22, 1, .36, 1);
+}
+.vx-premium-loader__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 11px;
+  color: #756d7d;
+  font: 600 10px/1.3 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.vx-premium-loader__meta strong {
+  color: #c4b5fd;
+  font-size: 11px;
+}
+@media (max-width: 720px) {
+  .vyxora-loader.vx-premium-loader {
+    padding: 22px 24px max(30px, env(safe-area-inset-bottom));
+    background:
+      radial-gradient(circle at 50% 28%, rgba(124, 58, 237, .13), transparent 31%),
+      #050507;
+  }
+  .vx-premium-loader__shell {
+    width: min(430px, 100%);
+    grid-template-columns: 1fr;
+    gap: 8px;
+    text-align: center;
+  }
+  .vx-premium-loader__visual img {
+    width: min(78vw, 360px);
+    max-height: 44dvh;
+  }
+  .vx-premium-loader__content {
+    width: 100%;
+    margin-inline: auto;
+  }
+  .vx-premium-loader__eyebrow { margin-bottom: 12px; font-size: 10px; }
+  .vx-premium-loader__content h1 { font-size: clamp(24px, 8vw, 34px); }
+  .vx-premium-loader__content p { margin: 10px 0 22px; font-size: 13px; }
+  .vx-premium-loader__meta { text-align: left; }
+}
+@media (max-height: 660px) and (max-width: 720px) {
+  .vx-premium-loader__visual img { width: min(58vw, 250px); max-height: 34dvh; }
+  .vx-premium-loader__shell { gap: 0; }
+  .vx-premium-loader__content p { margin-bottom: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vx-premium-loader__progress span,
+  .vyxora-loader.vx-premium-loader { transition-duration: .01ms !important; }
+}
