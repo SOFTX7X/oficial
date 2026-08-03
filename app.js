@@ -719,12 +719,20 @@ function menuNotifications() {
 }
 
 function setView(view) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const target = $('view-' + view);
-  if (target) target.classList.add('active');
-  // Reseta scroll ao trocar de aba no mobile
+  if (!target) return;
+
+  const atual = document.querySelector('.view.active');
+  if (atual !== target) {
+    // Troca síncrona e sem transição no Android para evitar flash da tela anterior.
+    document.body.classList.add('vx-view-switching');
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v === target));
+    requestAnimationFrame(() => document.body.classList.remove('vx-view-switching'));
+  }
+
+  // Reseta o scroll sem animação. "instant" não é suportado igualmente em WebViews.
   if (window.innerWidth <= 768) {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo(0, 0);
     const dm = document.querySelector('.dash-main');
     if (dm) dm.scrollTop = 0;
   }
