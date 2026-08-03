@@ -42,7 +42,7 @@
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
 <link rel="preload" as="image" href="mascote-vyxora.png?v=7">
-<link rel="stylesheet" href="style.css?v=20260803-18">
+<link rel="stylesheet" href="style.css?v=20260803-19">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -53,20 +53,30 @@
 <script src="calendar.js?v=20260601-3"></script>
 </head>
 <body>
-<div class="vyxora-loader" id="vyxoraLoader" role="status" aria-label="Carregando VyXora Agendas">
-  <div class="vyxora-loader-aurora" aria-hidden="true"></div>
-  <div class="vyxora-loader-grid" aria-hidden="true"></div>
-  <div class="vyxora-loader-stage">
-    <div class="vyxora-loader-frame">
-      <div class="vyxora-loader-shine" aria-hidden="true"></div>
-      <img class="vyxora-loader-banner" src="banner-loader-vyxora.png?v=16" alt="VyXora Agendas">
+<div class="vyxora-loader vx-lite-loader" id="vyxoraLoader" role="status" aria-label="Carregando VyXora Agendas">
+  <div class="vx-lite-orb vx-lite-orb-a" aria-hidden="true"></div>
+  <div class="vx-lite-orb vx-lite-orb-b" aria-hidden="true"></div>
+
+  <div class="vx-lite-content">
+    <div class="vx-lite-mark" aria-hidden="true">
+      <span class="vx-lite-ring vx-lite-ring-a"></span>
+      <span class="vx-lite-ring vx-lite-ring-b"></span>
+      <span class="vx-lite-core">V</span>
     </div>
-    <div class="vyxora-loader-status">
-      <div class="vyxora-loader-status-row">
-        <span>PREPARANDO SUA AGENDA</span>
-        <span class="vyxora-loader-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-      </div>
-      <div class="vyxora-loader-progress" aria-hidden="true"><span></span></div>
+
+    <div class="vx-lite-brand">
+      <strong>VYXORA</strong>
+      <span>AGENDAS</span>
+    </div>
+
+    <p class="vx-lite-copy">Preparando sua experiência</p>
+
+    <div class="vx-lite-progress" aria-hidden="true">
+      <span></span>
+    </div>
+
+    <div class="vx-lite-dots" aria-hidden="true">
+      <i></i><i></i><i></i>
     </div>
   </div>
 </div>
