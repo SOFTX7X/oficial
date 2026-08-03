@@ -5113,3 +5113,54 @@ body.vx-booting { overflow: hidden; }
   .vx-premium-loader__progress span,
   .vyxora-loader.vx-premium-loader { transition-duration: .01ms !important; }
 }
+
+/* Loader v34 — textos sempre completos em uma única linha */
+.vx-premium-loader__eyebrow,
+.vx-premium-loader__content h1,
+.vx-premium-loader__content p,
+.vx-premium-loader__meta span,
+.vx-premium-loader__meta strong {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.vx-premium-loader__content h1 {
+  font-size: clamp(24px, 3.05vw, 40px);
+}
+
+@media (max-width: 720px) {
+  .vx-premium-loader__content h1 {
+    font-size: clamp(19px, 5.7vw, 25px);
+    letter-spacing: -.025em;
+  }
+
+  .vx-premium-loader__content p {
+    font-size: clamp(11px, 3.25vw, 13px);
+    letter-spacing: -.01em;
+  }
+
+  .vx-premium-loader__eyebrow {
+    font-size: 9px;
+    letter-spacing: .21em;
+  }
+
+  .vx-premium-loader__meta {
+    font-size: 9px;
+    letter-spacing: .05em;
+  }
+}
+
+@media (max-width: 370px) {
+  .vyxora-loader.vx-premium-loader {
+    padding-inline: 16px;
+  }
+
+  .vx-premium-loader__content h1 {
+    font-size: clamp(17px, 5.25vw, 20px);
+  }
+
+  .vx-premium-loader__content p {
+    font-size: 10.5px;
+  }
+}
