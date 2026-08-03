@@ -1239,23 +1239,27 @@ function renderClientes() {
   const el = $('clientesGrid');
   if (!el) return;
   const clientes = state.clientes || [];
-  if (!clientes.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente ainda.</p></div>'; return; }
+  if (!clientes.length) { el.innerHTML = '<div class="empty-state directory-empty" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente cadastrado.</p><span>Use o formulário acima para criar o primeiro contato.</span></div>'; return; }
   el.innerHTML = '';
   clientes.forEach(c => {
     const agts = (state.agendamentos || []).filter(a => a.cliente_nome === c.nome && normStatus(a.status) !== 'Excluído').length;
     const gasto = (state.agendamentos || []).filter(a => a.cliente_nome === c.nome && isFinanceiro(a)).reduce((s, a) => s + Number(a.valor || 0), 0);
     const ativo = isAtivoCliente(c);
-    const card = document.createElement('div'); card.className = 'client-card' + (ativo ? '' : ' inactive');
+    const card = document.createElement('div'); card.className = 'client-card premium-record-card' + (ativo ? '' : ' inactive');
     card.innerHTML = `
-      <div class="cc-top">
-        <div class="cc-av">${initial(c.nome)}</div>
-        <div style="flex:1;min-width:0"><div class="cc-name">${c.nome}</div><div class="cc-phone">${c.telefone || '—'}</div></div>
+      <div class="record-card-accent"></div>
+      <div class="record-card-top">
+        <div class="cc-av record-avatar">${initial(c.nome)}</div>
+        <div class="record-main"><div class="cc-name record-name">${c.nome}</div><div class="record-type">Cliente</div></div>
+        <span class="badge ${ativo ? 'badge-green' : 'badge-gray'} record-status">${ativo ? 'Ativo' : 'Inativo'}</span>
       </div>
-      ${c.email ? `<div style="font-size:11.5px;color:var(--text4);margin-bottom:8px;word-break:break-all">✉ ${c.email}</div>` : ''}
-      <div style="margin-bottom:9px"><span class="badge ${ativo ? 'badge-green' : 'badge-gray'}">${ativo ? 'Ativo' : 'Inativo'}</span></div>
-      <div class="cc-stats">
+      <div class="record-contact-list">
+        <div class="record-contact"><span>☎</span><div><small>Telefone</small><strong>${c.telefone || 'Não informado'}</strong></div></div>
+        <div class="record-contact"><span>✉</span><div><small>E-mail</small><strong>${c.email || 'Não informado'}</strong></div></div>
+      </div>
+      <div class="cc-stats record-stats">
         <div class="cc-stat"><div class="cc-sl">Atendimentos</div><div class="cc-sv">${agts}</div></div>
-        <div class="cc-stat"><div class="cc-sl">Total gasto</div><div class="cc-sv" style="font-size:14px">${money(gasto).replace(',00', '')}</div></div>
+        <div class="cc-stat"><div class="cc-sl">Total gasto</div><div class="cc-sv record-money">${money(gasto).replace(',00', '')}</div></div>
       </div>`;
     const menu = buildActionMenu(c.id, [
       { icon: '✏️', label: 'Editar', action: () => editCliente(c.id) },
@@ -1272,16 +1276,21 @@ function renderServicos() {
   const el = $('servicosGrid');
   if (!el) return;
   const vis = (state.servicos || []).filter(s => s.status !== 'excluido');
-  if (!vis.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">✦</div><p>Nenhum serviço ainda.</p></div>'; return; }
+  if (!vis.length) { el.innerHTML = '<div class="empty-state directory-empty" style="grid-column:1/-1"><div class="es-icon">✦</div><p>Nenhum serviço cadastrado.</p><span>Adicione o primeiro item do seu catálogo.</span></div>'; return; }
   el.innerHTML = '';
   vis.forEach(s => {
     const ativo = s.status === 'ativo';
-    const card = document.createElement('div'); card.className = 'svc-card' + (ativo ? '' : ' inactive');
+    const card = document.createElement('div'); card.className = 'svc-card premium-record-card service-record-card' + (ativo ? '' : ' inactive');
     card.innerHTML = `
-      <div class="svc-price">${money(s.preco).replace(',00', '')}</div>
-      <div class="svc-name">${s.nome}</div>
-      <div class="svc-dur">⏱ ${s.duracao_minutos || 60} min</div>
-      <div class="svc-status"><span class="badge ${ativo ? 'badge-green' : 'badge-gray'}">${ativo ? 'Ativo' : 'Inativo'}</span></div>`;
+      <div class="record-card-accent"></div>
+      <div class="service-card-head"><span class="service-symbol">◈</span><span class="badge ${ativo ? 'badge-green' : 'badge-gray'} record-status">${ativo ? 'Ativo' : 'Inativo'}</span></div>
+      <div class="svc-name record-name">${s.nome}</div>
+      <div class="record-type">Serviço cadastrado</div>
+      <div class="service-info-grid">
+        <div class="service-info"><small>Valor</small><strong>${money(s.preco).replace(',00', '')}</strong></div>
+        <div class="service-info"><small>Duração</small><strong>${s.duracao_minutos || 60} min</strong></div>
+      </div>
+      <div class="service-footer"><span>Pronto para agendamentos</span><span>⏱</span></div>`;
     const menu = buildActionMenu(s.id, [
       { icon: '✏️', label: 'Editar', action: () => editServico(s.id) },
       { icon: '📋', label: 'Duplicar', action: () => duplicarServico(s.id) }, 'sep',
@@ -1297,17 +1306,21 @@ function renderProfissionais() {
   const el = $('profGrid');
   if (!el) return;
   const vis = (state.profissionais || []).filter(p => p.status !== 'excluido');
-  if (!vis.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">👤</div><p>Nenhum profissional ainda.</p></div>'; return; }
+  if (!vis.length) { el.innerHTML = '<div class="empty-state directory-empty" style="grid-column:1/-1"><div class="es-icon">👤</div><p>Nenhum profissional cadastrado.</p><span>Adicione quem fará parte da agenda da empresa.</span></div>'; return; }
   el.innerHTML = '';
   vis.forEach(p => {
     const ativo = p.status === 'ativo';
-    const card = document.createElement('div'); card.className = 'prof-card' + (ativo ? '' : ' inactive');
+    const card = document.createElement('div'); card.className = 'prof-card premium-record-card professional-record-card' + (ativo ? '' : ' inactive');
     card.innerHTML = `
-      <div class="prof-av">${initial(p.nome)}</div>
-      <div class="prof-name">${p.nome}</div>
-      <div class="prof-esp">${p.especialidade || 'Profissional'}</div>
-      ${p.telefone ? `<div class="prof-phone">📱 ${p.telefone}</div>` : ''}
-      <div class="online-dot${ativo ? '' : ' off'}">${ativo ? 'Online' : 'Offline'}</div>`;
+      <div class="record-card-accent"></div>
+      <div class="professional-card-top">
+        <div class="prof-av record-avatar">${initial(p.nome)}</div>
+        <span class="badge ${ativo ? 'badge-green' : 'badge-gray'} record-status">${ativo ? 'Disponível' : 'Indisponível'}</span>
+      </div>
+      <div class="prof-name record-name">${p.nome}</div>
+      <div class="prof-esp professional-specialty">${p.especialidade || 'Profissional'}</div>
+      <div class="professional-contact"><span>☎</span><strong>${p.telefone || 'Telefone não informado'}</strong></div>
+      <div class="professional-footer"><div class="online-dot${ativo ? '' : ' off'}">${ativo ? 'Agenda ativa' : 'Agenda inativa'}</div><span class="team-label">Equipe</span></div>`;
     const menu = buildActionMenu(p.id, [
       { icon: '✏️', label: 'Editar', action: () => editProfissional(p.id) },
       { icon: '📋', label: 'Duplicar', action: () => duplicarProfissional(p.id) }, 'sep',
