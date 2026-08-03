@@ -565,23 +565,37 @@ document.addEventListener('click', function(e) {
 
 document.addEventListener('scroll', closeAllMenus, { passive: true });
 
-const vyxoraLoaderStartedAt = Date.now();
+const vyxoraLoaderStartedAt = performance.now();
+let _vyxoraLoaderFinished = false;
 
 function esconderTelaCarregamento() {
+  if (_vyxoraLoaderFinished) return;
+  _vyxoraLoaderFinished = true;
+
   const loader = $('vyxoraLoader');
+  document.body.classList.remove('vx-booting');
+  document.body.classList.add('vx-ready');
+
   if (!loader) return;
   loader.classList.add('is-hidden');
-  setTimeout(() => loader.remove(), 500);
+  setTimeout(() => loader.remove(), 420);
 }
 
-window.addEventListener('load', () => {
-  const isNativeApp = /VyXoraAndroidApp/i.test(navigator.userAgent);
-  const minDuration = 3200;
-  const remaining = Math.max(0, minDuration - (Date.now() - vyxoraLoaderStartedAt));
+function agendarFimDoCarregamento() {
+  const elapsed = performance.now() - vyxoraLoaderStartedAt;
+  const minDuration = 2200;
+  const remaining = Math.max(0, minDuration - elapsed);
   setTimeout(esconderTelaCarregamento, remaining);
-});
+}
 
-window.addEventListener('DOMContentLoaded', init);
+// Não espera imagens grandes terminarem para liberar a interface.
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  agendarFimDoCarregamento();
+}, { once: true });
+
+// Segurança para nunca deixar o loader preso.
+setTimeout(esconderTelaCarregamento, 4200);
 
 async function init() {
   await loadCategorias();
