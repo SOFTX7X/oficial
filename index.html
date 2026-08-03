@@ -42,7 +42,7 @@
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
 <link rel="preload" as="image" href="mascote-vyxora.png?v=7">
-<link rel="stylesheet" href="style.css?v=20260803-27">
+<link rel="stylesheet" href="style.css?v=20260803-28">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -617,45 +617,60 @@
     </section>
 
     <!-- VIEW: CLIENTES -->
-    <section class="view" id="view-clientes">
-      <div class="form-panel">
-        <div class="form-panel-title">Adicionar cliente</div>
-        <div class="form-grid">
-          <div class="field"><label>Nome</label><input id="cliNome" placeholder="Nome completo"></div>
-          <div class="field"><label>Telefone</label><input id="cliTel" placeholder="WhatsApp"></div>
-          <div class="field"><label>E-mail</label><input id="cliEmail" placeholder="E-mail"></div>
-          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary btn-full" onclick="salvarCliente()">Adicionar</button></div>
+    <section class="view premium-directory-view" id="view-clientes">
+      <div class="directory-intro">
+        <div><span class="directory-kicker">Relacionamento</span><h2>Base de clientes</h2><p>Cadastre contatos e acompanhe o histórico de cada cliente.</p></div>
+        <div class="directory-icon" aria-hidden="true">👥</div>
+      </div>
+      <div class="form-panel directory-form-panel">
+        <div class="directory-form-head"><div><div class="form-panel-title">Adicionar cliente</div><div class="directory-form-sub">Informações principais para contato e atendimento.</div></div><span class="directory-form-badge">Novo cadastro</span></div>
+        <div class="form-grid directory-form-grid">
+          <div class="field"><label>Nome completo</label><input id="cliNome" placeholder="Ex: Maria Oliveira"></div>
+          <div class="field"><label>WhatsApp</label><input id="cliTel" placeholder="(00) 00000-0000"></div>
+          <div class="field"><label>E-mail</label><input id="cliEmail" placeholder="cliente@email.com"></div>
+          <div class="field directory-submit"><button class="btn btn-primary btn-full directory-add-btn" onclick="salvarCliente()"><span>＋</span> Adicionar cliente</button></div>
         </div>
       </div>
-      <div class="cards-grid" id="clientesGrid"></div>
+      <div class="directory-list-head"><div><strong>Clientes cadastrados</strong><span>Informações, status e resultados</span></div></div>
+      <div class="cards-grid directory-cards-grid" id="clientesGrid"></div>
     </section>
 
     <!-- VIEW: SERVIÇOS -->
-    <section class="view" id="view-servicos">
-      <div class="form-panel">
-        <div class="form-panel-title">Adicionar serviço</div>
-        <div class="form-grid">
-          <div class="field"><label>Nome</label><input id="srvNome" placeholder="Nome do serviço"></div>
+    <section class="view premium-directory-view" id="view-servicos">
+      <div class="directory-intro">
+        <div><span class="directory-kicker">Catálogo</span><h2>Serviços e preços</h2><p>Organize seu catálogo com valor e duração de cada atendimento.</p></div>
+        <div class="directory-icon" aria-hidden="true">◈</div>
+      </div>
+      <div class="form-panel directory-form-panel">
+        <div class="directory-form-head"><div><div class="form-panel-title">Adicionar serviço</div><div class="directory-form-sub">Configure um serviço pronto para receber agendamentos.</div></div><span class="directory-form-badge">Novo serviço</span></div>
+        <div class="form-grid directory-form-grid">
+          <div class="field"><label>Nome do serviço</label><input id="srvNome" placeholder="Ex: Corte premium"></div>
           <div class="field"><label>Preço (R$)</label><input id="srvPreco" type="number" placeholder="80"></div>
           <div class="field"><label>Duração (min)</label><input id="srvDur" type="number" placeholder="60"></div>
-          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary btn-full" onclick="salvarServico()">Adicionar</button></div>
+          <div class="field directory-submit"><button class="btn btn-primary btn-full directory-add-btn" onclick="salvarServico()"><span>＋</span> Adicionar serviço</button></div>
         </div>
       </div>
-      <div class="cards-grid" id="servicosGrid"></div>
+      <div class="directory-list-head"><div><strong>Catálogo ativo</strong><span>Preços, duração e disponibilidade</span></div></div>
+      <div class="cards-grid directory-cards-grid" id="servicosGrid"></div>
     </section>
 
     <!-- VIEW: PROFISSIONAIS -->
-    <section class="view" id="view-profissionais">
-      <div class="form-panel">
-        <div class="form-panel-title">Adicionar profissional</div>
-        <div class="form-grid">
-          <div class="field"><label>Nome</label><input id="proNome" placeholder="Nome"></div>
+    <section class="view premium-directory-view" id="view-profissionais">
+      <div class="directory-intro">
+        <div><span class="directory-kicker">Equipe</span><h2>Profissionais</h2><p>Gerencie quem realiza os atendimentos e aparece na agenda pública.</p></div>
+        <div class="directory-icon" aria-hidden="true">👤</div>
+      </div>
+      <div class="form-panel directory-form-panel">
+        <div class="directory-form-head"><div><div class="form-panel-title">Adicionar profissional</div><div class="directory-form-sub">Cadastre um novo integrante da sua equipe.</div></div><span class="directory-form-badge">Nova pessoa</span></div>
+        <div class="form-grid directory-form-grid">
+          <div class="field"><label>Nome</label><input id="proNome" placeholder="Nome do profissional"></div>
           <div class="field"><label>Especialidade</label><input id="proEsp" placeholder="Ex: Manicure"></div>
-          <div class="field"><label>Telefone</label><input id="proTel" placeholder="Telefone"></div>
-          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary btn-full" onclick="salvarProfissional()">Adicionar</button></div>
+          <div class="field"><label>Telefone</label><input id="proTel" placeholder="(00) 00000-0000"></div>
+          <div class="field directory-submit"><button class="btn btn-primary btn-full directory-add-btn" onclick="salvarProfissional()"><span>＋</span> Adicionar profissional</button></div>
         </div>
       </div>
-      <div class="cards-grid" id="profGrid"></div>
+      <div class="directory-list-head"><div><strong>Equipe cadastrada</strong><span>Especialidades, contato e disponibilidade</span></div></div>
+      <div class="cards-grid directory-cards-grid" id="profGrid"></div>
     </section>
 
     <!-- VIEW: FINANCEIRO -->
@@ -1071,6 +1086,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script src="app.js?v=20260803-26"></script>
+<script src="app.js?v=20260803-28"></script>
 </body>
 </html>
