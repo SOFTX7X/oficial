@@ -42,7 +42,7 @@
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
 <link rel="preload" as="image" href="mascote-vyxora.png?v=7">
-<link rel="stylesheet" href="style.css?v=20260803-23">
+<link rel="stylesheet" href="style.css?v=20260803-25">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -52,7 +52,7 @@
 <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 <script src="calendar.js?v=20260601-3"></script>
 </head>
-<body>
+<body class="vx-booting">
 <div class="vyxora-loader vx-lite-loader" id="vyxoraLoader" role="status" aria-label="Carregando VyXora Agendas">
   <div class="vx-lite-orb vx-lite-orb-a" aria-hidden="true"></div>
   <div class="vx-lite-orb vx-lite-orb-b" aria-hidden="true"></div>
@@ -88,7 +88,7 @@
 <div id="landingView">
   <nav class="land-nav" id="landNav">
     <div class="nav-brand" onclick="window.scrollTo(0,0)">
-      <img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="">
+      <img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">
       VyXora Agendas
     </div>
     <div class="nav-links">
@@ -131,7 +131,7 @@
           <span>VyXora OS</span>
         </div>
         <div class="vx-visual-image">
-          <img src="banner-inicio-vyxora.png?v=1" alt="Mascote VyXora apresentando a plataforma de agendamentos">
+          <img src="banner-inicio-vyxora.png?v=1" loading="eager" decoding="async" fetchpriority="high" alt="Mascote VyXora apresentando a plataforma de agendamentos">
           <span class="vx-scanline" aria-hidden="true"></span>
         </div>
         <div class="vx-visual-footer">
@@ -260,7 +260,7 @@
   <section class="land-section" style="padding-top:40px">
     <div class="section-wrap mascot-calm-wrap">
       <div class="mascot-calm-banner">
-        <img src="banner-tranquilidade-vyxora.png?v=1" alt="Mascote VyXora relaxando enquanto a agenda fica organizada">
+        <img src="banner-tranquilidade-vyxora.png?v=1" alt="Mascote VyXora relaxando enquanto a agenda fica organizada" loading="lazy" decoding="async">
       </div>
       <div class="mascot-calm-copy">
         <div>
@@ -335,7 +335,7 @@
   </section>
 
  <footer class="land-footer">
-    <div class="nav-brand"><img class="brand-mascot brand-mascot-sm" src="mascote-icone-vyxora.png?v=8" alt="">VyXora Agendas</div>
+    <div class="nav-brand"><img class="brand-mascot brand-mascot-sm" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">VyXora Agendas</div>
     <div>© 2025 VyXora Agendas · Plataforma de Agendamento</div>
     <div class="footer-contact">
       <a href="https://instagram.com/vyxoraoficial" target="_blank" rel="noopener" class="footer-contact-link">
@@ -357,7 +357,7 @@
     <button class="auth-close" onclick="closeAuth()">✕</button>
     <div class="auth-panel-left">
       <div>
-        <div class="auth-left-brand"><img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="">VyXora Agendas</div>
+        <div class="auth-left-brand"><img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">VyXora Agendas</div>
         <h2 class="auth-left-title">Seu painel<br><em>premium</em><br>em minutos.</h2>
         <p class="auth-left-desc">Login real com e-mail e senha. Dados protegidos por empresa com RLS.</p>
         <div class="auth-left-perks">
@@ -438,7 +438,7 @@
 <!-- DASHBOARD -->
 <section id="dashboardView" style="display:none">
   <aside class="sidebar" id="sidebar">
-    <div class="side-brand"><img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="">VyXora Agendas</div>
+    <div class="side-brand"><img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">VyXora Agendas</div>
     <div class="side-nav-section">
       <div class="side-nav-label">Gestão</div>
       <button class="nav-btn" onclick="setView('dashboard')"><span class="ni">📊</span>Dashboard</button>
@@ -500,7 +500,7 @@
     <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
     <div class="mobile-menu-drawer" id="mobileMenuDrawer">
       <div class="mobile-menu-header">
-        <div class="nav-brand" style="font-size:17px"><img class="brand-mascot brand-mascot-sm" src="mascote-icone-vyxora.png?v=8" alt="">VyXora Agendas</div>
+        <div class="nav-brand" style="font-size:17px"><img class="brand-mascot brand-mascot-sm" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">VyXora Agendas</div>
         <button class="modal-close" onclick="closeMobileMenu()" style="position:static">✕</button>
       </div>
       <div class="mobile-menu-body">
@@ -536,7 +536,7 @@
     <!-- VIEW: DASHBOARD -->
     <section class="view active" id="view-dashboard">
       <div class="dash-hero dash-hero-featured">
-        <img class="dash-hero-art" src="banner-dashboard-vyxora.png?v=1" alt="Mascote VyXora em um ambiente de agendamento">
+        <img class="dash-hero-art" src="banner-dashboard-vyxora.png?v=1" alt="Mascote VyXora em um ambiente de agendamento" loading="lazy" decoding="async">
         <div class="dash-hero-action">
           <span class="dash-hero-action-label">Sua agenda pronta para compartilhar</span>
           <button class="dash-copy-button" onclick="copyPublicLink(this)">
@@ -825,7 +825,7 @@
         <div class="pub-cover" id="pubFotoPublica" style="display:none"></div>
         <div class="pub-hero-content">
           <div class="pub-hero-brand">
-            <img class="brand-mascot brand-mascot-xs" src="mascote-icone-vyxora.png?v=8" alt="">
+            <img class="brand-mascot brand-mascot-xs" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">
             VyXora Agendas
           </div>
           <h1 id="pubNomeEmpresa">Agendamento Online</h1>
@@ -839,7 +839,7 @@
     <div id="pubConfirmScreen" class="pub-confirm-screen" style="display:none">
       <div class="pub-success-card">
         <div class="pub-success-visual">
-          <img src="mascote-icone-vyxora.png?v=8" alt="Mascote VyXora" class="pub-success-mascot">
+          <img src="mascote-icone-vyxora.png?v=8" alt="Mascote VyXora" class="pub-success-mascot" loading="lazy" decoding="async">
           <div class="pub-success-check" aria-hidden="true">✓</div>
         </div>
         <div class="pub-success-kicker">AGENDAMENTO CONCLUÍDO</div>
@@ -1071,6 +1071,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script src="app.js?v=20260803-24"></script>
+<script src="app.js?v=20260803-25"></script>
 </body>
 </html>
