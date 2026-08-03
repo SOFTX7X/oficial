@@ -566,10 +566,47 @@ document.addEventListener('click', function(e) {
 document.addEventListener('scroll', closeAllMenus, { passive: true });
 
 let _vyxoraLoaderFinished = false;
+let _vyxoraLoaderProgress = 12;
+let _vyxoraLoaderTimers = [];
+
+function atualizarTelaCarregamento(progress, title, detail, stage) {
+  if (_vyxoraLoaderFinished) return;
+
+  _vyxoraLoaderProgress = Math.max(_vyxoraLoaderProgress, Math.min(100, progress));
+  const bar = $('vyxoraLoaderBar');
+  const percent = $('vyxoraLoaderPercent');
+  const titleEl = $('vyxoraLoaderTitle');
+  const detailEl = $('vyxoraLoaderDetail');
+  const stageEl = $('vyxoraLoaderStage');
+
+  if (bar) bar.style.width = `${_vyxoraLoaderProgress}%`;
+  if (percent) percent.textContent = `${Math.round(_vyxoraLoaderProgress)}%`;
+  if (titleEl && title) titleEl.textContent = title;
+  if (detailEl && detail) detailEl.textContent = detail;
+  if (stageEl && stage) stageEl.textContent = stage;
+}
+
+function iniciarEtapasCarregamento() {
+  const etapas = [
+    [420, 30, 'Organizando o aplicativo', 'Preparando os recursos essenciais', 'Organizando'],
+    [980, 54, 'Carregando seus recursos', 'Conectando serviços e preferências', 'Carregando'],
+    [1580, 76, 'Ajustando sua experiência', 'Deixando tudo pronto para você', 'Ajustando'],
+    [2150, 89, 'Finalizando', 'Só mais um instante', 'Finalizando']
+  ];
+
+  etapas.forEach(([delay, progress, title, detail, stage]) => {
+    _vyxoraLoaderTimers.push(setTimeout(() => {
+      atualizarTelaCarregamento(progress, title, detail, stage);
+    }, delay));
+  });
+}
 
 function esconderTelaCarregamento() {
   if (_vyxoraLoaderFinished) return;
+  atualizarTelaCarregamento(100, 'Tudo pronto', 'Abrindo a VyXora Agendas', 'Concluído');
   _vyxoraLoaderFinished = true;
+  _vyxoraLoaderTimers.forEach(clearTimeout);
+  _vyxoraLoaderTimers = [];
 
   const loader = $('vyxoraLoader');
   document.documentElement.classList.remove('auth-performance-mode');
@@ -578,15 +615,17 @@ function esconderTelaCarregamento() {
   document.body.style.overflow = '';
 
   if (!loader) return;
-  loader.classList.add('is-hidden');
-  loader.style.pointerEvents = 'none';
-  setTimeout(() => loader.remove(), 240);
+  setTimeout(() => {
+    loader.classList.add('is-hidden');
+    loader.style.pointerEvents = 'none';
+    setTimeout(() => loader.remove(), 320);
+  }, 220);
 }
 
-// Mantém a etapa web visível tempo suficiente para completar a transição
-// do carregamento nativo, sem prolongar a abertura excessivamente.
 document.addEventListener('DOMContentLoaded', () => {
-  const minimumDisplay = new Promise(resolve => setTimeout(resolve, 1500));
+  iniciarEtapasCarregamento();
+
+  const minimumDisplay = new Promise(resolve => setTimeout(resolve, 2350));
   const startup = init();
 
   Promise.allSettled([startup, minimumDisplay]).finally(() => {
@@ -595,7 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
 }, { once: true });
 
 // Proteção para falhas externas de rede ou bibliotecas.
-setTimeout(esconderTelaCarregamento, 3000);
+setTimeout(esconderTelaCarregamento, 5200);
 
 async function init() {
   await loadCategorias();
