@@ -624,6 +624,7 @@ async function loadCategorias() {
 function preencherSelectCategorias() {
   const sel = $('empCategoria');
   if (!sel) return;
+  if (sel.dataset.preenchido === '1') return;
   if (!state.categorias || state.categorias.length === 0) {
     const fallback = [
       { id: 'beleza', nome: 'Beleza & Estética', icone: '💅' },
@@ -641,6 +642,7 @@ function preencherSelectCategorias() {
   } else {
     sel.innerHTML = state.categorias.map(c => `<option value="${c.id}">${c.icone || ''} ${c.nome}</option>`).join('');
   }
+  sel.dataset.preenchido = '1';
 }
 
 function showDashboard() {
@@ -728,15 +730,25 @@ function setView(view) {
 function openAuth(mode) {
   const overlay = $('authOverlay');
   if (!overlay) return;
-  overlay.classList.add('open');
-  lockPublicModalScroll();
+
+  // Suspende a página de fundo enquanto a autenticação está aberta.
+  document.documentElement.classList.add('auth-performance-mode');
+  document.body.classList.add('auth-performance-mode');
+  document.body.style.overflow = 'hidden';
+
   if (mode === 'login') showLogin(); else showCadastro();
+
+  // Exibe somente após preparar o formulário, evitando duas renderizações.
+  overlay.classList.add('open');
 }
 
 function closeAuth() {
   const overlay = $('authOverlay');
   if (overlay) overlay.classList.remove('open');
-  unlockPublicModalScroll();
+
+  document.documentElement.classList.remove('auth-performance-mode');
+  document.body.classList.remove('auth-performance-mode');
+  document.body.style.overflow = '';
 }
 
 function showLogin() {
