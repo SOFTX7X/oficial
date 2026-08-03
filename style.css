@@ -4203,3 +4203,355 @@ body.vyxora-safe-layer-open {
     animation-iteration-count: 1 !important;
   }
 }
+
+
+/* =========================================================
+   V20 — BOTÕES, LOGIN E CADASTRO PREMIUM
+   ========================================================= */
+
+:root {
+  --vx-premium-purple: #a855f7;
+  --vx-premium-purple-2: #7c3aed;
+  --vx-premium-border: rgba(192, 132, 252, .26);
+  --vx-premium-surface: rgba(11, 7, 18, .93);
+  --vx-premium-surface-2: rgba(20, 11, 33, .9);
+}
+
+/* Padronização dos botões principais */
+.vx-premium-btn,
+#landingView button,
+#landingView .btn,
+.auth-container button,
+.auth-modal button,
+.login-modal button,
+.signup-modal button {
+  min-height: 42px;
+  border-radius: 9px !important;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    border-color .2s ease,
+    background .2s ease,
+    color .2s ease;
+}
+
+.vx-premium-btn:not(.vx-premium-btn-outline),
+#landingView .btn-primary,
+#landingView .landing-btn-primary,
+.auth-container .btn-primary,
+.auth-modal .btn-primary,
+.login-modal .btn-primary,
+.signup-modal .btn-primary {
+  border: 1px solid rgba(216, 180, 254, .34) !important;
+  background:
+    linear-gradient(180deg, rgba(180, 82, 255, .98), rgba(124, 58, 237, .98)) !important;
+  color: #fff !important;
+  box-shadow:
+    0 10px 24px rgba(91, 33, 182, .24),
+    0 0 18px rgba(168, 85, 247, .16),
+    inset 0 1px rgba(255,255,255,.18);
+}
+
+.vx-premium-btn-outline,
+#landingView .btn-outline,
+#landingView .landing-btn-secondary,
+.auth-container .btn-outline,
+.auth-modal .btn-outline,
+.login-modal .btn-outline,
+.signup-modal .btn-outline {
+  border: 1px solid rgba(192, 132, 252, .22) !important;
+  background:
+    linear-gradient(180deg, rgba(18, 11, 29, .94), rgba(8, 5, 14, .96)) !important;
+  color: #e9d5ff !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.045),
+    0 8px 18px rgba(0,0,0,.2);
+}
+
+.vx-premium-btn:hover,
+#landingView button:hover,
+.auth-container button:hover,
+.auth-modal button:hover,
+.login-modal button:hover,
+.signup-modal button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(216, 180, 254, .48) !important;
+  box-shadow:
+    0 14px 30px rgba(88, 28, 135, .3),
+    0 0 24px rgba(168, 85, 247, .2);
+}
+
+.vx-premium-btn:active,
+#landingView button:active,
+.auth-container button:active,
+.auth-modal button:active,
+.login-modal button:active,
+.signup-modal button:active {
+  transform: translateY(0) scale(.985);
+}
+
+/* Estrutura das telas de autenticação */
+.auth-overlay,
+.login-overlay,
+.signup-overlay,
+.modal-overlay:has(.auth-container),
+.modal-overlay:has(.login-modal),
+.modal-overlay:has(.signup-modal) {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(126, 34, 206, .12), transparent 32%),
+    rgba(2, 2, 5, .88) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.auth-container,
+.auth-modal,
+.login-modal,
+.signup-modal,
+.login-container,
+.signup-container {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--vx-premium-border) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(145deg, rgba(19, 10, 31, .97), rgba(5, 4, 10, .98)) !important;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, .62),
+    0 0 50px rgba(126, 34, 206, .11),
+    inset 0 1px rgba(255,255,255,.055) !important;
+}
+
+.auth-container::before,
+.auth-modal::before,
+.login-modal::before,
+.signup-modal::before,
+.login-container::before,
+.signup-container::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(216,180,254,.65), transparent);
+  pointer-events: none;
+}
+
+.auth-container::after,
+.auth-modal::after,
+.login-modal::after,
+.signup-modal::after,
+.login-container::after,
+.signup-container::after {
+  content: "";
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  right: -100px;
+  top: -120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168,85,247,.11), transparent 68%);
+  pointer-events: none;
+}
+
+/* Cabeçalhos dos formulários */
+.auth-title,
+.login-title,
+.signup-title,
+.auth-container h1,
+.auth-container h2,
+.auth-modal h1,
+.auth-modal h2,
+.login-modal h1,
+.login-modal h2,
+.signup-modal h1,
+.signup-modal h2 {
+  color: #faf7ff !important;
+  font-weight: 900 !important;
+  letter-spacing: -.035em;
+  text-shadow: 0 0 24px rgba(192,132,252,.12);
+}
+
+.auth-subtitle,
+.login-subtitle,
+.signup-subtitle,
+.auth-container .subtitle,
+.auth-modal .subtitle,
+.login-modal .subtitle,
+.signup-modal .subtitle {
+  color: rgba(225, 209, 239, .63) !important;
+  line-height: 1.6;
+}
+
+/* Campos */
+.auth-container label,
+.auth-modal label,
+.login-modal label,
+.signup-modal label,
+.login-container label,
+.signup-container label {
+  color: rgba(235, 220, 249, .78) !important;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .015em;
+}
+
+.auth-container input,
+.auth-container select,
+.auth-container textarea,
+.auth-modal input,
+.auth-modal select,
+.auth-modal textarea,
+.login-modal input,
+.login-modal select,
+.login-modal textarea,
+.signup-modal input,
+.signup-modal select,
+.signup-modal textarea,
+.login-container input,
+.signup-container input {
+  min-height: 46px;
+  border: 1px solid rgba(192, 132, 252, .15) !important;
+  border-radius: 9px !important;
+  background:
+    linear-gradient(180deg, rgba(9, 6, 15, .94), rgba(14, 8, 23, .92)) !important;
+  color: #f8f3ff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 8px 20px rgba(0,0,0,.12);
+  outline: none !important;
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease,
+    background .2s ease,
+    transform .2s ease;
+}
+
+.auth-container input::placeholder,
+.auth-modal input::placeholder,
+.login-modal input::placeholder,
+.signup-modal input::placeholder,
+.login-container input::placeholder,
+.signup-container input::placeholder {
+  color: rgba(196, 181, 212, .35) !important;
+}
+
+.auth-container input:focus,
+.auth-container select:focus,
+.auth-container textarea:focus,
+.auth-modal input:focus,
+.auth-modal select:focus,
+.auth-modal textarea:focus,
+.login-modal input:focus,
+.login-modal select:focus,
+.login-modal textarea:focus,
+.signup-modal input:focus,
+.signup-modal select:focus,
+.signup-modal textarea:focus,
+.login-container input:focus,
+.signup-container input:focus {
+  border-color: rgba(192, 132, 252, .52) !important;
+  background: rgba(15, 8, 25, .98) !important;
+  box-shadow:
+    0 0 0 3px rgba(168, 85, 247, .1),
+    0 0 22px rgba(126, 34, 206, .12),
+    inset 0 1px rgba(255,255,255,.035);
+}
+
+/* Separadores, links e rodapé da autenticação */
+.auth-divider,
+.login-divider,
+.signup-divider {
+  color: rgba(199, 180, 216, .38) !important;
+}
+
+.auth-divider::before,
+.auth-divider::after,
+.login-divider::before,
+.login-divider::after,
+.signup-divider::before,
+.signup-divider::after {
+  background: rgba(192, 132, 252, .12) !important;
+}
+
+.auth-container a,
+.auth-modal a,
+.login-modal a,
+.signup-modal a,
+.login-container a,
+.signup-container a {
+  color: #c084fc !important;
+  text-decoration: none;
+  transition: color .18s ease, text-shadow .18s ease;
+}
+
+.auth-container a:hover,
+.auth-modal a:hover,
+.login-modal a:hover,
+.signup-modal a:hover,
+.login-container a:hover,
+.signup-container a:hover {
+  color: #e9d5ff !important;
+  text-shadow: 0 0 14px rgba(192,132,252,.25);
+}
+
+/* Barra de progresso/etapas do cadastro */
+.signup-steps,
+.auth-steps,
+.form-steps {
+  gap: 8px;
+}
+
+.signup-step,
+.auth-step,
+.form-step {
+  border-radius: 7px !important;
+  border: 1px solid rgba(192,132,252,.12) !important;
+  background: rgba(16, 9, 26, .78) !important;
+}
+
+.signup-step.active,
+.auth-step.active,
+.form-step.active,
+.signup-step.completed,
+.auth-step.completed,
+.form-step.completed {
+  border-color: rgba(192,132,252,.38) !important;
+  background: rgba(126,34,206,.18) !important;
+  color: #f3e8ff !important;
+  box-shadow: 0 0 18px rgba(126,34,206,.1);
+}
+
+/* Checkbox */
+.auth-container input[type="checkbox"],
+.auth-modal input[type="checkbox"],
+.login-modal input[type="checkbox"],
+.signup-modal input[type="checkbox"] {
+  min-height: auto;
+  accent-color: #9333ea;
+}
+
+/* Responsivo */
+@media (max-width: 680px) {
+  .auth-container,
+  .auth-modal,
+  .login-modal,
+  .signup-modal,
+  .login-container,
+  .signup-container {
+    width: calc(100vw - 24px) !important;
+    max-width: none !important;
+    border-radius: 12px !important;
+    margin: 12px;
+  }
+
+  .vx-premium-btn,
+  #landingView button,
+  .auth-container button,
+  .auth-modal button,
+  .login-modal button,
+  .signup-modal button {
+    min-height: 46px;
+  }
+}
