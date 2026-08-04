@@ -585,8 +585,22 @@
           <div class="field"><label>Telefone</label><input id="agTelefone" placeholder="WhatsApp"></div>
           <div class="field"><label>Serviço</label><select id="agServico"></select></div>
           <div class="field"><label>Profissional</label><select id="agProfissional"></select></div>
-          <div class="field"><label>Data</label><input id="agData" type="date"></div>
-          <div class="field"><label>Hora</label><input id="agHora" type="time"></div>
+          <div class="field">
+            <label>Data</label>
+            <button type="button" class="pub-picker-btn agenda-picker-btn" id="agDataBtn" onclick="abrirCalendarioAgendaInterna()">
+              <span id="agDataLabel">Escolher data</span>
+              <span aria-hidden="true">⌄</span>
+            </button>
+            <input id="agData" type="hidden">
+          </div>
+          <div class="field">
+            <label>Hora</label>
+            <button type="button" class="pub-picker-btn agenda-picker-btn" id="agHoraBtn" onclick="abrirHorariosAgendaInterna()">
+              <span id="agHoraLabel">Escolher horário</span>
+              <span aria-hidden="true">⌄</span>
+            </button>
+            <input id="agHora" type="hidden">
+          </div>
           <div class="field"><label>Status</label><select id="agStatus"><option>Confirmado</option><option>Pendente</option></select></div>
           <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary btn-full" onclick="salvarAgendamento()">Salvar</button></div>
         </div>
@@ -1080,6 +1094,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script defer src="app.js?v=20260803-31"></script>
+<script defer src="app.js?v=20260803-4"></script>
 </body>
 </html>
