@@ -23,17 +23,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ── FLATPICKR DATAS ── */
   const dateConfig = {
-    locale: "pt",
-    disableMobile: true,
-    dateFormat: "Y-m-d",
-    altInput: true,
-    altFormat: "d/m/Y",
-    allowInput: false,
-    clickOpens: true,
-    onChange(selectedDates, dateStr, instance) {
-      instance.close();
-    }
+   locale: "pt",
+disableMobile: true,
+dateFormat: "Y-m-d",
+altInput: true,
+altFormat: "d/m/Y",
+allowInput: false,
+clickOpens: true,
+minDate: "today",
+onChange(selectedDates, dateStr, instance) {
+  instance.close();
+}
   };
+  ["#reagendarData"].forEach(sel => {
+    const el = document.querySelector(sel);
+    if (el) flatpickr(el, dateConfig);
+  });
 
   /* ══════════════════════════════════════
      TIME PICKER — RODINHA INFINITA
@@ -467,64 +472,15 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("tpOk").addEventListener("click", confirmTP);
   overlay.addEventListener("click", e => { if (e.target === overlay) closeTP(); });
 
-  /* ── BIND GLOBAL: TODOS OS CAMPOS DE DATA E HORA ── */
-  function bindDateInput(el) {
-    if (!el || el._flatpickr || el.dataset.vyxoraDateBound === "1") return;
-    el.dataset.vyxoraDateBound = "1";
-
-    const config = { ...dateConfig };
-    if (el.id === "agData" || el.id === "reagendarData") {
-      config.minDate = "today";
-    }
-
-    flatpickr(el, config);
-  }
-
-  function bindTimeInput(el) {
-    if (!el || el.dataset.vyxoraTimeBound === "1") return;
-    el.dataset.vyxoraTimeBound = "1";
-    el.dataset.originalType = "time";
+  /* ── BIND NOS INPUTS ── */
+  ["#reagendarHora"].forEach(sel => {
+    const el = document.querySelector(sel);
+    if (!el) return;
     el.type = "text";
     el.readOnly = true;
-    el.inputMode = "none";
-    el.autocomplete = "off";
     el.style.cursor = "pointer";
-
-    const open = event => {
-      event.preventDefault();
-      openTP(el);
-    };
-
-    el.addEventListener("click", open);
-    el.addEventListener("focus", open);
-    el.addEventListener("keydown", event => {
-      if (event.key === "Enter" || event.key === " ") open(event);
-    });
-  }
-
-  function bindAllDateTimeInputs(root = document) {
-    if (root.matches?.('input[type="date"]')) bindDateInput(root);
-    if (root.matches?.('input[type="time"]')) bindTimeInput(root);
-
-    root.querySelectorAll?.('input[type="date"]').forEach(bindDateInput);
-    root.querySelectorAll?.('input[type="time"]').forEach(bindTimeInput);
-  }
-
-  bindAllDateTimeInputs(document);
-
-  const dateTimeObserver = new MutationObserver(mutations => {
-    for (const mutation of mutations) {
-      mutation.addedNodes.forEach(node => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          bindAllDateTimeInputs(node);
-        }
-      });
-    }
-  });
-
-  dateTimeObserver.observe(document.body, {
-    childList: true,
-    subtree: true
+    el.addEventListener("click", () => openTP(el));
+    el.addEventListener("focus", () => openTP(el));
   });
 
 });
