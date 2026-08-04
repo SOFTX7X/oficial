@@ -1,24 +1,48 @@
 
 // ═══════════════════════════════════════════════════════════════
-// V5 — TRAVA SEGURA DE SEGUNDAS TELAS
-// Mantém o fundo parado sem bloquear seletores nativos de data/hora.
+// GERENCIADOR ÚNICO DE ROLAGEM
+// Evita que um modal libere a rolagem enquanto outro ainda está aberto.
+// Não usa position: fixed, top ou scrollTo, reduzindo saltos no Android.
 // ═══════════════════════════════════════════════════════════════
-const VYXORA_SAFE_LAYER = {
-  count: 0,
+const VYXORA_SCROLL = {
+  legacyCount: 0,
+  tokens: new Set(),
 
-  lock() {
-    this.count += 1;
-    if (this.count > 1) return;
-    document.documentElement.classList.add('vyxora-safe-layer-open');
-    document.body.classList.add('vyxora-safe-layer-open');
+  apply() {
+    const locked = this.legacyCount > 0 || this.tokens.size > 0;
+    document.documentElement.classList.toggle('vyxora-safe-layer-open', locked);
+    document.body.classList.toggle('vyxora-safe-layer-open', locked);
   },
 
-  unlock() {
-    this.count = Math.max(0, this.count - 1);
-    if (this.count > 0) return;
-    document.documentElement.classList.remove('vyxora-safe-layer-open');
-    document.body.classList.remove('vyxora-safe-layer-open');
+  lock(token = null) {
+    if (token) this.tokens.add(String(token));
+    else this.legacyCount += 1;
+    this.apply();
+  },
+
+  unlock(token = null) {
+    if (token) this.tokens.delete(String(token));
+    else this.legacyCount = Math.max(0, this.legacyCount - 1);
+    this.apply();
+  },
+
+  reset() {
+    this.legacyCount = 0;
+    this.tokens.clear();
+    this.apply();
+  },
+
+  isLocked() {
+    return this.legacyCount > 0 || this.tokens.size > 0;
   }
+};
+
+window.VYXORA_SCROLL = VYXORA_SCROLL;
+VYXORA_SCROLL.lock('loader');
+
+const VYXORA_SAFE_LAYER = {
+  lock() { VYXORA_SCROLL.lock(); },
+  unlock() { VYXORA_SCROLL.unlock(); }
 };
 
 function lockSecondScreen() {
@@ -605,7 +629,7 @@ function esconderTelaCarregamento() {
   document.documentElement.classList.remove('auth-performance-mode');
   document.body.classList.remove('auth-performance-mode', 'vx-booting');
   document.body.classList.add('vx-ready');
-  document.body.style.overflow = '';
+  VYXORA_SCROLL.unlock('loader');
 
   if (!loader) return;
   setTimeout(() => {
@@ -791,7 +815,7 @@ function openAuth(mode) {
   // Suspende a página de fundo enquanto a autenticação está aberta.
   document.documentElement.classList.add('auth-performance-mode');
   document.body.classList.add('auth-performance-mode');
-  document.body.style.overflow = 'hidden';
+  VYXORA_SCROLL.lock('auth');
 
   if (mode === 'login') showLogin(); else showCadastro();
 
@@ -805,7 +829,7 @@ function closeAuth() {
 
   document.documentElement.classList.remove('auth-performance-mode');
   document.body.classList.remove('auth-performance-mode');
-  document.body.style.overflow = '';
+  VYXORA_SCROLL.unlock('auth');
 }
 
 function showLogin() {
@@ -1566,39 +1590,76 @@ async function salvarProfissional() {
 }
 
 async function salvarAgendamento() {
-  const agCli = $('agCliente')?.value?.trim();
-  const agSvc = $('agServico')?.value;
-  const agProf = $('agProfissional')?.value;
-  const agData = $('agData')?.value;
-  const agHora = $('agHora')?.value;
-  if (!agCli || !agSvc || !agProf || !agData || !agHora) return toast('Preencha todos os campos.', 'err');
-  const serv = (state.servicos || []).find(s => s.id === agSvc);
-  const prof = (state.profissionais || []).find(p => p.id === agProf);
-  let clienteId = null;
+  if (salvarAgendamento._running) return;
+
+  const botao = $('agendaBtnSalvar');
+  salvarAgendamento._running = true;
+  if (botao) botao.disabled = true;
+
   try {
-    const { data: cli } = await db.from('agenda_clientes').insert({
-      empresa_id: state.empresa.id, nome: agCli,
-      telefone: ($('agTelefone')?.value || '').trim(), status: 'ativo'
-    }).select('*').single();
-    if (cli) clienteId = cli.id;
-  } catch(e) {}
-  const { error } = await db.from('agenda_agendamentos').insert({
-    empresa_id: state.empresa.id, cliente_id: clienteId,
-    servico_id: serv?.id || null, profissional_id: prof?.id || null,
-    cliente_nome: agCli, cliente_telefone: ($('agTelefone')?.value || '').trim(),
-    servico_nome: serv?.nome || '', profissional_nome: prof?.nome || '',
-    data: agData, hora: agHora, status: $('agStatus')?.value || 'Pendente',
-    valor: Number(serv?.preco || 0)
-  });
-  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
-  if ($('agCliente')) $('agCliente').value = '';
-  if ($('agTelefone')) $('agTelefone').value = '';
-  if ($('agServico')) $('agServico').value = '';
-  if ($('agProfissional')) $('agProfissional').value = '';
-  if ($('agStatus')) $('agStatus').value = 'Confirmado';
-  if ($('agData')) { if ($('agData')._flatpickr) $('agData')._flatpickr.clear(); else $('agData').value = ''; }
-  if ($('agHora')) $('agHora').value = '';
-  await loadAll(); showNotif('Agendamento criado!', `${agCli} — ${formatDate(agData)} às ${agHora}.`, 'ok');
+    const agCli = $('agCliente')?.value?.trim();
+    const agSvc = $('agServico')?.value;
+    const agProf = $('agProfissional')?.value;
+    const agData = $('agData')?.value;
+    const agHora = $('agHora')?.value;
+    if (!agCli || !agSvc || !agProf || !agData || !agHora) {
+      toast('Preencha todos os campos.', 'err');
+      return;
+    }
+
+    const serv = (state.servicos || []).find(s => s.id === agSvc);
+    const prof = (state.profissionais || []).find(p => p.id === agProf);
+    let clienteId = null;
+
+    try {
+      const { data: cli } = await db.from('agenda_clientes').insert({
+        empresa_id: state.empresa.id,
+        nome: agCli,
+        telefone: ($('agTelefone')?.value || '').trim(),
+        status: 'ativo'
+      }).select('*').single();
+      if (cli) clienteId = cli.id;
+    } catch (e) {
+      console.warn('Não foi possível criar o cliente automaticamente:', e);
+    }
+
+    const { error } = await db.from('agenda_agendamentos').insert({
+      empresa_id: state.empresa.id,
+      cliente_id: clienteId,
+      servico_id: serv?.id || null,
+      profissional_id: prof?.id || null,
+      cliente_nome: agCli,
+      cliente_telefone: ($('agTelefone')?.value || '').trim(),
+      servico_nome: serv?.nome || '',
+      profissional_nome: prof?.nome || '',
+      data: agData,
+      hora: agHora,
+      status: $('agStatus')?.value || 'Pendente',
+      valor: Number(serv?.preco || 0)
+    });
+
+    if (error) {
+      toast('Erro ao salvar: ' + error.message, 'err');
+      return;
+    }
+
+    if ($('agCliente')) $('agCliente').value = '';
+    if ($('agTelefone')) $('agTelefone').value = '';
+    if ($('agServico')) $('agServico').value = '';
+    if ($('agProfissional')) $('agProfissional').value = '';
+    if ($('agStatus')) $('agStatus').value = 'Confirmado';
+    if ($('agData')) {
+      if ($('agData')._flatpickr) $('agData')._flatpickr.clear();
+      else $('agData').value = '';
+    }
+    if ($('agHora')) $('agHora').value = '';
+
+    await loadAll();
+    showNotif('Agendamento criado!', `${agCli} — ${formatDate(agData)} às ${agHora}.`, 'ok');
+  } finally {
+    salvarAgendamento._running = false;
+    if (botao) botao.disabled = false;
+  }
 }
 
 async function salvarConfig() {
@@ -1909,7 +1970,7 @@ function openConfirmModal({ icon = '⚠️', type = 'danger', title = 'Tem certe
 
 function closeConfirmModal() {
   const overlay = $('confirmOverlay'); if (overlay) overlay.classList.remove('open'); _confirmCb = null;
-  document.body.style.overflow = '';
+  unlockSecondScreen();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -2469,14 +2530,14 @@ function abrirCalendarioPublico() {
   renderPubCal();
   const ov = document.getElementById('pubCalendarioOverlay');
   if (ov) { ov.style.display = 'flex'; requestAnimationFrame(() => ov.classList.add('open')); }
-  document.body.style.overflow = 'hidden';
+  VYXORA_SCROLL.lock('public-calendar');
 }
 
 function fecharCalendarioPublico(e) {
   if (e && e.target !== document.getElementById('pubCalendarioOverlay')) return;
   const ov = document.getElementById('pubCalendarioOverlay');
   if (ov) { ov.classList.remove('open'); setTimeout(() => ov.style.display = 'none', 200); }
-  document.body.style.overflow = '';
+  VYXORA_SCROLL.unlock('public-calendar');
 }
 
 function pubCalMes(dir) {
@@ -2623,14 +2684,14 @@ async function abrirSlotsPublico() {
 
   const ov = document.getElementById('pubSlotsOverlay');
   if (ov) { ov.style.display = 'flex'; requestAnimationFrame(() => ov.classList.add('open')); }
-  document.body.style.overflow = 'hidden';
+  VYXORA_SCROLL.lock('public-slots');
 }
 
 function fecharSlotsPublico(e) {
   if (e && e.target !== document.getElementById('pubSlotsOverlay')) return;
   const ov = document.getElementById('pubSlotsOverlay');
   if (ov) { ov.classList.remove('open'); setTimeout(() => ov.style.display = 'none', 200); }
-  document.body.style.overflow = '';
+  VYXORA_SCROLL.unlock('public-slots');
 }
 
 function selecionarSlot(hora) {
@@ -3073,7 +3134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!overlay) return;
     overlay.style.display = 'flex';
     requestAnimationFrame(() => overlay.classList.add('open'));
-    document.body.style.overflow = 'hidden';
+    VYXORA_SCROLL.lock('overlay:' + id);
   }
 
   function fecharOverlay(id) {
@@ -3083,7 +3144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       if (!overlay.classList.contains('open')) overlay.style.display = 'none';
     }, 200);
-    document.body.style.overflow = '';
+    VYXORA_SCROLL.unlock('overlay:' + id);
   }
 
   function formatarDataAgenda(iso) {
