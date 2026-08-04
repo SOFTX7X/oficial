@@ -5775,3 +5775,65 @@ body.public-modal-open {
     animation: none !important;
   }
 }
+
+/* =============================================================
+   V11 — ANDROID WEBVIEW: ABERTURA ESTÁVEL DE RELÓGIO E MODAIS
+   Corrige o flash causado por opacity/transform/backdrop-filter
+   nos overlays reais usados pela Agenda e Página Pública.
+   ============================================================= */
+@media (max-width: 768px) {
+  /* Overlays reais: sem transparência progressiva nem blur do fundo. */
+  #pubCalendarioOverlay,
+  #pubSlotsOverlay,
+  .pub-modal-overlay,
+  .modal-overlay,
+  .edit-overlay,
+  .auth-overlay,
+  #actionCenterModal,
+  .notification-center-overlay {
+    transition: none !important;
+    animation: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #08070d !important;
+  }
+
+  #pubCalendarioOverlay.open,
+  #pubSlotsOverlay.open,
+  .pub-modal-overlay.open,
+  .modal-overlay.open,
+  .edit-overlay.open,
+  .auth-overlay.open,
+  #actionCenterModal.open,
+  .notification-center-overlay.open {
+    opacity: 1 !important;
+  }
+
+  /* Painéis internos aparecem já na posição final. */
+  #pubCalendarioOverlay .pub-modal-full,
+  #pubSlotsOverlay .pub-modal-full,
+  .pub-modal-full,
+  .modal,
+  .edit-modal,
+  .auth-modal,
+  .action-center-dialog,
+  .time-picker-modal,
+  .time-picker-panel,
+  .clock-modal,
+  .clock-picker,
+  .flatpickr-calendar {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    will-change: auto !important;
+  }
+
+  /* Evita composição gráfica da página de fundo durante a abertura. */
+  body.vyxora-safe-layer-open #dashboard,
+  body.public-modal-open #publicView {
+    contain: paint;
+  }
+}
