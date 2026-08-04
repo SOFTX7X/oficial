@@ -5469,3 +5469,50 @@ body.action-center-open { overflow:hidden!important; }
   .action-center-item{min-height:64px}
 }
 @media(prefers-reduced-motion:reduce){.action-center-modal,.action-center-dialog{transition:none!important}}
+
+/* =========================================================
+   AGENDA V6 — correção segura dos campos
+   Desktop: hover discreto e seta limpa.
+   Android/mobile: mantém o comportamento nativo e responsivo.
+   ========================================================= */
+@media (hover: hover) and (pointer: fine) and (min-width: 769px) {
+  .agenda-v2-grid input:hover,
+  .agenda-v2-grid select:hover,
+  .agenda-v2-grid .agenda-picker-btn:hover {
+    transform: none !important;
+    filter: none !important;
+    background-color: #100d17 !important;
+    border-color: rgba(157, 91, 255, .42) !important;
+    box-shadow: none !important;
+  }
+
+  .agenda-v2-grid select,
+  .agenda-v2-grid select:hover,
+  .agenda-v2-grid select:focus {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    padding-right: 42px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M2 2l4 4 4-4' fill='none' stroke='%23a56cff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 15px center !important;
+    background-size: 12px 8px !important;
+  }
+}
+
+@media (max-width: 768px), (hover: none), (pointer: coarse) {
+  .agenda-v2-grid input,
+  .agenda-v2-grid select,
+  .agenda-v2-grid .agenda-picker-btn {
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .agenda-v2-grid select,
+  .agenda-v2-grid select:hover,
+  .agenda-v2-grid select:focus {
+    appearance: auto !important;
+    -webkit-appearance: menulist !important;
+    background-image: none !important;
+    padding-right: 13px !important;
+  }
+}
