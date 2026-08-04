@@ -6050,3 +6050,31 @@ body.public-modal-open {
     transition: none !important;
   }
 }
+
+/* V15 — estabilidade da central de notificações no Android/WebView */
+@media (max-width: 768px) {
+  .notification-center-overlay {
+    background: rgba(5, 4, 10, 0.96) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: none !important;
+    contain: layout paint;
+  }
+
+  .notification-center {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100dvh !important;
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+    background: #0d0914 !important;
+  }
+
+  .notification-center-overlay.open,
+  .notification-center-overlay.open .notification-center {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+}
