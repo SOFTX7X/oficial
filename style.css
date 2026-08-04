@@ -5690,98 +5690,88 @@ body.action-center-open { overflow:hidden!important; }
 }
 
 
-/* =========================================================
-   V9 — estabilidade no Android WebView
-   1) trava completa do loader; 2) overlays sem flash de GPU.
-   Escopo exclusivo do APK pelo user-agent VyXoraAndroidApp.
-   ========================================================= */
-html.vyxora-android-app,
-body.vyxora-android-app {
-  overscroll-behavior: none !important;
-}
+/* =============================================================
+   ANDROID/WEBVIEW — loader sem rolagem e modais sem piscadas
+   ============================================================= */
 
-html.vyxora-android-app body.vx-booting,
-body.vyxora-android-app.vx-booting {
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100dvh !important;
+/* A trava existe apenas enquanto o loader está visível. A classe
+   vx-booting é removida pelo app.js ao concluir o carregamento. */
+html:has(body.vx-booting),
+body.vx-booting {
+  width: 100%;
+  height: 100%;
   overflow: hidden !important;
   overscroll-behavior: none !important;
-  touch-action: none !important;
 }
 
-html.vyxora-android-app .vyxora-loader,
-body.vyxora-android-app .vyxora-loader {
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100dvh !important;
-  min-height: 100dvh !important;
+body.vx-booting {
+  touch-action: none;
+}
+
+body.vx-ready {
+  overflow-y: auto;
+  touch-action: auto;
+}
+
+/* Trava de fundo sem position:fixed, sem top negativo e sem scrollTo.
+   Isso evita o salto/pisca do Android WebView ao abrir e fechar telas. */
+html.vyxora-safe-layer-open,
+body.vyxora-safe-layer-open,
+html.public-modal-open,
+body.public-modal-open {
   overflow: hidden !important;
   overscroll-behavior: none !important;
-  touch-action: none !important;
 }
 
-/* Backdrop-filter em overlays fixos provoca recomposição/piscada em alguns WebViews. */
-html.vyxora-android-app .tp-overlay,
-html.vyxora-android-app .modal-overlay,
-html.vyxora-android-app .edit-overlay,
-html.vyxora-android-app .action-center-backdrop,
-html.vyxora-android-app .pub-modal-overlay,
-html.vyxora-android-app .notification-center-overlay,
-body.vyxora-android-app .tp-overlay,
-body.vyxora-android-app .modal-overlay,
-body.vyxora-android-app .edit-overlay,
-body.vyxora-android-app .action-center-backdrop,
-body.vyxora-android-app .pub-modal-overlay,
-body.vyxora-android-app .notification-center-overlay {
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  background: rgba(4, 3, 8, .96) !important;
-}
-
-html.vyxora-android-app .tp-modal,
-html.vyxora-android-app .modal,
-html.vyxora-android-app .edit-modal,
-html.vyxora-android-app .action-center-dialog,
-html.vyxora-android-app .pub-modal-full,
-body.vyxora-android-app .tp-modal,
-body.vyxora-android-app .modal,
-body.vyxora-android-app .edit-modal,
-body.vyxora-android-app .action-center-dialog,
-body.vyxora-android-app .pub-modal-full {
-  animation: none !important;
-  transition: none !important;
-  will-change: auto !important;
-  transform: none !important;
-  -webkit-transform: none !important;
-}
-
-html.vyxora-android-app .tp-overlay,
-html.vyxora-android-app .modal-overlay,
-html.vyxora-android-app .edit-overlay,
-html.vyxora-android-app .action-center-modal,
-html.vyxora-android-app .pub-modal-overlay,
-body.vyxora-android-app .tp-overlay,
-body.vyxora-android-app .modal-overlay,
-body.vyxora-android-app .edit-overlay,
-body.vyxora-android-app .action-center-modal,
-body.vyxora-android-app .pub-modal-overlay {
-  transition: opacity .10s linear, visibility .10s linear !important;
-  contain: strict;
-}
-
-/* No APK, evita reposicionar toda a página ao abrir/fechar uma segunda tela. */
-html.vyxora-android-app.public-modal-open,
-body.vyxora-android-app.public-modal-open,
-html.vyxora-android-app.vyxora-safe-layer-open,
-body.vyxora-android-app.vyxora-safe-layer-open {
+body.vyxora-safe-layer-open,
+body.public-modal-open {
   position: static !important;
   top: auto !important;
   left: auto !important;
   right: auto !important;
-  width: 100% !important;
-  height: auto !important;
-  overflow: hidden !important;
+}
+
+@media (max-width: 768px) {
+  /* Blur de fundo e transformações em elementos fixed provocam flashes
+     no Android WebView. Mantém o mesmo visual com fundo opaco estável. */
+  .modal-overlay,
+  .edit-overlay,
+  .auth-overlay,
+  .public-calendar-overlay,
+  .public-slots-overlay,
+  #pubCalendarOverlay,
+  #pubSlotsOverlay,
+  #actionCenterModal,
+  .notification-center-overlay {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgba(3, 3, 6, 0.96) !important;
+  }
+
+  .modal,
+  .edit-modal,
+  .auth-modal,
+  .flatpickr-calendar,
+  .time-picker-modal,
+  .time-picker-panel,
+  .clock-modal,
+  .clock-picker,
+  .public-calendar,
+  .public-slots-panel,
+  .action-center-panel {
+    animation: none !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    filter: none !important;
+    will-change: auto !important;
+  }
+
+  .modal-overlay.open,
+  .edit-overlay.open,
+  .public-calendar-overlay.open,
+  .public-slots-overlay.open,
+  #pubCalendarOverlay.open,
+  #pubSlotsOverlay.open {
+    animation: none !important;
+  }
 }
