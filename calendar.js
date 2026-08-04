@@ -17,7 +17,7 @@ onChange(selectedDates, dateStr, instance) {
   instance.close();
 }
   };
-  ["#agData", "#reagendarData"].forEach(sel => {
+  ["#reagendarData"].forEach(sel => {
     const el = document.querySelector(sel);
     if (el) flatpickr(el, dateConfig);
   });
@@ -455,7 +455,7 @@ onChange(selectedDates, dateStr, instance) {
   overlay.addEventListener("click", e => { if (e.target === overlay) closeTP(); });
 
   /* ── BIND NOS INPUTS ── */
-  ["#agHora", "#reagendarHora"].forEach(sel => {
+  ["#reagendarHora"].forEach(sel => {
     const el = document.querySelector(sel);
     if (!el) return;
     el.type = "text";
