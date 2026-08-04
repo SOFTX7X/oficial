@@ -1242,67 +1242,102 @@ function renderAcoes(a) {
   </div>`;
 }
 
+function ensureActionCenterModal() {
+  let modal = document.getElementById('actionCenterModal');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.id = 'actionCenterModal';
+  modal.className = 'action-center-modal';
+  modal.setAttribute('aria-hidden', 'true');
+  modal.innerHTML = `
+    <div class="action-center-backdrop" data-action-close></div>
+    <section class="action-center-dialog" role="dialog" aria-modal="true" aria-labelledby="actionCenterTitle">
+      <header class="action-center-head">
+        <div>
+          <span class="action-center-kicker">GERENCIAR</span>
+          <h3 id="actionCenterTitle">Ações do agendamento</h3>
+          <p>Escolha o que deseja fazer com este registro.</p>
+        </div>
+        <button type="button" class="action-center-close" data-action-close aria-label="Fechar">×</button>
+      </header>
+      <div class="action-center-list" id="actionCenterList"></div>
+      <button type="button" class="action-center-cancel" data-action-close>Cancelar</button>
+    </section>`;
+
+  modal.addEventListener('click', e => {
+    if (e.target.closest('[data-action-close]')) closeActionCenterModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeActionCenterModal();
+  });
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function openActionCenterModal(items, title = 'Ações do agendamento') {
+  const modal = ensureActionCenterModal();
+  const list = modal.querySelector('#actionCenterList');
+  const heading = modal.querySelector('#actionCenterTitle');
+  heading.textContent = title;
+  list.innerHTML = '';
+
+  items.filter(item => item !== 'sep').forEach(item => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'action-center-item' + (item.cls ? ' ' + item.cls : '');
+    button.innerHTML = `
+      <span class="action-center-icon">${item.icon}</span>
+      <span class="action-center-copy">
+        <strong>${item.label}</strong>
+        <small>${item.label === 'Editar' ? 'Alterar dados deste registro' : item.label === 'Duplicar' ? 'Criar uma nova cópia' : 'Remover este registro'}</small>
+      </span>
+      <span class="action-center-arrow">›</span>`;
+    button.addEventListener('click', () => {
+      closeActionCenterModal();
+      setTimeout(() => item.action(), 120);
+    });
+    list.appendChild(button);
+  });
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('action-center-open');
+  requestAnimationFrame(() => modal.querySelector('.action-center-close')?.focus());
+}
+
+function closeActionCenterModal() {
+  const modal = document.getElementById('actionCenterModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('action-center-open');
+}
+
 function buildActionMenu(id, items) {
   const wrap = document.createElement('div');
-  wrap.className = 'action-menu';
+  wrap.className = 'action-menu action-menu-center';
 
   const btn = document.createElement('button');
   btn.className = 'action-menu-btn';
   btn.type = 'button';
-  btn.setAttribute('aria-label', 'Abrir ações');
-  btn.setAttribute('aria-expanded', 'false');
+  btn.setAttribute('aria-label', 'Abrir ações do registro');
+  btn.setAttribute('aria-haspopup', 'dialog');
   btn.innerHTML = '<span></span><span></span><span></span>';
-
-  const drop = document.createElement('div');
-  drop.className = 'action-dropdown';
-  drop.setAttribute('role', 'menu');
-
-  items.forEach(item => {
-    if (item === 'sep') {
-      const sep = document.createElement('div');
-      sep.className = 'action-sep';
-      drop.appendChild(sep);
-      return;
-    }
-
-    const el = document.createElement('button');
-    el.type = 'button';
-    el.className = 'action-item' + (item.cls ? ' ' + item.cls : '');
-    el.setAttribute('role', 'menuitem');
-    el.innerHTML = `<span class="action-item-icon">${item.icon}</span><span>${item.label}</span>`;
-    el.addEventListener('click', e => {
-      e.stopPropagation();
-      e.preventDefault();
-      closeAllMenus();
-      setTimeout(() => item.action(), 50);
-    });
-    drop.appendChild(el);
-  });
-
   btn.addEventListener('click', e => {
     e.stopPropagation();
     e.preventDefault();
-
-    const isOpen = drop.classList.contains('open');
-    closeAllMenus();
-    if (isOpen) return;
-
-    wrap.classList.add('open');
-    drop.classList.add('open');
-    btn.setAttribute('aria-expanded', 'true');
-    _openMenu = drop;
-    _openMenuBtn = btn;
+    openActionCenterModal(items, 'Ações do agendamento');
   });
 
   wrap.appendChild(btn);
-  wrap.appendChild(drop);
   return wrap;
 }
 
 function closeAllMenus() {
+  closeActionCenterModal();
   document.querySelectorAll('.action-menu.open').forEach(menu => menu.classList.remove('open'));
   document.querySelectorAll('.action-dropdown.open').forEach(drop => drop.classList.remove('open'));
-  document.querySelectorAll('.action-menu-btn[aria-expanded="true"]').forEach(btn => btn.setAttribute('aria-expanded', 'false'));
   document.querySelectorAll('body > .action-dropdown').forEach(drop => drop.remove());
   _openMenu = null;
   _openMenuBtn = null;
