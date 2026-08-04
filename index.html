@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260803-31">
+<link rel="stylesheet" href="style.css?v=agenda-premium-1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -577,40 +577,56 @@
     </section>
 
     <!-- VIEW: AGENDA -->
-    <section class="view" id="view-agenda">
-      <div class="form-panel">
-        <div class="form-panel-title">Criar agendamento</div>
-        <div class="form-grid">
-          <div class="field"><label>Cliente</label><input id="agCliente" placeholder="Nome do cliente"></div>
-          <div class="field"><label>Telefone</label><input id="agTelefone" placeholder="WhatsApp"></div>
-          <div class="field"><label>Serviço</label><select id="agServico"></select></div>
-          <div class="field"><label>Profissional</label><select id="agProfissional"></select></div>
-          <div class="field">
-            <label>Data</label>
+    <section class="view agenda-premium-view" id="view-agenda">
+      <div class="agenda-intro">
+        <div class="agenda-intro-copy">
+          <span class="agenda-kicker">Central de atendimentos</span>
+          <h2>Agenda</h2>
+          <p>Crie, acompanhe e gerencie todos os agendamentos em um só lugar.</p>
+        </div>
+        <div class="agenda-intro-mark" aria-hidden="true"><span>◷</span></div>
+      </div>
+
+      <div class="form-panel agenda-create-panel">
+        <div class="agenda-form-head">
+          <div>
+            <div class="form-panel-title">Criar agendamento</div>
+            <div class="agenda-form-sub">Preencha os dados essenciais do atendimento.</div>
+          </div>
+          <span class="agenda-form-badge"><i></i>Novo atendimento</span>
+        </div>
+        <div class="form-grid agenda-form-grid">
+          <div class="field agenda-field agenda-field-client"><label><span>01</span> Cliente</label><input id="agCliente" placeholder="Nome do cliente"></div>
+          <div class="field agenda-field agenda-field-phone"><label><span>02</span> Telefone</label><input id="agTelefone" placeholder="WhatsApp"></div>
+          <div class="field agenda-field agenda-field-service"><label><span>03</span> Serviço</label><select id="agServico"></select></div>
+          <div class="field agenda-field agenda-field-pro"><label><span>04</span> Profissional</label><select id="agProfissional"></select></div>
+          <div class="field agenda-field agenda-field-date">
+            <label><span>05</span> Data</label>
             <button type="button" class="pub-picker-btn agenda-picker-btn" id="agDataBtn" onclick="abrirCalendarioAgendaInterna()">
               <span id="agDataLabel">Escolher data</span>
-              <span aria-hidden="true">⌄</span>
+              <span class="agenda-picker-icon" aria-hidden="true">⌄</span>
             </button>
             <input id="agData" type="hidden">
           </div>
-          <div class="field">
-            <label>Hora</label>
+          <div class="field agenda-field agenda-field-time">
+            <label><span>06</span> Hora</label>
             <button type="button" class="pub-picker-btn agenda-picker-btn" id="agHoraBtn" onclick="abrirHorariosAgendaInterna()">
               <span id="agHoraLabel">Escolher horário</span>
-              <span aria-hidden="true">⌄</span>
+              <span class="agenda-picker-icon" aria-hidden="true">⌄</span>
             </button>
             <input id="agHora" type="hidden">
           </div>
-          <div class="field"><label>Status</label><select id="agStatus"><option>Confirmado</option><option>Pendente</option></select></div>
-          <div class="field" style="display:grid;align-items:end"><button class="btn btn-primary btn-full" onclick="salvarAgendamento()">Salvar</button></div>
+          <div class="field agenda-field agenda-field-status"><label><span>07</span> Status</label><select id="agStatus"><option>Confirmado</option><option>Pendente</option></select></div>
+          <div class="field agenda-submit-field"><button class="btn btn-primary btn-full agenda-save-btn" onclick="salvarAgendamento()"><span>＋</span><strong>Salvar agendamento</strong></button></div>
         </div>
       </div>
-      <div class="panel">
-        <div class="panel-head">
-          <div><div class="panel-title">Agenda</div><div class="panel-sub">Todos os agendamentos</div></div>
+      <div class="panel agenda-list-panel">
+        <div class="panel-head agenda-list-head">
+          <div><span class="agenda-list-kicker">Visão geral</span><div class="panel-title">Seus agendamentos</div><div class="panel-sub">Acompanhe status, horários e ações de cada atendimento.</div></div>
+          <div class="agenda-head-decor" aria-hidden="true"><span></span><span></span><span></span></div>
         </div>
-        <div class="panel-body">
-          <div class="filter-bar" id="filterBar">
+        <div class="panel-body agenda-list-body">
+          <div class="filter-bar agenda-filter-bar" id="filterBar">
             <button class="filter-btn active" onclick="setFilter('todos',this)">Todos <span class="filter-count" id="fc-todos">0</span></button>
             <button class="filter-btn" onclick="setFilter('pendente',this)">⏳ Pendentes <span class="filter-count" id="fc-pendente">0</span></button>
             <button class="filter-btn" onclick="setFilter('confirmado',this)">✅ Confirmados <span class="filter-count" id="fc-confirmado">0</span></button>
