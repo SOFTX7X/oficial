@@ -5632,23 +5632,28 @@ body.action-center-open { overflow:hidden!important; }
   }
 
   .agenda-v2 .apt-actions {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    grid-template-columns: none !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 7px !important;
     margin-top: 11px !important;
     padding-top: 10px !important;
+    width: 100% !important;
   }
 
   .agenda-v2 .act-btn {
-    width: auto !important;
+    width: 100% !important;
     min-width: 0 !important;
-    min-height: 34px !important;
-    padding: 7px 10px !important;
-    flex: 0 0 auto !important;
+    min-height: 38px !important;
+    padding: 8px 8px !important;
     color: inherit;
     opacity: 1 !important;
     transform: none !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .agenda-v2 .apt-actions .act-btn:last-child:nth-child(odd) {
+    grid-column: 1 / -1 !important;
   }
 
   .agenda-v2 .action-menu-center {
