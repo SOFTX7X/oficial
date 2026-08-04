@@ -3125,7 +3125,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.abrirHorariosAgendaInterna = async function() {
     modoAgendaInterna = true;
     const data = document.getElementById('agData')?.value;
-    const profissionalId = document.getElementById('agProf')?.value;
+    const profissionalId = document.getElementById('agProfissional')?.value;
 
     if (!data) return toast('Escolha a data primeiro.', 'warn');
     if (!profissionalId) return toast('Escolha o profissional antes do horário.', 'warn');
