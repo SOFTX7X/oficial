@@ -5471,48 +5471,215 @@ body.action-center-open { overflow:hidden!important; }
 @media(prefers-reduced-motion:reduce){.action-center-modal,.action-center-dialog{transition:none!important}}
 
 /* =========================================================
-   AGENDA V6 — correção segura dos campos
-   Desktop: hover discreto e seta limpa.
-   Android/mobile: mantém o comportamento nativo e responsivo.
+   AGENDA V7 — restauração responsiva para Android
+   Mantém o desktop da V4 e corrige somente a experiência móvel.
    ========================================================= */
-@media (hover: hover) and (pointer: fine) and (min-width: 769px) {
-  .agenda-v2-grid input:hover,
-  .agenda-v2-grid select:hover,
-  .agenda-v2-grid .agenda-picker-btn:hover {
-    transform: none !important;
-    filter: none !important;
-    background-color: #100d17 !important;
-    border-color: rgba(157, 91, 255, .42) !important;
-    box-shadow: none !important;
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  #view-agenda.agenda-v2 {
+    gap: 12px !important;
+    padding-bottom: 86px !important;
+    overflow: visible !important;
   }
 
-  .agenda-v2-grid select,
-  .agenda-v2-grid select:hover,
-  .agenda-v2-grid select:focus {
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    padding-right: 42px !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M2 2l4 4 4-4' fill='none' stroke='%23a56cff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 15px center !important;
-    background-size: 12px 8px !important;
+  .agenda-v2-form,
+  .agenda-v2-list-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
   }
-}
 
-@media (max-width: 768px), (hover: none), (pointer: coarse) {
+  .agenda-v2-form-head,
+  .agenda-v2-list-head {
+    padding: 16px 14px 14px !important;
+    gap: 12px !important;
+  }
+
+  .agenda-v2-form-head h2,
+  .agenda-v2-list-head h2 {
+    font-size: 19px !important;
+  }
+
+  .agenda-v2-form-head p,
+  .agenda-v2-list-head p {
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+  }
+
+  .agenda-v2-form-icon {
+    width: 38px !important;
+    height: 38px !important;
+    flex: 0 0 38px !important;
+  }
+
+  .agenda-v2-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 14px !important;
+  }
+
+  .agenda-v2-grid .field {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
   .agenda-v2-grid input,
   .agenda-v2-grid select,
-  .agenda-v2-grid .agenda-picker-btn {
+  .agenda-v2-grid .agenda-picker-btn,
+  .agenda-v2-save {
+    width: 100% !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    border-radius: 6px !important;
     transform: none !important;
     filter: none !important;
   }
 
-  .agenda-v2-grid select,
-  .agenda-v2-grid select:hover,
-  .agenda-v2-grid select:focus {
+  .agenda-v2-grid select {
     appearance: auto !important;
     -webkit-appearance: menulist !important;
     background-image: none !important;
-    padding-right: 13px !important;
+    padding-right: 12px !important;
+  }
+
+  .agenda-v2-save {
+    margin-top: 2px !important;
+    box-shadow: 0 8px 22px rgba(126,42,235,.22) !important;
+  }
+
+  .agenda-v2-filter-wrap {
+    padding: 12px 10px 0 !important;
+    overflow: hidden !important;
+  }
+
+  .agenda-v2-list-panel .filter-bar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 7px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 1px 1px 12px !important;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .agenda-v2-list-panel .filter-btn {
+    flex: 0 0 auto !important;
+    min-height: 36px !important;
+    padding: 8px 11px !important;
+    transform: none !important;
+    scroll-snap-align: start;
+  }
+
+  .agenda-v2-timeline-wrap {
+    padding: 12px 10px 18px !important;
+  }
+
+  .agenda-v2 .timeline {
+    gap: 12px !important;
+  }
+
+  .agenda-v2 .tl-block {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+    gap: 6px !important;
+  }
+
+  .agenda-v2 .tl-time {
+    padding: 0 !important;
+    text-align: left !important;
+    font-size: 11px !important;
+  }
+
+  .agenda-v2 .tl-line {
+    display: none !important;
+  }
+
+  .agenda-v2 .tl-content {
+    padding-left: 0 !important;
+  }
+
+  .agenda-v2 .tl-card {
+    padding: 13px !important;
+    border-radius: 7px !important;
+    transform: none !important;
+    overflow: visible !important;
+  }
+
+  .agenda-v2 .tl-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .agenda-v2 .tl-card-top {
+    display: grid !important;
+    grid-template-columns: 36px minmax(0,1fr) auto !important;
+    gap: 10px !important;
+    align-items: start !important;
+  }
+
+  .agenda-v2 .tl-card-status {
+    grid-column: 2 / -1 !important;
+    justify-self: start !important;
+    margin-top: 5px !important;
+  }
+
+  .agenda-v2 .tl-card-meta {
+    font-size: 10.5px !important;
+    line-height: 1.45 !important;
+  }
+
+  .agenda-v2 .apt-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    grid-template-columns: none !important;
+    gap: 7px !important;
+    margin-top: 11px !important;
+    padding-top: 10px !important;
+  }
+
+  .agenda-v2 .act-btn {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 34px !important;
+    padding: 7px 10px !important;
+    flex: 0 0 auto !important;
+    color: inherit;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .agenda-v2 .action-menu-center {
+    top: 10px !important;
+    right: 10px !important;
+  }
+
+  .agenda-v2 .action-menu-center .action-menu-btn {
+    width: 36px !important;
+    height: 34px !important;
+  }
+
+  .action-center-modal {
+    padding: 12px !important;
+    align-items: center !important;
+  }
+
+  .action-center-dialog {
+    width: min(420px, 100%) !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow-y: auto !important;
+    border-radius: 10px !important;
+    padding: 16px !important;
+    transform: translateY(12px) scale(.98) !important;
+  }
+
+  .action-center-modal.open .action-center-dialog {
+    transform: translateY(0) scale(1) !important;
+  }
+
+  .action-center-item {
+    min-height: 60px !important;
   }
 }
