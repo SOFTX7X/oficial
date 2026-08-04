@@ -2995,3 +2995,236 @@ function initLandingPremiumMotion() {
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('#landingView .landing-reveal').forEach(el => el.classList.add('is-visible'));
 }, { once: true });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// AGENDA INTERNA — usa exatamente os mesmos overlays da Página Pública
+// para data e horário, sem abrir os seletores nativos/Flatpickr.
+// ═════════════════════════════════════════════════════════════════════════════
+(() => {
+  let modoAgendaInterna = false;
+  let agendaAno = 0;
+  let agendaMes = 0;
+  let agendaData = '';
+
+  const anteriorSelecionarData = selecionarDataPublica;
+  const anteriorSelecionarSlot = selecionarSlot;
+  const anteriorPubCalMes = pubCalMes;
+  const anteriorFecharCalendario = fecharCalendarioPublico;
+  const anteriorFecharSlots = fecharSlotsPublico;
+
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const mesesCurtos = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+  function abrirOverlay(id) {
+    const overlay = document.getElementById(id);
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => overlay.classList.add('open'));
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharOverlay(id) {
+    const overlay = document.getElementById(id);
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    setTimeout(() => {
+      if (!overlay.classList.contains('open')) overlay.style.display = 'none';
+    }, 200);
+    document.body.style.overflow = '';
+  }
+
+  function formatarDataAgenda(iso) {
+    if (!iso) return 'Escolher data';
+    const [ano, mes, dia] = iso.split('-').map(Number);
+    return `${dia} de ${mesesCurtos[mes - 1]} de ${ano}`;
+  }
+
+  function renderCalendarioAgendaInterna() {
+    const titulo = document.getElementById('pubCalTitulo');
+    if (titulo) titulo.textContent = `${meses[agendaMes]} ${agendaAno}`;
+
+    const grid = document.getElementById('pubCalGrid');
+    if (!grid) return;
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const primeiro = new Date(agendaAno, agendaMes, 1);
+    const ultimo = new Date(agendaAno, agendaMes + 1, 0);
+    const inicioSemana = primeiro.getDay();
+    const diasFechados = state.empresa?.dias_fechados || state.diasFechados || [];
+
+    let html = '';
+    if (inicioSemana > 0) {
+      const anterior = new Date(agendaAno, agendaMes, 0).getDate();
+      for (let i = inicioSemana - 1; i >= 0; i -= 1) {
+        html += `<div class="pub-cal-cell fora-mes">${anterior - i}</div>`;
+      }
+    }
+
+    for (let dia = 1; dia <= ultimo.getDate(); dia += 1) {
+      const data = new Date(agendaAno, agendaMes, dia);
+      data.setHours(0, 0, 0, 0);
+      const iso = `${agendaAno}-${String(agendaMes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+      const bloqueado = data < hoje || diasFechados.includes(data.getDay());
+      const selecionado = agendaData === iso;
+      html += `<div class="pub-cal-cell${bloqueado ? ' bloqueado' : ''}${selecionado ? ' selecionado' : ''}" ${bloqueado ? '' : `onclick="selecionarDataPublica('${iso}')"`}>${dia}</div>`;
+    }
+
+    const ultimoDiaSemana = ultimo.getDay();
+    if (ultimoDiaSemana < 6) {
+      for (let dia = 1; dia <= 6 - ultimoDiaSemana; dia += 1) {
+        html += `<div class="pub-cal-cell fora-mes">${dia}</div>`;
+      }
+    }
+    grid.innerHTML = html;
+  }
+
+  window.abrirCalendarioAgendaInterna = function() {
+    modoAgendaInterna = true;
+    agendaData = document.getElementById('agData')?.value || '';
+    const base = agendaData ? new Date(`${agendaData}T12:00:00`) : new Date();
+    agendaAno = base.getFullYear();
+    agendaMes = base.getMonth();
+
+    const titulo = document.querySelector('#pubCalendarioOverlay .pub-modal-title');
+    if (titulo) titulo.textContent = 'Escolha a data';
+    renderCalendarioAgendaInterna();
+    abrirOverlay('pubCalendarioOverlay');
+  };
+
+  pubCalMes = function(direcao) {
+    if (!modoAgendaInterna) return anteriorPubCalMes(direcao);
+    agendaMes += direcao;
+    if (agendaMes > 11) { agendaMes = 0; agendaAno += 1; }
+    if (agendaMes < 0) { agendaMes = 11; agendaAno -= 1; }
+    renderCalendarioAgendaInterna();
+  };
+
+  selecionarDataPublica = function(iso) {
+    if (!modoAgendaInterna) return anteriorSelecionarData(iso);
+
+    agendaData = iso;
+    const input = document.getElementById('agData');
+    const label = document.getElementById('agDataLabel');
+    const botao = document.getElementById('agDataBtn');
+    if (input) input.value = iso;
+    if (label) label.textContent = formatarDataAgenda(iso);
+    if (botao) botao.classList.add('selecionado');
+
+    const horaInput = document.getElementById('agHora');
+    const horaLabel = document.getElementById('agHoraLabel');
+    const horaBotao = document.getElementById('agHoraBtn');
+    if (horaInput) horaInput.value = '';
+    if (horaLabel) horaLabel.textContent = 'Escolher horário';
+    if (horaBotao) horaBotao.classList.remove('selecionado');
+
+    fecharOverlay('pubCalendarioOverlay');
+    window.abrirHorariosAgendaInterna();
+  };
+
+  window.abrirHorariosAgendaInterna = async function() {
+    modoAgendaInterna = true;
+    const data = document.getElementById('agData')?.value;
+    const profissionalId = document.getElementById('agProf')?.value;
+
+    if (!data) return toast('Escolha a data primeiro.', 'warn');
+    if (!profissionalId) return toast('Escolha o profissional antes do horário.', 'warn');
+
+    const empresa = state.empresa || {};
+    const profissional = (state.profissionais || []).find(item => String(item.id) === String(profissionalId)) || {};
+    const inicio = empresa.horario_inicio || profissional.horario_inicio || '09:00';
+    const fim = empresa.horario_fim || profissional.horario_fim || '18:00';
+    const intervalo = Math.max(5, Number(empresa.intervalo_slots || profissional.intervalo_slots || 30));
+
+    let consulta = db.from('agenda_agendamentos')
+      .select('hora, status')
+      .eq('data', data)
+      .eq('profissional_id', profissionalId)
+      .in('status', ['Pendente', 'Confirmado', 'Reagendado']);
+
+    const { data: registros, error } = await consulta;
+    const grid = document.getElementById('pubSlotsGrid');
+    if (!grid) return;
+
+    if (error) {
+      grid.innerHTML = '<p style="color:var(--text3);text-align:center;padding:24px">Não foi possível carregar os horários.</p>';
+    } else {
+      const ocupados = new Set((registros || []).map(item => (item.hora || '').slice(0, 5)));
+      const [hIni, mIni] = inicio.split(':').map(Number);
+      const [hFim, mFim] = fim.split(':').map(Number);
+      let atual = hIni * 60 + mIni;
+      const limite = hFim * 60 + mFim;
+      const slots = [];
+      while (atual < limite) {
+        slots.push(`${String(Math.floor(atual / 60)).padStart(2, '0')}:${String(atual % 60).padStart(2, '0')}`);
+        atual += intervalo;
+      }
+      grid.innerHTML = slots.map(hora => {
+        const ocupado = ocupados.has(hora);
+        return `<div class="pub-slot${ocupado ? ' ocupado' : ' livre'}" ${ocupado ? '' : `onclick="selecionarSlot('${hora}')"`}>${hora}${ocupado ? '<span class="slot-tag">Ocupado</span>' : ''}</div>`;
+      }).join('');
+    }
+
+    const titulo = document.getElementById('pubSlotsTitulo');
+    if (titulo) titulo.textContent = `Horários — ${formatarDataAgenda(data)}`;
+    const tituloModal = document.querySelector('#pubSlotsOverlay .pub-modal-title');
+    if (tituloModal) tituloModal.textContent = 'Escolha o horário';
+    abrirOverlay('pubSlotsOverlay');
+  };
+
+  selecionarSlot = function(hora) {
+    if (!modoAgendaInterna) return anteriorSelecionarSlot(hora);
+
+    const input = document.getElementById('agHora');
+    const label = document.getElementById('agHoraLabel');
+    const botao = document.getElementById('agHoraBtn');
+    if (input) input.value = hora;
+    if (label) label.textContent = hora;
+    if (botao) botao.classList.add('selecionado');
+    fecharOverlay('pubSlotsOverlay');
+    modoAgendaInterna = false;
+  };
+
+  fecharCalendarioPublico = function(evento) {
+    if (!modoAgendaInterna) return anteriorFecharCalendario(evento);
+    if (evento && evento.target !== document.getElementById('pubCalendarioOverlay')) return;
+    fecharOverlay('pubCalendarioOverlay');
+    modoAgendaInterna = false;
+  };
+
+  fecharSlotsPublico = function(evento) {
+    if (!modoAgendaInterna) return anteriorFecharSlots(evento);
+    if (evento && evento.target !== document.getElementById('pubSlotsOverlay')) return;
+    fecharOverlay('pubSlotsOverlay');
+    modoAgendaInterna = false;
+  };
+
+  // Mantém os rótulos sincronizados quando o formulário é limpo pelo sistema.
+  document.addEventListener('DOMContentLoaded', () => {
+    const observar = () => {
+      const data = document.getElementById('agData');
+      const hora = document.getElementById('agHora');
+      const dataLabel = document.getElementById('agDataLabel');
+      const horaLabel = document.getElementById('agHoraLabel');
+      const dataBtn = document.getElementById('agDataBtn');
+      const horaBtn = document.getElementById('agHoraBtn');
+      if (!data || !hora) return;
+
+      let anteriorData = data.value;
+      let anteriorHora = hora.value;
+      setInterval(() => {
+        if (data.value !== anteriorData) {
+          anteriorData = data.value;
+          if (dataLabel) dataLabel.textContent = data.value ? formatarDataAgenda(data.value) : 'Escolher data';
+          dataBtn?.classList.toggle('selecionado', Boolean(data.value));
+        }
+        if (hora.value !== anteriorHora) {
+          anteriorHora = hora.value;
+          if (horaLabel) horaLabel.textContent = hora.value || 'Escolher horário';
+          horaBtn?.classList.toggle('selecionado', Boolean(hora.value));
+        }
+      }, 250);
+    };
+    observar();
+  }, { once: true });
+})();
