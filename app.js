@@ -3342,3 +3342,214 @@ document.addEventListener('DOMContentLoaded', () => {
     observar();
   }, { once: true });
 })();
+
+/* =========================================================
+   AGENDA V14 — selects personalizados para Serviço,
+   Profissional e Status. Mantém os <select> originais como
+   fonte de valor para preservar toda a lógica existente.
+   ========================================================= */
+(() => {
+  const SELECT_IDS = ['agServico', 'agProfissional', 'agStatus'];
+  const instances = new Map();
+  let activeInstance = null;
+  let layer = null;
+  let panel = null;
+
+  function ensureLayer() {
+    if (layer) return;
+
+    layer = document.createElement('div');
+    layer.className = 'agenda-custom-select-layer';
+    layer.hidden = true;
+    layer.innerHTML = `
+      <div class="agenda-custom-select-backdrop" data-agenda-select-close></div>
+      <div class="agenda-custom-select-panel" role="listbox" tabindex="-1"></div>
+    `;
+    document.body.appendChild(layer);
+    panel = layer.querySelector('.agenda-custom-select-panel');
+
+    layer.addEventListener('click', (event) => {
+      if (event.target.closest('[data-agenda-select-close]')) {
+        closeCustomSelect();
+        return;
+      }
+
+      const optionButton = event.target.closest('[data-agenda-select-value]');
+      if (!optionButton || !activeInstance || optionButton.disabled) return;
+
+      const value = optionButton.dataset.agendaSelectValue ?? '';
+      activeInstance.select.value = value;
+      activeInstance.select.dispatchEvent(new Event('input', { bubbles: true }));
+      activeInstance.select.dispatchEvent(new Event('change', { bubbles: true }));
+      syncTrigger(activeInstance);
+      closeCustomSelect(true);
+    });
+  }
+
+  function selectedOption(select) {
+    return select.options[select.selectedIndex] || select.options[0] || null;
+  }
+
+  function syncTrigger(instance) {
+    const option = selectedOption(instance.select);
+    instance.label.textContent = option?.textContent?.trim() || 'Selecione';
+    instance.trigger.disabled = instance.select.disabled;
+    instance.trigger.setAttribute('aria-disabled', String(instance.select.disabled));
+  }
+
+  function renderOptions(instance) {
+    panel.replaceChildren();
+    const fragment = document.createDocumentFragment();
+
+    Array.from(instance.select.options).forEach((option) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'agenda-custom-select-option';
+      button.dataset.agendaSelectValue = option.value;
+      button.textContent = option.textContent.trim();
+      button.disabled = option.disabled;
+      button.setAttribute('role', 'option');
+      button.setAttribute('aria-selected', String(option.selected));
+      if (option.selected) button.classList.add('is-selected');
+      fragment.appendChild(button);
+    });
+
+    panel.appendChild(fragment);
+  }
+
+  function positionPanel(trigger) {
+    if (window.matchMedia('(max-width: 700px)').matches) {
+      panel.style.removeProperty('left');
+      panel.style.removeProperty('top');
+      panel.style.removeProperty('width');
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    const viewportPadding = 12;
+    const width = Math.max(rect.width, 220);
+    panel.style.width = `${Math.min(width, window.innerWidth - viewportPadding * 2)}px`;
+
+    const estimatedHeight = Math.min(panel.scrollHeight || 260, 360);
+    const spaceBelow = window.innerHeight - rect.bottom - viewportPadding;
+    const opensAbove = spaceBelow < Math.min(estimatedHeight, 220) && rect.top > spaceBelow;
+    const top = opensAbove
+      ? Math.max(viewportPadding, rect.top - estimatedHeight - 6)
+      : Math.min(window.innerHeight - estimatedHeight - viewportPadding, rect.bottom + 6);
+    const left = Math.min(
+      Math.max(viewportPadding, rect.left),
+      window.innerWidth - Math.min(width, window.innerWidth - viewportPadding * 2) - viewportPadding
+    );
+
+    panel.style.left = `${left}px`;
+    panel.style.top = `${Math.max(viewportPadding, top)}px`;
+  }
+
+  function openCustomSelect(instance) {
+    if (!instance || instance.select.disabled) return;
+    ensureLayer();
+
+    if (activeInstance && activeInstance !== instance) {
+      activeInstance.trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    activeInstance = instance;
+    syncTrigger(instance);
+    renderOptions(instance);
+    positionPanel(instance.trigger);
+
+    layer.hidden = false;
+    instance.trigger.setAttribute('aria-expanded', 'true');
+    requestAnimationFrame(() => layer.classList.add('is-open'));
+  }
+
+  function closeCustomSelect(restoreFocus = false) {
+    if (!layer || layer.hidden) return;
+
+    const previous = activeInstance;
+    layer.classList.remove('is-open');
+    previous?.trigger.setAttribute('aria-expanded', 'false');
+    activeInstance = null;
+
+    window.setTimeout(() => {
+      if (!layer.classList.contains('is-open')) layer.hidden = true;
+    }, 140);
+
+    if (restoreFocus && previous?.trigger) {
+      previous.trigger.focus({ preventScroll: true });
+    }
+  }
+
+  function enhanceSelect(select) {
+    if (!select || select.dataset.agendaCustomSelect === 'true') return;
+
+    select.dataset.agendaCustomSelect = 'true';
+    select.classList.add('agenda-native-select-hidden');
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'agenda-custom-select-trigger';
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.innerHTML = `
+      <span class="agenda-custom-select-trigger__label"></span>
+      <span class="agenda-custom-select-trigger__chevron" aria-hidden="true"></span>
+    `;
+    select.insertAdjacentElement('afterend', trigger);
+
+    const instance = {
+      select,
+      trigger,
+      label: trigger.querySelector('.agenda-custom-select-trigger__label')
+    };
+    instances.set(select.id, instance);
+    syncTrigger(instance);
+
+    trigger.addEventListener('click', () => {
+      if (activeInstance === instance && layer?.classList.contains('is-open')) {
+        closeCustomSelect();
+      } else {
+        openCustomSelect(instance);
+      }
+    });
+
+    select.addEventListener('change', () => syncTrigger(instance));
+    select.addEventListener('input', () => syncTrigger(instance));
+
+    const observer = new MutationObserver(() => {
+      syncTrigger(instance);
+      if (activeInstance === instance) {
+        renderOptions(instance);
+        positionPanel(instance.trigger);
+      }
+    });
+    observer.observe(select, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['disabled', 'selected', 'label', 'value']
+    });
+  }
+
+  function initAgendaCustomSelects() {
+    SELECT_IDS.forEach((id) => enhanceSelect(document.getElementById(id)));
+  }
+
+  document.addEventListener('DOMContentLoaded', initAgendaCustomSelects, { once: true });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && activeInstance) closeCustomSelect(true);
+  });
+
+  window.addEventListener('resize', () => {
+    if (activeInstance && layer?.classList.contains('is-open')) {
+      positionPanel(activeInstance.trigger);
+    }
+  }, { passive: true });
+
+  window.addEventListener('scroll', () => {
+    if (activeInstance && !window.matchMedia('(max-width: 700px)').matches) {
+      closeCustomSelect();
+    }
+  }, { passive: true, capture: true });
+})();
