@@ -1196,7 +1196,7 @@ function renderTimeline() {
     const block = document.createElement('div');
     block.className = 'tl-block'; block.id = 'ag-' + a.id;
     block.innerHTML = `
-      <div class="tl-time">${a.hora || '—'}</div>
+      <div class="tl-time">${String(a.hora || '—').slice(0,5)}</div>
       <div class="tl-line"></div>
       <div class="tl-content">
         <div class="tl-card">
