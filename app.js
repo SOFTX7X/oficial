@@ -1243,37 +1243,69 @@ function renderAcoes(a) {
 }
 
 function buildActionMenu(id, items) {
-  const wrap = document.createElement('div'); wrap.className = 'action-menu';
-  const btn = document.createElement('button'); btn.className = 'action-menu-btn'; btn.innerHTML = '⋮'; btn.type = 'button';
-  const drop = document.createElement('div'); drop.className = 'action-dropdown';
+  const wrap = document.createElement('div');
+  wrap.className = 'action-menu';
+
+  const btn = document.createElement('button');
+  btn.className = 'action-menu-btn';
+  btn.type = 'button';
+  btn.setAttribute('aria-label', 'Abrir ações');
+  btn.setAttribute('aria-expanded', 'false');
+  btn.innerHTML = '<span></span><span></span><span></span>';
+
+  const drop = document.createElement('div');
+  drop.className = 'action-dropdown';
+  drop.setAttribute('role', 'menu');
+
   items.forEach(item => {
-    if (item === 'sep') { const s = document.createElement('div'); s.className = 'action-sep'; drop.appendChild(s); return; }
-    const el = document.createElement('button'); el.type = 'button';
+    if (item === 'sep') {
+      const sep = document.createElement('div');
+      sep.className = 'action-sep';
+      drop.appendChild(sep);
+      return;
+    }
+
+    const el = document.createElement('button');
+    el.type = 'button';
     el.className = 'action-item' + (item.cls ? ' ' + item.cls : '');
-    el.innerHTML = `<span class="action-item-icon">${item.icon}</span>${item.label}`;
-    el.addEventListener('click', e => { e.stopPropagation(); e.preventDefault(); closeAllMenus(); setTimeout(() => item.action(), 50); });
+    el.setAttribute('role', 'menuitem');
+    el.innerHTML = `<span class="action-item-icon">${item.icon}</span><span>${item.label}</span>`;
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      closeAllMenus();
+      setTimeout(() => item.action(), 50);
+    });
     drop.appendChild(el);
   });
+
   btn.addEventListener('click', e => {
-    e.stopPropagation(); e.preventDefault();
-    if (_openMenu === drop) { closeAllMenus(); return; }
+    e.stopPropagation();
+    e.preventDefault();
+
+    const isOpen = drop.classList.contains('open');
     closeAllMenus();
-    const rect = btn.getBoundingClientRect(), dropW = 200;
-    const viewportW = window.innerWidth;
-    const viewportH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-    let left = rect.right - dropW, top = rect.bottom + 6;
-    if (left < 8) left = rect.left;
-    if (left + dropW > viewportW - 8) left = viewportW - dropW - 8;
-    if (top + 200 > viewportH - 8) top = rect.top - 210;
-    drop.style.top = top + 'px'; drop.style.left = left + 'px'; drop.style.minWidth = dropW + 'px';
-    document.body.appendChild(drop); drop.classList.add('open'); _openMenu = drop; _openMenuBtn = btn;
+    if (isOpen) return;
+
+    wrap.classList.add('open');
+    drop.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    _openMenu = drop;
+    _openMenuBtn = btn;
   });
-  wrap.appendChild(btn); wrap.appendChild(drop); return wrap;
+
+  wrap.appendChild(btn);
+  wrap.appendChild(drop);
+  return wrap;
 }
 
 function closeAllMenus() {
-  if (_openMenu) { _openMenu.classList.remove('open'); if (_openMenu.parentElement === document.body) document.body.removeChild(_openMenu); _openMenu = null; _openMenuBtn = null; }
-  document.querySelectorAll('body > .action-dropdown').forEach(d => { d.classList.remove('open'); if (d.parentElement === document.body) document.body.removeChild(d); });
+  document.querySelectorAll('.action-menu.open').forEach(menu => menu.classList.remove('open'));
+  document.querySelectorAll('.action-dropdown.open').forEach(drop => drop.classList.remove('open'));
+  document.querySelectorAll('.action-menu-btn[aria-expanded="true"]').forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+  document.querySelectorAll('body > .action-dropdown').forEach(drop => drop.remove());
+  _openMenu = null;
+  _openMenuBtn = null;
 }
 
 function renderClientes() {
