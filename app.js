@@ -1,3 +1,13 @@
+// V9 — identificação segura do APK Android para ajustes de renderização.
+(() => {
+  const isAndroidApp = /VyXoraAndroidApp/i.test(navigator.userAgent || '');
+  if (!isAndroidApp) return;
+  document.documentElement.classList.add('vyxora-android-app');
+  const markBody = () => document.body?.classList.add('vyxora-android-app');
+  if (document.body) markBody();
+  else document.addEventListener('DOMContentLoaded', markBody, { once: true });
+})();
+
 
 // ═══════════════════════════════════════════════════════════════
 // V5 — TRAVA SEGURA DE SEGUNDAS TELAS
