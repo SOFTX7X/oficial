@@ -1,13 +1,3 @@
-// V9 — identificação segura do APK Android para ajustes de renderização.
-(() => {
-  const isAndroidApp = /VyXoraAndroidApp/i.test(navigator.userAgent || '');
-  if (!isAndroidApp) return;
-  document.documentElement.classList.add('vyxora-android-app');
-  const markBody = () => document.body?.classList.add('vyxora-android-app');
-  if (document.body) markBody();
-  else document.addEventListener('DOMContentLoaded', markBody, { once: true });
-})();
-
 
 // ═══════════════════════════════════════════════════════════════
 // V5 — TRAVA SEGURA DE SEGUNDAS TELAS
@@ -15,26 +5,19 @@
 // ═══════════════════════════════════════════════════════════════
 const VYXORA_SAFE_LAYER = {
   count: 0,
-  scrollY: 0,
 
   lock() {
     this.count += 1;
     if (this.count > 1) return;
-
-    this.scrollY = window.scrollY || window.pageYOffset || 0;
     document.documentElement.classList.add('vyxora-safe-layer-open');
     document.body.classList.add('vyxora-safe-layer-open');
-    document.body.style.top = `-${this.scrollY}px`;
   },
 
   unlock() {
     this.count = Math.max(0, this.count - 1);
     if (this.count > 0) return;
-
     document.documentElement.classList.remove('vyxora-safe-layer-open');
     document.body.classList.remove('vyxora-safe-layer-open');
-    document.body.style.top = '';
-    window.scrollTo(0, this.scrollY);
   }
 };
 
@@ -1850,7 +1833,7 @@ function openModalRecusa(id) {
 
 function closeModalRecusa() {
   const overlay = $('modalRecusaOverlay'); if (overlay) overlay.classList.remove('open');
-  document.body.style.overflow = '';
+  unlockPublicModalScroll();
   _recusaId = null; _recusaMotivo = null;
 }
 
@@ -1921,7 +1904,7 @@ function openConfirmModal({ icon = '⚠️', type = 'danger', title = 'Tem certe
   if (btn) { btn.textContent = btnLabel; btn.className = 'btn ' + (type === 'danger' ? 'btn-danger' : 'btn-primary'); }
   _confirmCb = cb;
   const overlay = $('confirmOverlay'); if (overlay) overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockSecondScreen();
 }
 
 function closeConfirmModal() {
@@ -1962,12 +1945,12 @@ function openEditModal(title, bodyHtml, saveCb) {
   _editSaveCb = saveCb;
   const saveBtn = $('editSaveBtn'); if (saveBtn) saveBtn.onclick = () => { if (_editSaveCb) _editSaveCb(); };
   const overlay = $('editOverlay'); if (overlay) overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockSecondScreen();
 }
 
 function closeEditModal() {
   const overlay = $('editOverlay'); if (overlay) overlay.classList.remove('open'); _editSaveCb = null;
-  document.body.style.overflow = '';
+  unlockSecondScreen();
 }
 
 function editServico(id) {
@@ -2448,27 +2431,20 @@ Object.assign(window, {
 
 
 // ── TRAVA DE ROLAGEM DOS MODAIS PÚBLICOS ─────────────────────────────────────
-let _publicModalScrollY = 0;
 let _publicModalLockCount = 0;
 
 function lockPublicModalScroll() {
   _publicModalLockCount += 1;
   if (_publicModalLockCount > 1) return;
-
-  _publicModalScrollY = window.scrollY || window.pageYOffset || 0;
   document.documentElement.classList.add('public-modal-open');
   document.body.classList.add('public-modal-open');
-  document.body.style.top = `-${_publicModalScrollY}px`;
 }
 
 function unlockPublicModalScroll() {
   _publicModalLockCount = Math.max(0, _publicModalLockCount - 1);
   if (_publicModalLockCount > 0) return;
-
   document.documentElement.classList.remove('public-modal-open');
   document.body.classList.remove('public-modal-open');
-  document.body.style.top = '';
-  window.scrollTo(0, _publicModalScrollY);
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
