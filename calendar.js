@@ -1,24 +1,6 @@
 /* PATCH CLIQUES LANDING/AUTH */
 window.__authOpenMode = null;
 
-window.openAuth = function(mode) {
-  window.__authOpenMode = mode || 'login';
-  const overlay = document.getElementById('authOverlay');
-  if (overlay) overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  if (window.__authOpenMode === 'login') {
-    if (typeof window.showLogin === 'function') window.showLogin();
-  } else {
-    if (typeof window.showCadastro === 'function') window.showCadastro();
-  }
-};
-
-window.closeAuth = function() {
-  const overlay = document.getElementById('authOverlay');
-  if (overlay) overlay.classList.remove('open');
-  document.body.style.overflow = '';
-};
-
 document.addEventListener("DOMContentLoaded", () => {
 
   /* ── FLATPICKR DATAS ── */
@@ -35,7 +17,7 @@ onChange(selectedDates, dateStr, instance) {
   instance.close();
 }
   };
-  ["#reagendarData"].forEach(sel => {
+  ["#agData", "#reagendarData"].forEach(sel => {
     const el = document.querySelector(sel);
     if (el) flatpickr(el, dateConfig);
   });
@@ -451,12 +433,12 @@ onChange(selectedDates, dateStr, instance) {
 
     updatePreview();
     overlay.classList.add("open");
-    document.body.style.overflow = "hidden";
+    window.VYXORA_SCROLL?.lock("time-picker");
   }
 
   function closeTP() {
     overlay.classList.remove("open");
-    document.body.style.overflow = "";
+    window.VYXORA_SCROLL?.unlock("time-picker");
     currentInput = null;
   }
 
@@ -473,7 +455,7 @@ onChange(selectedDates, dateStr, instance) {
   overlay.addEventListener("click", e => { if (e.target === overlay) closeTP(); });
 
   /* ── BIND NOS INPUTS ── */
-  ["#reagendarHora"].forEach(sel => {
+  ["#agHora", "#reagendarHora"].forEach(sel => {
     const el = document.querySelector(sel);
     if (!el) return;
     el.type = "text";
