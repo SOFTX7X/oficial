@@ -6131,3 +6131,40 @@ body.public-modal-open {
   background: rgba(126,61,209,.23) !important;
   box-shadow: 0 0 0 3px rgba(144,76,232,.10) !important;
 }
+
+
+/* AUTH: confirmação de e-mail e recuperação de senha */
+.auth-forgot-link {
+  align-self: flex-end;
+  margin-top: -4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #b98cff;
+  font: 600 12px 'Geist', sans-serif;
+  cursor: pointer;
+}
+.auth-forgot-link:hover { color: #d5b8ff; }
+.auth-flow-screen { width: 100%; }
+.auth-flow-icon {
+  width: 46px; height: 46px; margin-bottom: 18px;
+  display: grid; place-items: center;
+  border: 1px solid rgba(168,85,247,.42);
+  border-radius: 9px;
+  background: linear-gradient(145deg, rgba(124,58,237,.22), rgba(20,12,31,.82));
+  color: #c69aff; font-size: 19px; font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.auth-form-sub strong { color: #d9c8ef; overflow-wrap: anywhere; }
+.auth-code-input {
+  text-align: center;
+  letter-spacing: .42em;
+  font-size: 22px !important;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.auth-modal .btn:disabled { opacity: .55; cursor: not-allowed; transform: none !important; }
+@media (max-width: 700px) {
+  .auth-flow-icon { width: 42px; height: 42px; margin-bottom: 14px; }
+  .auth-code-input { font-size: 20px !important; letter-spacing: .34em; }
+}
