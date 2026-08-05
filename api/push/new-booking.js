@@ -22,19 +22,25 @@ function safeTopic(companyId) {
   return `empresa_${String(companyId).trim().replace(/[^a-zA-Z0-9-_.~%]/g, '_')}`;
 }
 
-function formatBookingDate(value) {
-  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return String(value || '').trim();
+function formatDate(dateValue) {
+  const value = String(dateValue || '').trim();
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (!match) return value;
 
   const [, , month, day] = match;
   return `${day}/${month}`;
 }
 
-function formatBookingTime(value) {
-  const match = String(value || '').match(/^(\d{2}):(\d{2})/);
-  if (!match) return String(value || '').trim();
+function formatTime(timeValue) {
+  const value = String(timeValue || '').trim();
+  const match = value.match(/^(\d{2}):(\d{2})/);
+  return match ? `${match[1]}:${match[2]}` : value;
+}
 
-  return `${match[1]}:${match[2]}`;
+function cleanText(value, fallback) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  return text || fallback;
 }
 
 export default async function handler(req, res) {
@@ -79,21 +85,25 @@ export default async function handler(req, res) {
       return res.status(409).json({ error: 'Agendamento fora da janela de envio.' });
     }
 
-    const clientName = String(booking.cliente_nome || 'Cliente').trim();
-    const serviceName = String(booking.servico_nome || 'Serviço').trim();
-    const date = formatBookingDate(booking.data);
-    const time = formatBookingTime(booking.hora);
+    const clientName = cleanText(booking.cliente_nome, 'Cliente');
+    const serviceName = cleanText(booking.servico_nome, 'Serviço');
+    const date = formatDate(booking.data);
+    const time = formatTime(booking.hora);
 
     await getMessaging(getFirebaseApp()).send({
       topic: safeTopic(companyId),
       notification: {
         title: 'Novo agendamento',
-        body: `${clientName}\n${serviceName} • ${date} às ${time}`
+        body: `Cliente: ${clientName}\n${serviceName} • ${date} às ${time}`
       },
       data: {
         appointmentId: String(booking.id),
         companyId: String(booking.empresa_id),
-        type: 'new_booking'
+        type: 'new_booking',
+        clientName,
+        serviceName,
+        date,
+        time
       },
       android: {
         priority: 'high',
