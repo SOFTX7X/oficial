@@ -812,6 +812,192 @@ function setView(view) {
   });
 }
 
+
+const AUTH_PENDING_KEY = 'vyxora_pending_signup_v1';
+let _authEmail = '';
+let _recoveryEmail = '';
+let _resendTimer = null;
+
+function esconderTelasAuth() {
+  ['formLogin','formCadastro','formVerifyEmail','formForgotPassword','formRecoveryCode','formNewPassword'].forEach(id => {
+    const el = $(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function mostrarTelaAuth(id) {
+  esconderTelasAuth();
+  const el = $(id);
+  if (el) el.style.display = 'block';
+}
+
+function normalizarCodigo(valor) {
+  return String(valor || '').replace(/\D/g, '').slice(0, 8);
+}
+
+function mensagemAuth(error, fallback) {
+  const code = String(error?.code || '').toLowerCase();
+  const msg = String(error?.message || '').toLowerCase();
+  if (code.includes('otp_expired') || msg.includes('expired')) return 'O código expirou. Solicite um novo.';
+  if (code.includes('otp_disabled') || msg.includes('invalid') || msg.includes('token')) return 'Código inválido. Confira e tente novamente.';
+  if (code.includes('email_not_confirmed') || msg.includes('email not confirmed')) return 'Confirme seu e-mail antes de entrar.';
+  if (code.includes('over_request_rate_limit') || msg.includes('rate limit')) return 'Muitas tentativas. Aguarde um pouco e tente novamente.';
+  if (msg.includes('already registered')) return 'Este e-mail já está cadastrado.';
+  return error?.message || fallback;
+}
+
+function guardarCadastroPendente(data) {
+  localStorage.setItem(AUTH_PENDING_KEY, JSON.stringify({ ...data, createdAt: Date.now() }));
+}
+
+function lerCadastroPendente() {
+  try { return JSON.parse(localStorage.getItem(AUTH_PENDING_KEY) || 'null'); }
+  catch (_) { return null; }
+}
+
+function limparCadastroPendente() {
+  localStorage.removeItem(AUTH_PENDING_KEY);
+}
+
+function iniciarContagemReenvio(buttonId, seconds = 45) {
+  if (_resendTimer) clearInterval(_resendTimer);
+  const btn = $(buttonId);
+  if (!btn) return;
+  let left = seconds;
+  btn.disabled = true;
+  btn.textContent = `Reenviar em ${left}s`;
+  _resendTimer = setInterval(() => {
+    left -= 1;
+    if (left <= 0) {
+      clearInterval(_resendTimer); _resendTimer = null;
+      btn.disabled = false; btn.textContent = 'Reenviar código';
+    } else btn.textContent = `Reenviar em ${left}s`;
+  }, 1000);
+}
+
+function showVerifyEmail(email) {
+  _authEmail = String(email || '').trim().toLowerCase();
+  setText('verifyEmailLabel', _authEmail);
+  const code = $('verifyEmailCode'); if (code) code.value = '';
+  mostrarTelaAuth('formVerifyEmail');
+  setTimeout(() => code?.focus({ preventScroll: true }), 60);
+}
+
+function showForgotPassword() {
+  const current = ($('loginEmail')?.value || _recoveryEmail || '').trim();
+  const input = $('recoveryEmail'); if (input) input.value = current;
+  mostrarTelaAuth('formForgotPassword');
+  setTimeout(() => input?.focus({ preventScroll: true }), 60);
+}
+
+function showRecoveryCode(email) {
+  _recoveryEmail = String(email || '').trim().toLowerCase();
+  setText('recoveryEmailLabel', _recoveryEmail);
+  const code = $('recoveryCode'); if (code) code.value = '';
+  mostrarTelaAuth('formRecoveryCode');
+  setTimeout(() => code?.focus({ preventScroll: true }), 60);
+}
+
+function showNewPassword() {
+  mostrarTelaAuth('formNewPassword');
+  setTimeout(() => $('newPassword')?.focus({ preventScroll: true }), 60);
+}
+
+function voltarCadastroEmail() {
+  showCadastro();
+  _mostrarStep(1);
+  setTimeout(() => $('cadEmail')?.focus({ preventScroll: true }), 60);
+}
+
+async function reenviarCodigoCadastro() {
+  const email = _authEmail || lerCadastroPendente()?.email;
+  if (!email) return toast('Informe o e-mail do cadastro.', 'err');
+  const btn = $('btnResendSignup'); if (btn) btn.disabled = true;
+  const { error } = await db.auth.resend({ type: 'signup', email });
+  if (error) { if (btn) btn.disabled = false; return toast(mensagemAuth(error, 'Não foi possível reenviar o código.'), 'err'); }
+  toast('Novo código enviado para seu e-mail.', 'ok');
+  iniciarContagemReenvio('btnResendSignup');
+}
+
+async function confirmarEmailCadastro() {
+  const email = _authEmail || lerCadastroPendente()?.email;
+  const token = normalizarCodigo($('verifyEmailCode')?.value);
+  if (!email || token.length < 6) return toast('Digite o código recebido por e-mail.', 'err');
+  const btn = $('btnVerifyEmail'); if (btn) { btn.disabled = true; btn.textContent = 'Confirmando...'; }
+  try {
+    const { data, error } = await db.auth.verifyOtp({ email, token, type: 'email' });
+    if (error || !data?.user) return toast(mensagemAuth(error, 'Não foi possível confirmar o e-mail.'), 'err');
+    const pendente = lerCadastroPendente();
+    if (pendente && pendente.email === email) {
+      const ok = await provisionarCadastroConfirmado(data.user, pendente);
+      if (!ok) return;
+      limparCadastroPendente();
+    } else {
+      const ok = await carregarConta(data.user);
+      if (!ok) return toast('E-mail confirmado. Complete novamente os dados do negócio para criar o painel.', 'err');
+    }
+    closeAuth();
+    showNotif('E-mail confirmado!', 'Sua conta está pronta para uso.', 'ok', 5000);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar e continuar →'; }
+  }
+}
+
+async function enviarCodigoRecuperacao() {
+  const email = ($('recoveryEmail')?.value || '').trim().toLowerCase();
+  if (!email) return toast('Digite seu e-mail.', 'err');
+  const btn = $('btnSendRecovery'); if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+  try {
+    const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    if (error) return toast(mensagemAuth(error, 'Não foi possível enviar o código.'), 'err');
+    toast('Código de recuperação enviado.', 'ok');
+    showRecoveryCode(email);
+    iniciarContagemReenvio('btnResendRecovery');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar código →'; }
+  }
+}
+
+async function reenviarCodigoRecuperacao() {
+  if (!_recoveryEmail) return showForgotPassword();
+  const btn = $('btnResendRecovery'); if (btn) btn.disabled = true;
+  const { error } = await db.auth.resetPasswordForEmail(_recoveryEmail, { redirectTo: location.origin + location.pathname });
+  if (error) { if (btn) btn.disabled = false; return toast(mensagemAuth(error, 'Não foi possível reenviar o código.'), 'err'); }
+  toast('Novo código enviado.', 'ok');
+  iniciarContagemReenvio('btnResendRecovery');
+}
+
+async function validarCodigoRecuperacao() {
+  const token = normalizarCodigo($('recoveryCode')?.value);
+  if (!_recoveryEmail || token.length < 6) return toast('Digite o código recebido por e-mail.', 'err');
+  const btn = $('btnVerifyRecovery'); if (btn) { btn.disabled = true; btn.textContent = 'Validando...'; }
+  try {
+    const { data, error } = await db.auth.verifyOtp({ email: _recoveryEmail, token, type: 'recovery' });
+    if (error || !data?.session) return toast(mensagemAuth(error, 'Código inválido ou expirado.'), 'err');
+    showNewPassword();
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Validar código →'; }
+  }
+}
+
+async function salvarNovaSenha() {
+  const password = $('newPassword')?.value || '';
+  const confirm = $('newPasswordConfirm')?.value || '';
+  if (password.length < 8) return toast('A nova senha deve ter pelo menos 8 caracteres.', 'err');
+  if (password !== confirm) return toast('As senhas não são iguais.', 'err');
+  const btn = $('btnUpdatePassword'); if (btn) { btn.disabled = true; btn.textContent = 'Atualizando...'; }
+  try {
+    const { error } = await db.auth.updateUser({ password });
+    if (error) return toast(mensagemAuth(error, 'Não foi possível atualizar a senha.'), 'err');
+    await db.auth.signOut();
+    toast('Senha atualizada. Entre com a nova senha.', 'ok');
+    showLogin();
+    if ($('loginEmail')) $('loginEmail').value = _recoveryEmail;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha →'; }
+  }
+}
+
 function openAuth(mode) {
   const overlay = $('authOverlay');
   if (!overlay) return;
@@ -837,14 +1023,12 @@ function closeAuth() {
 }
 
 function showLogin() {
-  const fl = $('formLogin'), fc = $('formCadastro');
-  if (fc) fc.style.display = 'none';
-  if (fl) fl.style.display = 'block';
+  mostrarTelaAuth('formLogin');
 }
 
 function showCadastro() {
-  const fl = $('formLogin'), fc = $('formCadastro');
-  if (fl) fl.style.display = 'none';
+  esconderTelasAuth();
+  const fc = $('formCadastro');
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
   if (typeof _mostrarStep === 'function') _mostrarStep(1);
   preencherSelectCategorias();
@@ -899,17 +1083,73 @@ document.addEventListener('input', function(e) {
 
 document.addEventListener('change', function(e) { ajustarFonteCampo(e.target); });
 
+document.addEventListener('input', function(e) {
+  if (e.target?.classList?.contains('auth-code-input')) e.target.value = normalizarCodigo(e.target.value);
+});
+
 async function loginComSenha() {
-  const email = ($('loginEmail')?.value || '').trim();
+  const email = ($('loginEmail')?.value || '').trim().toLowerCase();
   const senha = ($('loginSenha')?.value || '').trim();
   if (!email || !senha) return toast('Digite e-mail e senha.', 'err');
+  const btn = $('btnLogin'); if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
   try {
     const { data, error } = await db.auth.signInWithPassword({ email, password: senha });
-    if (error || !data.user) return toast(error?.message || 'E-mail ou senha incorretos.', 'err');
+    if (error || !data.user) {
+      const message = mensagemAuth(error, 'E-mail ou senha incorretos.');
+      if (String(error?.code || '').includes('email_not_confirmed') || String(error?.message || '').toLowerCase().includes('email not confirmed')) {
+        showVerifyEmail(email);
+        iniciarContagemReenvio('btnResendSignup', 15);
+      }
+      return toast(message, 'err');
+    }
     const ok = await carregarConta(data.user);
     if (!ok) { await db.auth.signOut(); return toast('Perfil ou empresa não encontrado. Refaça o cadastro.', 'err'); }
     showNotif('Login realizado!', 'Bem-vindo de volta.', 'ok', 4000);
   } catch (e) { console.error('Erro no login:', e); toast('Erro ao fazer login. Tente novamente.', 'err'); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'Entrar →'; } }
+}
+
+async function provisionarCadastroConfirmado(user, cadastro) {
+  const btnFin = $('btnFinalizar');
+  try {
+    const { data: perfilExistente } = await db.from('agenda_perfis').select('*').eq('auth_user_id', user.id).maybeSingle();
+    if (perfilExistente) {
+      const ok = await carregarConta(user);
+      return !!ok;
+    }
+    const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', cadastro.empSlugVal).maybeSingle();
+    const slugFinal = slugExiste ? cadastro.empSlugVal + '-' + Date.now().toString().slice(-4) : cadastro.empSlugVal;
+    const { data: empresa, error: errEmp } = await db.from('agenda_empresas').insert({
+      nome: cadastro.empNomeVal, slug: slugFinal, area_atuacao: cadastro.areaAtuacao,
+      whatsapp: cadastro.empWhatsappVal, email: cadastro.email, plano: 'Grátis', onboarding_finalizado: true
+    }).select('*').single();
+    if (errEmp || !empresa) { console.error(errEmp); toast('Não foi possível criar a empresa: ' + (errEmp?.message || 'tente novamente.'), 'err'); return false; }
+    const { error: perfilErr } = await db.from('agenda_perfis').insert({
+      auth_user_id: user.id, empresa_id: empresa.id, nome: cadastro.nomeUser,
+      email: cadastro.email, whatsapp: cadastro.empWhatsappVal, cargo: 'Administrador'
+    });
+    if (perfilErr) { console.error(perfilErr); toast('Não foi possível criar o perfil.', 'err'); return false; }
+    await db.from('agenda_servicos').insert({
+      empresa_id: empresa.id, nome: cadastro.servNome, preco: Number(cadastro.servPreco || 0),
+      duracao_minutos: Number(cadastro.servDuracao || 60), status: 'ativo', descricao: 'Serviço inicial.'
+    });
+    await db.from('agenda_profissionais').insert({
+      empresa_id: empresa.id, nome: cadastro.profNomeVal,
+      especialidade: cadastro.profEsp || 'Profissional', telefone: cadastro.empWhatsappVal, status: 'ativo'
+    });
+    state.user = user;
+    state.perfil = { auth_user_id: user.id, empresa_id: empresa.id, nome: cadastro.nomeUser, email: cadastro.email };
+    state.empresa = empresa;
+    showDashboard(); await loadAll();
+    showNotif('Bem-vindo ao VyXora Agendas!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
+    return true;
+  } catch (e) {
+    console.error('Erro ao provisionar cadastro:', e);
+    toast('Erro ao concluir o cadastro. Tente novamente.', 'err');
+    return false;
+  } finally {
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+  }
 }
 
 async function finalizarCadastro() {
@@ -918,7 +1158,7 @@ async function finalizarCadastro() {
   const servDuracao = $('servDuracao')?.value;
   const profNomeVal = $('profNome')?.value?.trim();
   if (!servNome || !servPreco || !servDuracao || !profNomeVal) return toast('Preencha serviço, preço, duração e profissional.', 'err');
-  const email = ($('cadEmail')?.value || '').trim();
+  const email = ($('cadEmail')?.value || '').trim().toLowerCase();
   const senha = ($('cadSenha')?.value || '').trim();
   const nomeUser = ($('cadNome')?.value || '').trim();
   const empNomeVal = ($('empNome')?.value || '').trim();
@@ -926,76 +1166,36 @@ async function finalizarCadastro() {
   const empWhatsappVal = ($('empWhatsapp')?.value || '').trim();
   const catSelect = $('empCategoria');
   const areaAtuacao = catSelect ? (catSelect.options[catSelect.selectedIndex]?.textContent?.trim() || 'Outro') : 'Outro';
+  const cadastro = {
+    email, nomeUser, empNomeVal, empSlugVal, empWhatsappVal, areaAtuacao,
+    servNome, servPreco, servDuracao, profNomeVal, profEsp: ($('profEsp')?.value || 'Profissional').trim()
+  };
   const btnFin = $('btnFinalizar');
-  if (btnFin) { btnFin.disabled = true; btnFin.textContent = 'Criando...'; }
+  if (btnFin) { btnFin.disabled = true; btnFin.textContent = 'Criando conta...'; }
   try {
-    // O cadastro passa pelo mesmo dominio do site. Isso evita que bloqueadores de
-    // privacidade interrompam a rota externa /auth/v1/signup com "Failed to fetch".
     const signupResponse = await fetch('/api/auth-signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password: senha, nome: nomeUser })
     });
     const signupPayload = await signupResponse.json().catch(() => ({}));
-    const authErr = signupResponse.ok ? null : new Error(signupPayload.error || 'Nao foi possivel criar a conta.');
-    const authData = signupPayload.data || null;
-    if (authErr) {
-      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
-      if (authErr.message && authErr.message.toLowerCase().includes('already registered')) return toast('Este e-mail já está cadastrado. Faça login.', 'err');
-      return toast('Erro ao criar conta: ' + authErr.message, 'err');
-    }
-    if (!authData?.user) {
-      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
-      return toast('Erro ao criar conta. Tente novamente.', 'err');
-    }
+    if (!signupResponse.ok) return toast(mensagemAuth({ message: signupPayload.error }, 'Não foi possível criar a conta.'), 'err');
+    const authData = signupPayload.data;
+    if (!authData?.user) return toast('Não foi possível criar a conta. Tente novamente.', 'err');
+    guardarCadastroPendente(cadastro);
     if (authData.session?.access_token && authData.session?.refresh_token) {
-      const { error: sessionErr } = await db.auth.setSession({
-        access_token: authData.session.access_token,
-        refresh_token: authData.session.refresh_token
-      });
-      if (sessionErr) throw sessionErr;
+      await db.auth.setSession({ access_token: authData.session.access_token, refresh_token: authData.session.refresh_token });
+      const ok = await provisionarCadastroConfirmado(authData.user, cadastro);
+      if (ok) limparCadastroPendente();
+      return;
     }
-    const user = authData.user;
-    const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', empSlugVal).maybeSingle();
-    const slugFinal = slugExiste ? empSlugVal + '-' + Date.now().toString().slice(-4) : empSlugVal;
-    const { data: empresa, error: errEmp } = await db.from('agenda_empresas').insert({
-      nome: empNomeVal, slug: slugFinal, area_atuacao: areaAtuacao,
-      whatsapp: empWhatsappVal, email: email, plano: 'Grátis', onboarding_finalizado: true
-    }).select('*').single();
-    if (errEmp || !empresa) {
-      console.error('Erro ao criar empresa:', errEmp);
-      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
-      return toast('Erro ao criar empresa: ' + (errEmp?.message || 'tente novamente.'), 'err');
-    }
-    const { error: perfilErr } = await db.from('agenda_perfis').insert({
-      auth_user_id: user.id, empresa_id: empresa.id, nome: nomeUser,
-      email: email, whatsapp: empWhatsappVal, cargo: 'Administrador'
-    });
-    if (perfilErr) console.error('Erro ao criar perfil:', perfilErr);
-    await db.from('agenda_servicos').insert({
-      empresa_id: empresa.id, nome: servNome, preco: Number(servPreco || 0),
-      duracao_minutos: Number(servDuracao || 60), status: 'ativo', descricao: 'Serviço inicial.'
-    });
-    await db.from('agenda_profissionais').insert({
-      empresa_id: empresa.id, nome: profNomeVal,
-      especialidade: ($('profEsp')?.value || 'Profissional').trim(),
-      telefone: empWhatsappVal, status: 'ativo'
-    });
-    const { data: loginData, error: loginErr } = await db.auth.signInWithPassword({ email, password: senha });
-    if (loginErr || !loginData?.user) {
-      if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
-      closeAuth(); toast('Conta criada! Faça login para acessar.', 'ok');
-      setTimeout(() => openAuth('login'), 1500); return;
-    }
-    state.user = loginData.user;
-    state.perfil = { auth_user_id: loginData.user.id, empresa_id: empresa.id, nome: nomeUser, email };
-    state.empresa = empresa;
-    showDashboard(); await loadAll();
-    showNotif('Bem-vindo ao VyXora Agendas!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
+    showVerifyEmail(email);
+    iniciarContagemReenvio('btnResendSignup');
+    toast('Conta criada. Digite o código enviado ao seu e-mail.', 'ok');
   } catch (e) {
     console.error('Erro em finalizarCadastro:', e);
+    toast('Erro inesperado. Tente novamente.', 'err');
+  } finally {
     if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
-    toast('Erro inesperado. Verifique o console e tente novamente.', 'err');
   }
 }
 
@@ -2469,6 +2669,8 @@ Object.assign(window, {
   openAuth, closeAuth, showLogin, showCadastro,
   goStep1, goStep2, goStep3, autoSlug,
   loginComSenha, finalizarCadastro, logout,
+  showForgotPassword, confirmarEmailCadastro, reenviarCodigoCadastro, voltarCadastroEmail,
+  enviarCodigoRecuperacao, reenviarCodigoRecuperacao, validarCodigoRecuperacao, salvarNovaSenha,
   setView, setFilter,
   setConfigTab, openConfigSection,
   salvarCliente, salvarServico, salvarProfissional, salvarAgendamento,
