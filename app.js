@@ -948,7 +948,7 @@ async function enviarCodigoRecuperacao() {
   if (!email) return toast('Digite seu e-mail.', 'err');
   const btn = $('btnSendRecovery'); if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
   try {
-    const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    const { error } = await db.auth.resetPasswordForEmail(email);
     if (error) return toast(mensagemAuth(error, 'Não foi possível enviar o código.'), 'err');
     toast('Código de recuperação enviado.', 'ok');
     showRecoveryCode(email);
@@ -961,7 +961,7 @@ async function enviarCodigoRecuperacao() {
 async function reenviarCodigoRecuperacao() {
   if (!_recoveryEmail) return showForgotPassword();
   const btn = $('btnResendRecovery'); if (btn) btn.disabled = true;
-  const { error } = await db.auth.resetPasswordForEmail(_recoveryEmail, { redirectTo: location.origin + location.pathname });
+  const { error } = await db.auth.resetPasswordForEmail(_recoveryEmail);
   if (error) { if (btn) btn.disabled = false; return toast(mensagemAuth(error, 'Não foi possível reenviar o código.'), 'err'); }
   toast('Novo código enviado.', 'ok');
   iniciarContagemReenvio('btnResendRecovery');
