@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260804-19">
+<link rel="stylesheet" href="style.css?v=20260805-20">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -719,31 +719,81 @@
 
     <!-- VIEW: CONFIG -->
     <section class="view" id="view-config">
-      <div class="dash-hero" style="margin-bottom:20px">
-        <div class="dash-hero-inner"><div><h1 id="configHeroTitle">Dados <em>da empresa.</em></h1><p id="configHeroSub">Informações principais do seu negócio.</p></div></div>
-      </div>
       <div class="config-tab-content">
-        <div class="config-section config-tab-panel active" data-config-tab="empresa">
-          <div class="config-title"><div class="config-icon">🏢</div>Dados da empresa</div>
-          <div class="form-gap">
-            <div class="field"><label>Nome da empresa</label><input id="cfgNome"></div>
-            <div class="field"><label>WhatsApp</label><input id="cfgWhatsapp"></div>
-            <div class="field"><label>Slug / link</label><input id="cfgSlug"></div>
-            <div class="field">
-              <label>CEP</label>
-              <div class="endereco-cep-wrap">
-                <input id="cfgCep" placeholder="00000-000" maxlength="9" oninput="formatarCep(this)" onblur="buscarCep(this.value)">
-                <span class="cep-spinner" id="cepSpinner" style="display:none">⏳</span>
+        <div class="config-section config-tab-panel company-premium-panel active" data-config-tab="empresa">
+          <div class="company-workspace">
+            <div class="company-brand-strip">
+              <div class="company-brand-mark" aria-hidden="true">V</div>
+              <div class="company-brand-copy">
+                <span class="company-premium-kicker">PERFIL DO NEGÓCIO</span>
+                <strong id="companyPreviewName">Sua empresa</strong>
+                <span>Informações exibidas na agenda pública e usadas nos atendimentos.</span>
+              </div>
+              <div class="company-brand-actions">
+                <button type="button" class="company-secondary-action" onclick="openPublic()"><span>↗</span> Abrir página pública</button>
+                <button type="button" class="company-primary-action" id="cfgSaveTop" onclick="salvarConfig()"><span>✓</span> Salvar alterações</button>
               </div>
             </div>
-            <div class="field" style="position:relative">
-              <label>Endereço</label>
-              <input id="cfgEndereco" placeholder="Rua, número, bairro" autocomplete="off" oninput="autocompleteEndereco(this.value)" onfocus="autocompleteEndereco(this.value)">
-              <div class="endereco-suggestions" id="enderecoSuggestions" style="display:none"></div>
+
+            <div class="company-flow-section company-flow-identity">
+              <div class="company-flow-label">
+                <span>01</span>
+                <div><strong>Identidade e contato</strong><small>Dados principais usados em toda a plataforma.</small></div>
+              </div>
+              <div class="company-fields-grid company-fields-main">
+                <div class="field company-field"><label>Nome da empresa</label><input id="cfgNome" placeholder="Nome exibido para seus clientes"></div>
+                <div class="field company-field"><label>WhatsApp</label><input id="cfgWhatsapp" inputmode="tel" placeholder="(00) 00000-0000"></div>
+                <div class="field company-field company-field-wide"><label>Link personalizado</label><div class="company-slug-control"><span>vyxora.online/#agendar/</span><input id="cfgSlug" placeholder="sua-empresa"></div></div>
+              </div>
+              <div class="company-public-link">
+                <span class="company-public-link-icon">↗</span>
+                <div><small>SEU LINK PÚBLICO</small><strong id="cfgLinkBox"></strong></div>
+                <button type="button" onclick="copyPublicLink(this)">Copiar</button>
+              </div>
             </div>
-            <div class="field"><label>Cidade / Estado</label><input id="cfgCidade" placeholder="Ex: Manaus, AM"></div>
-            <button class="btn btn-primary btn-full" onclick="salvarConfig()">Salvar alterações</button>
-            <div id="cfgLinkBox" style="font-size:10.5px;color:var(--text4);padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);word-break:break-all"></div>
+
+            <div class="company-flow-divider"></div>
+
+            <div class="company-flow-section company-flow-location">
+              <div class="company-flow-label">
+                <span>02</span>
+                <div><strong>Localização</strong><small>Encontre pelo CEP ou endereço e ajuste os dados manualmente quando necessário.</small></div>
+              </div>
+
+              <div class="location-mode-switch" role="tablist" aria-label="Modo de preenchimento do endereço">
+                <button type="button" class="location-mode-btn active" data-location-mode="search" onclick="setLocationMode('search', this)"><span>⌕</span> Busca inteligente</button>
+                <button type="button" class="location-mode-btn" data-location-mode="manual" onclick="setLocationMode('manual', this)"><span>✎</span> Digitar manualmente</button>
+              </div>
+
+              <div class="location-smart-search" id="locationSmartSearch">
+                <label for="cfgLocationSearch">Pesquisar CEP ou endereço</label>
+                <div class="location-search-control">
+                  <span class="location-search-icon">⌕</span>
+                  <input id="cfgLocationSearch" autocomplete="off" inputmode="search" placeholder="Digite o CEP ou comece a escrever o endereço" oninput="buscarLocalizacaoInteligente(this.value)" onfocus="buscarLocalizacaoInteligente(this.value)">
+                  <span class="location-search-loader" id="locationSearchLoader" hidden></span>
+                  <button type="button" class="location-search-clear" id="locationSearchClear" onclick="limparBuscaLocalizacao()" aria-label="Limpar busca" hidden>×</button>
+                </div>
+                <div class="location-search-hint" id="locationSearchHint"><span>●</span> Digite 3 letras do endereço ou os 8 números do CEP.</div>
+                <div class="endereco-suggestions location-suggestions" id="enderecoSuggestions" hidden></div>
+              </div>
+
+              <div class="location-selected-card" id="locationSelectedCard" hidden>
+                <span class="location-selected-pin">⌖</span>
+                <div><small>LOCALIZAÇÃO SELECIONADA</small><strong id="locationSelectedTitle"></strong><span id="locationSelectedSubtitle"></span></div>
+                <button type="button" onclick="editarLocalizacaoManual()">Ajustar</button>
+              </div>
+
+              <div class="company-fields-grid company-address-fields" id="locationManualFields">
+                <div class="field company-field"><label>CEP</label><div class="endereco-cep-wrap"><input id="cfgCep" placeholder="00000-000" maxlength="9" inputmode="numeric" oninput="formatarCep(this)"><span class="cep-spinner" id="cepSpinner" hidden></span></div></div>
+                <div class="field company-field company-field-address"><label>Endereço completo</label><input id="cfgEndereco" placeholder="Rua, número e bairro" autocomplete="street-address"></div>
+                <div class="field company-field"><label>Cidade / Estado</label><input id="cfgCidade" placeholder="Ex.: Manaus, AM"></div>
+              </div>
+            </div>
+
+            <div class="company-action-rail">
+              <div><span class="company-save-dot"></span><strong>Pronto para publicar</strong><small>As informações salvas aparecem imediatamente na página pública.</small></div>
+              <div class="company-save-actions"><button type="button" class="company-secondary-action" onclick="renderConfig()">Restaurar</button><button type="button" class="company-primary-action" id="cfgSaveBottom" onclick="salvarConfig()"><span>✓</span> Salvar alterações</button></div>
+            </div>
           </div>
         </div>
         <div class="config-section config-tab-panel" data-config-tab="redes">
@@ -1108,6 +1158,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script defer src="app.js?v=20260804-16"></script>
+<script defer src="app.js?v=20260805-20"></script>
 </body>
 </html>
