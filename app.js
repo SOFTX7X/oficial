@@ -925,7 +925,7 @@ async function confirmarEmailCadastro() {
   if (!email || token.length < 6) return toast('Digite o código recebido por e-mail.', 'err');
   const btn = $('btnVerifyEmail'); if (btn) { btn.disabled = true; btn.textContent = 'Confirmando...'; }
   try {
-    const { data, error } = await db.auth.verifyOtp({ email, token, type: 'email' });
+    const { data, error } = await db.auth.verifyOtp({ email, token, type: 'signup' });
     if (error || !data?.user) return toast(mensagemAuth(error, 'Não foi possível confirmar o e-mail.'), 'err');
     const pendente = lerCadastroPendente();
     if (pendente && pendente.email === email) {
@@ -1182,12 +1182,15 @@ async function finalizarCadastro() {
     const authData = signupPayload.data;
     if (!authData?.user) return toast('Não foi possível criar a conta. Tente novamente.', 'err');
     guardarCadastroPendente(cadastro);
-    if (authData.session?.access_token && authData.session?.refresh_token) {
-      await db.auth.setSession({ access_token: authData.session.access_token, refresh_token: authData.session.refresh_token });
-      const ok = await provisionarCadastroConfirmado(authData.user, cadastro);
-      if (ok) limparCadastroPendente();
-      return;
+
+    // O cadastro sempre deve passar pela confirmação por código antes de
+    // provisionar empresa, perfil, serviço e profissional. Mesmo que uma
+    // sessão seja devolvida por configuração incorreta do Supabase, ela não
+    // pode liberar o painel automaticamente.
+    if (authData.session) {
+      try { await db.auth.signOut(); } catch (_) {}
     }
+
     showVerifyEmail(email);
     iniciarContagemReenvio('btnResendSignup');
     toast('Conta criada. Digite o código enviado ao seu e-mail.', 'ok');
