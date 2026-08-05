@@ -776,8 +776,6 @@ function setView(view) {
   const target = $('view-' + view);
   if (!target) return;
 
-  document.body.classList.toggle('config-view-active', view === 'config');
-
   const atual = document.querySelector('.view.active');
   if (atual !== target) {
     // Troca síncrona e sem transição no Android para evitar flash da tela anterior.
@@ -1478,8 +1476,6 @@ function renderConfig() {
   const set = (id, v) => { const el = $(id); if (el) el.value = v || ''; };
   set('cfgNome', e.nome); set('cfgWhatsapp', e.whatsapp); set('cfgSlug', e.slug);
   set('cfgCep', e.cep); set('cfgEndereco', e.endereco); set('cfgCidade', e.cidade);
-  atualizarResumoLocalizacao();
-  const buscaLocal = $('cfgLocationSearch'); if (buscaLocal) buscaLocal.value = '';
   set('cfgInstagram', e.instagram); set('cfgFacebook', e.facebook);
   set('cfgTiktok', e.tiktok); set('cfgSite', e.site);
   renderPreviewImagem('previewFotoPerfil', e.foto_perfil_url);
@@ -1671,39 +1667,27 @@ async function salvarAgendamento() {
 }
 
 async function salvarConfig() {
-  if (salvarConfig._running || !state?.empresa?.id) return;
-  salvarConfig._running = true;
-  const saveButtons = [$('cfgSaveTop'), $('cfgSaveBottom')].filter(Boolean);
-  saveButtons.forEach(btn => { btn.disabled = true; btn.classList.add('is-saving'); });
-  try {
-    const nome = ($('cfgNome')?.value || '').trim();
-    if (!nome) return toast('Digite o nome da empresa.', 'err');
-    const slugAtual = slugify(state.empresa.slug || '');
-    const slugNovo = slugify($('cfgSlug')?.value || slugAtual);
-    const updates = {
-      nome,
-      whatsapp: ($('cfgWhatsapp')?.value || '').trim(),
-      cep: ($('cfgCep')?.value || '').trim(),
-      endereco: ($('cfgEndereco')?.value || '').trim(),
-      cidade: ($('cfgCidade')?.value || '').trim()
-    };
-    if (slugNovo !== slugAtual) {
-      const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', slugNovo).neq('id', state.empresa.id).maybeSingle();
-      if (slugExiste) return toast('Esse link já está em uso.', 'err');
-      updates.slug = slugNovo;
-    }
-    const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
-    if (error) return toast('Erro ao salvar: ' + error.message, 'err');
-    state.empresa = data || { ...state.empresa, ...updates };
-    setText('sideNome', state.empresa.nome);
-    renderAvatarPainel();
-    const lb = $('sideLinkBox'); if (lb) lb.textContent = publicUrl(state.empresa.slug);
-    renderConfig();
-    showNotif('Dados da empresa salvos', 'As informações já estão atualizadas na página pública.', 'ok');
-  } finally {
-    salvarConfig._running = false;
-    saveButtons.forEach(btn => { btn.disabled = false; btn.classList.remove('is-saving'); });
+  if (!state?.empresa?.id) return;
+  const nome = ($('cfgNome')?.value || '').trim();
+  if (!nome) return toast('Digite o nome.', 'err');
+  const slugAtual = slugify(state.empresa.slug || '');
+  const slugNovo = slugify($('cfgSlug')?.value || slugAtual);
+  const updates = {
+    nome, whatsapp: ($('cfgWhatsapp')?.value || '').trim(),
+    cep: ($('cfgCep')?.value || '').trim(),
+    endereco: ($('cfgEndereco')?.value || '').trim(), cidade: ($('cfgCidade')?.value || '').trim()
+  };
+  if (slugNovo !== slugAtual) {
+    const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', slugNovo).neq('id', state.empresa.id).maybeSingle();
+    if (slugExiste) return toast('Esse link já está em uso.', 'err');
+    updates.slug = slugNovo;
   }
+  const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  state.empresa = data || { ...state.empresa, ...updates };
+  setText('sideNome', state.empresa.nome); renderAvatarPainel();
+  const lb = $('sideLinkBox'); if (lb) lb.textContent = publicUrl(state.empresa.slug);
+  renderConfig(); showNotif('Configurações salvas', '', 'ok');
 }
 
 async function salvarHorarios() {
@@ -2726,209 +2710,85 @@ function selecionarSlot(hora) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 
-// ── Localização inteligente: CEP, busca e preenchimento manual ───────────────
-let _locationSearchTimer = null;
-let _locationSearchController = null;
-let _locationMode = 'search';
-
-function setLocationMode(mode, button) {
-  _locationMode = mode === 'manual' ? 'manual' : 'search';
-  document.querySelectorAll('.location-mode-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.locationMode === _locationMode);
-  });
-  const search = $('locationSmartSearch');
-  const manual = $('locationManualFields');
-  if (search) search.hidden = _locationMode !== 'search';
-  if (manual) manual.classList.toggle('manual-emphasis', _locationMode === 'manual');
-  if (_locationMode === 'manual') {
-    fecharSugestoesLocalizacao();
-    setTimeout(() => $('cfgCep')?.focus({ preventScroll: true }), 60);
-  } else {
-    setTimeout(() => $('cfgLocationSearch')?.focus({ preventScroll: true }), 60);
-  }
-}
-
+// ── CEP e Autocomplete de Endereço ───────────────────────────────────────────
 function formatarCep(input) {
   let v = input.value.replace(/\D/g, '').slice(0, 8);
   if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5);
   input.value = v;
-  if (v.replace(/\D/g, '').length === 8) buscarCep(v, { preencherBusca: false });
+  if (v.replace('-', '').length === 8) buscarCep(v);
 }
 
-function setLocationLoading(active) {
-  const loader = $('locationSearchLoader');
-  if (loader) loader.hidden = !active;
-  const spinner = $('cepSpinner');
-  if (spinner) spinner.hidden = !active;
-}
-
-function setLocationHint(text, type = '') {
-  const hint = $('locationSearchHint');
-  if (!hint) return;
-  hint.className = `location-search-hint${type ? ' ' + type : ''}`;
-  hint.innerHTML = `<span>${type === 'ok' ? '✓' : type === 'error' ? '!' : '●'}</span> ${escapeHtml(text)}`;
-}
-
-async function buscarCep(cep, options = {}) {
+async function buscarCep(cep) {
   const limpo = (cep || '').replace(/\D/g, '');
-  if (limpo.length !== 8) return false;
-  setLocationLoading(true);
-  setLocationHint('Consultando o CEP…');
+  if (limpo.length !== 8) return;
+  const spinner = $('cepSpinner');
+  if (spinner) spinner.style.display = 'inline';
   try {
-    const res = await fetch(`https://viacep.com.br/ws/${limpo}/json/`, { cache: 'no-store' });
-    if (!res.ok) throw new Error('Falha na consulta');
+    const res = await fetch(`https://viacep.com.br/ws/${limpo}/json/`);
     const d = await res.json();
-    if (d.erro) {
-      setLocationHint('CEP não encontrado. Confira os números ou preencha manualmente.', 'error');
-      return false;
-    }
-    const endereco = [d.logradouro, d.bairro].filter(Boolean).join(', ');
-    const cidade = [d.localidade, d.uf].filter(Boolean).join(', ');
-    if ($('cfgCep')) $('cfgCep').value = limpo.replace(/^(\d{5})(\d{3})$/, '$1-$2');
-    if ($('cfgEndereco')) $('cfgEndereco').value = endereco;
-    if ($('cfgCidade')) $('cfgCidade').value = cidade;
-    if (options.preencherBusca !== false && $('cfgLocationSearch')) $('cfgLocationSearch').value = limpo.replace(/^(\d{5})(\d{3})$/, '$1-$2');
-    mostrarLocalizacaoSelecionada(endereco || `CEP ${limpo}`, cidade, limpo.replace(/^(\d{5})(\d{3})$/, '$1-$2'));
-    fecharSugestoesLocalizacao();
-    setLocationHint('Endereço preenchido automaticamente. Complete o número, se necessário.', 'ok');
-    return true;
-  } catch (error) {
-    console.warn('Erro ao consultar CEP:', error);
-    setLocationHint('Não foi possível consultar o CEP agora. Use o preenchimento manual.', 'error');
-    return false;
+    if (d.erro) { toast('CEP não encontrado.', 'err'); return; }
+    const end = $('cfgEndereco');
+    const cid = $('cfgCidade');
+    if (end) end.value = [d.logradouro, d.bairro].filter(Boolean).join(', ');
+    if (cid) cid.value = [d.localidade, d.uf].filter(Boolean).join(', ');
+    toast('Endereço preenchido automaticamente!', 'ok');
+  } catch (e) {
+    toast('Erro ao buscar CEP.', 'err');
   } finally {
-    setLocationLoading(false);
+    if (spinner) spinner.style.display = 'none';
   }
 }
 
-function buscarLocalizacaoInteligente(valor) {
-  const input = $('cfgLocationSearch');
-  const clear = $('locationSearchClear');
-  if (clear) clear.hidden = !String(valor || '').trim();
-  const texto = String(valor || '').trim();
-  const numeros = texto.replace(/\D/g, '');
-  clearTimeout(_locationSearchTimer);
-  if (_locationSearchController) _locationSearchController.abort();
-
-  if (!texto) {
-    fecharSugestoesLocalizacao();
-    setLocationHint('Digite pelo menos 3 letras do endereço ou os 8 números do CEP.');
-    return;
-  }
-  if (/^[\d\s-]+$/.test(texto)) {
-    if (numeros.length < 8) {
-      fecharSugestoesLocalizacao();
-      setLocationHint(`Continue digitando o CEP: faltam ${8 - numeros.length} número(s).`);
-      return;
-    }
-    if (numeros.length === 8) buscarCep(numeros);
-    return;
-  }
-  if (texto.length < 3) {
-    fecharSugestoesLocalizacao();
-    setLocationHint('Digite mais caracteres para ver endereços próximos.');
-    return;
-  }
-
-  setLocationHint('Buscando endereços…');
-  _locationSearchTimer = setTimeout(() => autocompleteEndereco(texto), 350);
-}
-
+let _enderecoTimer = null;
 async function autocompleteEndereco(valor) {
   const box = $('enderecoSuggestions');
-  if (!box || !valor || valor.trim().length < 3) return fecharSugestoesLocalizacao();
-  _locationSearchController = new AbortController();
-  setLocationLoading(true);
-  try {
-    const query = `${valor.trim()}, Brasil`;
-    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=br&q=${encodeURIComponent(query)}`;
-    const res = await fetch(url, {
-      headers: { 'Accept-Language': 'pt-BR,pt;q=0.9' },
-      signal: _locationSearchController.signal,
-      cache: 'no-store'
-    });
-    if (!res.ok) throw new Error('Falha na busca');
-    const lista = await res.json();
-    if (!Array.isArray(lista) || !lista.length) {
-      fecharSugestoesLocalizacao();
-      setLocationHint('Nenhum endereço encontrado. Tente incluir cidade ou estado.', 'error');
-      return;
-    }
-    box.innerHTML = lista.map((item, i) => {
-      const a = item.address || {};
-      const rua = a.road || a.pedestrian || a.residential || a.neighbourhood || item.name || item.display_name.split(',')[0];
-      const numero = a.house_number || '';
-      const bairro = a.suburb || a.neighbourhood || a.quarter || a.city_district || '';
-      const cidade = a.city || a.town || a.village || a.municipality || a.county || '';
-      const estado = a.state_code || a['ISO3166-2-lvl4']?.replace('BR-', '') || a.state || '';
-      const cep = a.postcode || '';
-      const linha1 = [rua, numero].filter(Boolean).join(', ');
-      const linha2 = [bairro, cidade, estado].filter(Boolean).join(' • ');
-      return `<button type="button" class="endereco-suggestion-item" data-index="${i}" data-rua="${escapeHtml([linha1, bairro].filter(Boolean).join(', '))}" data-cidade="${escapeHtml([cidade, estado].filter(Boolean).join(', '))}" data-cep="${escapeHtml(cep)}" onclick="selecionarEndereco(this)"><span class="es-icon">📍</span><span><strong>${escapeHtml(linha1)}</strong>${linha2 ? `<small>${escapeHtml(linha2)}</small>` : ''}${cep ? `<em>CEP ${escapeHtml(cep)}</em>` : ''}</span><span class="location-option-arrow">›</span></button>`;
-    }).join('');
-    box.hidden = false;
-    setLocationHint(`${lista.length} opção(ões) encontrada(s). Selecione a localização correta.`, 'ok');
-  } catch (error) {
-    if (error.name !== 'AbortError') {
-      console.warn('Erro na busca de endereço:', error);
-      fecharSugestoesLocalizacao();
-      setLocationHint('Busca temporariamente indisponível. Preencha o endereço manualmente.', 'error');
-    }
-  } finally {
-    setLocationLoading(false);
-  }
+  if (!box) return;
+  if (!valor || valor.length < 4) { box.style.display = 'none'; return; }
+  clearTimeout(_enderecoTimer);
+  _enderecoTimer = setTimeout(async () => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=br&q=${encodeURIComponent(valor)}`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } });
+      const lista = await res.json();
+      if (!lista.length) { box.style.display = 'none'; return; }
+      box.innerHTML = lista.map((item, i) => {
+        const a = item.address || {};
+        const rua = [a.road, a.house_number].filter(Boolean).join(', ');
+        const bairro = a.suburb || a.neighbourhood || a.quarter || '';
+        const cidade = a.city || a.town || a.village || a.municipality || '';
+        const estado = a.state_code || a.state || '';
+        const linha1 = rua || item.display_name.split(',')[0];
+        const linha2 = [bairro, cidade, estado].filter(Boolean).join(', ');
+        return `<div class="endereco-suggestion-item" onclick="selecionarEndereco(${i})" data-rua="${escapeHtml(linha1)}" data-cidade="${escapeHtml([cidade, estado].filter(Boolean).join(', '))}">
+          <span class="es-icon">📍</span>
+          <span><strong>${escapeHtml(linha1)}</strong>${linha2 ? '<br><small>' + escapeHtml(linha2) + '</small>' : ''}</span>
+        </div>`;
+      }).join('');
+      box.style.display = 'block';
+    } catch (e) { box.style.display = 'none'; }
+  }, 400);
 }
 
-function selecionarEndereco(item) {
-  if (!item) return;
-  const endereco = item.dataset.rua || '';
-  const cidade = item.dataset.cidade || '';
-  const cep = item.dataset.cep || '';
-  if ($('cfgEndereco')) $('cfgEndereco').value = endereco;
-  if ($('cfgCidade')) $('cfgCidade').value = cidade;
-  if ($('cfgCep') && cep) $('cfgCep').value = cep.replace(/\D/g, '').replace(/^(\d{5})(\d{3}).*$/, '$1-$2');
-  mostrarLocalizacaoSelecionada(endereco, cidade, cep);
-  fecharSugestoesLocalizacao();
-  setLocationHint('Localização selecionada. Você pode ajustar os campos abaixo.', 'ok');
-}
-
-function mostrarLocalizacaoSelecionada(endereco, cidade, cep = '') {
-  const card = $('locationSelectedCard');
-  if (!card) return;
-  const title = $('locationSelectedTitle');
-  const subtitle = $('locationSelectedSubtitle');
-  if (title) title.textContent = endereco || cidade || 'Localização selecionada';
-  if (subtitle) subtitle.textContent = [cidade, cep ? `CEP ${cep}` : ''].filter(Boolean).join(' • ');
-  card.hidden = !(endereco || cidade);
-}
-
-function atualizarResumoLocalizacao() {
-  mostrarLocalizacaoSelecionada(($('cfgEndereco')?.value || '').trim(), ($('cfgCidade')?.value || '').trim(), ($('cfgCep')?.value || '').trim());
-}
-
-function editarLocalizacaoManual() {
-  setLocationMode('manual', document.querySelector('[data-location-mode="manual"]'));
-}
-
-function limparBuscaLocalizacao() {
-  const input = $('cfgLocationSearch');
-  if (input) input.value = '';
-  const clear = $('locationSearchClear');
-  if (clear) clear.hidden = true;
-  fecharSugestoesLocalizacao();
-  setLocationHint('Digite pelo menos 3 letras do endereço ou os 8 números do CEP.');
-  input?.focus({ preventScroll: true });
-}
-
-function fecharSugestoesLocalizacao() {
+function selecionarEndereco(idx) {
   const box = $('enderecoSuggestions');
-  if (box) { box.hidden = true; box.innerHTML = ''; }
+  if (!box) return;
+  const items = box.querySelectorAll('.endereco-suggestion-item');
+  const item = items[idx];
+  if (!item) return;
+  const end = $('cfgEndereco');
+  const cid = $('cfgCidade');
+  if (end) end.value = item.dataset.rua || '';
+  if (cid && item.dataset.cidade) cid.value = item.dataset.cidade;
+  box.style.display = 'none';
 }
 
-document.addEventListener('click', (event) => {
-  const area = $('locationSmartSearch');
-  if (area && !area.contains(event.target)) fecharSugestoesLocalizacao();
+document.addEventListener('click', (e) => {
+  const box = $('enderecoSuggestions');
+  if (box && !box.contains(e.target) && e.target.id !== 'cfgEndereco') {
+    box.style.display = 'none';
+  }
 });
+
 
 // Garante que os seletores nativos de data e hora abram dentro dos modais.
 document.addEventListener('DOMContentLoaded', () => {
