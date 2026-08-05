@@ -6103,3 +6103,31 @@ body.public-modal-open {
     transform: none !important;
   }
 }
+
+/* V19 — padronização dos botões de três pontos nos cards */
+.premium-record-card .action-menu-center .action-menu-btn,
+.premium-record-card .action-menu .action-menu-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  color: #c29aff !important;
+}
+
+.premium-record-card .action-menu-center .action-menu-btn > span,
+.premium-record-card .action-menu .action-menu-btn > span {
+  display: block !important;
+  width: 3px !important;
+  height: 3px !important;
+  flex: 0 0 3px !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+}
+
+.premium-record-card .action-menu-center .action-menu-btn:hover,
+.premium-record-card .action-menu .action-menu-btn:hover {
+  transform: none !important;
+  border-color: rgba(190,132,255,.72) !important;
+  background: rgba(126,61,209,.23) !important;
+  box-shadow: 0 0 0 3px rgba(144,76,232,.10) !important;
+}
