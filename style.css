@@ -2306,6 +2306,31 @@ body.menu-open { overflow: hidden; touch-action: none; }
 .notification-empty span { font-size: 12px; }
 body.notification-center-open { overflow: hidden; }
 
+/* Central vazia: não mantém uma lista rolável invisível no Android. */
+.notification-center { overflow: hidden; }
+.notification-center.is-empty .notification-list {
+  display: none;
+  flex: 0 0 auto;
+  height: 0;
+  min-height: 0;
+  padding: 0 !important;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+.notification-center.is-empty .notification-empty {
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+.notification-center:not(.is-empty) .notification-list {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+
 /* Alertas de operação: somente um por vez, pequenos e discretos. */
 .notif-stack { top: auto; bottom: 18px; }
 .notif-item.compact { border-radius: 7px; }
