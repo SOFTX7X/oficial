@@ -480,7 +480,11 @@ function renderNotificationCenter() {
     badge.hidden = unread === 0;
   });
   if (!list || !empty) return;
-  empty.style.display = appNotifications.length ? 'none' : 'flex';
+  const center = list.closest('.notification-center');
+  const isEmpty = appNotifications.length === 0;
+  center?.classList.toggle('is-empty', isEmpty);
+  empty.style.display = isEmpty ? 'flex' : 'none';
+  list.setAttribute('aria-hidden', isEmpty ? 'true' : 'false');
   list.innerHTML = appNotifications.map(item => `
     <article class="notification-row ${item.read ? '' : 'unread'}" data-id="${item.id}">
       <button class="notification-row-main" onclick="markNotificationRead('${item.id}')">
