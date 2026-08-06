@@ -720,6 +720,92 @@ function preencherSelectCategorias() {
     sel.innerHTML = state.categorias.map(c => `<option value="${c.id}">${c.icone || ''} ${c.nome}</option>`).join('');
   }
   sel.dataset.preenchido = '1';
+  sincronizarSeletorCategoriaCadastro();
+}
+
+function categoriasCadastroDisponiveis() {
+  const sel = $('empCategoria');
+  if (!sel) return [];
+  return Array.from(sel.options).map(opt => {
+    const texto = (opt.textContent || '').trim();
+    const partes = texto.split(/\s+/);
+    const primeiro = partes[0] || '✦';
+    const temIcone = /[^\p{L}\p{N}]/u.test(primeiro);
+    return {
+      value: opt.value,
+      icon: temIcone ? primeiro : '✦',
+      name: temIcone ? partes.slice(1).join(' ') : texto
+    };
+  }).filter(item => item.value && item.name);
+}
+
+function sincronizarSeletorCategoriaCadastro() {
+  const sel = $('empCategoria');
+  const text = $('empCategoriaTriggerText');
+  const icon = $('empCategoriaTriggerIcon');
+  if (!sel || !text || !icon) return;
+  const option = sel.options[sel.selectedIndex];
+  if (!option || !option.value) {
+    text.textContent = 'Escolher área de atuação';
+    icon.textContent = '✦';
+    return;
+  }
+  const item = categoriasCadastroDisponiveis().find(c => c.value === option.value);
+  if (!item) return;
+  text.textContent = item.name;
+  icon.textContent = item.icon;
+}
+
+function renderizarCategoriasCadastro(filtro = '') {
+  const grid = $('authCategoryGrid');
+  if (!grid) return;
+  const termo = String(filtro || '').trim().toLocaleLowerCase('pt-BR');
+  const atual = $('empCategoria')?.value || '';
+  const itens = categoriasCadastroDisponiveis().filter(item => !termo || item.name.toLocaleLowerCase('pt-BR').includes(termo));
+  grid.innerHTML = itens.length ? itens.map(item => `
+    <button type="button" class="auth-category-option${item.value === atual ? ' selected' : ''}" onclick="selecionarCategoriaCadastro('${String(item.value).replace(/'/g, "\\'")}')">
+      <span class="auth-category-option-icon">${item.icon}</span>
+      <span><strong>${item.name}</strong><small>Selecionar categoria</small></span>
+      <b>${item.value === atual ? 'Selecionado' : 'Escolher'}</b>
+    </button>`).join('') : '<div class="auth-category-empty">Nenhuma categoria encontrada.</div>';
+}
+
+function abrirSeletorCategoria() {
+  const panel = $('authCategoryPanel');
+  const form = $('formCadastro');
+  if (!panel || !form) return;
+  form.dataset.categoryHidden = '1';
+  form.style.display = 'none';
+  panel.style.display = 'block';
+  renderizarCategoriasCadastro();
+  const search = $('authCategorySearch');
+  if (search) {
+    search.value = '';
+    setTimeout(() => search.focus(), 30);
+  }
+}
+
+function fecharSeletorCategoria() {
+  const panel = $('authCategoryPanel');
+  const form = $('formCadastro');
+  if (panel) panel.style.display = 'none';
+  if (form && form.dataset.categoryHidden === '1') {
+    form.style.display = 'block';
+    delete form.dataset.categoryHidden;
+  }
+}
+
+function filtrarCategoriasCadastro(valor) {
+  renderizarCategoriasCadastro(valor);
+}
+
+function selecionarCategoriaCadastro(valor) {
+  const sel = $('empCategoria');
+  if (!sel) return;
+  sel.value = valor;
+  sel.dispatchEvent(new Event('change', { bubbles: true }));
+  sincronizarSeletorCategoriaCadastro();
+  fecharSeletorCategoria();
 }
 
 function showDashboard() {
@@ -939,7 +1025,7 @@ async function confirmarEmailCadastro() {
     closeAuth();
     showNotif('E-mail confirmado!', 'Sua conta está pronta para uso.', 'ok', 5000);
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar e continuar'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar e continuar →'; }
   }
 }
 
@@ -954,7 +1040,7 @@ async function enviarCodigoRecuperacao() {
     showRecoveryCode(email);
     iniciarContagemReenvio('btnResendRecovery');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Enviar código'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar código →'; }
   }
 }
 
@@ -976,7 +1062,7 @@ async function validarCodigoRecuperacao() {
     if (error || !data?.session) return toast(mensagemAuth(error, 'Código inválido ou expirado.'), 'err');
     showNewPassword();
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Validar código'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Validar código →'; }
   }
 }
 
@@ -994,7 +1080,7 @@ async function salvarNovaSenha() {
     showLogin();
     if ($('loginEmail')) $('loginEmail').value = _recoveryEmail;
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha →'; }
   }
 }
 
@@ -1014,6 +1100,7 @@ function openAuth(mode) {
 }
 
 function closeAuth() {
+  fecharSeletorCategoria();
   const overlay = $('authOverlay');
   if (overlay) overlay.classList.remove('open');
 
@@ -1023,10 +1110,12 @@ function closeAuth() {
 }
 
 function showLogin() {
+  fecharSeletorCategoria();
   mostrarTelaAuth('formLogin');
 }
 
 function showCadastro() {
+  fecharSeletorCategoria();
   esconderTelasAuth();
   const fc = $('formCadastro');
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
@@ -1106,7 +1195,7 @@ async function loginComSenha() {
     if (!ok) { await db.auth.signOut(); return toast('Perfil ou empresa não encontrado. Refaça o cadastro.', 'err'); }
     showNotif('Login realizado!', 'Bem-vindo de volta.', 'ok', 4000);
   } catch (e) { console.error('Erro no login:', e); toast('Erro ao fazer login. Tente novamente.', 'err'); }
-  finally { if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; } }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'Entrar →'; } }
 }
 
 async function provisionarCadastroConfirmado(user, cadastro) {
@@ -1148,7 +1237,7 @@ async function provisionarCadastroConfirmado(user, cadastro) {
     toast('Erro ao concluir o cadastro. Tente novamente.', 'err');
     return false;
   } finally {
-    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel'; }
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
   }
 }
 
@@ -1198,7 +1287,7 @@ async function finalizarCadastro() {
     console.error('Erro em finalizarCadastro:', e);
     toast('Erro inesperado. Tente novamente.', 'err');
   } finally {
-    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel'; }
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
   }
 }
 
