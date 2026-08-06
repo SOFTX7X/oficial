@@ -939,7 +939,7 @@ async function confirmarEmailCadastro() {
     closeAuth();
     showNotif('E-mail confirmado!', 'Sua conta está pronta para uso.', 'ok', 5000);
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar e continuar →'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar e continuar'; }
   }
 }
 
@@ -954,7 +954,7 @@ async function enviarCodigoRecuperacao() {
     showRecoveryCode(email);
     iniciarContagemReenvio('btnResendRecovery');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Enviar código →'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar código'; }
   }
 }
 
@@ -976,7 +976,7 @@ async function validarCodigoRecuperacao() {
     if (error || !data?.session) return toast(mensagemAuth(error, 'Código inválido ou expirado.'), 'err');
     showNewPassword();
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Validar código →'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Validar código'; }
   }
 }
 
@@ -994,7 +994,7 @@ async function salvarNovaSenha() {
     showLogin();
     if ($('loginEmail')) $('loginEmail').value = _recoveryEmail;
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha →'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha'; }
   }
 }
 
@@ -1106,7 +1106,7 @@ async function loginComSenha() {
     if (!ok) { await db.auth.signOut(); return toast('Perfil ou empresa não encontrado. Refaça o cadastro.', 'err'); }
     showNotif('Login realizado!', 'Bem-vindo de volta.', 'ok', 4000);
   } catch (e) { console.error('Erro no login:', e); toast('Erro ao fazer login. Tente novamente.', 'err'); }
-  finally { if (btn) { btn.disabled = false; btn.textContent = 'Entrar →'; } }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; } }
 }
 
 async function provisionarCadastroConfirmado(user, cadastro) {
@@ -1148,7 +1148,7 @@ async function provisionarCadastroConfirmado(user, cadastro) {
     toast('Erro ao concluir o cadastro. Tente novamente.', 'err');
     return false;
   } finally {
-    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel'; }
   }
 }
 
@@ -1198,7 +1198,7 @@ async function finalizarCadastro() {
     console.error('Erro em finalizarCadastro:', e);
     toast('Erro inesperado. Tente novamente.', 'err');
   } finally {
-    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel'; }
   }
 }
 
