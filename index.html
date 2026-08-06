@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260805-27">
+<link rel="stylesheet" href="style.css?v=20260806-33">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -92,7 +92,7 @@
     </div>
     <div class="nav-actions">
       <button class="btn btn-ghost btn-sm" onclick="openAuth('login')">Entrar</button>
-      <button class="btn btn-primary btn-sm" onclick="openAuth('register')">Criar conta →</button>
+      <button class="btn btn-primary btn-sm" onclick="openAuth('register')">Criar conta</button>
     </div>
   </nav>
 
@@ -107,8 +107,8 @@
       <p>Agenda online, equipe, clientes, serviços e resultados em um único painel criado para negócios que trabalham com hora marcada.</p>
 
       <div class="vx-home-actions">
-        <button class="btn vx-btn-primary" onclick="openAuth('register')">Criar minha agenda <span>→</span></button>
-        <button class="btn vx-btn-secondary" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Explorar plataforma <span>↓</span></button>
+        <button class="btn vx-btn-primary" onclick="openAuth('register')">Criar minha agenda</button>
+        <button class="btn vx-btn-secondary" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Explorar plataforma</button>
       </div>
 
       <div class="vx-home-proof">
@@ -146,8 +146,8 @@
     </h1>
     <p class="hero-sub">Receba agendamentos, gerencie equipe, clientes e faturamento — tudo em um painel profissional.</p>
     <div class="hero-cta">
-      <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar minha agenda grátis →</button>
-      <button class="btn btn-ghost btn-lg" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Ver como funciona →</button>
+      <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar minha agenda grátis</button>
+      <button class="btn btn-ghost btn-lg" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Ver como funciona</button>
     </div>
     <div class="hero-trust">
       <span>★★★★★ 4.9/5</span>
@@ -260,7 +260,7 @@
         <div>
           <h2 class="section-title">Sua agenda organizada. <em>Você mais tranquilo.</em></h2>
         </div>
-        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Começar agora →</button>
+        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Começar agora</button>
       </div>
     </div>
   </section>
@@ -322,7 +322,7 @@
       <h2 class="cta-title">Sua agenda profissional<br>começa <em>agora.</em></h2>
       <p class="cta-sub">Crie sua conta em menos de 3 minutos e receba seu link exclusivo na hora.</p>
       <div class="cta-actions">
-        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar minha agenda grátis →</button>
+        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar minha agenda grátis</button>
         <button class="btn btn-ghost btn-lg" onclick="openAuth('login')">Já tenho uma conta</button>
       </div>
     </div>
@@ -438,9 +438,14 @@
           <div class="form-gap">
             <div class="field"><label>Nome do negócio</label><input id="empNome" placeholder="Ex: Nails da Ana" oninput="autoSlug()"></div>
             <div class="field-row">
-              <div class="field">
+              <div class="field auth-category-field">
                 <label>Área de atuação</label>
-                <select id="empCategoria"><option value="">Carregando...</option></select>
+                <button type="button" class="auth-category-trigger" id="empCategoriaTrigger" onclick="abrirSeletorCategoria()" aria-haspopup="dialog" aria-controls="authCategoryPanel">
+                  <span id="empCategoriaTriggerIcon">✦</span>
+                  <strong id="empCategoriaTriggerText">Escolher área de atuação</strong>
+                  <small>Selecionar</small>
+                </button>
+                <select id="empCategoria" class="auth-category-native" tabindex="-1" aria-hidden="true"><option value="">Carregando...</option></select>
               </div>
               <div class="field"><label>WhatsApp</label><input id="empWhatsapp" placeholder="(92) 99999-9999"></div>
             </div>
@@ -466,6 +471,23 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div id="authCategoryPanel" class="auth-category-panel" style="display:none" role="dialog" aria-modal="true" aria-labelledby="authCategoryTitle">
+        <div class="auth-category-head">
+          <div>
+            <div class="auth-category-kicker">PERFIL DO NEGÓCIO</div>
+            <div class="auth-form-title" id="authCategoryTitle">Escolha sua área</div>
+            <p class="auth-form-sub">Selecione a categoria que melhor representa o seu atendimento.</p>
+          </div>
+          <button type="button" class="auth-category-back" onclick="fecharSeletorCategoria()">Voltar</button>
+        </div>
+        <div class="auth-category-search-wrap">
+          <span aria-hidden="true">⌕</span>
+          <input id="authCategorySearch" type="search" placeholder="Pesquisar categoria" autocomplete="off" oninput="filtrarCategoriasCadastro(this.value)">
+        </div>
+        <div class="auth-category-grid" id="authCategoryGrid"></div>
+        <div class="auth-category-foot">A categoria pode ser alterada depois em Dados da empresa.</div>
       </div>
     </div>
   </div>
@@ -897,7 +919,7 @@
 <!-- PÁGINA PÚBLICA -->
 <section id="publicView" style="display:none">
   <div class="pub-wrap">
-    <button class="pub-back" onclick="voltarDaPublica()">← Voltar</button>
+    <button class="pub-back" onclick="voltarDaPublica()">Voltar</button>
 
     <div class="pub-hero">
       <div class="pub-hero-inner">
@@ -998,7 +1020,7 @@
 <div class="pub-modal-overlay" id="pubCalendarioOverlay" onclick="fecharCalendarioPublico(event)">
   <div class="pub-modal-full" id="pubCalendarioModal">
     <div class="pub-modal-header">
-      <button class="pub-modal-back" onclick="fecharCalendarioPublico()">← Voltar</button>
+      <button class="pub-modal-back" onclick="fecharCalendarioPublico()">Voltar</button>
       <span class="pub-modal-title">Escolha a data</span>
     </div>
     <div class="pub-cal-wrap">
@@ -1023,7 +1045,7 @@
 <div class="pub-modal-overlay" id="pubSlotsOverlay" onclick="fecharSlotsPublico(event)">
   <div class="pub-modal-full" id="pubSlotsModal">
     <div class="pub-modal-header">
-      <button class="pub-modal-back" onclick="fecharSlotsPublico()">← Voltar</button>
+      <button class="pub-modal-back" onclick="fecharSlotsPublico()">Voltar</button>
       <span class="pub-modal-title" id="pubSlotsTitulo">Escolha o horário</span>
     </div>
     <div class="pub-slots-wrap">
@@ -1150,6 +1172,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script defer src="app.js?v=20260805-otp2"></script>
+<script defer src="app.js?v=20260806-33"></script>
 </body>
 </html>
