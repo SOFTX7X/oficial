@@ -6472,3 +6472,1104 @@ body.public-modal-open {
   #authOverlay .auth-left-perks { margin-top: 18px !important; }
   #authOverlay .auth-form-area { padding: 38px 42px 30px !important; }
 }
+
+/* =========================================================
+   V29 — PADRÃO QUADRADO GLOBAL
+   Componentes de interface retos; círculos funcionais preservados.
+   ========================================================= */
+:root {
+  --radius: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+}
+
+/* Controles e ações */
+button,
+input,
+select,
+textarea,
+.btn,
+[class*="btn-"],
+[class*="-btn"],
+[role="button"],
+.auth-btn,
+.auth-code-input,
+.custom-select-trigger,
+.custom-select-menu,
+.custom-select-option,
+.flatpickr-calendar,
+.flatpickr-day,
+.time-picker,
+.time-picker-panel,
+.time-option,
+.dropdown,
+.dropdown-menu,
+.menu-dropdown,
+.action-dropdown,
+.action-center-dialog,
+.modal,
+.modal-box,
+.modal-card,
+.modal-content,
+.modal-panel,
+.overlay-panel,
+.dialog,
+[class*="dialog"],
+[class*="dropdown"],
+[class*="popover"],
+[class*="tooltip"],
+[class*="sheet"],
+[class*="drawer"] {
+  border-radius: 0 !important;
+}
+
+/* Blocos visuais e cartões */
+.card,
+[class$="-card"],
+[class*="-card "],
+[class*=" card-"],
+.panel,
+[class$="-panel"],
+[class*="-panel "],
+.box,
+[class$="-box"],
+[class*="-box "],
+.widget,
+[class$="-widget"],
+[class*="-widget "],
+.section-box,
+.form-box,
+.form-card,
+.auth-modal,
+.auth-panel-left,
+.auth-form-area,
+.agenda-card,
+.cliente-card,
+.servico-card,
+.profissional-card,
+.notif-panel,
+.notification-panel,
+.notification-item,
+.toast,
+.alert,
+.empty-state,
+.skeleton,
+.badge,
+.chip,
+.tag,
+.pill,
+.status,
+[class*="badge"],
+[class*="chip"],
+[class*="tag"],
+[class*="pill"],
+[class*="status-"] {
+  border-radius: 0 !important;
+}
+
+/* Elementos de navegação e filtros */
+.nav-item,
+.side-link,
+.sidebar-link,
+.tab,
+.tabs button,
+.filter,
+.filter-btn,
+[class*="filter-"],
+.pagination button,
+.step,
+.step-item,
+.step-number,
+.copy-link,
+.input-group,
+.field-wrap,
+.search-box,
+.search-results,
+.search-option {
+  border-radius: 0 !important;
+}
+
+/* Mantém somente círculos que têm função visual clara */
+.side-avatar,
+.profile-image-preview.is-avatar,
+.profile-image-preview.is-cover,
+.foto-editor-circle,
+.avatar,
+.user-avatar,
+.professional-avatar,
+.client-avatar,
+[class*="avatar"],
+.motivo-radio,
+.motivo-item.sel .motivo-radio::after,
+.notif-dot,
+.top-notify-dot,
+.online-dot::before,
+.badge::before,
+.tl-line::before,
+.mockup-dot {
+  border-radius: 50% !important;
+}
+
+/* Scrollbar também reta */
+::-webkit-scrollbar-thumb {
+  border-radius: 0 !important;
+}
+
+
+/* =========================================================
+   V30 — QUADRADO GLOBAL COMPLETO
+   Aplica cantos retos em botões, campos, cards, painéis,
+   navegação, landing, auth e dashboard.
+   ========================================================= */
+:root {
+  --radius: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+}
+
+::-webkit-scrollbar-thumb,
+.btn,
+.btn-sm,
+.btn-lg,
+.btn-ghost,
+.btn-primary,
+.btn-secondary,
+.vx-btn-primary,
+.vx-btn-secondary,
+.nav-link,
+.nav-actions .btn,
+.hero-eyebrow,
+.badge,
+.seg-pill,
+.top-notify-slot,
+.filter-btn,
+.filter-count,
+.choice-card,
+.choice-icon,
+.notification-row,
+.notification-row-icon,
+.notification-center-close,
+.notification-center-actions button,
+.notif-item,
+.notif-item.compact,
+.notif-close,
+.mobile-nav-bar,
+.mobile-menu-trigger,
+.mob-nav-btn,
+.mob-nav-btn .mni,
+.nav-btn,
+.nav-btn .ni,
+.side-link-box,
+.side-user-card,
+.topbar,
+.panel,
+.form-panel,
+.section-wrap,
+.step-card,
+.step-icon,
+.feat-card,
+.feat-icon,
+.test-card,
+.test-av,
+.mockup-window,
+.mockup-sidebar,
+.ms-item,
+.ms-icon,
+.mc-stat,
+.mc-row,
+.mc-av,
+.vx-product-preview,
+.vx-preview-head,
+.vx-preview-row,
+.vx-home-kicker,
+.vx-home-proof > div,
+.vx-home-visual,
+.hero-mockup,
+.land-nav,
+.land-section,
+.apt-item,
+.apt-av,
+.client-card,
+.cc-av,
+.cc-stat,
+.svc-card,
+.prof-card,
+.edit-modal,
+.modal,
+.sidebar,
+.pub-panel,
+.pub-hero,
+.pub-cal-arrow,
+.pub-cal-day,
+.pub-choice,
+.pub-social,
+.pub-tick,
+.pub-whatsapp-btn,
+.pub-obs-inner,
+.auth-modal,
+.auth-main,
+.auth-side,
+.auth-card,
+.auth-feature,
+.auth-step,
+.auth-perk-icon,
+.auth-brand-icon,
+.auth-close,
+.step-dot,
+.status-badge,
+.card,
+.surface,
+.box,
+.tile,
+.kpi,
+.dropdown-menu,
+.menu,
+.menu-panel,
+.menu-card,
+.dropdown,
+.dropdown-trigger,
+.dropdown-item,
+.timeline-card,
+.tl-card,
+.act-btn,
+.foto-editor-stage,
+.confirm-shell,
+.confirm-card,
+.recovery-card,
+.code-input,
+.input-group,
+.toast,
+.stat-card,
+.preview-card,
+.preview-shell,
+.preview-box,
+.preview-stat,
+.preview-item,
+.calendar-card,
+.cal-day,
+.pub-day,
+.pub-slot,
+.tab-btn,
+.tabs button,
+.search-box,
+.empty-state,
+.inline-box,
+.notice,
+.warning,
+.success,
+.info,
+.error,
+.vx-premium-loader__shell,
+.vx-premium-loader__progress,
+.vx-premium-loader__progress span,
+.vx-premium-loader__meta,
+.vx-premium-loader__visual,
+.vx-premium-loader__content {
+  border-radius: 0 !important;
+}
+
+input,
+select,
+textarea,
+.field input,
+.field select,
+.field textarea,
+.pub-panel .field textarea,
+.pub-panel .field input,
+.pub-panel .field select,
+.auth-form input,
+.auth-form select,
+.auth-form textarea,
+.search-input,
+.search-control,
+.search-box input,
+.search-box select,
+.flatpickr-input,
+.fp-input,
+.code-digit,
+.code-box,
+.otp-input,
+.pin-input,
+.pin-box {
+  border-radius: 0 !important;
+}
+
+.vx-home-actions .btn span,
+.hero-cta .btn span,
+.nav-actions .btn span {
+  border-radius: 0 !important;
+}
+
+/* Mantém elementos que realmente precisam ser redondos */
+.bg-glow-tl,
+.bg-glow-br,
+.mockup-dot,
+.live-dot,
+.badge::before,
+.top-notify-dot,
+.notif-dot,
+.vx-preview-dot,
+.vx-preview-row i,
+.brand-mascot,
+.side-avatar,
+.pub-whatsapp-fab,
+.pub-cal-dot,
+.foto-editor-circle,
+.vx-home-orb,
+.auth-orb,
+.loader-orb,
+.status-dot,
+.dot,
+.circle,
+.round,
+.avatar-circle,
+.hero-avatar,
+.is-circle {
+  border-radius: 50% !important;
+}
+
+/* Containers principais retos */
+.land-nav,
+.land-hero,
+.hero-mockup,
+.section-wrap,
+.auth-modal,
+.mockup-window,
+.vx-product-preview,
+.panel,
+.form-panel,
+.client-card,
+.svc-card,
+.prof-card,
+.pub-panel,
+.pub-hero,
+.notification-center,
+.mobile-nav-bar,
+.topbar,
+.sidebar,
+.edit-modal,
+.modal,
+.vx-premium-loader__shell,
+.vx-home-visual,
+.vx-home-copy,
+.mascot-calm-banner img,
+.landing-banner-hero,
+.landing-banner-hero > img,
+.mockup-body {
+  border-radius: 0 !important;
+}
+
+/* Botões e campos mais retos e consistentes */
+.btn,
+.nav-link,
+.filter-btn,
+.notification-center-actions button,
+.mobile-menu-trigger,
+.mob-nav-btn,
+.nav-btn,
+.act-btn,
+.auth-close,
+.pub-cal-arrow,
+.pub-social,
+.seg-pill,
+.hero-eyebrow,
+.badge {
+  border-radius: 0 !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-radius: 0 !important;
+}
+
+/* Etapas do cadastro/recuperação mais quadradas */
+.step-dot,
+.auth-step,
+.auth-steps > * {
+  border-radius: 0 !important;
+}
+
+/* Navegação desktop e hero */
+.nav-links,
+.hero-trust,
+.vx-home-proof,
+.vx-home-actions,
+.mockup-bar,
+.vx-preview-stats article,
+.vx-preview-agenda,
+.vx-preview-title,
+.vx-home-kicker,
+.vx-home-copy,
+.vx-home-hero,
+.vx-preview-stats,
+.steps-grid,
+.features-grid,
+.tests-grid,
+.choice-grid,
+.pub-panel-grid {
+  border-radius: 0 !important;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .auth-modal,
+  .modal,
+  .edit-modal,
+  .mobile-nav-bar,
+  .mobile-menu-trigger,
+  .pub-hero,
+  .land-nav,
+  .topbar,
+  .vx-home-hero,
+  .section-wrap,
+  .hero-mockup {
+    border-radius: 0 !important;
+  }
+}
+
+
+/* =========================================================
+   V31 — QUADRADO TOTAL / SECO
+   Expande o modo quadrado para dashboard, notificações,
+   calendário, badges, chips, dropdowns e toda a UI.
+   ========================================================= */
+html.square-mode *,
+body.square-mode * {
+  --radius: 0px !important;
+  --radius-sm: 0px !important;
+  --radius-md: 0px !important;
+  --radius-lg: 0px !important;
+  --radius-xl: 0px !important;
+  --radius-2xl: 0px !important;
+}
+
+/* Regra agressiva para tudo que normalmente vira pill/card */
+body.square-mode button,
+body.square-mode input,
+body.square-mode select,
+body.square-mode textarea,
+body.square-mode label,
+body.square-mode .btn,
+body.square-mode .button,
+body.square-mode .card,
+body.square-mode .panel,
+body.square-mode .modal,
+body.square-mode .sheet,
+body.square-mode .drawer,
+body.square-mode .surface,
+body.square-mode .box,
+body.square-mode .tile,
+body.square-mode .badge,
+body.square-mode .chip,
+body.square-mode .tag,
+body.square-mode .pill,
+body.square-mode .toast,
+body.square-mode .dropdown,
+body.square-mode .dropdown-menu,
+body.square-mode .menu,
+body.square-mode .menu-panel,
+body.square-mode .menu-item,
+body.square-mode .timeline-card,
+body.square-mode .timeline-item,
+body.square-mode .status-badge,
+body.square-mode .filter-btn,
+body.square-mode .filter-count,
+body.square-mode .tab-btn,
+body.square-mode .step,
+body.square-mode .step-dot,
+body.square-mode .step-card,
+body.square-mode .step-icon,
+body.square-mode .feature-card,
+body.square-mode .feat-card,
+body.square-mode .feat-icon,
+body.square-mode .kpi,
+body.square-mode .stat,
+body.square-mode .stat-card,
+body.square-mode .preview-card,
+body.square-mode .preview-box,
+body.square-mode .preview-stat,
+body.square-mode .client-card,
+body.square-mode .prof-card,
+body.square-mode .svc-card,
+body.square-mode .notification,
+body.square-mode .notification-center,
+body.square-mode .notif-item,
+body.square-mode .notif-close,
+body.square-mode .notif-badge,
+body.square-mode .code-input,
+body.square-mode .code-digit,
+body.square-mode .otp-input,
+body.square-mode .pin-box,
+body.square-mode .calendar,
+body.square-mode .calendar-card,
+body.square-mode .calendar-grid,
+body.square-mode .cal-day,
+body.square-mode .pub-day,
+body.square-mode .pub-slot,
+body.square-mode .slot,
+body.square-mode .slot-btn,
+body.square-mode .empty-state,
+body.square-mode .search-box,
+body.square-mode .search-input,
+body.square-mode .search-control,
+body.square-mode .hero,
+body.square-mode .hero-card,
+body.square-mode .hero-kicker,
+body.square-mode .mockup,
+body.square-mode .mockup-window,
+body.square-mode .mockup-card,
+body.square-mode .sidebar,
+body.square-mode .topbar,
+body.square-mode .land-nav,
+body.square-mode .nav-link,
+body.square-mode .nav-btn,
+body.square-mode .nav-chip,
+body.square-mode .mobile-nav-bar,
+body.square-mode .mobile-menu-trigger,
+body.square-mode .section-wrap,
+body.square-mode .auth-modal,
+body.square-mode .auth-main,
+body.square-mode .auth-side,
+body.square-mode .auth-card,
+body.square-mode .auth-feature,
+body.square-mode .auth-step,
+body.square-mode .pub-panel,
+body.square-mode .pub-hero,
+body.square-mode .pub-choice,
+body.square-mode .pub-social,
+body.square-mode [class*='btn'],
+body.square-mode [class*='button'],
+body.square-mode [class*='card'],
+body.square-mode [class*='panel'],
+body.square-mode [class*='modal'],
+body.square-mode [class*='badge'],
+body.square-mode [class*='chip'],
+body.square-mode [class*='tag'],
+body.square-mode [class*='pill'],
+body.square-mode [class*='toast'],
+body.square-mode [class*='dropdown'],
+body.square-mode [class*='menu'],
+body.square-mode [class*='field'],
+body.square-mode [class*='input'],
+body.square-mode [class*='select'],
+body.square-mode [class*='calendar'],
+body.square-mode [class*='slot'],
+body.square-mode [class*='timeline'],
+body.square-mode [class*='notif'],
+body.square-mode [class*='status'],
+body.square-mode [class*='step'],
+body.square-mode [class*='stat'],
+body.square-mode [class*='preview'] {
+  border-radius: 0 !important;
+}
+
+/* Remove arredondado também de pseudo-elementos usados como detalhes */
+body.square-mode .btn::before,
+body.square-mode .btn::after,
+body.square-mode .card::before,
+body.square-mode .card::after,
+body.square-mode .panel::before,
+body.square-mode .panel::after,
+body.square-mode .badge::before,
+body.square-mode .badge::after,
+body.square-mode .chip::before,
+body.square-mode .chip::after,
+body.square-mode .filter-btn::before,
+body.square-mode .filter-btn::after,
+body.square-mode .notification-center::before,
+body.square-mode .notification-center::after,
+body.square-mode .calendar-card::before,
+body.square-mode .calendar-card::after,
+body.square-mode [class*='btn']::before,
+body.square-mode [class*='btn']::after,
+body.square-mode [class*='card']::before,
+body.square-mode [class*='card']::after,
+body.square-mode [class*='panel']::before,
+body.square-mode [class*='panel']::after {
+  border-radius: 0 !important;
+}
+
+/* Seções específicas que o usuário pediu */
+body.square-mode .filter-tabs,
+body.square-mode .filters-row,
+body.square-mode .agenda-filters,
+body.square-mode .notify-box,
+body.square-mode .notify-item,
+body.square-mode .notify-empty,
+body.square-mode .bell-panel,
+body.square-mode .calendar-shell,
+body.square-mode .calendar-head,
+body.square-mode .calendar-week,
+body.square-mode .calendar-days,
+body.square-mode .dashboard-kpis,
+body.square-mode .dashboard-card,
+body.square-mode .dashboard-section,
+body.square-mode .dashboard-actions,
+body.square-mode .dashboard-row,
+body.square-mode .public-card,
+body.square-mode .public-shell,
+body.square-mode .public-actions,
+body.square-mode .auth-shell,
+body.square-mode .auth-actions,
+body.square-mode .auth-progress,
+body.square-mode .auth-progress > *,
+body.square-mode .hero-actions,
+body.square-mode .hero-stats,
+body.square-mode .landing-card,
+body.square-mode .landing-stat,
+body.square-mode .landing-actions {
+  border-radius: 0 !important;
+}
+
+/* Exceções que DEVEM permanecer circulares */
+body.square-mode .brand-mascot,
+body.square-mode .side-avatar,
+body.square-mode .avatar,
+body.square-mode .avatar-circle,
+body.square-mode .hero-avatar,
+body.square-mode .status-dot,
+body.square-mode .live-dot,
+body.square-mode .notif-dot,
+body.square-mode .top-notify-dot,
+body.square-mode .dot,
+body.square-mode .circle,
+body.square-mode .round,
+body.square-mode .orb,
+body.square-mode .glow-orb,
+body.square-mode [class*='avatar'],
+body.square-mode [class*='mascot'],
+body.square-mode [class*='-dot'],
+body.square-mode [class$='Dot'] {
+  border-radius: 50% !important;
+}
+
+/* Inputs e selects mais retos visualmente */
+body.square-mode input,
+body.square-mode select,
+body.square-mode textarea {
+  border-radius: 0 !important;
+  box-shadow: none;
+}
+
+/* Remover visual oval de scrollbar e barras de progresso */
+body.square-mode ::-webkit-scrollbar-thumb,
+body.square-mode progress,
+body.square-mode meter,
+body.square-mode .progress,
+body.square-mode .progress-bar {
+  border-radius: 0 !important;
+}
+
+
+/* =========================================================
+   V32 — REFINO DAS ÁREAS QUE AINDA ESTAVAM "ANTIGAS"
+   Landing actions + auth buttons + stepper + links de acesso
+   ========================================================= */
+#landingView .nav-actions { gap: 10px !important; }
+#landingView .nav-actions .btn {
+  min-height: 40px !important;
+  padding: 0 18px !important;
+  border: 1px solid rgba(166,90,247,.28) !important;
+  border-radius: 0 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: .01em !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+#landingView .nav-actions .btn-ghost {
+  background: #0f0a16 !important;
+  color: #f2eaff !important;
+}
+#landingView .nav-actions .btn-primary {
+  background: linear-gradient(180deg,#a23dff,#7c23d8) !important;
+  border-color: rgba(224,186,255,.46) !important;
+  color: #fff !important;
+  box-shadow: 0 14px 32px rgba(124,35,216,.20) !important;
+}
+
+#landingView .vx-home-actions,
+#landingView .hero-cta { gap: 12px !important; }
+#landingView .vx-home-actions .btn,
+#landingView .hero-cta .btn {
+  min-height: 50px !important;
+  padding: 0 22px !important;
+  border-radius: 0 !important;
+  border: 1px solid rgba(166,90,247,.22) !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  letter-spacing: -.01em !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+#landingView .vx-home-actions .btn span,
+#landingView .hero-cta .btn span,
+#landingView .nav-actions .btn span {
+  display: none !important;
+}
+#landingView .vx-btn-primary,
+#landingView .hero-cta .btn-primary {
+  background: linear-gradient(180deg,#a23dff,#7c23d8) !important;
+  border-color: rgba(224,186,255,.46) !important;
+  color: #fff !important;
+  box-shadow: 0 18px 36px rgba(124,35,216,.24) !important;
+}
+#landingView .vx-btn-secondary,
+#landingView .hero-cta .btn-ghost {
+  background: #100b17 !important;
+  color: #f1ebf9 !important;
+  border-color: rgba(166,90,247,.20) !important;
+}
+#landingView .vx-home-actions .btn:hover,
+#landingView .hero-cta .btn:hover,
+#landingView .nav-actions .btn:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(195,130,255,.42) !important;
+}
+
+#authOverlay .auth-close,
+#authOverlay .field input,
+#authOverlay .field select,
+#authOverlay .field textarea,
+#authOverlay .btn,
+#authOverlay .auth-flow-icon,
+#authOverlay .step-dot,
+#authOverlay .auth-perk,
+#authOverlay .auth-perk-icon {
+  border-radius: 0 !important;
+}
+
+#authOverlay .auth-close {
+  width: 40px !important;
+  height: 40px !important;
+  background: #11091a !important;
+  border-color: rgba(193,118,255,.26) !important;
+}
+#authOverlay .auth-form-title {
+  margin-bottom: 10px !important;
+  font-size: 36px !important;
+}
+#authOverlay .auth-form-sub {
+  margin-bottom: 24px !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+}
+#authOverlay .field label {
+  margin-bottom: 8px !important;
+  color: #e2d3f1 !important;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: .10em !important;
+}
+#authOverlay .field input,
+#authOverlay .field select,
+#authOverlay .field textarea {
+  min-height: 52px !important;
+  padding: 0 15px !important;
+  background: #0f0916 !important;
+  border: 1px solid rgba(174,84,255,.18) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.015) !important;
+}
+#authOverlay .field input:focus,
+#authOverlay .field select:focus,
+#authOverlay .field textarea:focus {
+  border-color: #c17aff !important;
+  box-shadow: 0 0 0 3px rgba(139,34,238,.11) !important;
+}
+#authOverlay .btn,
+#authOverlay .auth-form-area button:not(.auth-forgot-link):not(.auth-switch button) {
+  min-height: 50px !important;
+  padding-inline: 18px !important;
+  border-radius: 0 !important;
+  font-size: 13.5px !important;
+  font-weight: 850 !important;
+  letter-spacing: .005em !important;
+}
+#authOverlay .btn-primary {
+  background: linear-gradient(180deg,#a23dff,#7c23d8) !important;
+  border: 1px solid rgba(224,186,255,.46) !important;
+  color: #fff !important;
+  box-shadow: 0 18px 40px rgba(124,35,216,.20) !important;
+}
+#authOverlay .btn-ghost {
+  background: #100b17 !important;
+  border: 1px solid rgba(174,84,255,.18) !important;
+  color: #eadff6 !important;
+}
+#authOverlay .btn-primary:hover,
+#authOverlay .btn-ghost:hover {
+  transform: translateY(-1px) !important;
+}
+#authOverlay .auth-forgot-link,
+#authOverlay .auth-switch button {
+  color: #d29cff !important;
+  font-weight: 700 !important;
+}
+#authOverlay .stepper {
+  gap: 10px !important;
+  margin: 0 0 26px !important;
+}
+#authOverlay .step-dot {
+  height: 36px !important;
+  border: 1px solid rgba(174,84,255,.15) !important;
+  background: #0f0916 !important;
+}
+#authOverlay .step-dot::before {
+  color: #7e708a !important;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: .10em !important;
+}
+#authOverlay .step-dot.active,
+#authOverlay .step-dot.done {
+  background: rgba(139,34,238,.12) !important;
+  border-color: rgba(209,149,255,.52) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025) !important;
+}
+#authOverlay .step-dot.active::before,
+#authOverlay .step-dot.done::before {
+  color: #f0ddff !important;
+}
+#authOverlay .form-actions {
+  gap: 12px !important;
+}
+#authOverlay .auth-switch {
+  margin-top: 20px !important;
+  font-size: 12.5px !important;
+}
+#authOverlay .auth-code-input {
+  min-height: 64px !important;
+  letter-spacing: .28em !important;
+}
+
+@media (max-width: 820px) {
+  #landingView .nav-actions .btn {
+    min-height: 38px !important;
+    padding: 0 14px !important;
+    font-size: 11.5px !important;
+  }
+  #landingView .vx-home-actions .btn,
+  #landingView .hero-cta .btn {
+    min-height: 48px !important;
+    width: 100% !important;
+  }
+  #authOverlay .auth-form-title {
+    font-size: 31px !important;
+  }
+}
+
+/* =========================================================
+   V33 — SELETOR PROFISSIONAL DE ÁREA DE ATUAÇÃO
+   Substitui o menu nativo por uma aba integrada ao cadastro.
+   ========================================================= */
+#authOverlay .auth-category-native {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+#authOverlay .auth-category-trigger {
+  width: 100% !important;
+  min-height: 52px !important;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0,1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(174,84,255,.18) !important;
+  border-radius: 0 !important;
+  background: #0f0916 !important;
+  color: #f7f1fb !important;
+  text-align: left !important;
+  box-shadow: none !important;
+}
+#authOverlay .auth-category-trigger:hover,
+#authOverlay .auth-category-trigger:focus-visible {
+  border-color: #c17aff !important;
+  background: #130b1d !important;
+  outline: 3px solid rgba(139,34,238,.10) !important;
+}
+#authOverlay .auth-category-trigger > span {
+  width: 38px !important;
+  height: 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(193,118,255,.28) !important;
+  background: rgba(139,34,238,.10) !important;
+  font-size: 17px !important;
+}
+#authOverlay .auth-category-trigger strong {
+  display: block !important;
+  overflow: hidden !important;
+  color: #f1e8fa !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+#authOverlay .auth-category-trigger small {
+  color: #b87ef0 !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+}
+#authOverlay .auth-category-panel {
+  width: 100% !important;
+  max-width: 540px !important;
+  margin: auto 0 !important;
+}
+#authOverlay .auth-category-head {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto !important;
+  align-items: start !important;
+  gap: 18px !important;
+  margin-bottom: 20px !important;
+}
+#authOverlay .auth-category-head .auth-form-title {
+  margin-bottom: 8px !important;
+}
+#authOverlay .auth-category-head .auth-form-sub {
+  margin-bottom: 0 !important;
+}
+#authOverlay .auth-category-kicker {
+  margin-bottom: 9px !important;
+  color: #bd7cff !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  letter-spacing: .22em !important;
+}
+#authOverlay .auth-category-back {
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  border: 1px solid rgba(174,84,255,.20) !important;
+  border-radius: 0 !important;
+  background: #100a17 !important;
+  color: #eadcf6 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+#authOverlay .auth-category-search-wrap {
+  display: grid !important;
+  grid-template-columns: 42px minmax(0,1fr) !important;
+  align-items: center !important;
+  min-height: 50px !important;
+  margin-bottom: 14px !important;
+  border: 1px solid rgba(174,84,255,.18) !important;
+  background: #0f0916 !important;
+}
+#authOverlay .auth-category-search-wrap > span {
+  display: grid !important;
+  place-items: center !important;
+  height: 100% !important;
+  border-right: 1px solid rgba(174,84,255,.14) !important;
+  color: #c98cff !important;
+  font-size: 18px !important;
+}
+#authOverlay .auth-category-search-wrap input {
+  width: 100% !important;
+  min-height: 48px !important;
+  padding: 0 14px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #f7f1fb !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+#authOverlay .auth-category-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  max-height: 390px !important;
+  overflow-y: auto !important;
+  padding-right: 3px !important;
+}
+#authOverlay .auth-category-option {
+  min-height: 82px !important;
+  display: grid !important;
+  grid-template-columns: 42px minmax(0,1fr) !important;
+  grid-template-rows: 1fr auto !important;
+  align-items: center !important;
+  gap: 0 12px !important;
+  padding: 13px !important;
+  border: 1px solid rgba(174,84,255,.16) !important;
+  border-radius: 0 !important;
+  background: #0f0916 !important;
+  color: #f2e9fa !important;
+  text-align: left !important;
+  box-shadow: none !important;
+}
+#authOverlay .auth-category-option:hover,
+#authOverlay .auth-category-option.selected {
+  border-color: rgba(207,140,255,.58) !important;
+  background: rgba(139,34,238,.12) !important;
+}
+#authOverlay .auth-category-option-icon {
+  grid-row: 1 / 3 !important;
+  width: 42px !important;
+  height: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(193,118,255,.24) !important;
+  background: rgba(139,34,238,.10) !important;
+  font-size: 19px !important;
+}
+#authOverlay .auth-category-option span:nth-child(2) {
+  min-width: 0 !important;
+}
+#authOverlay .auth-category-option strong {
+  display: block !important;
+  overflow: hidden !important;
+  font-size: 12.5px !important;
+  font-weight: 850 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+#authOverlay .auth-category-option small {
+  display: block !important;
+  margin-top: 3px !important;
+  color: #7f718a !important;
+  font-size: 9.5px !important;
+}
+#authOverlay .auth-category-option b {
+  color: #bd7cff !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+}
+#authOverlay .auth-category-empty {
+  grid-column: 1 / -1 !important;
+  padding: 34px 18px !important;
+  border: 1px solid rgba(174,84,255,.14) !important;
+  color: #8d7f98 !important;
+  text-align: center !important;
+}
+#authOverlay .auth-category-foot {
+  margin-top: 14px !important;
+  color: #766980 !important;
+  font-size: 10.5px !important;
+}
+@media (max-width: 620px) {
+  #authOverlay .auth-category-panel {
+    max-width: none !important;
+  }
+  #authOverlay .auth-category-head {
+    grid-template-columns: 1fr !important;
+  }
+  #authOverlay .auth-category-back {
+    width: 100% !important;
+  }
+  #authOverlay .auth-category-grid {
+    grid-template-columns: 1fr !important;
+    max-height: 48dvh !important;
+  }
+}
