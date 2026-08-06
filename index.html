@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260806-33">
+<link rel="stylesheet" href="style.css?v=20260806-34">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -345,6 +345,14 @@
     <div style="color:var(--text4)">Feito com ❤️ para profissionais brasileiros</div>
   </footer>
 </div>
+<!-- ALERTA CENTRAL DO SISTEMA -->
+<div class="system-alert-overlay" id="systemAlertOverlay" role="dialog" aria-modal="true" aria-labelledby="systemAlertTitle" aria-describedby="systemAlertMessage">
+  <div class="system-alert-card" id="systemAlertCard">
+    <div class="system-alert-icon" id="systemAlertIcon" aria-hidden="true">!</div>
+    <div class="system-alert-copy"><strong id="systemAlertTitle">Atenção</strong><p id="systemAlertMessage"></p></div>
+    <button type="button" class="system-alert-close" id="systemAlertClose" onclick="closeSystemAlert()" aria-label="Fechar aviso">Fechar</button>
+  </div>
+</div>
 <!-- AUTH MODAL -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-modal">
@@ -428,9 +436,9 @@
         <div id="step1">
           <div class="form-gap">
             <div class="field"><label>Seu nome</label><input id="cadNome" placeholder="Ex: Ana Caroline" autocomplete="name"></div>
-            <div class="field"><label>E-mail</label><input id="cadEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
+            <div class="field" id="cadEmailField"><label>E-mail</label><input id="cadEmail" type="email" placeholder="seu@email.com" autocomplete="email"><small class="field-error" id="cadEmailError" aria-live="polite"></small></div>
             <div class="field"><label>Senha</label><input id="cadSenha" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"></div>
-            <button class="btn btn-primary btn-full" onclick="goStep2()">Continuar</button>
+            <button class="btn btn-primary btn-full" id="btnGoStep2" onclick="goStep2()">Continuar</button>
           </div>
           <div class="auth-switch">Já tenho conta. <button onclick="showLogin()">Entrar</button></div>
         </div>
@@ -1172,6 +1180,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script defer src="app.js?v=20260806-33"></script>
+<script defer src="app.js?v=20260806-34"></script>
 </body>
 </html>
