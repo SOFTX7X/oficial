@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260804-19">
+<link rel="stylesheet" href="style.css?v=20260805-auth25">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -346,131 +346,155 @@
   </footer>
 </div>
 <!-- AUTH MODAL -->
-<div class="auth-overlay" id="authOverlay">
-  <div class="auth-modal">
-    <button class="auth-close" onclick="closeAuth()">✕</button>
-    <div class="auth-panel-left">
-      <div>
-        <div class="auth-left-brand"><img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">VyXora Agendas</div>
-        <h2 class="auth-left-title">Seu painel<br><em>premium</em><br>em minutos.</h2>
-        <p class="auth-left-desc">Login real com e-mail e senha. Dados protegidos por empresa com RLS.</p>
-        <div class="auth-left-perks">
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Login com e-mail e senha</div>
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Mesmo login no site e app</div>
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Sessão salva no dispositivo</div>
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Dados isolados por empresa</div>
-          <div class="auth-perk"><div class="auth-perk-icon">✓</div>Protegido por Supabase Auth</div>
+<div class="auth-overlay auth-premium" id="authOverlay">
+  <div class="auth-modal auth-premium-shell">
+    <button class="auth-close" onclick="closeAuth()" aria-label="Fechar">✕</button>
+
+    <aside class="auth-panel-left auth-premium-showcase">
+      <div class="auth-showcase-top">
+        <div class="auth-left-brand">
+          <span class="auth-brand-mark"><img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async"></span>
+          <span><strong>VyXora</strong><small>AGENDAS</small></span>
+        </div>
+        <span class="auth-security-pill">AMBIENTE SEGURO</span>
+      </div>
+
+      <div class="auth-showcase-center">
+        <span class="auth-eyebrow">GESTÃO PROFISSIONAL</span>
+        <h2 class="auth-left-title">Seu negócio merece uma presença <em>extraordinária.</em></h2>
+        <p class="auth-left-desc">Uma experiência refinada para organizar agenda, clientes, equipe e crescimento em um único ambiente.</p>
+
+        <div class="auth-showcase-grid">
+          <div class="auth-showcase-card"><span>01</span><strong>Agenda inteligente</strong><small>Controle completo em tempo real.</small></div>
+          <div class="auth-showcase-card"><span>02</span><strong>Dados protegidos</strong><small>Autenticação e isolamento por empresa.</small></div>
+          <div class="auth-showcase-card"><span>03</span><strong>Site e aplicativo</strong><small>A mesma experiência em qualquer tela.</small></div>
+          <div class="auth-showcase-card"><span>04</span><strong>Configuração guiada</strong><small>Seu painel pronto em poucos passos.</small></div>
         </div>
       </div>
-      <p class="auth-left-footer">🔒 Supabase Auth · RLS · Dispositivo confiável</p>
-    </div>
-    <div class="auth-form-area">
+
+      <div class="auth-left-footer"><span class="auth-live-dot"></span> Supabase Auth · RLS · Sessão protegida</div>
+    </aside>
+
+    <section class="auth-form-area auth-premium-form-area">
+      <div class="auth-mobile-brand"><img src="mascote-icone-vyxora.png?v=8" alt=""> <span>VyXora <small>AGENDAS</small></span></div>
+
       <div id="formLogin" style="display:none">
-        <div class="auth-form-title">Entrar no painel</div>
-        <p class="auth-form-sub">Use o mesmo e-mail e senha criados no cadastro.</p>
+        <div class="auth-kicker">ACESSO AO PAINEL</div>
+        <div class="auth-form-title">Bem-vindo de volta.</div>
+        <p class="auth-form-sub">Entre para continuar administrando seu negócio.</p>
         <div class="form-gap">
-          <div class="field"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
-          <div class="field"><label>Senha</label><input id="loginSenha" type="password" placeholder="Sua senha" autocomplete="current-password"></div>
-          <button class="auth-forgot-link" type="button" onclick="showForgotPassword()">Esqueci minha senha</button>
-          <button class="btn btn-primary btn-full" id="btnLogin" onclick="loginComSenha()">Entrar →</button>
+          <div class="field auth-field"><label>E-mail</label><div class="auth-input-shell"><span>✉</span><input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div></div>
+          <div class="field auth-field"><label>Senha</label><div class="auth-input-shell"><span>◆</span><input id="loginSenha" type="password" placeholder="Sua senha" autocomplete="current-password"></div></div>
+          <div class="auth-inline-row"><span class="auth-safe-text">Conexão protegida</span><button class="auth-forgot-link" type="button" onclick="showForgotPassword()">Esqueci minha senha</button></div>
+          <button class="btn btn-primary btn-full auth-main-action" id="btnLogin" onclick="loginComSenha()"><span>Entrar no painel</span><b>→</b></button>
         </div>
-        <div class="auth-switch">Não tenho conta. <button onclick="showCadastro()">Criar cadastro</button></div>
+        <div class="auth-switch">Ainda não possui uma conta? <button onclick="showCadastro()">Criar agora</button></div>
       </div>
+
       <div id="formVerifyEmail" class="auth-flow-screen" style="display:none">
         <div class="auth-flow-icon">✉</div>
-        <div class="auth-form-title">Confirme seu e-mail</div>
+        <div class="auth-kicker">CONFIRMAÇÃO DE IDENTIDADE</div>
+        <div class="auth-form-title">Confirme seu e-mail.</div>
         <p class="auth-form-sub">Enviamos um código para <strong id="verifyEmailLabel"></strong>.</p>
         <div class="form-gap">
-          <div class="field"><label>Código de confirmação</label><input id="verifyEmailCode" class="auth-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="000000"></div>
-          <button class="btn btn-primary btn-full" id="btnVerifyEmail" onclick="confirmarEmailCadastro()">Confirmar e continuar →</button>
-          <button class="btn btn-ghost btn-full" id="btnResendSignup" onclick="reenviarCodigoCadastro()">Reenviar código</button>
+          <div class="field auth-field"><label>Código de confirmação</label><div class="auth-input-shell auth-otp-shell"><input id="verifyEmailCode" class="auth-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="000000"></div></div>
+          <button class="btn btn-primary btn-full auth-main-action" id="btnVerifyEmail" onclick="confirmarEmailCadastro()"><span>Confirmar e continuar</span><b>→</b></button>
+          <button class="btn btn-ghost btn-full auth-secondary-action" id="btnResendSignup" onclick="reenviarCodigoCadastro()">Reenviar código</button>
         </div>
         <div class="auth-switch">E-mail incorreto? <button onclick="voltarCadastroEmail()">Alterar e-mail</button></div>
       </div>
+
       <div id="formForgotPassword" class="auth-flow-screen" style="display:none">
-        <div class="auth-flow-icon">⌁</div>
-        <div class="auth-form-title">Recuperar acesso</div>
-        <p class="auth-form-sub">Digite o e-mail da conta para receber um código de recuperação.</p>
+        <div class="auth-flow-icon">↺</div>
+        <div class="auth-kicker">RECUPERAÇÃO SEGURA</div>
+        <div class="auth-form-title">Recupere seu acesso.</div>
+        <p class="auth-form-sub">Informe o e-mail da conta para receber um código de recuperação.</p>
         <div class="form-gap">
-          <div class="field"><label>E-mail</label><input id="recoveryEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
-          <button class="btn btn-primary btn-full" id="btnSendRecovery" onclick="enviarCodigoRecuperacao()">Enviar código →</button>
+          <div class="field auth-field"><label>E-mail</label><div class="auth-input-shell"><span>✉</span><input id="recoveryEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div></div>
+          <button class="btn btn-primary btn-full auth-main-action" id="btnSendRecovery" onclick="enviarCodigoRecuperacao()"><span>Enviar código</span><b>→</b></button>
         </div>
         <div class="auth-switch"><button onclick="showLogin()">← Voltar ao login</button></div>
       </div>
+
       <div id="formRecoveryCode" class="auth-flow-screen" style="display:none">
         <div class="auth-flow-icon">#</div>
-        <div class="auth-form-title">Digite o código</div>
-        <p class="auth-form-sub">Enviamos um código de recuperação para <strong id="recoveryEmailLabel"></strong>.</p>
+        <div class="auth-kicker">CÓDIGO DE SEGURANÇA</div>
+        <div class="auth-form-title">Digite o código.</div>
+        <p class="auth-form-sub">Enviamos o código para <strong id="recoveryEmailLabel"></strong>.</p>
         <div class="form-gap">
-          <div class="field"><label>Código de recuperação</label><input id="recoveryCode" class="auth-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="000000"></div>
-          <button class="btn btn-primary btn-full" id="btnVerifyRecovery" onclick="validarCodigoRecuperacao()">Validar código →</button>
-          <button class="btn btn-ghost btn-full" id="btnResendRecovery" onclick="reenviarCodigoRecuperacao()">Reenviar código</button>
+          <div class="field auth-field"><label>Código de recuperação</label><div class="auth-input-shell auth-otp-shell"><input id="recoveryCode" class="auth-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="000000"></div></div>
+          <button class="btn btn-primary btn-full auth-main-action" id="btnVerifyRecovery" onclick="validarCodigoRecuperacao()"><span>Validar código</span><b>→</b></button>
+          <button class="btn btn-ghost btn-full auth-secondary-action" id="btnResendRecovery" onclick="reenviarCodigoRecuperacao()">Reenviar código</button>
         </div>
         <div class="auth-switch"><button onclick="showForgotPassword()">← Usar outro e-mail</button></div>
       </div>
+
       <div id="formNewPassword" class="auth-flow-screen" style="display:none">
         <div class="auth-flow-icon">✓</div>
-        <div class="auth-form-title">Crie uma nova senha</div>
+        <div class="auth-kicker">NOVA CREDENCIAL</div>
+        <div class="auth-form-title">Crie uma nova senha.</div>
         <p class="auth-form-sub">Use pelo menos 8 caracteres para proteger sua conta.</p>
         <div class="form-gap">
-          <div class="field"><label>Nova senha</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div>
-          <div class="field"><label>Confirmar nova senha</label><input id="newPasswordConfirm" type="password" autocomplete="new-password" placeholder="Repita a nova senha"></div>
-          <button class="btn btn-primary btn-full" id="btnUpdatePassword" onclick="salvarNovaSenha()">Atualizar senha →</button>
+          <div class="field auth-field"><label>Nova senha</label><div class="auth-input-shell"><span>◆</span><input id="newPassword" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div></div>
+          <div class="field auth-field"><label>Confirmar nova senha</label><div class="auth-input-shell"><span>◆</span><input id="newPasswordConfirm" type="password" autocomplete="new-password" placeholder="Repita a nova senha"></div></div>
+          <button class="btn btn-primary btn-full auth-main-action" id="btnUpdatePassword" onclick="salvarNovaSenha()"><span>Atualizar senha</span><b>→</b></button>
         </div>
       </div>
+
       <div id="formCadastro" style="display:none">
-        <div class="auth-form-title">Criar sua conta</div>
-        <p class="auth-form-sub">Configure em 3 etapas simples.</p>
-        <div class="stepper">
-          <div class="step-dot active" id="st1"></div>
-          <div class="step-dot" id="st2"></div>
-          <div class="step-dot" id="st3"></div>
+        <div class="auth-signup-heading">
+          <div><div class="auth-kicker">CONFIGURAÇÃO INICIAL</div><div class="auth-form-title">Crie sua conta.</div><p class="auth-form-sub">Três etapas claras para iniciar com excelência.</p></div>
+          <span class="auth-step-count">03 ETAPAS</span>
         </div>
-        <div id="step1">
+
+        <div class="stepper auth-premium-stepper">
+          <div class="step-dot active" id="st1"><span>1</span><small>Conta</small></div>
+          <div class="step-dot" id="st2"><span>2</span><small>Negócio</small></div>
+          <div class="step-dot" id="st3"><span>3</span><small>Operação</small></div>
+        </div>
+
+        <div id="step1" class="auth-step-panel">
+          <div class="auth-step-intro"><strong>Seus dados de acesso</strong><span>Informações pessoais e credenciais seguras.</span></div>
           <div class="form-gap">
-            <div class="field"><label>Seu nome</label><input id="cadNome" placeholder="Ex: Ana Caroline" autocomplete="name"></div>
-            <div class="field"><label>E-mail</label><input id="cadEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
-            <div class="field"><label>Senha</label><input id="cadSenha" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"></div>
-            <button class="btn btn-primary btn-full" onclick="goStep2()">Continuar →</button>
+            <div class="field auth-field"><label>Seu nome</label><div class="auth-input-shell"><span>●</span><input id="cadNome" placeholder="Ex: Ana Caroline" autocomplete="name"></div></div>
+            <div class="field auth-field"><label>E-mail</label><div class="auth-input-shell"><span>✉</span><input id="cadEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div></div>
+            <div class="field auth-field"><label>Senha</label><div class="auth-input-shell"><span>◆</span><input id="cadSenha" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div></div>
+            <button class="btn btn-primary btn-full auth-main-action" onclick="goStep2()"><span>Continuar configuração</span><b>→</b></button>
           </div>
-          <div class="auth-switch">Já tenho conta. <button onclick="showLogin()">Entrar</button></div>
+          <div class="auth-switch">Já possui uma conta? <button onclick="showLogin()">Entrar</button></div>
         </div>
-        <div id="step2" style="display:none">
+
+        <div id="step2" class="auth-step-panel" style="display:none">
+          <div class="auth-step-intro"><strong>Identidade do negócio</strong><span>Defina como sua empresa aparecerá para os clientes.</span></div>
           <div class="form-gap">
-            <div class="field"><label>Nome do negócio</label><input id="empNome" placeholder="Ex: Nails da Ana" oninput="autoSlug()"></div>
-            <div class="field-row">
-              <div class="field">
-                <label>Área de atuação</label>
-                <select id="empCategoria"><option value="">Carregando...</option></select>
-              </div>
-              <div class="field"><label>WhatsApp</label><input id="empWhatsapp" placeholder="(92) 99999-9999"></div>
+            <div class="field auth-field"><label>Nome do negócio</label><div class="auth-input-shell"><span>◆</span><input id="empNome" placeholder="Ex: Nails da Ana" oninput="autoSlug()"></div></div>
+            <div class="field-row auth-equal-row">
+              <div class="field auth-field"><label>Área de atuação</label><div class="auth-input-shell auth-select-shell"><span>◈</span><select id="empCategoria"><option value="">Carregando...</option></select></div></div>
+              <div class="field auth-field"><label>WhatsApp</label><div class="auth-input-shell"><span>☎</span><input id="empWhatsapp" placeholder="(92) 99999-9999"></div></div>
             </div>
-            <div class="field"><label>Link personalizado</label><input id="empSlug" placeholder="nails-da-ana"></div>
-            <div class="form-actions">
-              <button class="btn btn-ghost" onclick="goStep1()">← Voltar</button>
-              <button class="btn btn-primary" style="flex:1" onclick="goStep3()">Continuar →</button>
-            </div>
+            <div class="field auth-field"><label>Link personalizado</label><div class="auth-input-shell auth-slug-shell"><span>vyxora.online/#agendar/</span><input id="empSlug" placeholder="nails-da-ana"></div></div>
+            <div class="form-actions auth-nav-actions"><button class="btn btn-ghost auth-back-action" onclick="goStep1()">← Voltar</button><button class="btn btn-primary auth-main-action" style="flex:1" onclick="goStep3()"><span>Continuar</span><b>→</b></button></div>
           </div>
         </div>
-        <div id="step3" style="display:none">
+
+        <div id="step3" class="auth-step-panel" style="display:none">
+          <div class="auth-step-intro"><strong>Primeira operação</strong><span>Cadastre o serviço e o profissional inicial.</span></div>
           <div class="form-gap">
-            <div class="field"><label>Primeiro serviço</label><input id="servNome" placeholder="Ex: Alongamento em Gel"></div>
-            <div class="field-row">
-              <div class="field"><label>Preço (R$)</label><input id="servPreco" type="number" placeholder="80"></div>
-              <div class="field"><label>Duração (min)</label><input id="servDuracao" type="number" placeholder="90"></div>
+            <div class="field auth-field"><label>Primeiro serviço</label><div class="auth-input-shell"><span>◇</span><input id="servNome" placeholder="Ex: Alongamento em Gel"></div></div>
+            <div class="field-row auth-equal-row">
+              <div class="field auth-field"><label>Preço (R$)</label><div class="auth-input-shell"><span>R$</span><input id="servPreco" type="number" min="0" step="0.01" placeholder="80"></div></div>
+              <div class="field auth-field"><label>Duração (min)</label><div class="auth-input-shell"><span>◷</span><input id="servDuracao" type="number" min="1" step="1" placeholder="90"></div></div>
             </div>
-            <div class="field"><label>Primeiro profissional</label><input id="profNome" placeholder="Ex: Ana Caroline"></div>
-            <div class="field"><label>Especialidade</label><input id="profEsp" placeholder="Ex: Manicure"></div>
-            <div class="form-actions">
-              <button class="btn btn-ghost" onclick="goStep2()">← Voltar</button>
-              <button class="btn btn-primary" style="flex:1" id="btnFinalizar" onclick="finalizarCadastro()">Criar painel →</button>
-            </div>
+            <div class="field auth-field"><label>Primeiro profissional</label><div class="auth-input-shell"><span>●</span><input id="profNome" placeholder="Ex: Ana Caroline"></div></div>
+            <div class="field auth-field"><label>Especialidade</label><div class="auth-input-shell"><span>✦</span><input id="profEsp" placeholder="Ex: Manicure"></div></div>
+            <div class="form-actions auth-nav-actions"><button class="btn btn-ghost auth-back-action" onclick="goStep2()">← Voltar</button><button class="btn btn-primary auth-main-action" style="flex:1" id="btnFinalizar" onclick="finalizarCadastro()"><span>Criar meu painel</span><b>→</b></button></div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </div>
+
 
 <!-- DASHBOARD -->
 <section id="dashboardView" style="display:none">
