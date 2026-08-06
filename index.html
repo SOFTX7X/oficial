@@ -371,7 +371,7 @@
           <div class="field"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
           <div class="field"><label>Senha</label><input id="loginSenha" type="password" placeholder="Sua senha" autocomplete="current-password"></div>
           <button class="auth-forgot-link" type="button" onclick="showForgotPassword()">Esqueci minha senha</button>
-          <button class="btn btn-primary btn-full" id="btnLogin" onclick="loginComSenha()">Entrar →</button>
+          <button class="btn btn-primary btn-full" id="btnLogin" onclick="loginComSenha()">Entrar</button>
         </div>
         <div class="auth-switch">Não tenho conta. <button onclick="showCadastro()">Criar cadastro</button></div>
       </div>
@@ -381,7 +381,7 @@
         <p class="auth-form-sub">Enviamos um código para <strong id="verifyEmailLabel"></strong>.</p>
         <div class="form-gap">
           <div class="field"><label>Código de confirmação</label><input id="verifyEmailCode" class="auth-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="000000"></div>
-          <button class="btn btn-primary btn-full" id="btnVerifyEmail" onclick="confirmarEmailCadastro()">Confirmar e continuar →</button>
+          <button class="btn btn-primary btn-full" id="btnVerifyEmail" onclick="confirmarEmailCadastro()">Confirmar e continuar</button>
           <button class="btn btn-ghost btn-full" id="btnResendSignup" onclick="reenviarCodigoCadastro()">Reenviar código</button>
         </div>
         <div class="auth-switch">E-mail incorreto? <button onclick="voltarCadastroEmail()">Alterar e-mail</button></div>
@@ -392,9 +392,9 @@
         <p class="auth-form-sub">Digite o e-mail da conta para receber um código de recuperação.</p>
         <div class="form-gap">
           <div class="field"><label>E-mail</label><input id="recoveryEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
-          <button class="btn btn-primary btn-full" id="btnSendRecovery" onclick="enviarCodigoRecuperacao()">Enviar código →</button>
+          <button class="btn btn-primary btn-full" id="btnSendRecovery" onclick="enviarCodigoRecuperacao()">Enviar código</button>
         </div>
-        <div class="auth-switch"><button onclick="showLogin()">← Voltar ao login</button></div>
+        <div class="auth-switch"><button onclick="showLogin()">Voltar ao login</button></div>
       </div>
       <div id="formRecoveryCode" class="auth-flow-screen" style="display:none">
         <div class="auth-flow-icon">#</div>
@@ -402,10 +402,10 @@
         <p class="auth-form-sub">Enviamos um código de recuperação para <strong id="recoveryEmailLabel"></strong>.</p>
         <div class="form-gap">
           <div class="field"><label>Código de recuperação</label><input id="recoveryCode" class="auth-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="000000"></div>
-          <button class="btn btn-primary btn-full" id="btnVerifyRecovery" onclick="validarCodigoRecuperacao()">Validar código →</button>
+          <button class="btn btn-primary btn-full" id="btnVerifyRecovery" onclick="validarCodigoRecuperacao()">Validar código</button>
           <button class="btn btn-ghost btn-full" id="btnResendRecovery" onclick="reenviarCodigoRecuperacao()">Reenviar código</button>
         </div>
-        <div class="auth-switch"><button onclick="showForgotPassword()">← Usar outro e-mail</button></div>
+        <div class="auth-switch"><button onclick="showForgotPassword()">Usar outro e-mail</button></div>
       </div>
       <div id="formNewPassword" class="auth-flow-screen" style="display:none">
         <div class="auth-flow-icon">✓</div>
@@ -414,7 +414,7 @@
         <div class="form-gap">
           <div class="field"><label>Nova senha</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div>
           <div class="field"><label>Confirmar nova senha</label><input id="newPasswordConfirm" type="password" autocomplete="new-password" placeholder="Repita a nova senha"></div>
-          <button class="btn btn-primary btn-full" id="btnUpdatePassword" onclick="salvarNovaSenha()">Atualizar senha →</button>
+          <button class="btn btn-primary btn-full" id="btnUpdatePassword" onclick="salvarNovaSenha()">Atualizar senha</button>
         </div>
       </div>
       <div id="formCadastro" style="display:none">
@@ -430,7 +430,7 @@
             <div class="field"><label>Seu nome</label><input id="cadNome" placeholder="Ex: Ana Caroline" autocomplete="name"></div>
             <div class="field"><label>E-mail</label><input id="cadEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
             <div class="field"><label>Senha</label><input id="cadSenha" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"></div>
-            <button class="btn btn-primary btn-full" onclick="goStep2()">Continuar →</button>
+            <button class="btn btn-primary btn-full" onclick="goStep2()">Continuar</button>
           </div>
           <div class="auth-switch">Já tenho conta. <button onclick="showLogin()">Entrar</button></div>
         </div>
@@ -446,8 +446,8 @@
             </div>
             <div class="field"><label>Link personalizado</label><input id="empSlug" placeholder="nails-da-ana"></div>
             <div class="form-actions">
-              <button class="btn btn-ghost" onclick="goStep1()">← Voltar</button>
-              <button class="btn btn-primary" style="flex:1" onclick="goStep3()">Continuar →</button>
+              <button class="btn btn-ghost" onclick="goStep1()">Voltar</button>
+              <button class="btn btn-primary" style="flex:1" onclick="goStep3()">Continuar</button>
             </div>
           </div>
         </div>
@@ -461,8 +461,8 @@
             <div class="field"><label>Primeiro profissional</label><input id="profNome" placeholder="Ex: Ana Caroline"></div>
             <div class="field"><label>Especialidade</label><input id="profEsp" placeholder="Ex: Manicure"></div>
             <div class="form-actions">
-              <button class="btn btn-ghost" onclick="goStep2()">← Voltar</button>
-              <button class="btn btn-primary" style="flex:1" id="btnFinalizar" onclick="finalizarCadastro()">Criar painel →</button>
+              <button class="btn btn-ghost" onclick="goStep2()">Voltar</button>
+              <button class="btn btn-primary" style="flex:1" id="btnFinalizar" onclick="finalizarCadastro()">Criar painel</button>
             </div>
           </div>
         </div>
