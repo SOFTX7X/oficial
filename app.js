@@ -1068,12 +1068,28 @@ function _mostrarStep(n) {
 function setStep(n) { _mostrarStep(n); }
 function goStep1() { _mostrarStep(1); }
 
-function goStep2() {
+async function goStep2() {
   const nome = $('cadNome')?.value?.trim();
-  const email = $('cadEmail')?.value?.trim();
+  const email = $('cadEmail')?.value?.trim().toLowerCase();
   const senha = $('cadSenha')?.value?.trim();
   if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
   if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
+
+  // Bloqueia e-mail duplicado já no início do cadastro.
+  try {
+    const response = await fetch('/api/auth-email-exists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (result.exists) {
+      return toast('Este e-mail já possui uma conta. Use outro e-mail ou recupere sua senha.', 'err');
+    }
+  } catch (e) {
+    console.warn('Falha ao verificar e-mail:', e);
+  }
+
   preencherSelectCategorias(); _mostrarStep(2);
 }
 
@@ -1084,6 +1100,20 @@ function goStep3() {
   if (!empNome || !empSlug || !empWhatsapp) return toast('Preencha nome, link e WhatsApp.', 'err');
   _mostrarStep(3);
 }
+
+// Corrige seleção de categoria em componentes personalizados.
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-area-value], [data-categoria-value], .area-option, .categoria-option');
+  if (!btn) return;
+  const select = document.getElementById('empCategoria');
+  const value = btn.dataset.areaValue || btn.dataset.categoriaValue || btn.getAttribute('data-value');
+  if (select && value != null) {
+    select.value = value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    btn.parentElement?.querySelectorAll('.selected, .active').forEach(x => x.classList.remove('selected','active'));
+    btn.classList.add('selected','active');
+  }
+});
 
 function autoSlug() {
   const el = $('empSlug');
