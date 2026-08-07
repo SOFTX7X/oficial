@@ -1190,6 +1190,17 @@ async function finalizarCadastro() {
   const btnFin = $('btnFinalizar');
   if (btnFin) { btnFin.disabled = true; btnFin.textContent = 'Criando conta...'; }
   try {
+    // Bloqueio preventivo de e-mail duplicado antes de criar usuário
+    const emailCheck = await fetch('/api/auth-email-exists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const emailCheckData = await emailCheck.json().catch(() => ({}));
+    if (emailCheckData.exists) {
+      return toast('Este e-mail já possui uma conta. Use outro e-mail ou recupere sua senha.', 'err');
+    }
+
     const signupResponse = await fetch('/api/auth-signup', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password: senha, nome: nomeUser })
