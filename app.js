@@ -389,41 +389,9 @@ function isDiaFechado(dataStr, diasFechados) {
   return diasFechados.includes(d.getDay());
 }
 
-function traduzirMensagemSistema(valor, fallback = 'Não foi possível concluir esta ação.') {
-  const original = String(valor || '').trim();
-  if (!original) return fallback;
-  const regras = [
-    [/invalid login credentials|invalid credentials|email or password/i, 'E-mail ou senha incorretos.'],
-    [/email not confirmed|email_not_confirmed/i, 'Confirme seu e-mail antes de entrar.'],
-    [/user already registered|already registered|already exists|duplicate key.*email|email.*already/i, 'Este e-mail já possui uma conta. Use outro e-mail ou entre na conta existente.'],
-    [/password should be at least|password.*characters/i, 'A senha não atende ao mínimo de caracteres exigido.'],
-    [/rate limit|too many requests|over_request_rate_limit/i, 'Muitas tentativas em pouco tempo. Aguarde e tente novamente.'],
-    [/otp.*expired|token.*expired|expired/i, 'O código expirou. Solicite um novo.'],
-    [/invalid.*otp|invalid.*token|token.*invalid/i, 'Código inválido. Confira e tente novamente.'],
-    [/network|failed to fetch|fetch failed|load failed/i, 'Falha de conexão. Verifique sua internet e tente novamente.'],
-    [/permission denied|row-level security|violates row-level security|not authorized|unauthorized/i, 'O banco de dados bloqueou esta operação. Verifique as permissões do sistema.'],
-    [/duplicate key|unique constraint/i, 'Já existe um registro com essas informações.'],
-    [/foreign key|violates foreign key/i, 'Há uma dependência de dados impedindo esta operação.'],
-    [/timeout|timed out/i, 'O servidor demorou para responder. Tente novamente.'],
-    [/service unavailable|bad gateway|gateway|502|503/i, 'O serviço está temporariamente indisponível. Tente novamente em instantes.']
-  ];
-  for (const [padrao, traducao] of regras) if (padrao.test(original)) return traducao;
-  if (/[a-z]{4,}\s+[a-z]{4,}/i.test(original) && !/[áéíóúãõç]/i.test(original)) return fallback;
-  return original;
-}
-function showSystemAlert(message, type = 'err', title = '') {
-  const overlay = $('systemAlertOverlay'); const card = $('systemAlertCard');
-  if (!overlay || !card) return showNotif(message, '', type === 'err' ? 'err' : 'info');
-  card.classList.toggle('is-error', type === 'err'); card.classList.toggle('is-warning', type === 'warn');
-  setText('systemAlertTitle', title || (type === 'err' ? 'Não foi possível continuar' : 'Atenção'));
-  setText('systemAlertMessage', traduzirMensagemSistema(message)); setText('systemAlertIcon', type === 'err' ? '!' : 'i');
-  overlay.classList.add('open'); VYXORA_SCROLL.lock('system-alert');
-  setTimeout(() => $('systemAlertClose')?.focus?.({ preventScroll: true }), 30);
-}
-function closeSystemAlert() { $('systemAlertOverlay')?.classList.remove('open'); VYXORA_SCROLL.unlock('system-alert'); }
 function toast(msg, type = 'info') {
-  if (type === 'err' || type === 'warn') return showSystemAlert(msg, type);
-  showNotif(traduzirMensagemSistema(msg, String(msg || '')), '', type === 'ok' ? 'ok' : 'info');
+  const typeMap = { ok: 'ok', err: 'err', warn: 'info', info: 'info' };
+  showNotif(msg, '', typeMap[type] || 'info');
 }
 
 const NOTIFICATION_LIMIT = 100;
@@ -752,94 +720,6 @@ function preencherSelectCategorias() {
     sel.innerHTML = state.categorias.map(c => `<option value="${c.id}">${c.icone || ''} ${c.nome}</option>`).join('');
   }
   sel.dataset.preenchido = '1';
-  sincronizarSeletorCategoriaCadastro();
-}
-
-function categoriasCadastroDisponiveis() {
-  const sel = $('empCategoria');
-  if (!sel) return [];
-  return Array.from(sel.options).map(opt => {
-    const texto = (opt.textContent || '').trim();
-    const partes = texto.split(/\s+/);
-    const primeiro = partes[0] || '✦';
-    const temIcone = /[^\p{L}\p{N}]/u.test(primeiro);
-    return {
-      value: opt.value,
-      icon: temIcone ? primeiro : '✦',
-      name: temIcone ? partes.slice(1).join(' ') : texto
-    };
-  }).filter(item => item.value && item.name);
-}
-
-function sincronizarSeletorCategoriaCadastro() {
-  const sel = $('empCategoria');
-  const text = $('empCategoriaTriggerText');
-  const icon = $('empCategoriaTriggerIcon');
-  if (!sel || !text || !icon) return;
-  const option = sel.options[sel.selectedIndex];
-  if (!option || !option.value) {
-    text.textContent = 'Escolher área de atuação';
-    icon.textContent = '✦';
-    return;
-  }
-  const item = categoriasCadastroDisponiveis().find(c => c.value === option.value);
-  if (!item) return;
-  text.textContent = item.name;
-  icon.textContent = item.icon;
-}
-
-function renderizarCategoriasCadastro(filtro = '') {
-  const grid = $('authCategoryGrid');
-  if (!grid) return;
-  const termo = String(filtro || '').trim().toLocaleLowerCase('pt-BR');
-  const atual = $('empCategoria')?.value || '';
-  const itens = categoriasCadastroDisponiveis().filter(item => !termo || item.name.toLocaleLowerCase('pt-BR').includes(termo));
-  grid.innerHTML = itens.length ? itens.map(item => `
-    <button type="button" class="auth-category-option${item.value === atual ? ' selected' : ''}" onclick="selecionarCategoriaCadastro('${String(item.value).replace(/'/g, "\\'")}')">
-      <span class="auth-category-option-icon">${item.icon}</span>
-      <span><strong>${item.name}</strong><small>Selecionar categoria</small></span>
-      <b>${item.value === atual ? 'Selecionado' : 'Escolher'}</b>
-    </button>`).join('') : '<div class="auth-category-empty">Nenhuma categoria encontrada.</div>';
-}
-
-function abrirSeletorCategoria() {
-  const panel = $('authCategoryPanel');
-  const form = $('formCadastro');
-  if (!panel || !form) return;
-  form.dataset.categoryHidden = '1';
-  form.style.display = 'none';
-  panel.style.display = 'block';
-  VYXORA_SCROLL.lock('auth-category');
-  renderizarCategoriasCadastro();
-  const search = $('authCategorySearch');
-  if (search) {
-    search.value = '';
-    setTimeout(() => search.focus(), 30);
-  }
-}
-
-function fecharSeletorCategoria() {
-  const panel = $('authCategoryPanel');
-  const form = $('formCadastro');
-  if (panel) panel.style.display = 'none';
-  VYXORA_SCROLL.unlock('auth-category');
-  if (form && form.dataset.categoryHidden === '1') {
-    form.style.display = 'block';
-    delete form.dataset.categoryHidden;
-  }
-}
-
-function filtrarCategoriasCadastro(valor) {
-  renderizarCategoriasCadastro(valor);
-}
-
-function selecionarCategoriaCadastro(valor) {
-  const sel = $('empCategoria');
-  if (!sel) return;
-  sel.value = valor;
-  sel.dispatchEvent(new Event('change', { bubbles: true }));
-  sincronizarSeletorCategoriaCadastro();
-  fecharSeletorCategoria();
 }
 
 function showDashboard() {
@@ -962,8 +842,8 @@ function mensagemAuth(error, fallback) {
   if (code.includes('otp_disabled') || msg.includes('invalid') || msg.includes('token')) return 'Código inválido. Confira e tente novamente.';
   if (code.includes('email_not_confirmed') || msg.includes('email not confirmed')) return 'Confirme seu e-mail antes de entrar.';
   if (code.includes('over_request_rate_limit') || msg.includes('rate limit')) return 'Muitas tentativas. Aguarde um pouco e tente novamente.';
-  if (msg.includes('already registered') || msg.includes('already exists')) return 'Este e-mail já possui uma conta. Use outro e-mail ou entre na conta existente.';
-  return traduzirMensagemSistema(error?.message, fallback);
+  if (msg.includes('already registered')) return 'Este e-mail já está cadastrado.';
+  return error?.message || fallback;
 }
 
 function guardarCadastroPendente(data) {
@@ -1032,6 +912,10 @@ function voltarCadastroEmail() {
 async function reenviarCodigoCadastro() {
   const email = _authEmail || lerCadastroPendente()?.email;
   if (!email) return toast('Informe o e-mail do cadastro.', 'err');
+  const sessao = await db.auth.getSession();
+  if (sessao?.data?.session) {
+    return toast('Esta conta já foi confirmada. Faça login.', 'err');
+  }
   const btn = $('btnResendSignup'); if (btn) btn.disabled = true;
   const { error } = await db.auth.resend({ type: 'signup', email });
   if (error) { if (btn) btn.disabled = false; return toast(mensagemAuth(error, 'Não foi possível reenviar o código.'), 'err'); }
@@ -1047,6 +931,18 @@ async function confirmarEmailCadastro() {
   try {
     const { data, error } = await db.auth.verifyOtp({ email, token, type: 'signup' });
     if (error || !data?.user) return toast(mensagemAuth(error, 'Não foi possível confirmar o e-mail.'), 'err');
+
+    // Garante sessão ativa após confirmação. Alguns fluxos via API retornam usuário
+    // confirmado sem manter a sessão no navegador.
+    if (!data.session) {
+      const senhaPendente = lerCadastroPendente()?.senha || '';
+      if (senhaPendente) {
+        await db.auth.signInWithPassword({ email, password: senhaPendente });
+      }
+    } else {
+      await db.auth.setSession(data.session);
+    }
+
     const pendente = lerCadastroPendente();
     if (pendente && pendente.email === email) {
       const ok = await provisionarCadastroConfirmado(data.user, pendente);
@@ -1134,7 +1030,6 @@ function openAuth(mode) {
 }
 
 function closeAuth() {
-  fecharSeletorCategoria();
   const overlay = $('authOverlay');
   if (overlay) overlay.classList.remove('open');
 
@@ -1144,12 +1039,10 @@ function closeAuth() {
 }
 
 function showLogin() {
-  fecharSeletorCategoria();
   mostrarTelaAuth('formLogin');
 }
 
 function showCadastro() {
-  fecharSeletorCategoria();
   esconderTelasAuth();
   const fc = $('formCadastro');
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
@@ -1175,27 +1068,13 @@ function _mostrarStep(n) {
 function setStep(n) { _mostrarStep(n); }
 function goStep1() { _mostrarStep(1); }
 
-async function verificarEmailDisponivel(email) {
-  const response = await fetch('/api/auth-email-exists', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || 'Não foi possível verificar o e-mail.');
-  return payload.exists !== true;
-}
-function limparErroEmailCadastro() { $('cadEmailField')?.classList.remove('has-error'); const erro = $('cadEmailError'); if (erro) { erro.textContent = ''; erro.classList.remove('show'); } }
-function mostrarErroEmailCadastro(mensagem) { $('cadEmailField')?.classList.add('has-error'); const erro = $('cadEmailError'); if (erro) { erro.textContent = mensagem; erro.classList.add('show'); } $('cadEmail')?.focus({ preventScroll: true }); }
-async function goStep2() {
-  const nome = $('cadNome')?.value?.trim(); const email = $('cadEmail')?.value?.trim().toLowerCase(); const senha = $('cadSenha')?.value?.trim();
-  limparErroEmailCadastro();
+function goStep2() {
+  const nome = $('cadNome')?.value?.trim();
+  const email = $('cadEmail')?.value?.trim();
+  const senha = $('cadSenha')?.value?.trim();
   if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { mostrarErroEmailCadastro('Digite um endereço de e-mail válido.'); return; }
-  if (senha.length < 6) return toast('A senha deve ter pelo menos 6 caracteres.', 'err');
-  const btn = $('btnGoStep2'); if (btn) { btn.disabled = true; btn.textContent = 'Verificando e-mail...'; }
-  try {
-    const disponivel = await verificarEmailDisponivel(email);
-    if (!disponivel) { mostrarErroEmailCadastro('Este e-mail já possui uma conta. Use outro e-mail ou entre na conta existente.'); return; }
-    preencherSelectCategorias(); _mostrarStep(2);
-  } catch (error) { showSystemAlert(traduzirMensagemSistema(error?.message, 'Não foi possível verificar o e-mail agora.'), 'err', 'Verificação indisponível'); }
-  finally { if (btn) { btn.disabled = false; btn.textContent = 'Continuar'; } }
+  if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
+  preencherSelectCategorias(); _mostrarStep(2);
 }
 
 function goStep3() {
@@ -1214,7 +1093,6 @@ function autoSlug() {
 }
 
 document.addEventListener('input', function(e) {
-  if (e.target && e.target.id === 'cadEmail') limparErroEmailCadastro();
   if (e.target && e.target.id === 'empSlug') e.target.dataset.manual = '1';
   ajustarFonteCampo(e.target);
 });
@@ -1286,7 +1164,7 @@ async function provisionarCadastroConfirmado(user, cadastro) {
     toast('Erro ao concluir o cadastro. Tente novamente.', 'err');
     return false;
   } finally {
-    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel'; }
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
   }
 }
 
@@ -1305,6 +1183,7 @@ async function finalizarCadastro() {
   const catSelect = $('empCategoria');
   const areaAtuacao = catSelect ? (catSelect.options[catSelect.selectedIndex]?.textContent?.trim() || 'Outro') : 'Outro';
   const cadastro = {
+    senha,
     email, nomeUser, empNomeVal, empSlugVal, empWhatsappVal, areaAtuacao,
     servNome, servPreco, servDuracao, profNomeVal, profEsp: ($('profEsp')?.value || 'Profissional').trim()
   };
@@ -1316,7 +1195,7 @@ async function finalizarCadastro() {
       body: JSON.stringify({ email, password: senha, nome: nomeUser })
     });
     const signupPayload = await signupResponse.json().catch(() => ({}));
-    if (!signupResponse.ok) { const mensagem = mensagemAuth({ message: signupPayload.error }, 'Não foi possível criar a conta.'); if (signupResponse.status === 409 || /já possui|já está|already/i.test(mensagem)) { _mostrarStep(1); mostrarErroEmailCadastro('Este e-mail já possui uma conta. Use outro e-mail ou entre na conta existente.'); return; } return toast(mensagem, 'err'); }
+    if (!signupResponse.ok) return toast(mensagemAuth({ message: signupPayload.error }, 'Não foi possível criar a conta.'), 'err');
     const authData = signupPayload.data;
     if (!authData?.user) return toast('Não foi possível criar a conta. Tente novamente.', 'err');
     guardarCadastroPendente(cadastro);
@@ -1336,7 +1215,7 @@ async function finalizarCadastro() {
     console.error('Erro em finalizarCadastro:', e);
     toast('Erro inesperado. Tente novamente.', 'err');
   } finally {
-    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel'; }
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
   }
 }
 
@@ -2828,7 +2707,7 @@ Object.assign(window, {
   copyPublicLink, openPublic, voltarDaPublica,
   selectPubSvc, selectPubProf, confirmarAgendamentoPublico, finalizarAgendamentoPublico, resetPublic,
   closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
-  toast, showSystemAlert, closeSystemAlert, clearNotifDot, loadPublic,
+  toast, clearNotifDot, loadPublic,
   openMobileMenu, closeMobileMenu,
   menuOpenPublic, menuCopyPublicLink, menuNotifications,
   openNotificationCenter, closeNotificationCenter, markNotificationRead,
