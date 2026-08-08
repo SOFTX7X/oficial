@@ -1352,7 +1352,7 @@ async function loadAll() {
 function renderAll() {
   preserveAgendaFormValues(() => {
     renderStats(); renderDashList(); renderCalendar(); renderSelects();
-    renderTimeline(); renderClientes(); renderServicos(); renderProfissionais(); renderFinanceiro();
+    renderTimeline(); renderClientes(); renderServicos(); renderProfissionais(); renderFinanceiro(); renderDashPremium(); renderDashChart();
     const active = document.activeElement;
     const editingConfig = active && active.closest && active.closest('#view-config');
     if (!editingConfig) renderConfig();
@@ -1722,14 +1722,290 @@ function renderProfissionais() {
   });
 }
 
-function renderFinanceiro() {
+const DIAS_SEMANA_ABREV = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const DIAS_SEMANA_NOME = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const MESES_ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+let chartPeriodAtual = 'dias';
+
+function getChartSeries(period) {
   const fin = (state.agendamentos || []).filter(isFinanceiro);
+  const somaNoIntervalo = (deIso, ateIso) => fin
+    .filter(a => { const iso = dataConclusaoISO(a); return iso >= deIso && iso <= ateIso; })
+    .reduce((s, a) => s + Number(a.valor || 0), 0);
+  const atendimentosNoIntervalo = (deIso, ateIso) => fin
+    .filter(a => { const iso = dataConclusaoISO(a); return iso >= deIso && iso <= ateIso; }).length;
+
+  if (period === 'semanas') {
+    const pts = [];
+    const hoje = new Date(hojeISO() + 'T00:00:00');
+    for (let w = 7; w >= 0; w--) {
+      const fim = new Date(hoje); fim.setDate(fim.getDate() - w * 7);
+      const ini = new Date(fim); ini.setDate(ini.getDate() - 6);
+      const iniISO = dataLocalISO(ini), fimISO = dataLocalISO(fim);
+      pts.push({ label: w === 0 ? 'Atual' : `S-${w}`, valor: somaNoIntervalo(iniISO, fimISO), atendimentos: atendimentosNoIntervalo(iniISO, fimISO), full: `${ini.getDate()}/${ini.getMonth() + 1} a ${fim.getDate()}/${fim.getMonth() + 1}` });
+    }
+    return pts;
+  }
+  if (period === 'meses') {
+    const pts = [];
+    const hoje = new Date();
+    for (let m = 5; m >= 0; m--) {
+      const d = new Date(hoje.getFullYear(), hoje.getMonth() - m, 1);
+      const prefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const valor = fin.filter(a => dataConclusaoISO(a).startsWith(prefix)).reduce((s, a) => s + Number(a.valor || 0), 0);
+      const atendimentos = fin.filter(a => dataConclusaoISO(a).startsWith(prefix)).length;
+      pts.push({ label: MESES_ABREV[d.getMonth()], valor, atendimentos, full: `${MESES_ABREV[d.getMonth()]}/${d.getFullYear()}` });
+    }
+    return pts;
+  }
+  // dias (padrão): últimos 14 dias
+  const pts = [];
+  const hoje = new Date(hojeISO() + 'T00:00:00');
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(hoje); d.setDate(d.getDate() - i);
+    const iso = dataLocalISO(d);
+    const dataFmt = `${d.getDate()}/${d.getMonth() + 1}`;
+    pts.push({ label: i === 0 ? 'Hoje' : dataFmt, valor: somaNoIntervalo(iso, iso), atendimentos: atendimentosNoIntervalo(iso, iso), full: `${DIAS_SEMANA_NOME[d.getDay()]}, ${dataFmt}` });
+  }
+  return pts;
+}
+
+function moneyCompact(v) {
+  if (v >= 1000) return 'R$' + (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1).replace('.', ',') + 'mil';
+  return money(v).replace(',00', '');
+}
+
+function setChartPeriod(period) {
+  chartPeriodAtual = period;
+  document.querySelectorAll('.dash-chart-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.period === period);
+  });
+  renderDashChart();
+}
+
+function renderDashChart() {
+  const svg = $('dashChartSvg');
+  if (!svg) return;
+  const pts = getChartSeries(chartPeriodAtual);
+  const totalValor = pts.reduce((s, p) => s + p.valor, 0);
+  const totalAtendimentos = pts.reduce((s, p) => s + p.atendimentos, 0);
+  const melhor = pts.reduce((m, p) => (p.valor > m.valor ? p : m), pts[0] || { valor: 0, full: '—' });
+  const ticket = totalAtendimentos > 0 ? totalValor / totalAtendimentos : 0;
+
+  setText('chartFatValue', money(totalValor).replace(',00', ''));
+  setText('chartFatSub', chartPeriodAtual === 'dias' ? 'Faturamento nos últimos 14 dias' : chartPeriodAtual === 'semanas' ? 'Faturamento nas últimas 8 semanas' : 'Faturamento nos últimos 6 meses');
+  setText('chartMelhor', melhor && melhor.valor > 0 ? melhor.full : '—');
+  setText('chartTicket', money(ticket).replace(',00', ''));
+  setText('chartAtendimentos', totalAtendimentos);
+  setText('chartLegendText', `Faturamento por ${chartPeriodAtual === 'dias' ? 'dia' : chartPeriodAtual === 'semanas' ? 'semana' : 'mês'} · último: ${money(pts[pts.length - 1] ? pts[pts.length - 1].valor : 0).replace(',00', '')}`);
+
+  const W = 640, H = 200, padX = 10, padY = 22;
+  const maxVal = Math.max(...pts.map(p => p.valor), 1) * 1.15;
+  const n = pts.length;
+  const stepX = (W - padX * 2) / Math.max(1, n - 1);
+  const coords = pts.map((p, i) => ({
+    x: padX + i * stepX,
+    y: H - padY - (p.valor / maxVal) * (H - padY * 2),
+    ...p
+  }));
+
+  const linePath = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L ${coords[n - 1].x.toFixed(1)} ${(H - padY).toFixed(1)} L ${coords[0].x.toFixed(1)} ${(H - padY).toFixed(1)} Z`;
+
+  const gridEl = $('chartGrid');
+  let gridHtml = '';
+  for (let g = 0; g <= 3; g++) {
+    const gy = padY + (g * (H - padY * 2)) / 3;
+    const isBase = g === 3;
+    gridHtml += `<line x1="${padX}" y1="${gy.toFixed(1)}" x2="${W - padX}" y2="${gy.toFixed(1)}" class="${isBase ? 'dash-chart-baseline' : 'dash-chart-grid-line'}"></line>`;
+  }
+  if (gridEl) gridEl.innerHTML = gridHtml;
+
+  const yAxisEl = $('chartYAxis');
+  if (yAxisEl) {
+    const steps = [maxVal / 1.15, (maxVal / 1.15) * 0.66, (maxVal / 1.15) * 0.33, 0];
+    yAxisEl.innerHTML = steps.map(v => `<span>${moneyCompact(Math.round(v))}</span>`).join('');
+  }
+
+  const lineEl = $('chartLine');
+  const areaEl = $('chartArea');
+  if (lineEl) {
+    lineEl.setAttribute('d', linePath);
+    lineEl.classList.remove('animated');
+    const len = lineEl.getTotalLength ? lineEl.getTotalLength() : 800;
+    lineEl.style.transition = 'none';
+    lineEl.style.strokeDasharray = `${len} ${len}`;
+    lineEl.style.strokeDashoffset = String(len);
+    void lineEl.getBoundingClientRect();
+    requestAnimationFrame(() => {
+      lineEl.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1)';
+      lineEl.style.strokeDashoffset = '0';
+    });
+  }
+  if (areaEl) { areaEl.setAttribute('d', areaPath); areaEl.classList.remove('animated'); }
+
+  const pointsEl = $('chartPoints');
+  if (pointsEl) {
+    const maxValReal = Math.max(...pts.map(p => p.valor));
+    pointsEl.innerHTML = coords.map(c => `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" class="dash-chart-point${c.valor === maxValReal && maxValReal > 0 ? ' top' : ''}"><title>${c.full}: ${money(c.valor)}</title></circle>`).join('');
+  }
+
+  const labelsEl = $('chartLabels');
+  if (labelsEl) {
+    const mobile = window.innerWidth < 480;
+    const showEvery = n > 10 ? (mobile ? 4 : 2) : (n > 6 ? (mobile ? 2 : 1) : 1);
+    labelsEl.innerHTML = pts.map((p, i) => {
+      const isLast = i === n - 1;
+      const visible = isLast || (i % showEvery === 0 && i !== n - 2);
+      return `<span${visible ? '' : ' style="opacity:0"'}>${p.label}</span>`;
+    }).join('');
+  }
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (areaEl) areaEl.classList.add('animated');
+    pointsEl && pointsEl.querySelectorAll('.dash-chart-point').forEach((p, i) => {
+      setTimeout(() => p.classList.add('animated'), 900 + i * 25);
+    });
+  }));
+}
+
+function renderFinanceiro() {
+  const todos = state.agendamentos || [];
+  const fin = todos.filter(isFinanceiro);
   const total = fin.reduce((s, a) => s + Number(a.valor || 0), 0);
   const ticket = fin.length ? total / fin.length : 0;
-  setText('finReceita', money(total).replace(',00', ''));
+  const hoje = hojeISO();
+  const mes = mesPrefixo();
+
+  const fatHoje = fin.filter(a => dataConclusaoISO(a) === hoje).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const fatMes = fin.filter(a => dataConclusaoISO(a).startsWith(mes)).reduce((s, a) => s + Number(a.valor || 0), 0);
+
+  setText('finHoje', money(fatHoje).replace(',00', ''));
+  setText('finHojeSub', new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' }));
+  setText('finMes', money(fatMes).replace(',00', ''));
+  setText('finMesSub', new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }));
   setText('finTicket', money(ticket).replace(',00', ''));
   setText('finPagos', fin.length);
-  setText('finPlano', state.empresa?.plano || 'Grátis');
+  setText('finPagosSub', 'Todos os tempos');
+
+  renderFinBars7(fin, hoje);
+  renderFinWeekRanking(fin);
+
+  const naoExcluidos = todos.filter(a => normStatus(a.status) !== 'Excluído');
+  const clientesUnicos = new Set(naoExcluidos.map(a => (a.cliente_telefone || a.cliente_nome || '').trim().toLowerCase()).filter(Boolean));
+  const taxa = naoExcluidos.length ? Math.round((fin.length / naoExcluidos.length) * 100) : 0;
+  setText('finClientesUnicos', clientesUnicos.size);
+  setText('finTotalAgendamentos', naoExcluidos.length);
+  setText('finTaxaConclusao', taxa + '%');
+}
+
+function renderFinBars7(fin, hojeStr, containerId, badgeId) {
+  containerId = containerId || 'finBars7';
+  badgeId = badgeId || 'finMelhorDiaBadge';
+  const el = $(containerId);
+  if (!el) return;
+
+  const dias = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(hojeStr + 'T00:00:00');
+    d.setDate(d.getDate() - i);
+    const iso = dataLocalISO(d);
+    const valor = fin.filter(a => dataConclusaoISO(a) === iso).reduce((s, a) => s + Number(a.valor || 0), 0);
+    dias.push({ iso, valor, weekday: d.getDay(), isHoje: iso === hojeStr });
+  }
+
+  const max = Math.max(...dias.map(d => d.valor), 1);
+  const maiorDia = dias.reduce((m, d) => d.valor > m.valor ? d : m, dias[0]);
+
+  el.innerHTML = dias.map(d => {
+    const alturaPct = Math.max(4, Math.round((d.valor / max) * 100));
+    const isTop = d.valor > 0 && d.valor === maiorDia.valor;
+    const label = d.isHoje ? 'Hoje' : DIAS_SEMANA_ABREV[d.weekday];
+    return `<div class="fin-bar-col${isTop ? ' top' : ''}" style="--fin-bar-h:${alturaPct}%">
+      <div class="fin-bar-value">${money(d.valor).replace(',00', '')}</div>
+      <div class="fin-bar-track"><div class="fin-bar-fill"></div></div>
+      <div class="fin-bar-label">${label}</div>
+    </div>`;
+  }).join('');
+
+  const badge = $(badgeId);
+  if (badge) {
+    badge.textContent = maiorDia.valor > 0
+      ? `Melhor dia: ${maiorDia.isHoje ? 'Hoje' : DIAS_SEMANA_NOME[maiorDia.weekday]}`
+      : 'Sem faturamento ainda';
+  }
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.querySelectorAll('.fin-bar-col').forEach(col => col.classList.add('animated'));
+  }));
+}
+
+function renderFinWeekRanking(fin) {
+  const el = $('finWeekList');
+  if (!el) return;
+
+  const totais = [0, 0, 0, 0, 0, 0, 0];
+  fin.forEach(a => {
+    const iso = dataConclusaoISO(a);
+    if (!iso) return;
+    const d = new Date(iso + 'T00:00:00');
+    if (Number.isNaN(d.getTime())) return;
+    totais[d.getDay()] += Number(a.valor || 0);
+  });
+
+  const ranking = totais
+    .map((valor, idx) => ({ idx, valor }))
+    .sort((a, b) => b.valor - a.valor);
+
+  const max = Math.max(...totais, 1);
+
+  el.innerHTML = ranking.map((r, pos) => {
+    const pct = Math.max(3, Math.round((r.valor / max) * 100));
+    const isTop = pos === 0 && r.valor > 0;
+    return `<div class="fin-week-row${isTop ? ' top' : ''}">
+      <div class="fin-week-day${isTop ? ' top' : ''}">${DIAS_SEMANA_NOME[r.idx]}</div>
+      <div class="fin-week-track"><div class="fin-week-fill" data-pct="${pct}"></div></div>
+      <div class="fin-week-val">${money(r.valor).replace(',00', '')}</div>
+    </div>`;
+  }).join('');
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.querySelectorAll('.fin-week-fill').forEach(f => { f.style.width = f.dataset.pct + '%'; });
+  }));
+}
+
+function renderDashPremium() {
+  if (!$('dashDonutValue')) return;
+  const todos = state.agendamentos || [];
+  const ativos = todos.filter(a => normStatus(a.status) !== 'Excluído');
+
+  const concluidos = ativos.filter(a => normStatus(a.status) === 'Concluído').length;
+  const confirmados = ativos.filter(a => ['Confirmado', 'Reagendado'].includes(normStatus(a.status))).length;
+  const pendentes = ativos.filter(a => normStatus(a.status) === 'Pendente').length;
+  const total = ativos.length;
+
+  setText('dashDonutValue', total);
+  setText('dashLegConcluidos', concluidos);
+  setText('dashLegConfirmados', confirmados);
+  setText('dashLegPendentes', pendentes);
+
+  const R = 52, C = 2 * Math.PI * R;
+  const segs = [
+    { id: 'dashDonutConcluidos', val: concluidos },
+    { id: 'dashDonutConfirmados', val: confirmados },
+    { id: 'dashDonutPendentes', val: pendentes }
+  ];
+  let acc = 0;
+  segs.forEach(seg => {
+    const el = $(seg.id);
+    if (!el) return;
+    const frac = total > 0 ? seg.val / total : 0;
+    const len = Math.max(0, frac * C - (frac > 0 ? 2 : 0));
+    el.style.strokeDasharray = `${len} ${C - len}`;
+    el.style.strokeDashoffset = String(-acc);
+    acc += frac * C;
+  });
 }
 
 function renderConfig() {
