@@ -601,50 +601,106 @@
 
     <!-- VIEW: DASHBOARD -->
     <section class="view active" id="view-dashboard">
-      <div class="dash-hero dash-hero-featured">
-        <img class="dash-hero-art" src="banner-dashboard-vyxora.png?v=1" alt="Mascote VyXora em um ambiente de agendamento" loading="lazy" decoding="async">
-        <div class="dash-hero-action">
-          <span class="dash-hero-action-label">Sua agenda pronta para compartilhar</span>
-          <button class="dash-copy-button" onclick="copyPublicLink(this)">
-            <span class="dash-copy-icon">🔗</span>
-            <span class="dash-copy-label">Copiar link da agenda</span>
-          </button>
-        </div>
-      </div>
-      <div class="section-label">Agendamentos</div>
-      <div class="stats-grid stats-grid-4" style="margin-bottom:10px">
-        <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">Hoje</div><div class="stat-value" id="statHoje">0</div><div class="stat-note up">Tempo real</div></div>
-        <div class="stat-card"><span class="stat-icon">⏳</span><div class="stat-label">Pendentes</div><div class="stat-value yellow" id="statPendentes">0</div><div class="stat-note">Aguardando</div></div>
-        <div class="stat-card"><span class="stat-icon">✅</span><div class="stat-label">Confirmados</div><div class="stat-value green" id="statConfirmados">0</div><div class="stat-note up">Prontos</div></div>
-        <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">Reagendados</div><div class="stat-value purple" id="statReagendados">0</div><div class="stat-note">Nova data</div></div>
-      </div>
-      <div class="stats-grid stats-grid-4" style="margin-bottom:10px">
-        <div class="stat-card"><span class="stat-icon">🎯</span><div class="stat-label">Concluídos</div><div class="stat-value blue" id="statConcluidos">0</div></div>
-        <div class="stat-card"><span class="stat-icon">✕</span><div class="stat-label">Recusados</div><div class="stat-value red" id="statRecusados">0</div></div>
-        <div class="stat-card"><span class="stat-icon">🗑</span><div class="stat-label">Excluídos</div><div class="stat-value" id="statExcluidos">0</div></div>
-        <div class="stat-card"><span class="stat-icon">📊</span><div class="stat-label">Taxa confirmação</div><div class="stat-value green" id="statTaxa">0%</div></div>
-      </div>
-      <div class="section-label">Financeiro e base</div>
-      <div class="stats-grid stats-grid-6" style="margin-bottom:20px">
-        <div class="stat-card"><span class="stat-icon">💵</span><div class="stat-label">Fat. hoje</div><div class="stat-value" id="statFatHoje">R$0</div></div>
-        <div class="stat-card"><span class="stat-icon">💰</span><div class="stat-label">Fat. mês</div><div class="stat-value" id="statFatMes">R$0</div></div>
-        <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div></div>
-        <div class="stat-card"><span class="stat-icon">◈</span><div class="stat-label">Serviços</div><div class="stat-value" id="statServicos">0</div></div>
-        <div class="stat-card"><span class="stat-icon">👤</span><div class="stat-label">Profissionais</div><div class="stat-value" id="statProfissionais">0</div></div>
-        <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">Total ags.</div><div class="stat-value" id="statTotal">0</div></div>
-      </div>
-      <div class="content-grid">
-        <div class="panel">
-          <div class="panel-head">
-            <div><div class="panel-title">Próximos agendamentos</div><div class="panel-sub">Pendentes e confirmados</div></div>
-            <button class="panel-action" onclick="setView('agenda')">Ver todos →</button>
+      <div class="dash-chart-panel">
+        <div class="dash-chart-head">
+          <div>
+            <div class="dash-premium-kicker">Painel financeiro · tempo real</div>
+            <div class="dash-chart-value" id="chartFatValue">R$0</div>
+            <div class="dash-chart-sub" id="chartFatSub">Faturamento nos últimos 14 dias</div>
           </div>
-          <div class="panel-body"><div class="apt-list" id="dashAptList"></div></div>
+          <div class="dash-chart-top-right">
+            <div class="dash-chart-tabs">
+              <button class="dash-chart-tab active" data-period="dias" onclick="setChartPeriod('dias')">Dias</button>
+              <button class="dash-chart-tab" data-period="semanas" onclick="setChartPeriod('semanas')">Semanas</button>
+              <button class="dash-chart-tab" data-period="meses" onclick="setChartPeriod('meses')">Meses</button>
+            </div>
+            <button class="dash-copy-button dash-copy-button-inline" onclick="copyPublicLink(this)">
+              <span class="dash-copy-icon">🔗</span>
+              <span class="dash-copy-label">Copiar link</span>
+            </button>
+          </div>
         </div>
-        <div class="panel">
-          <div class="panel-head"><div><div class="panel-title">Calendário</div><div class="panel-sub">Dias com agendamentos</div></div></div>
-          <div class="panel-body"><div class="cal-grid" id="calGrid"></div></div>
+
+        <div class="dash-chart-body">
+          <div class="dash-chart-yaxis" id="chartYAxis"></div>
+          <div class="dash-chart-svg-wrap">
+            <svg viewBox="0 0 640 200" class="dash-chart-svg" id="dashChartSvg" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartFillGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#a855f7" stop-opacity="0.42"/>
+                  <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="chartLineGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#c084fc"/>
+                  <stop offset="100%" stop-color="#8b3fd9"/>
+                </linearGradient>
+              </defs>
+              <g id="chartGrid"></g>
+              <path id="chartArea" class="dash-chart-area"></path>
+              <path id="chartLine" class="dash-chart-line"></path>
+              <g id="chartPoints"></g>
+            </svg>
+          </div>
         </div>
+        <div class="dash-chart-labels" id="chartLabels"></div>
+        <div class="dash-chart-legend"><span class="dash-chart-legend-dot"></span><span id="chartLegendText">Faturamento por dia</span></div>
+
+        <div class="dash-chart-foot">
+          <div class="dash-chart-foot-item"><span>Melhor momento</span><b id="chartMelhor">—</b></div>
+          <div class="dash-chart-foot-item"><span>Ticket médio</span><b id="chartTicket">R$0</b></div>
+          <div class="dash-chart-foot-item"><span>Atendimentos</span><b id="chartAtendimentos">0</b></div>
+        </div>
+      </div>
+
+      <div class="dash-secondary-grid">
+        <div class="stats-grid stats-grid-2 dash-mini-stack">
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">💵</div><div class="stat-label">Fat. hoje</div><div class="stat-value" id="statFatHoje">R$0</div></div>
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">💰</div><div class="stat-label">Fat. mês</div><div class="stat-value" id="statFatMes">R$0</div></div>
+          <div class="stat-card stat-card-green"><div class="stat-icon-badge">📊</div><div class="stat-label">Taxa confirmação</div><div class="stat-value green" id="statTaxa">0%</div></div>
+          <div class="stat-card stat-card-blue"><div class="stat-icon-badge">👥</div><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div></div>
+        </div>
+
+        <div class="dash-premium-donut dash-status-panel">
+          <div class="panel-title dash-status-title">Status dos agendamentos</div>
+          <div class="dash-donut-wrap">
+            <svg viewBox="0 0 120 120" class="dash-donut-svg">
+              <circle cx="60" cy="60" r="52" class="dash-donut-track"></circle>
+              <circle cx="60" cy="60" r="52" class="dash-donut-seg dash-donut-seg-green" id="dashDonutConcluidos"></circle>
+              <circle cx="60" cy="60" r="52" class="dash-donut-seg dash-donut-seg-purple" id="dashDonutConfirmados"></circle>
+              <circle cx="60" cy="60" r="52" class="dash-donut-seg dash-donut-seg-yellow" id="dashDonutPendentes"></circle>
+            </svg>
+            <div class="dash-donut-center">
+              <div class="dash-donut-value" id="dashDonutValue">0</div>
+              <div class="dash-donut-label">Agendamentos</div>
+            </div>
+          </div>
+          <div class="dash-premium-legend">
+            <div class="dash-legend-item"><span class="dash-legend-dot dash-legend-dot-green"></span>Concluídos<b id="dashLegConcluidos">0</b></div>
+            <div class="dash-legend-item"><span class="dash-legend-dot dash-legend-dot-purple"></span>Confirmados<b id="dashLegConfirmados">0</b></div>
+            <div class="dash-legend-item"><span class="dash-legend-dot dash-legend-dot-yellow"></span>Pendentes<b id="dashLegPendentes">0</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title">Próximos agendamentos</div><div class="panel-sub">Pendentes e confirmados</div></div>
+          <button class="panel-action" onclick="setView('agenda')">Ver todos →</button>
+        </div>
+        <div class="panel-body"><div class="apt-list" id="dashAptList"></div></div>
+      </div>
+
+      <div class="section-label" style="margin-top:20px">Todos os status</div>
+      <div class="stats-grid stats-grid-6">
+        <div class="stat-card stat-card-purple"><div class="stat-icon-badge">📅</div><div class="stat-label">Hoje</div><div class="stat-value" id="statHoje">0</div></div>
+        <div class="stat-card stat-card-yellow"><div class="stat-icon-badge">⏳</div><div class="stat-label">Pendentes</div><div class="stat-value yellow" id="statPendentes">0</div></div>
+        <div class="stat-card stat-card-green"><div class="stat-icon-badge">✅</div><div class="stat-label">Confirmados</div><div class="stat-value green" id="statConfirmados">0</div></div>
+        <div class="stat-card stat-card-blue"><div class="stat-icon-badge">🎯</div><div class="stat-label">Concluídos</div><div class="stat-value blue" id="statConcluidos">0</div></div>
+        <div class="stat-card stat-card-purple"><div class="stat-icon-badge">📅</div><div class="stat-label">Reagendados</div><div class="stat-value purple" id="statReagendados">0</div></div>
+        <div class="stat-card stat-card-red"><div class="stat-icon-badge">✕</div><div class="stat-label">Recusados</div><div class="stat-value red" id="statRecusados">0</div></div>
+      </div>
+      <div class="dash-hidden-stats" style="display:none">
+        <span id="statExcluidos">0</span><span id="statServicos">0</span><span id="statProfissionais">0</span><span id="statTotal">0</span>
       </div>
     </section>
 
@@ -772,11 +828,39 @@
       <div class="dash-hero" style="margin-bottom:20px">
         <div class="dash-hero-inner"><div><h1>Resultados <em>financeiros.</em></h1><p>Receita, ticket médio e histórico.</p></div></div>
       </div>
+
       <div class="fin-grid">
-        <div class="fin-card"><div class="fin-label">Receita total</div><div class="fin-value" id="finReceita">R$0</div><div class="fin-sub">Todos os concluídos</div></div>
+        <div class="fin-card"><div class="fin-label">Faturamento hoje</div><div class="fin-value" id="finHoje">R$0</div><div class="fin-sub" id="finHojeSub">—</div></div>
+        <div class="fin-card"><div class="fin-label">Faturamento do mês</div><div class="fin-value" id="finMes">R$0</div><div class="fin-sub" id="finMesSub">—</div></div>
         <div class="fin-card"><div class="fin-label">Ticket médio</div><div class="fin-value" id="finTicket">R$0</div><div class="fin-sub">Média por atendimento</div></div>
-        <div class="fin-card"><div class="fin-label">Total de pagamentos</div><div class="fin-value" id="finPagos">0</div><div class="fin-sub">Registros concluídos</div></div>
-        <div class="fin-card"><div class="fin-label">Plano atual</div><div class="fin-value" style="font-size:28px" id="finPlano">Grátis</div><div class="fin-sub">Status ativo</div></div>
+        <div class="fin-card"><div class="fin-label">Atendimentos concluídos</div><div class="fin-value" id="finPagos">0</div><div class="fin-sub" id="finPagosSub">Todos os tempos</div></div>
+      </div>
+
+      <div class="fin-panel">
+        <div class="fin-panel-head">
+          <div>
+            <div class="fin-panel-title">Faturamento dos últimos 7 dias</div>
+            <div class="fin-panel-sub">Evolução diária dos valores concluídos</div>
+          </div>
+          <div class="fin-panel-badge" id="finMelhorDiaBadge">—</div>
+        </div>
+        <div class="fin-bars" id="finBars7"></div>
+      </div>
+
+      <div class="fin-panel">
+        <div class="fin-panel-head">
+          <div>
+            <div class="fin-panel-title">Melhor dia da semana</div>
+            <div class="fin-panel-sub">Ranking por faturamento acumulado</div>
+          </div>
+        </div>
+        <div class="fin-week-list" id="finWeekList"></div>
+      </div>
+
+      <div class="fin-mini-grid">
+        <div class="fin-mini-card"><div class="fin-mini-icon">👥</div><div class="fin-mini-value" id="finClientesUnicos">0</div><div class="fin-mini-label">Pessoas que agendaram</div></div>
+        <div class="fin-mini-card"><div class="fin-mini-icon">📋</div><div class="fin-mini-value" id="finTotalAgendamentos">0</div><div class="fin-mini-label">Agendamentos no total</div></div>
+        <div class="fin-mini-card"><div class="fin-mini-icon">✅</div><div class="fin-mini-value" id="finTaxaConclusao">0%</div><div class="fin-mini-label">Taxa de conclusão</div></div>
       </div>
     </section>
 
