@@ -721,6 +721,77 @@ function preencherSelectCategorias() {
   sel.dataset.preenchido = '1';
 }
 
+const CATEGORIAS_FALLBACK = [
+  { id: 'beleza', nome: 'Beleza & Estética', icone: '💅' },
+  { id: 'saude', nome: 'Saúde', icone: '🏥' },
+  { id: 'barbearia', nome: 'Barbearia', icone: '✂️' },
+  { id: 'fitness', nome: 'Fitness & Bem-estar', icone: '🏋️' },
+  { id: 'tatuagem', nome: 'Tatuagem & Piercing', icone: '🎨' },
+  { id: 'pet', nome: 'Pet Shop', icone: '🐾' },
+  { id: 'educacao', nome: 'Educação', icone: '📚' },
+  { id: 'consultoria', nome: 'Consultoria', icone: '💼' },
+  { id: 'fotografia', nome: 'Fotografia', icone: '📸' },
+  { id: 'outro', nome: 'Outro', icone: '✦' }
+];
+
+function renderCategoriasCadastro(filtro) {
+  const grid = $('authCategoryGrid');
+  if (!grid) return;
+  const termo = String(filtro || '').trim().toLowerCase();
+  const lista = (state.categorias && state.categorias.length) ? state.categorias : CATEGORIAS_FALLBACK;
+  const filtrada = termo ? lista.filter(c => (c.nome || '').toLowerCase().includes(termo)) : lista;
+  const atual = $('empCategoria')?.value || '';
+
+  if (!filtrada.length) {
+    grid.innerHTML = '<div class="auth-category-empty">Nenhuma categoria encontrada.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtrada.map(c => {
+    const nome = String(c.nome || '').replace(/"/g, '&quot;');
+    const icone = c.icone || '✦';
+    const selecionada = String(c.id) === String(atual) ? ' selected' : '';
+    return `<button type="button" class="auth-category-option${selecionada}" data-categoria-value="${c.id}" data-categoria-nome="${nome}" data-categoria-icone="${icone}">
+      <span class="auth-category-option-icon">${icone}</span>
+      <span><strong>${c.nome || ''}</strong><small>Toque para selecionar</small></span>
+    </button>`;
+  }).join('');
+}
+
+function abrirSeletorCategoria() {
+  renderCategoriasCadastro('');
+  const search = $('authCategorySearch');
+  if (search) search.value = '';
+  const panel = $('authCategoryPanel');
+  if (panel) panel.style.display = 'block';
+  setTimeout(() => search?.focus({ preventScroll: true }), 60);
+}
+
+function fecharSeletorCategoria() {
+  const panel = $('authCategoryPanel');
+  if (panel) panel.style.display = 'none';
+}
+
+function filtrarCategoriasCadastro(valor) {
+  renderCategoriasCadastro(valor);
+}
+
+document.addEventListener('click', function(e) {
+  const opt = e.target.closest('.auth-category-option');
+  if (!opt) return;
+  const select = $('empCategoria');
+  const valor = opt.dataset.categoriaValue;
+  if (select && valor != null) {
+    select.value = valor;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  const iconEl = $('empCategoriaTriggerIcon');
+  const textEl = $('empCategoriaTriggerText');
+  if (iconEl) iconEl.textContent = opt.dataset.categoriaIcone || '✦';
+  if (textEl) textEl.textContent = opt.dataset.categoriaNome || 'Escolher área de atuação';
+  fecharSeletorCategoria();
+});
+
 function showDashboard() {
   const lv = $('landingView'), dv = $('dashboardView'), pv = $('publicView');
   if (lv) lv.style.display = 'none';
