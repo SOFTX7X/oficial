@@ -1,4 +1,3 @@
-
 // ═══════════════════════════════════════════════════════════════
 // GERENCIADOR ÚNICO DE ROLAGEM
 // Evita que um modal libere a rolagem enquanto outro ainda está aberto.
@@ -1076,6 +1075,8 @@ async function goStep2() {
   if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
 
   // Bloqueia e-mail duplicado já no início do cadastro.
+  const btnStep2 = $('btnGoStep2');
+  if (btnStep2) { btnStep2.disabled = true; btnStep2.textContent = 'Verificando...'; }
   try {
     const response = await fetch('/api/auth-email-exists', {
       method: 'POST',
@@ -1083,11 +1084,19 @@ async function goStep2() {
       body: JSON.stringify({ email })
     });
     const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      // Falha real na verificação (ex.: chave admin ausente no servidor).
+      // Não deixa passar silenciosamente — o cadastro ficaria vulnerável a duplicidade.
+      return toast(result.error || 'Não foi possível verificar o e-mail agora. Tente novamente em instantes.', 'err');
+    }
     if (result.exists) {
       return toast('Este e-mail já possui uma conta. Use outro e-mail ou recupere sua senha.', 'err');
     }
   } catch (e) {
     console.warn('Falha ao verificar e-mail:', e);
+    return toast('Não foi possível verificar o e-mail agora. Verifique sua conexão e tente novamente.', 'err');
+  } finally {
+    if (btnStep2) { btnStep2.disabled = false; btnStep2.textContent = 'Continuar'; }
   }
 
   preencherSelectCategorias(); _mostrarStep(2);
