@@ -22,22 +22,23 @@ async function emailExists(admin, email) {
   // perfil; a rota final de cadastro continua consultando o Auth como garantia.
   const { data, error } = await admin
     .from('agenda_perfis')
-    .select('id')
+    .select('id, auth_user_id')
     .eq('email', email)
     .limit(1);
   if (error) throw error;
   if (!Array.isArray(data) || data.length === 0) return false;
 
-  // Um perfil pode permanecer no banco após uma conta de teste ser removida.
-  // Só bloqueia o cadastro se o usuário também existir no Supabase Auth.
-  for (let page = 1; page <= 100; page += 1) {
-    const { data: authData, error: authError } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
-    if (authError) throw authError;
-    const users = Array.isArray(authData?.users) ? authData.users : [];
-    if (users.some(user => normalizeEmail(user?.email) === email)) return true;
-    if (users.length < 1000) return false;
+  // Um perfil pode permanecer após uma conta de teste ser removida. Consulta
+  // diretamente o usuário relacionado, sem percorrer toda a base do Auth.
+  const authUserId = data[0]?.auth_user_id;
+  if (!authUserId) return false;
+  const { data: authData, error: authError } = await admin.auth.admin.getUserById(authUserId);
+  if (authError) {
+    const value = `${authError?.code || ''} ${authError?.message || ''}`.toLowerCase();
+    if (value.includes('not found') || value.includes('user_not_found')) return false;
+    throw authError;
   }
-  throw new Error('USER_LIST_LIMIT_REACHED');
+  return normalizeEmail(authData?.user?.email) === email;
 }
 
 export default async function handler(req, res) {
