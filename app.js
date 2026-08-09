@@ -547,14 +547,21 @@ function showNotif(title, msg = '', type = 'info', duration = 2800) {
   stack.innerHTML = '';
   const item = document.createElement('div');
   item.className = 'notif-item compact';
-  const icons = { new: '📅', ok: '✅', err: '⚠️', info: '💬' };
+  const icons = {
+    new: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="1"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+    ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+    err: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+  };
   item.innerHTML = `
-    <div class="notif-icon ${type}">${icons[type] || '🔔'}</div>
+    <div class="notif-icon ${type}">${icons[type] || icons.info}</div>
     <div class="notif-body">
       <div class="notif-title">${escapeNotificationText(title)}</div>
       ${msg ? `<div class="notif-msg">${escapeNotificationText(msg)}</div>` : ''}
     </div>
-    <button class="notif-close" onclick="this.parentElement.remove()">✕</button>
+    <button class="notif-close" onclick="this.parentElement.remove()" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
   `;
   stack.appendChild(item);
   setTimeout(() => {
