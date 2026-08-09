@@ -955,6 +955,8 @@ function esconderTelasAuth() {
 function mostrarTelaAuth(id) {
   esconderTelasAuth();
   authFeedback();
+  const overlay = $('authOverlay');
+  if (overlay) overlay.dataset.authScreen = id;
   const el = $(id);
   if (el) el.style.display = 'block';
 }
@@ -1143,6 +1145,50 @@ async function salvarNovaSenha() {
   }
 }
 
+let _authViewportBaseline = 0;
+let _authViewportTimer = null;
+
+function scrollAuthFieldIntoView(field = document.activeElement) {
+  const overlay = $('authOverlay');
+  const area = overlay?.querySelector('.auth-form-area');
+  if (!overlay?.classList.contains('open') || !area || !field?.closest?.('#authOverlay')) return;
+  const fieldRect = field.getBoundingClientRect();
+  const areaRect = area.getBoundingClientRect();
+  const targetTop = area.scrollTop + fieldRect.top - areaRect.top - Math.max(68, area.clientHeight * .34);
+  area.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+}
+
+function syncAuthVisualViewport() {
+  const overlay = $('authOverlay');
+  if (!overlay || window.innerWidth > 620) return;
+  const viewport = window.visualViewport;
+  const height = Math.round(viewport?.height || window.innerHeight);
+  const offsetTop = Math.round(viewport?.offsetTop || 0);
+  _authViewportBaseline = Math.max(_authViewportBaseline, window.innerHeight, height);
+  const keyboardOpen = _authViewportBaseline - height > 120;
+
+  overlay.style.setProperty('--auth-visual-height', `${height}px`);
+  overlay.style.setProperty('--auth-visual-top', `${offsetTop}px`);
+  overlay.classList.toggle('keyboard-open', keyboardOpen);
+
+  if (keyboardOpen) {
+    clearTimeout(_authViewportTimer);
+    _authViewportTimer = setTimeout(() => scrollAuthFieldIntoView(), 70);
+  }
+}
+
+window.visualViewport?.addEventListener('resize', syncAuthVisualViewport);
+window.visualViewport?.addEventListener('scroll', syncAuthVisualViewport);
+window.addEventListener('orientationchange', () => {
+  _authViewportBaseline = 0;
+  setTimeout(syncAuthVisualViewport, 120);
+});
+document.addEventListener('focusin', function(e) {
+  if (!e.target?.matches?.('#authOverlay input, #authOverlay select, #authOverlay textarea')) return;
+  setTimeout(syncAuthVisualViewport, 80);
+  setTimeout(() => scrollAuthFieldIntoView(e.target), 220);
+});
+
 function openAuth(mode) {
   const overlay = $('authOverlay');
   if (!overlay) return;
@@ -1162,6 +1208,8 @@ function openAuth(mode) {
 
   // Exibe somente após preparar o formulário, evitando duas renderizações.
   overlay.classList.add('open');
+  _authViewportBaseline = Math.max(window.innerHeight, window.visualViewport?.height || 0);
+  requestAnimationFrame(syncAuthVisualViewport);
 }
 
 function closeAuth() {
@@ -1171,6 +1219,10 @@ function closeAuth() {
   document.documentElement.classList.remove('auth-performance-mode');
   document.body.classList.remove('auth-performance-mode');
   VYXORA_SCROLL.unlock('auth');
+  _authViewportBaseline = 0;
+  overlay?.classList.remove('keyboard-open');
+  overlay?.style.removeProperty('--auth-visual-height');
+  overlay?.style.removeProperty('--auth-visual-top');
 }
 
 function showLogin() {
@@ -1180,6 +1232,8 @@ function showLogin() {
 function showCadastro() {
   esconderTelasAuth();
   authFeedback();
+  const overlay = $('authOverlay');
+  if (overlay) overlay.dataset.authScreen = 'formCadastro';
   const fc = $('formCadastro');
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
   if (typeof _mostrarStep === 'function') _mostrarStep(1);
