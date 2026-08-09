@@ -8245,3 +8245,111 @@ body.square-mode .progress-bar {
   #authOverlay .auth-modal,
   #authOverlay .auth-form-area > div { animation: none !important; }
 }
+
+/* V31 — acabamento quadrado + controle de senha estável no Android */
+#authOverlay .auth-modal,
+#authOverlay .auth-brandmark,
+#authOverlay .auth-secure,
+#authOverlay .auth-close,
+#authOverlay .field input,
+#authOverlay .field select,
+#authOverlay .field textarea,
+#authOverlay .pw-eye,
+#authOverlay .btn,
+#authOverlay .auth-form-area button:not(.auth-forgot-link):not(.auth-switch button),
+#authOverlay .auth-feedback,
+#authOverlay .step-dot,
+#authOverlay .auth-flow-icon,
+#authOverlay .auth-code-input,
+#authOverlay .auth-category-trigger,
+#authOverlay .auth-category-panel,
+#authOverlay .auth-category-option,
+#authOverlay .auth-category-search-wrap,
+#authOverlay .auth-category-search-wrap input {
+  border-radius: 0 !important;
+}
+#authOverlay .auth-form-area button.btn.btn-primary,
+#authOverlay .auth-form-area button.btn.btn-ghost,
+#authOverlay .auth-form-area .form-actions button.btn {
+  border-radius: 0 !important;
+}
+#authOverlay.auth-overlay .auth-modal .auth-form-area button.btn {
+  border-radius: 0 !important;
+}
+
+#authOverlay .pw-eye {
+  display: grid !important;
+  place-items: center !important;
+  top: 50% !important;
+  right: 8px !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transform: translateY(-50%) !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: #9e8cab !important;
+  line-height: 1 !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#authOverlay .pw-eye:active,
+#authOverlay .pw-eye.show {
+  border-color: rgba(192,132,252,.2) !important;
+  background: rgba(168,85,247,.10) !important;
+  color: #d8b4fe !important;
+}
+#authOverlay .pw-eye svg {
+  display: block !important;
+  width: 19px !important;
+  height: 19px !important;
+  min-width: 19px !important;
+  min-height: 19px !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  flex: none !important;
+}
+#authOverlay .pw-eye .eye-off { display: none !important; }
+#authOverlay .pw-eye.show .eye-on { display: none !important; }
+#authOverlay .pw-eye.show .eye-off { display: block !important; }
+#authOverlay .pw-wrap { position: relative !important; width: 100% !important; }
+#authOverlay .pw-wrap input { padding-right: 60px !important; }
+
+@media (max-width: 620px) {
+  #authOverlay .pw-eye {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    right: 5px !important;
+  }
+  #authOverlay .pw-wrap input { padding-right: 58px !important; }
+}
+
+/* Seletores simples para WebView Android antigo (evita :not() complexo). */
+#authOverlay .auth-modal,
+#authOverlay .auth-brandmark,
+#authOverlay .auth-secure,
+#authOverlay .auth-close,
+#authOverlay .field input,
+#authOverlay .field select,
+#authOverlay .field textarea,
+#authOverlay button.btn,
+#authOverlay .btn-primary,
+#authOverlay .btn-ghost,
+#authOverlay .auth-feedback,
+#authOverlay .step-dot,
+#authOverlay .auth-flow-icon,
+#authOverlay .auth-code-input,
+#authOverlay .auth-category-trigger,
+#authOverlay .auth-category-panel,
+#authOverlay .auth-category-option,
+#authOverlay .auth-category-search-wrap,
+#authOverlay .auth-category-search-wrap input {
+  border-radius: 0 !important;
+}
