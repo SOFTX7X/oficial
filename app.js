@@ -1329,8 +1329,29 @@ async function goStep2() {
     return authFail('Use pelo menos 8 caracteres, incluindo uma letra e um número.', 'cadSenha');
   }
   authFeedback();
-
-  preencherSelectCategorias(); _mostrarStep(2);
+  const btn = $('btnGoStep2');
+  if (btn) { btn.disabled = true; btn.textContent = 'Verificando e-mail...'; }
+  try {
+    const response = await fetch('/api/auth-email-exists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return authFail(payload.error || 'Não foi possível verificar o e-mail. Tente novamente.', 'cadEmail');
+    }
+    if (payload.exists) {
+      return authFail('Este e-mail já possui uma conta. Entre ou redefina sua senha.', 'cadEmail');
+    }
+    preencherSelectCategorias();
+    _mostrarStep(2);
+  } catch (error) {
+    console.error('Erro ao verificar e-mail:', error);
+    return authFail('Não foi possível verificar o e-mail. Confira sua conexão e tente novamente.', 'cadEmail');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Continuar'; }
+  }
 }
 
 function goStep3() {
