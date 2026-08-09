@@ -7755,50 +7755,109 @@ body.square-mode .progress-bar {
 .system-alert-overlay{position:fixed;inset:0;z-index:20050;display:none;place-items:center;padding:18px;background:rgba(3,2,6,.76);overscroll-behavior:contain}.system-alert-overlay.open{display:grid}.system-alert-card{width:min(430px,100%);display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;padding:22px;border:1px solid rgba(190,112,255,.35);border-radius:0;background:#0d0813;box-shadow:0 28px 80px rgba(0,0,0,.58)}.system-alert-icon{width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(190,112,255,.35);border-radius:0;background:rgba(139,34,238,.12);color:#d7a8ff;font-size:18px;font-weight:900}.system-alert-card.is-error{border-color:rgba(239,68,68,.42)}.system-alert-card.is-error .system-alert-icon{border-color:rgba(239,68,68,.40);background:rgba(239,68,68,.10);color:#ff8c8c}.system-alert-card.is-warning{border-color:rgba(250,204,21,.38)}.system-alert-card.is-warning .system-alert-icon{border-color:rgba(250,204,21,.35);background:rgba(250,204,21,.09);color:#ffe16d}.system-alert-copy strong{display:block;color:#fff;font-size:17px;line-height:1.2}.system-alert-copy p{margin-top:7px;color:#b9abc5;font-size:13.5px;line-height:1.55}.system-alert-close{grid-column:1/-1;min-height:44px;border:1px solid rgba(190,112,255,.28);border-radius:0;background:#15101b;color:#f2e9fa;font:800 13px 'Geist',sans-serif;cursor:pointer}.system-alert-close:hover{border-color:rgba(213,158,255,.52);background:#1b1224}.field-error{display:none;margin-top:7px;color:#ff8c8c;font-size:11.5px;line-height:1.45;font-weight:650}.field-error.show{display:block}#cadEmailField.has-error input{border-color:rgba(239,68,68,.72)!important;box-shadow:0 0 0 3px rgba(239,68,68,.10)!important}#authCategoryPanel{overscroll-behavior:contain!important;touch-action:pan-y}html.vyxora-safe-layer-open,body.vyxora-safe-layer-open{overflow:hidden!important;overscroll-behavior:none!important}@media(max-width:520px){.system-alert-overlay{padding:10px}.system-alert-card{padding:18px;grid-template-columns:40px minmax(0,1fr)}.system-alert-icon{width:40px;height:40px}}
 
 
+
 /* =========================================================
-   VYXORA — AUTH: acabamento premium (roxo + preto, reto,
-   sem elementos novos de layout — só refinamento visual)
+   VYXORA — AUTH: redesign premium (roxo + preto, reto)
+   Só restyle de elementos já existentes + animações leves.
+   Nenhum elemento novo — zero risco de estourar a altura fixa
+   do modal (que usa overflow:hidden, não rola).
    ========================================================= */
-#authOverlay {
-  background:
-    radial-gradient(120% 100% at 15% 0%, rgba(124,34,232,.20), transparent 55%),
-    rgba(4,3,8,.90) !important;
-  backdrop-filter: blur(18px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(140%) !important;
-}
+
+/* rede de segurança: se algo crescer mesmo assim, rola em vez de quebrar */
+#authOverlay .auth-panel-left { overflow-y: auto !important; scrollbar-width: thin !important; }
+#authOverlay .auth-panel-left::-webkit-scrollbar,
+#authOverlay .auth-form-area::-webkit-scrollbar { width: 5px !important; }
+#authOverlay .auth-panel-left::-webkit-scrollbar-thumb,
+#authOverlay .auth-form-area::-webkit-scrollbar-thumb { background: rgba(174,84,255,.30) !important; }
+#authOverlay .auth-panel-left::-webkit-scrollbar-track,
+#authOverlay .auth-form-area::-webkit-scrollbar-track { background: transparent !important; }
+
+/* modal: brilho roxo "respirando" — assinatura visual, não muda tamanho/posição */
 #authOverlay .auth-modal {
-  border: 1px solid rgba(174,84,255,.30) !important;
-  box-shadow: 0 40px 120px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.03) inset !important;
+  border: 1px solid rgba(174,84,255,.32) !important;
   background: #08060d !important;
+  animation: vxAura 5s ease-in-out infinite !important;
 }
+@keyframes vxAura {
+  0%, 100% { box-shadow: 0 40px 120px rgba(0,0,0,.72), 0 0 0 1px rgba(139,34,238,.20), 0 0 46px rgba(124,34,232,.16); }
+  50% { box-shadow: 0 40px 120px rgba(0,0,0,.72), 0 0 0 1px rgba(188,99,255,.42), 0 0 70px rgba(139,34,238,.28); }
+}
+@media (prefers-reduced-motion: reduce) { #authOverlay .auth-modal { animation: none !important; } }
+
+/* painel esquerdo: textura + orbe ambiente com leve deriva */
 #authOverlay .auth-panel-left {
   background:
-    linear-gradient(rgba(255,255,255,.016) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.016) 1px, transparent 1px),
-    linear-gradient(150deg, rgba(94,24,158,.36), rgba(10,6,17,.97) 60%) !important;
-  background-size: 30px 30px, 30px 30px, auto !important;
-  border-right: 1px solid rgba(174,84,255,.22) !important;
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(150deg, rgba(94,24,158,.38), rgba(9,5,15,.98) 62%) !important;
+  background-size: 28px 28px, 28px 28px, auto !important;
+  border-right: 1px solid rgba(174,84,255,.24) !important;
 }
-#authOverlay .auth-left-kicker { letter-spacing: .22em !important; }
-#authOverlay .auth-left-title { letter-spacing: -.01em !important; }
-#authOverlay .auth-left-title em { color: #c98cff !important; }
-#authOverlay .auth-perk-icon { border-color: rgba(193,118,255,.35) !important; background: rgba(139,34,238,.14) !important; }
+#authOverlay .auth-panel-left::before {
+  animation: vxOrbDrift 9s ease-in-out infinite !important;
+}
+@keyframes vxOrbDrift {
+  0%, 100% { transform: translate(0,0) scale(1); opacity: .85; }
+  50% { transform: translate(-14px,10px) scale(1.08); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { #authOverlay .auth-panel-left::before { animation: none !important; } }
 
-/* formulário: leve glow atrás do título, sem mudar alturas */
-#authOverlay .auth-form-area { background: radial-gradient(80% 55% at 50% 0%, rgba(139,34,238,.07), transparent 60%) !important; }
+#authOverlay .auth-left-kicker { display: flex !important; align-items: center !important; gap: 8px !important; }
+#authOverlay .auth-left-kicker::before { content: '' !important; width: 16px !important; height: 1px !important; background: linear-gradient(90deg, #bc63ff, transparent) !important; }
+#authOverlay .auth-left-title em { background: linear-gradient(90deg, #c98cff, #8b5cf6) !important; -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; }
 
-/* stepper — reto, com linha conectando os marcadores */
+/* checklist de benefícios — cards mais ricos, ícone de check no lugar do número */
+#authOverlay .auth-left-perks { position: relative !important; margin-top: 26px !important; padding-top: 18px !important; }
+#authOverlay .auth-left-perks::before {
+  content: '' !important; position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 1px !important; background: linear-gradient(90deg, rgba(174,84,255,.35), transparent) !important;
+}
+#authOverlay .auth-perk {
+  transition: border-color .18s, background .18s, transform .18s !important;
+}
+#authOverlay .auth-perk:hover { border-color: rgba(197,124,255,.42) !important; background: rgba(139,34,238,.07) !important; transform: translateX(2px) !important; }
+#authOverlay .auth-perk-icon { font-size: 0 !important; position: relative !important; background: linear-gradient(150deg, rgba(139,34,238,.22), rgba(139,34,238,.06)) !important; }
+#authOverlay .auth-perk-icon::before { content: '✓' !important; font-size: 13px !important; font-weight: 900 !important; color: #d7b8ff !important; }
+
+/* formulário */
+#authOverlay .auth-form-title { position: relative !important; }
+#authOverlay .auth-form-title::after {
+  content: '' !important; display: block !important; width: 34px !important; height: 3px !important; margin-top: 12px !important;
+  background: linear-gradient(90deg, #8b22ee, #bc63ff) !important;
+}
+
+/* stepper — trilho conectado, sem virar círculo (mantém quadrado) */
 #authOverlay .stepper { position: relative !important; }
-#authOverlay .step-dot.active,
-#authOverlay .step-dot.done { border-color: #bc63ff !important; background: rgba(139,34,238,.18) !important; box-shadow: 0 0 0 3px rgba(139,34,238,.12) !important; }
-#authOverlay .step-dot.done::before { color: #d7b8ff !important; }
-#authOverlay .step-dot.done::before { content: "✓" !important; }
+#authOverlay .step-dot { transition: border-color .2s, background .2s, box-shadow .2s !important; }
+#authOverlay .step-dot:not(:last-child)::after {
+  content: '' !important; position: absolute !important; top: 50% !important; right: -8px !important;
+  width: 8px !important; height: 1px !important; background: rgba(174,84,255,.30) !important; z-index: 1 !important;
+}
+#authOverlay .step-dot.active {
+  border-color: #bc63ff !important; background: rgba(139,34,238,.20) !important;
+  box-shadow: 0 0 0 3px rgba(139,34,238,.14), 0 0 18px rgba(139,34,238,.22) !important;
+  animation: vxStepPulse 1.8s ease-in-out infinite !important;
+}
+@keyframes vxStepPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(139,34,238,.14), 0 0 18px rgba(139,34,238,.22); }
+  50% { box-shadow: 0 0 0 5px rgba(139,34,238,.08), 0 0 26px rgba(139,34,238,.30); }
+}
+#authOverlay .step-dot.done { border-color: #8b22ee !important; background: #8b22ee !important; }
+#authOverlay .step-dot.done::before { content: "✓" !important; color: #fff !important; }
+@media (prefers-reduced-motion: reduce) { #authOverlay .step-dot.active { animation: none !important; } }
 
-/* inputs — ícones (sem mudar altura/padding vertical, só o prefixo) */
+/* inputs — profundidade e foco premium, ícones já existentes */
+#authOverlay .field input,
+#authOverlay .field select {
+  background: #0d0813 !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.35) !important;
+  transition: border-color .15s, box-shadow .15s, background .15s !important;
+}
 #authOverlay .field input:focus,
 #authOverlay .field select:focus {
   border-color: #bc63ff !important;
-  box-shadow: 0 0 0 3px rgba(139,34,238,.16) !important;
+  background: #120a1c !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.35), 0 0 0 3px rgba(139,34,238,.18) !important;
 }
 #authOverlay input[type="email"] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%238d7f98' stroke-width='2'%3E%3Crect x='2' y='4' width='20' height='16' rx='2'/%3E%3Cpolyline points='2,4 12,13 22,4'/%3E%3C/svg%3E") !important;
@@ -7818,25 +7877,70 @@ body.square-mode .progress-bar {
   #authOverlay #empWhatsapp { background-image: none !important; padding-left: 14px !important; }
 }
 
-/* botão primário — gradiente mais rico, mesmo formato */
+/* código OTP — maior, mais claro, com leve realce */
+#authOverlay .auth-code-input {
+  color: #f2e9fa !important;
+  background: #0d0813 !important;
+  border-color: rgba(174,84,255,.34) !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.35) !important;
+}
+#authOverlay .auth-code-input:focus {
+  border-color: #bc63ff !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.35), 0 0 0 3px rgba(139,34,238,.20) !important;
+}
+
+/* botão primário — gradiente rico + brilho que passa no hover */
 #authOverlay .btn-primary {
+  position: relative !important;
+  overflow: hidden !important;
   background: linear-gradient(135deg, #9829ee, #6d17c4) !important;
   border: 1px solid #b75fff !important;
-  box-shadow: 0 12px 28px rgba(139,34,238,.30) !important;
+  box-shadow: 0 12px 28px rgba(139,34,238,.32) !important;
+  transition: box-shadow .18s, transform .12s !important;
 }
-#authOverlay .btn-primary:hover { box-shadow: 0 14px 34px rgba(139,34,238,.42) !important; }
+#authOverlay .btn-primary::after {
+  content: '' !important; position: absolute !important; inset: 0 !important;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.16) 50%, transparent 70%) !important;
+  transform: translateX(-120%) !important;
+}
+#authOverlay .btn-primary:hover::after { transform: translateX(120%) !important; transition: transform .6s ease !important; }
+#authOverlay .btn-primary:hover { box-shadow: 0 16px 38px rgba(139,34,238,.46) !important; }
+#authOverlay .btn-primary:active { transform: scale(.985) !important; }
+#authOverlay .btn-ghost { transition: border-color .15s, background .15s !important; }
+#authOverlay .btn-ghost:hover { border-color: rgba(197,124,255,.45) !important; background: #150c20 !important; }
 
-/* seleção de categoria — check no canto, sem arredondar */
-#authOverlay .auth-category-option { transition: border-color .12s, background .12s !important; position: relative !important; }
+/* links de apoio — sublinhado animado */
+#authOverlay .auth-switch button,
+#authOverlay .auth-forgot-link {
+  position: relative !important;
+}
+#authOverlay .auth-switch button::after,
+#authOverlay .auth-forgot-link::after {
+  content: '' !important; position: absolute !important; left: 0 !important; bottom: -2px !important;
+  width: 100% !important; height: 1px !important; background: currentColor !important;
+  transform: scaleX(0) !important; transform-origin: right !important; transition: transform .2s !important;
+}
+#authOverlay .auth-switch button:hover::after,
+#authOverlay .auth-forgot-link:hover::after { transform: scaleX(1) !important; transform-origin: left !important; }
+
+/* botão fechar — micro-interação */
+#authOverlay .auth-close { transition: border-color .15s, background .15s, transform .15s !important; }
+#authOverlay .auth-close:hover { border-color: #bc63ff !important; background: #1a0f28 !important; transform: rotate(90deg) !important; }
+
+/* seleção de categoria — cards mais ricos */
+#authOverlay .auth-category-trigger,
+#authOverlay .auth-category-option { transition: border-color .15s, background .15s, transform .15s !important; }
+#authOverlay .auth-category-trigger:hover { transform: translateY(-1px) !important; }
+#authOverlay .auth-category-option:hover { transform: translateY(-2px) !important; border-color: rgba(197,124,255,.40) !important; }
 #authOverlay .auth-category-option.selected {
   border-color: #bc63ff !important;
-  background: rgba(139,34,238,.14) !important;
+  background: rgba(139,34,238,.16) !important;
+  box-shadow: 0 0 0 1px rgba(139,34,238,.30), 0 8px 20px rgba(139,34,238,.18) !important;
 }
 #authOverlay .auth-category-option.selected::after {
   content: '✓' !important; position: absolute !important; top: 6px !important; right: 6px !important;
   width: 15px !important; height: 15px !important; background: #bc63ff !important; color: #0a0611 !important;
   font-size: 9px !important; font-weight: 900 !important; display: grid !important; place-items: center !important;
 }
-
-/* código OTP — mais legível, sem mudar altura */
-#authOverlay .auth-code-input { color: #e6d9f7 !important; }
+#authOverlay .auth-category-option { position: relative !important; }
+#authOverlay .auth-category-option-icon { background: linear-gradient(150deg, rgba(139,34,238,.24), rgba(139,34,238,.06)) !important; }
