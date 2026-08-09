@@ -988,9 +988,14 @@ function mostrarTelaAuth(id) {
   authFeedback();
   clearAuthFieldErrors();
   const overlay = $('authOverlay');
-  if (overlay) overlay.dataset.authScreen = id;
+  if (overlay) {
+    overlay.dataset.authScreen = id;
+    overlay.scrollTop = 0;
+  }
   const el = $(id);
   if (el) el.style.display = 'block';
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (formArea) formArea.scrollTop = 0;
 }
 
 function normalizarCodigo(valor) {
@@ -1291,9 +1296,14 @@ function showCadastro() {
   esconderTelasAuth();
   authFeedback();
   const overlay = $('authOverlay');
-  if (overlay) overlay.dataset.authScreen = 'formCadastro';
+  if (overlay) {
+    overlay.dataset.authScreen = 'formCadastro';
+    overlay.scrollTop = 0;
+  }
   const fc = $('formCadastro');
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (formArea) formArea.scrollTop = 0;
   if ($('cadSenha')) $('cadSenha').placeholder = '8+ caracteres, letra e número';
   if (typeof _mostrarStep === 'function') _mostrarStep(1);
   preencherSelectCategorias();
@@ -1312,6 +1322,30 @@ function _mostrarStep(n) {
     if (!dot) return;
     dot.className = 'step-dot' + (i + 1 === n ? ' active' : (i + 1 < n ? ' done' : ''));
   });
+  atualizarCabecalhoCadastro(n);
+}
+
+function primeiroNomeCadastro() {
+  const nome = ($('cadNome')?.value || '').trim().replace(/\s+/g, ' ');
+  return nome ? nome.split(' ')[0].slice(0, 32) : '';
+}
+
+function atualizarCabecalhoCadastro(etapa) {
+  const titulo = $('cadastroSaudacao');
+  const mensagem = $('cadastroMensagem');
+  if (!titulo || !mensagem) return;
+  const nome = primeiroNomeCadastro();
+  const textos = {
+    1: [nome ? `Olá, ${nome}` : 'Vamos começar?', 'Conte um pouco sobre você.'],
+    2: [nome ? `Olá, ${nome}` : 'Sobre você', 'Agora, conte sobre o seu negócio.'],
+    3: [nome ? `Estamos quase lá, ${nome}` : 'Estamos quase lá', 'Vamos preparar os primeiros detalhes da sua agenda.']
+  };
+  const [novoTitulo, novaMensagem] = textos[etapa] || textos[1];
+  titulo.classList.remove('auth-heading-change');
+  void titulo.offsetWidth;
+  titulo.textContent = novoTitulo;
+  mensagem.textContent = novaMensagem;
+  titulo.classList.add('auth-heading-change');
 }
 
 function setStep(n) { _mostrarStep(n); }
@@ -1481,7 +1515,7 @@ async function provisionarCadastroConfirmado(user, cadastro) {
     state.perfil = { auth_user_id: user.id, empresa_id: empresa.id, nome: cadastro.nomeUser, email: cadastro.email };
     state.empresa = empresa;
     showDashboard(); await loadAll();
-    showNotif('Bem-vindo ao VyXora Agendas!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
+    showNotif('Tudo pronto!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
     return true;
   } catch (e) {
     console.error('Erro ao provisionar cadastro:', e);

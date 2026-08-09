@@ -8639,3 +8639,85 @@ body.auth-performance-mode .notif-item.compact.out {
     height: 0 !important;
   }
 }
+
+/* V39.1 — prioridade final para a experiência neutra */
+#authOverlay .auth-brandbar.auth-neutralbar {
+  min-height: 32px !important;
+  margin: 0 0 30px !important;
+}
+#authOverlay .auth-neutralbar .auth-private-note {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  color: #a99bb5;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+#authOverlay .auth-neutralbar .auth-private-note i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50% !important;
+  background: #c084fc;
+  box-shadow: 0 0 14px rgba(192,132,252,.72);
+}
+#authOverlay .auth-signup-heading { width: 100%; text-align: center; }
+#authOverlay .auth-signup-heading .auth-form-title,
+#authOverlay .auth-signup-heading .auth-form-sub {
+  width: 100%;
+  max-width: 100% !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+}
+#authOverlay .auth-signup-heading .auth-form-title {
+  padding: .06em 0 .08em;
+  line-height: 1.08 !important;
+  text-wrap: balance;
+}
+#authOverlay .auth-signup-heading .auth-form-title::after,
+#authOverlay[data-auth-screen="formLogin"] #formLogin > .auth-form-title::after {
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+#authOverlay .auth-signup-heading .auth-form-sub { text-wrap: pretty; }
+#authOverlay .auth-heading-change { animation: authGreetingIn .36s cubic-bezier(.2,.85,.25,1) both; }
+@keyframes authGreetingIn {
+  from { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+#authOverlay[data-auth-screen="formLogin"] #formLogin > .auth-form-title,
+#authOverlay[data-auth-screen="formLogin"] #formLogin > .auth-form-sub {
+  max-width: 100% !important;
+  text-align: center;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+@media (max-width: 620px) {
+  #authOverlay .auth-brandbar.auth-neutralbar {
+    min-height: 26px !important;
+    margin-bottom: 26px !important;
+    padding-right: 48px;
+  }
+  #authOverlay .auth-private-note span,
+  #authOverlay .auth-secure { font-size: 8px !important; }
+  #authOverlay .auth-signup-heading .auth-form-title {
+    font-size: clamp(31px, 10.5vw, 43px) !important;
+    line-height: 1.1 !important;
+  }
+  #authOverlay .auth-signup-heading .auth-form-sub {
+    margin-bottom: 22px !important;
+    font-size: 13px !important;
+  }
+  #authOverlay[data-auth-screen="formCadastro"].keyboard-open .auth-neutralbar { display: none !important; }
+  #authOverlay[data-auth-screen="formCadastro"].keyboard-open .auth-signup-heading .auth-form-title {
+    font-size: clamp(28px, 8.8vw, 36px) !important;
+  }
+  #authOverlay[data-auth-screen="formCadastro"].keyboard-open .auth-signup-heading .auth-form-sub {
+    margin-bottom: 14px !important;
+  }
+}
