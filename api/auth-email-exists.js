@@ -33,12 +33,18 @@ async function emailExists(admin, email) {
   const authUserId = data[0]?.auth_user_id;
   if (!authUserId) return false;
   const { data: authData, error: authError } = await admin.auth.admin.getUserById(authUserId);
-  if (authError) {
-    const value = `${authError?.code || ''} ${authError?.message || ''}`.toLowerCase();
-    if (value.includes('not found') || value.includes('user_not_found')) return false;
-    throw authError;
+  if (!authError && normalizeEmail(authData?.user?.email) === email) return true;
+
+  // Contas recriadas podem conservar um perfil ligado ao ID Auth anterior.
+  // Nesse caso, confirma pelo e-mail exato antes de liberar o cadastro.
+  for (let page = 1; page <= 100; page += 1) {
+    const { data: usersData, error: usersError } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (usersError) throw usersError;
+    const users = Array.isArray(usersData?.users) ? usersData.users : [];
+    if (users.some(user => normalizeEmail(user?.email) === email)) return true;
+    if (users.length < 1000) return false;
   }
-  return normalizeEmail(authData?.user?.email) === email;
+  throw new Error('USER_LIST_LIMIT_REACHED');
 }
 
 export default async function handler(req, res) {
