@@ -1009,11 +1009,22 @@ function mensagemAuth(error, fallback) {
 }
 
 function guardarCadastroPendente(data) {
-  localStorage.setItem(AUTH_PENDING_KEY, JSON.stringify({ ...data, createdAt: Date.now() }));
+  // Nunca persiste senha no navegador. O OTP confirmado deve devolver uma
+  // sessão válida antes de qualquer dado do negócio ser provisionado.
+  const { senha: _senhaDescartada, ...cadastroSeguro } = data || {};
+  localStorage.setItem(AUTH_PENDING_KEY, JSON.stringify({ ...cadastroSeguro, createdAt: Date.now() }));
 }
 
 function lerCadastroPendente() {
-  try { return JSON.parse(localStorage.getItem(AUTH_PENDING_KEY) || 'null'); }
+  try {
+    const data = JSON.parse(localStorage.getItem(AUTH_PENDING_KEY) || 'null');
+    if (data?.senha) {
+      const { senha: _senhaAntiga, ...cadastroSeguro } = data;
+      localStorage.setItem(AUTH_PENDING_KEY, JSON.stringify(cadastroSeguro));
+      return cadastroSeguro;
+    }
+    return data;
+  }
   catch (_) { return null; }
 }
 
@@ -1021,7 +1032,7 @@ function limparCadastroPendente() {
   localStorage.removeItem(AUTH_PENDING_KEY);
 }
 
-function iniciarContagemReenvio(buttonId, seconds = 45) {
+function iniciarContagemReenvio(buttonId, seconds = 60) {
   if (_resendTimer) clearInterval(_resendTimer);
   const btn = $(buttonId);
   if (!btn) return;
@@ -1073,16 +1084,16 @@ function voltarCadastroEmail() {
 
 async function reenviarCodigoCadastro() {
   const email = _authEmail || lerCadastroPendente()?.email;
-  if (!email) return toast('Informe o e-mail do cadastro.', 'err');
+  if (!email) return authFail('Informe o e-mail do cadastro.', 'verifyEmailCode');
   const sessao = await db.auth.getSession();
   if (sessao?.data?.session) {
-    return toast('Esta conta já foi confirmada. Faça login.', 'err');
+    return authFail('Esta conta já foi confirmada. Faça login.', 'verifyEmailCode');
   }
   const btn = $('btnResendSignup'); if (btn) btn.disabled = true;
   const { error } = await db.auth.resend({ type: 'signup', email });
-  if (error) { if (btn) btn.disabled = false; return toast(mensagemAuth(error, 'Não foi possível reenviar o código.'), 'err'); }
+  if (error) { if (btn) btn.disabled = false; return authFail(mensagemAuth(error, 'Não foi possível reenviar o código.'), 'verifyEmailCode'); }
   toast('Novo código enviado para seu e-mail.', 'ok');
-  iniciarContagemReenvio('btnResendSignup');
+  iniciarContagemReenvio('btnResendSignup', 60);
 }
 
 async function confirmarEmailCadastro() {
@@ -1092,18 +1103,10 @@ async function confirmarEmailCadastro() {
   const btn = $('btnVerifyEmail'); if (btn) { btn.disabled = true; btn.textContent = 'Confirmando...'; }
   try {
     const { data, error } = await db.auth.verifyOtp({ email, token, type: 'signup' });
-    if (error || !data?.user) return toast(mensagemAuth(error, 'Não foi possível confirmar o e-mail.'), 'err');
-
-    // Garante sessão ativa após confirmação. Alguns fluxos via API retornam usuário
-    // confirmado sem manter a sessão no navegador.
-    if (!data.session) {
-      const senhaPendente = lerCadastroPendente()?.senha || '';
-      if (senhaPendente) {
-        await db.auth.signInWithPassword({ email, password: senhaPendente });
-      }
-    } else {
-      await db.auth.setSession(data.session);
+    if (error || !data?.user || !data?.session) {
+      return authFail(mensagemAuth(error, 'Código inválido ou expirado.'), 'verifyEmailCode');
     }
+    await db.auth.setSession(data.session);
 
     const pendente = lerCadastroPendente();
     if (pendente && pendente.email === email) {
@@ -1127,11 +1130,16 @@ async function enviarCodigoRecuperacao() {
   if (!/^\S+@\S+\.\S+$/.test(email)) return authFail('Digite um endereço de e-mail válido.', 'recoveryEmail');
   const btn = $('btnSendRecovery'); if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
   try {
-    const { error } = await db.auth.resetPasswordForEmail(email);
-    if (error) return toast(mensagemAuth(error, 'Não foi possível enviar o código.'), 'err');
-    toast('Código de recuperação enviado.', 'ok');
+    const response = await fetch('/api/auth-recovery-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) return authFail(payload.error || 'Não foi possível solicitar a recuperação agora.', 'recoveryEmail');
+    toast('Se este e-mail estiver cadastrado, o código chegará em instantes.', 'ok');
     showRecoveryCode(email);
-    iniciarContagemReenvio('btnResendRecovery');
+    iniciarContagemReenvio('btnResendRecovery', 60);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Enviar código →'; }
   }
@@ -1140,10 +1148,19 @@ async function enviarCodigoRecuperacao() {
 async function reenviarCodigoRecuperacao() {
   if (!_recoveryEmail) return showForgotPassword();
   const btn = $('btnResendRecovery'); if (btn) btn.disabled = true;
-  const { error } = await db.auth.resetPasswordForEmail(_recoveryEmail);
-  if (error) { if (btn) btn.disabled = false; return toast(mensagemAuth(error, 'Não foi possível reenviar o código.'), 'err'); }
-  toast('Novo código enviado.', 'ok');
-  iniciarContagemReenvio('btnResendRecovery');
+  try {
+    const response = await fetch('/api/auth-recovery-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: _recoveryEmail })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) return authFail(payload.error || 'Não foi possível solicitar um novo código agora.', 'recoveryCode');
+    toast('Se a conta existir, um novo código chegará em instantes.', 'ok');
+    iniciarContagemReenvio('btnResendRecovery', 60);
+  } finally {
+    if (btn && !_resendTimer) btn.disabled = false;
+  }
 }
 
 async function validarCodigoRecuperacao() {
@@ -1152,7 +1169,7 @@ async function validarCodigoRecuperacao() {
   const btn = $('btnVerifyRecovery'); if (btn) { btn.disabled = true; btn.textContent = 'Validando...'; }
   try {
     const { data, error } = await db.auth.verifyOtp({ email: _recoveryEmail, token, type: 'recovery' });
-    if (error || !data?.session) return toast(mensagemAuth(error, 'Código inválido ou expirado.'), 'err');
+    if (error || !data?.session) return authFail(mensagemAuth(error, 'Código inválido ou expirado.'), 'recoveryCode');
     showNewPassword();
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Validar código →'; }
@@ -1162,7 +1179,9 @@ async function validarCodigoRecuperacao() {
 async function salvarNovaSenha() {
   const password = $('newPassword')?.value || '';
   const confirm = $('newPasswordConfirm')?.value || '';
-  if (password.length < 8) return authFail('A nova senha deve ter pelo menos 8 caracteres.', 'newPassword');
+  if (password.length < 8 || !/[A-Za-zÀ-ÿ]/.test(password) || !/\d/.test(password)) {
+    return authFail('Use pelo menos 8 caracteres, incluindo uma letra e um número.', 'newPassword');
+  }
   if (password !== confirm) return authFail('As senhas não são iguais. Confira e tente novamente.', 'newPasswordConfirm');
   const btn = $('btnUpdatePassword'); if (btn) { btn.disabled = true; btn.textContent = 'Atualizando...'; }
   try {
@@ -1275,6 +1294,7 @@ function showCadastro() {
   if (overlay) overlay.dataset.authScreen = 'formCadastro';
   const fc = $('formCadastro');
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
+  if ($('cadSenha')) $('cadSenha').placeholder = '8+ caracteres, letra e número';
   if (typeof _mostrarStep === 'function') _mostrarStep(1);
   preencherSelectCategorias();
 }
@@ -1305,33 +1325,10 @@ async function goStep2() {
   if (!email) return authFail('Digite seu melhor e-mail.', 'cadEmail');
   if (!/^\S+@\S+\.\S+$/.test(email)) return authFail('Digite um endereço de e-mail válido.', 'cadEmail');
   if (!senha) return authFail('Crie uma senha para proteger sua conta.', 'cadSenha');
-  if (senha.length < 6) return authFail('Sua senha precisa ter pelo menos 6 caracteres.', 'cadSenha');
-  authFeedback();
-
-  // Bloqueia e-mail duplicado já no início do cadastro.
-  const btnStep2 = $('btnGoStep2');
-  if (btnStep2) { btnStep2.disabled = true; btnStep2.textContent = 'Verificando...'; }
-  try {
-    const response = await fetch('/api/auth-email-exists', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      // Falha real na verificação (ex.: chave admin ausente no servidor).
-      // Não deixa passar silenciosamente — o cadastro ficaria vulnerável a duplicidade.
-      return toast(result.error || 'Não foi possível verificar o e-mail agora. Tente novamente em instantes.', 'err');
-    }
-    if (result.exists) {
-      return toast('Este e-mail já possui uma conta. Use outro e-mail ou recupere sua senha.', 'err');
-    }
-  } catch (e) {
-    console.warn('Falha ao verificar e-mail:', e);
-    return toast('Não foi possível verificar o e-mail agora. Verifique sua conexão e tente novamente.', 'err');
-  } finally {
-    if (btnStep2) { btnStep2.disabled = false; btnStep2.textContent = 'Continuar'; }
+  if (senha.length < 8 || !/[A-Za-zÀ-ÿ]/.test(senha) || !/\d/.test(senha)) {
+    return authFail('Use pelo menos 8 caracteres, incluindo uma letra e um número.', 'cadSenha');
   }
+  authFeedback();
 
   preencherSelectCategorias(); _mostrarStep(2);
 }
@@ -1420,7 +1417,7 @@ async function loginComSenha() {
       const message = mensagemAuth(error, 'E-mail ou senha incorretos.');
       if (String(error?.code || '').includes('email_not_confirmed') || String(error?.message || '').toLowerCase().includes('email not confirmed')) {
         showVerifyEmail(email);
-        iniciarContagemReenvio('btnResendSignup', 15);
+        iniciarContagemReenvio('btnResendSignup', 60);
       }
       return authFail(message, 'loginSenha');
     }
@@ -1500,23 +1497,12 @@ async function finalizarCadastro() {
   const btnFin = $('btnFinalizar');
   if (btnFin) { btnFin.disabled = true; btnFin.textContent = 'Criando conta...'; }
   try {
-    // Bloqueio preventivo de e-mail duplicado antes de criar usuário
-    const emailCheck = await fetch('/api/auth-email-exists', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    const emailCheckData = await emailCheck.json().catch(() => ({}));
-    if (emailCheckData.exists) {
-      return toast('Este e-mail já possui uma conta. Use outro e-mail ou recupere sua senha.', 'err');
-    }
-
     const signupResponse = await fetch('/api/auth-signup', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password: senha, nome: nomeUser })
     });
     const signupPayload = await signupResponse.json().catch(() => ({}));
-    if (!signupResponse.ok) return toast(mensagemAuth({ message: signupPayload.error }, 'Não foi possível criar a conta.'), 'err');
+    if (!signupResponse.ok) return authFail(mensagemAuth({ message: signupPayload.error }, 'Não foi possível criar a conta.'), 'cadEmail');
     const authData = signupPayload.data;
     if (!authData?.user) return toast('Não foi possível criar a conta. Tente novamente.', 'err');
     guardarCadastroPendente(cadastro);
@@ -1530,7 +1516,7 @@ async function finalizarCadastro() {
     }
 
     showVerifyEmail(email);
-    iniciarContagemReenvio('btnResendSignup');
+    iniciarContagemReenvio('btnResendSignup', 60);
     toast('Conta criada. Digite o código enviado ao seu e-mail.', 'ok');
   } catch (e) {
     console.error('Erro em finalizarCadastro:', e);
