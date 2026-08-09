@@ -8432,6 +8432,7 @@ body.square-mode .progress-bar {
 
 /* V34 — viewport real e teclado virtual no Android */
 @media (max-width: 620px) {
+  body.auth-performance-mode #authOverlay.auth-overlay,
   #authOverlay.auth-overlay {
     top: var(--auth-visual-top, 0px) !important;
     right: 0 !important;
@@ -8600,6 +8601,23 @@ body.auth-performance-mode .notif-item.compact.out {
 
 /* V38 — tela cheia mobile sem moldura externa ou faixa de rolagem */
 @media (max-width: 620px) {
+  #authOverlay.auth-overlay {
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    scrollbar-width: none !important;
+    overscroll-behavior: none !important;
+  }
+  body.auth-performance-mode #authOverlay.auth-overlay::-webkit-scrollbar,
+  #authOverlay.auth-overlay::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
   #authOverlay .auth-modal {
     border: 0 !important;
     outline: 0 !important;
