@@ -8277,6 +8277,38 @@ body.square-mode .progress-bar {
   border-radius: 0 !important;
 }
 
+/* V32 — mantém campos escuros ao digitar, colar ou usar autofill */
+#authOverlay .field input,
+#authOverlay .field input:not(:placeholder-shown),
+#authOverlay .field input:valid,
+#authOverlay .field input:invalid {
+  background-color: #08040d !important;
+  color: #f8f4fb !important;
+  -webkit-text-fill-color: #f8f4fb !important;
+  caret-color: #c084fc !important;
+}
+#authOverlay .field input:-webkit-autofill,
+#authOverlay .field input:-webkit-autofill:hover,
+#authOverlay .field input:-webkit-autofill:focus,
+#authOverlay .field input:-webkit-autofill:active,
+#authOverlay .field input:autofill,
+#authOverlay .field input:autofill:hover,
+#authOverlay .field input:autofill:focus {
+  border-color: rgba(192,132,252,.72) !important;
+  background-color: #08040d !important;
+  color: #f8f4fb !important;
+  -webkit-text-fill-color: #f8f4fb !important;
+  caret-color: #c084fc !important;
+  -webkit-box-shadow: 0 0 0 1000px #08040d inset, 0 0 0 3px rgba(168,85,247,.10) !important;
+  box-shadow: 0 0 0 1000px #08040d inset, 0 0 0 3px rgba(168,85,247,.10) !important;
+  transition: background-color 999999s ease-out 0s, color 999999s ease-out 0s !important;
+}
+#authOverlay .field input::selection {
+  background: rgba(168,85,247,.42);
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+}
+
 #authOverlay .pw-eye {
   display: grid !important;
   place-items: center !important;
