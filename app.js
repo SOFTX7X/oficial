@@ -769,10 +769,28 @@ function renderCategoriasCadastro(filtro) {
 function togglePw(id, btn) {
   const inp = document.getElementById(id);
   if (!inp) return;
-  const showing = inp.type === 'text';
-  inp.type = showing ? 'password' : 'text';
-  btn.classList.toggle('show', !showing);
+  const reveal = inp.type === 'password';
+  const start = inp.selectionStart;
+  const end = inp.selectionEnd;
+
+  inp.type = reveal ? 'text' : 'password';
+  btn.classList.toggle('show', reveal);
+  btn.setAttribute('aria-pressed', reveal ? 'true' : 'false');
+  btn.setAttribute('aria-label', reveal ? 'Ocultar senha' : 'Mostrar senha');
+
+  // Android recria o campo ao alternar o type. Restaurar o foco e a seleção
+  // evita o salto do teclado, o cursor perdido e o toque duplicado no ícone.
+  requestAnimationFrame(() => {
+    try {
+      inp.focus({ preventScroll: true });
+      if (Number.isInteger(start) && Number.isInteger(end)) inp.setSelectionRange(start, end);
+    } catch (_) {}
+  });
 }
+
+document.addEventListener('pointerdown', function(e) {
+  if (e.target?.closest?.('#authOverlay .pw-eye')) e.preventDefault();
+});
 
 function abrirSeletorCategoria() {
   renderCategoriasCadastro('');
@@ -1128,6 +1146,12 @@ async function salvarNovaSenha() {
 function openAuth(mode) {
   const overlay = $('authOverlay');
   if (!overlay) return;
+
+  // Garante o acabamento quadrado mesmo em WebViews Android que mantêm
+  // regras antigas do CSS em cache ou calculam :not() com especificidade diferente.
+  overlay.querySelectorAll('.btn').forEach(button => {
+    button.style.setProperty('border-radius', '0', 'important');
+  });
 
   // Suspende a página de fundo enquanto a autenticação está aberta.
   document.documentElement.classList.add('auth-performance-mode');
