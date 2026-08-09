@@ -8429,3 +8429,46 @@ body.square-mode .progress-bar {
   box-shadow: none !important;
   outline: none !important;
 }
+
+/* V34 — viewport real e teclado virtual no Android */
+@media (max-width: 620px) {
+  #authOverlay.auth-overlay {
+    top: var(--auth-visual-top, 0px) !important;
+    right: 0 !important;
+    bottom: auto !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: var(--auth-visual-height, 100dvh) !important;
+    min-height: 0 !important;
+    max-height: var(--auth-visual-height, 100dvh) !important;
+    overflow: hidden !important;
+  }
+  #authOverlay .auth-modal,
+  #authOverlay .auth-form-area {
+    height: var(--auth-visual-height, 100dvh) !important;
+    min-height: 0 !important;
+    max-height: var(--auth-visual-height, 100dvh) !important;
+  }
+  #authOverlay .auth-form-area {
+    padding-top: max(48px, calc(env(safe-area-inset-top) + 30px)) !important;
+    padding-bottom: max(120px, calc(env(safe-area-inset-bottom) + 92px)) !important;
+    scroll-padding-top: 82px;
+    scroll-padding-bottom: 150px;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  #authOverlay.keyboard-open .auth-form-area {
+    padding-top: max(14px, env(safe-area-inset-top)) !important;
+    padding-bottom: 110px !important;
+    scroll-behavior: smooth;
+  }
+  #authOverlay.keyboard-open .auth-brandbar {
+    margin-bottom: 18px !important;
+  }
+  #authOverlay.keyboard-open .auth-form-title {
+    font-size: clamp(33px, 10vw, 41px) !important;
+  }
+  #authOverlay.keyboard-open .auth-form-sub {
+    margin-bottom: 20px !important;
+  }
+}
