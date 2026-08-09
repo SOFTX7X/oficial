@@ -930,9 +930,8 @@ function authFeedback(message = '', type = 'error') {
 }
 
 function authFail(message, inputId = '') {
-  authFeedback(message, 'error');
-  const area = document.querySelector('#authOverlay .auth-form-area');
-  if (area) area.scrollTo({ top: 0, behavior: 'smooth' });
+  authFeedback();
+  toast(message, 'err');
   const input = inputId ? $(inputId) : null;
   if (input) {
     input.setAttribute('aria-invalid', 'true');
@@ -942,7 +941,8 @@ function authFail(message, inputId = '') {
 }
 
 function authSuccess(message) {
-  authFeedback(message, 'success');
+  authFeedback();
+  toast(message, 'ok');
 }
 
 function esconderTelasAuth() {
@@ -1171,6 +1171,11 @@ function syncAuthVisualViewport() {
   overlay.style.setProperty('--auth-visual-height', `${height}px`);
   overlay.style.setProperty('--auth-visual-top', `${offsetTop}px`);
   overlay.classList.toggle('keyboard-open', keyboardOpen);
+  const stack = $('notifStack');
+  if (stack) {
+    const coveredBottom = Math.max(0, window.innerHeight - (offsetTop + height));
+    stack.style.setProperty('--auth-toast-bottom', `${coveredBottom + 18}px`);
+  }
 
   if (keyboardOpen) {
     clearTimeout(_authViewportTimer);
@@ -1224,6 +1229,7 @@ function closeAuth() {
   overlay?.classList.remove('keyboard-open');
   overlay?.style.removeProperty('--auth-visual-height');
   overlay?.style.removeProperty('--auth-visual-top');
+  $('notifStack')?.style.removeProperty('--auth-toast-bottom');
 }
 
 function showLogin() {
