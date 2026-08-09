@@ -904,6 +904,29 @@ let _authEmail = '';
 let _recoveryEmail = '';
 let _resendTimer = null;
 
+function authFeedback(message = '', type = 'error') {
+  const box = $('authFeedback');
+  if (!box) return;
+  box.textContent = String(message || '');
+  box.className = 'auth-feedback' + (message ? ` show ${type}` : '');
+}
+
+function authFail(message, inputId = '') {
+  authFeedback(message, 'error');
+  const area = document.querySelector('#authOverlay .auth-form-area');
+  if (area) area.scrollTo({ top: 0, behavior: 'smooth' });
+  const input = inputId ? $(inputId) : null;
+  if (input) {
+    input.setAttribute('aria-invalid', 'true');
+    input.focus({ preventScroll: true });
+  }
+  return false;
+}
+
+function authSuccess(message) {
+  authFeedback(message, 'success');
+}
+
 function esconderTelasAuth() {
   ['formLogin','formCadastro','formVerifyEmail','formForgotPassword','formRecoveryCode','formNewPassword'].forEach(id => {
     const el = $(id);
@@ -913,6 +936,7 @@ function esconderTelasAuth() {
 
 function mostrarTelaAuth(id) {
   esconderTelasAuth();
+  authFeedback();
   const el = $(id);
   if (el) el.style.display = 'block';
 }
@@ -1012,7 +1036,7 @@ async function reenviarCodigoCadastro() {
 async function confirmarEmailCadastro() {
   const email = _authEmail || lerCadastroPendente()?.email;
   const token = normalizarCodigo($('verifyEmailCode')?.value);
-  if (!email || token.length < 6) return toast('Digite o código recebido por e-mail.', 'err');
+  if (!email || token.length < 6) return authFail('Digite o código de confirmação recebido por e-mail.', 'verifyEmailCode');
   const btn = $('btnVerifyEmail'); if (btn) { btn.disabled = true; btn.textContent = 'Confirmando...'; }
   try {
     const { data, error } = await db.auth.verifyOtp({ email, token, type: 'signup' });
@@ -1047,7 +1071,8 @@ async function confirmarEmailCadastro() {
 
 async function enviarCodigoRecuperacao() {
   const email = ($('recoveryEmail')?.value || '').trim().toLowerCase();
-  if (!email) return toast('Digite seu e-mail.', 'err');
+  if (!email) return authFail('Digite o e-mail da conta que deseja recuperar.', 'recoveryEmail');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return authFail('Digite um endereço de e-mail válido.', 'recoveryEmail');
   const btn = $('btnSendRecovery'); if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
   try {
     const { error } = await db.auth.resetPasswordForEmail(email);
@@ -1071,7 +1096,7 @@ async function reenviarCodigoRecuperacao() {
 
 async function validarCodigoRecuperacao() {
   const token = normalizarCodigo($('recoveryCode')?.value);
-  if (!_recoveryEmail || token.length < 6) return toast('Digite o código recebido por e-mail.', 'err');
+  if (!_recoveryEmail || token.length < 6) return authFail('Digite o código de recuperação recebido por e-mail.', 'recoveryCode');
   const btn = $('btnVerifyRecovery'); if (btn) { btn.disabled = true; btn.textContent = 'Validando...'; }
   try {
     const { data, error } = await db.auth.verifyOtp({ email: _recoveryEmail, token, type: 'recovery' });
@@ -1085,8 +1110,8 @@ async function validarCodigoRecuperacao() {
 async function salvarNovaSenha() {
   const password = $('newPassword')?.value || '';
   const confirm = $('newPasswordConfirm')?.value || '';
-  if (password.length < 8) return toast('A nova senha deve ter pelo menos 8 caracteres.', 'err');
-  if (password !== confirm) return toast('As senhas não são iguais.', 'err');
+  if (password.length < 8) return authFail('A nova senha deve ter pelo menos 8 caracteres.', 'newPassword');
+  if (password !== confirm) return authFail('As senhas não são iguais. Confira e tente novamente.', 'newPasswordConfirm');
   const btn = $('btnUpdatePassword'); if (btn) { btn.disabled = true; btn.textContent = 'Atualizando...'; }
   try {
     const { error } = await db.auth.updateUser({ password });
@@ -1130,6 +1155,7 @@ function showLogin() {
 
 function showCadastro() {
   esconderTelasAuth();
+  authFeedback();
   const fc = $('formCadastro');
   if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
   if (typeof _mostrarStep === 'function') _mostrarStep(1);
@@ -1158,8 +1184,12 @@ async function goStep2() {
   const nome = $('cadNome')?.value?.trim();
   const email = $('cadEmail')?.value?.trim().toLowerCase();
   const senha = $('cadSenha')?.value?.trim();
-  if (!nome || !email || !senha) return toast('Preencha nome, e-mail e senha.', 'err');
-  if (senha.length < 6) return toast('Senha mínimo 6 caracteres.', 'err');
+  if (!nome) return authFail('Conte para a gente como você quer ser chamado.', 'cadNome');
+  if (!email) return authFail('Digite seu melhor e-mail.', 'cadEmail');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return authFail('Digite um endereço de e-mail válido.', 'cadEmail');
+  if (!senha) return authFail('Crie uma senha para proteger sua conta.', 'cadSenha');
+  if (senha.length < 6) return authFail('Sua senha precisa ter pelo menos 6 caracteres.', 'cadSenha');
+  authFeedback();
 
   // Bloqueia e-mail duplicado já no início do cadastro.
   const btnStep2 = $('btnGoStep2');
@@ -1193,7 +1223,10 @@ function goStep3() {
   const empNome = $('empNome')?.value?.trim();
   const empSlug = $('empSlug')?.value?.trim();
   const empWhatsapp = $('empWhatsapp')?.value?.trim();
-  if (!empNome || !empSlug || !empWhatsapp) return toast('Preencha nome, link e WhatsApp.', 'err');
+  if (!empNome) return authFail('Digite o nome do seu negócio.', 'empNome');
+  if (!empWhatsapp) return authFail('Digite um WhatsApp para seus clientes.', 'empWhatsapp');
+  if (!empSlug) return authFail('Escolha o endereço personalizado da sua agenda.', 'empSlug');
+  authFeedback();
   _mostrarStep(3);
 }
 
@@ -1220,6 +1253,11 @@ function autoSlug() {
 
 document.addEventListener('input', function(e) {
   if (e.target && e.target.id === 'empSlug') e.target.dataset.manual = '1';
+  if (e.target?.closest?.('#authOverlay')) {
+    e.target.removeAttribute('aria-invalid');
+    const box = $('authFeedback');
+    if (box?.classList.contains('error')) authFeedback();
+  }
   ajustarFonteCampo(e.target);
 });
 
@@ -1229,11 +1267,30 @@ document.addEventListener('input', function(e) {
   if (e.target?.classList?.contains('auth-code-input')) e.target.value = normalizarCodigo(e.target.value);
 });
 
+document.addEventListener('keydown', function(e) {
+  const overlay = $('authOverlay');
+  if (!overlay?.classList.contains('open')) return;
+  if (e.key === 'Escape') return closeAuth();
+  if (e.key !== 'Enter' || e.target?.tagName === 'BUTTON') return;
+  e.preventDefault();
+  if ($('formLogin')?.offsetParent) return loginComSenha();
+  if ($('formForgotPassword')?.offsetParent) return enviarCodigoRecuperacao();
+  if ($('formRecoveryCode')?.offsetParent) return validarCodigoRecuperacao();
+  if ($('formVerifyEmail')?.offsetParent) return confirmarEmailCadastro();
+  if ($('formNewPassword')?.offsetParent) return salvarNovaSenha();
+  if ($('step1')?.offsetParent) return goStep2();
+  if ($('step2')?.offsetParent) return goStep3();
+  if ($('step3')?.offsetParent) return finalizarCadastro();
+});
+
 async function loginComSenha() {
   const email = ($('loginEmail')?.value || '').trim().toLowerCase();
   const senha = ($('loginSenha')?.value || '').trim();
-  if (!email || !senha) return toast('Digite e-mail e senha.', 'err');
+  if (!email) return authFail('Digite o e-mail usado no seu cadastro.', 'loginEmail');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return authFail('Digite um endereço de e-mail válido.', 'loginEmail');
+  if (!senha) return authFail('Digite sua senha para continuar.', 'loginSenha');
   const btn = $('btnLogin'); if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
+  authFeedback();
   try {
     const { data, error } = await db.auth.signInWithPassword({ email, password: senha });
     if (error || !data.user) {
@@ -1242,12 +1299,12 @@ async function loginComSenha() {
         showVerifyEmail(email);
         iniciarContagemReenvio('btnResendSignup', 15);
       }
-      return toast(message, 'err');
+      return authFail(message, 'loginSenha');
     }
     const ok = await carregarConta(data.user);
-    if (!ok) { await db.auth.signOut(); return toast('Perfil ou empresa não encontrado. Refaça o cadastro.', 'err'); }
+    if (!ok) { await db.auth.signOut(); return authFail('Perfil ou empresa não encontrado. Refaça o cadastro.'); }
     showNotif('Login realizado!', 'Bem-vindo de volta.', 'ok', 4000);
-  } catch (e) { console.error('Erro no login:', e); toast('Erro ao fazer login. Tente novamente.', 'err'); }
+  } catch (e) { console.error('Erro no login:', e); authFail('Não foi possível entrar agora. Verifique sua conexão e tente novamente.'); }
   finally { if (btn) { btn.disabled = false; btn.textContent = 'Entrar →'; } }
 }
 
@@ -1299,7 +1356,11 @@ async function finalizarCadastro() {
   const servPreco = $('servPreco')?.value;
   const servDuracao = $('servDuracao')?.value;
   const profNomeVal = $('profNome')?.value?.trim();
-  if (!servNome || !servPreco || !servDuracao || !profNomeVal) return toast('Preencha serviço, preço, duração e profissional.', 'err');
+  if (!servNome) return authFail('Digite o nome do seu primeiro serviço.', 'servNome');
+  if (!servPreco) return authFail('Informe o preço do serviço.', 'servPreco');
+  if (!servDuracao) return authFail('Informe a duração do atendimento.', 'servDuracao');
+  if (!profNomeVal) return authFail('Digite o nome do primeiro profissional.', 'profNome');
+  authFeedback();
   const email = ($('cadEmail')?.value || '').trim().toLowerCase();
   const senha = ($('cadSenha')?.value || '').trim();
   const nomeUser = ($('cadNome')?.value || '').trim();
