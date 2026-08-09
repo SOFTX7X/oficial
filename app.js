@@ -929,13 +929,44 @@ function authFeedback(message = '', type = 'error') {
   box.className = 'auth-feedback' + (message ? ` show ${type}` : '');
 }
 
+function clearAuthFieldErrors(exceptInput = null) {
+  document.querySelectorAll('#authOverlay .auth-field-error').forEach(error => {
+    if (exceptInput && error.closest('.field')?.contains(exceptInput)) return;
+    error.remove();
+  });
+  document.querySelectorAll('#authOverlay .field.has-auth-error').forEach(field => {
+    if (exceptInput && field.contains(exceptInput)) return;
+    field.classList.remove('has-auth-error');
+    field.querySelectorAll('input, select, textarea').forEach(input => {
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-describedby');
+    });
+  });
+}
+
 function authFail(message, inputId = '') {
   authFeedback();
-  toast(message, 'err');
   const input = inputId ? $(inputId) : null;
   if (input) {
+    clearAuthFieldErrors(input);
     input.setAttribute('aria-invalid', 'true');
+    const field = input.closest('.field');
+    if (field) {
+      field.classList.add('has-auth-error');
+      let error = field.querySelector('.auth-field-error');
+      if (!error) {
+        error = document.createElement('small');
+        error.className = 'auth-field-error';
+        error.setAttribute('role', 'alert');
+        field.appendChild(error);
+      }
+      error.textContent = String(message || 'Confira este campo.');
+      error.id = error.id || `${input.id}Error`;
+      input.setAttribute('aria-describedby', error.id);
+    }
     input.focus({ preventScroll: true });
+  } else {
+    toast(message, 'err');
   }
   return false;
 }
@@ -955,6 +986,7 @@ function esconderTelasAuth() {
 function mostrarTelaAuth(id) {
   esconderTelasAuth();
   authFeedback();
+  clearAuthFieldErrors();
   const overlay = $('authOverlay');
   if (overlay) overlay.dataset.authScreen = id;
   const el = $(id);
@@ -1340,6 +1372,12 @@ document.addEventListener('input', function(e) {
   if (e.target && e.target.id === 'empSlug') e.target.dataset.manual = '1';
   if (e.target?.closest?.('#authOverlay')) {
     e.target.removeAttribute('aria-invalid');
+    const field = e.target.closest('.field');
+    if (field?.classList.contains('has-auth-error')) {
+      field.classList.remove('has-auth-error');
+      field.querySelector('.auth-field-error')?.remove();
+      e.target.removeAttribute('aria-describedby');
+    }
     const box = $('authFeedback');
     if (box?.classList.contains('error')) authFeedback();
   }
