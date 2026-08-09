@@ -8268,6 +8268,20 @@ body.square-mode .progress-bar {
 #authOverlay .auth-category-search-wrap input {
   border-radius: 0 !important;
 }
+
+/* V33.1 — override final: somente o desenho do olho fica visível */
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye:hover,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye:focus,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye:focus-visible,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye:active,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye.show {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
 #authOverlay .auth-form-area button.btn.btn-primary,
 #authOverlay .auth-form-area button.btn.btn-ghost,
 #authOverlay .auth-form-area .form-actions button.btn {
@@ -8308,6 +8322,23 @@ body.square-mode .progress-bar {
   color: #fff;
   -webkit-text-fill-color: #fff;
 }
+
+/* V33 — botão de senha visualmente reduzido ao ícone */
+#authOverlay .pw-eye,
+#authOverlay .pw-eye:hover,
+#authOverlay .pw-eye:focus,
+#authOverlay .pw-eye:focus-visible,
+#authOverlay .pw-eye:active,
+#authOverlay .pw-eye.show {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+#authOverlay .pw-eye:hover,
+#authOverlay .pw-eye:focus-visible,
+#authOverlay .pw-eye.show { color: #d8b4fe !important; }
+#authOverlay .pw-eye:focus-visible svg { filter: drop-shadow(0 0 5px rgba(192,132,252,.65)); }
 
 #authOverlay .pw-eye {
   display: grid !important;
@@ -8384,4 +8415,17 @@ body.square-mode .progress-bar {
 #authOverlay .auth-category-search-wrap,
 #authOverlay .auth-category-search-wrap input {
   border-radius: 0 !important;
+}
+
+/* V33.2 — regra final para remover a caixa visual do olho */
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye:hover,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye:focus,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye:focus-visible,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye:active,
+#authOverlay.auth-overlay .auth-modal .auth-form-area .pw-eye.show {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
