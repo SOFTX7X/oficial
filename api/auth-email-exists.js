@@ -18,14 +18,15 @@ function readBody(req) {
 }
 
 async function emailExists(admin, email) {
-  for (let page = 1; page <= 100; page += 1) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
-    if (error) throw error;
-    const users = Array.isArray(data?.users) ? data.users : [];
-    if (users.some(user => normalizeEmail(user?.email) === email)) return true;
-    if (users.length < 1000) return false;
-  }
-  throw new Error('USER_LIST_LIMIT_REACHED');
+  // A etapa inicial precisa responder rápido. Contas concluídas sempre possuem
+  // perfil; a rota final de cadastro continua consultando o Auth como garantia.
+  const { data, error } = await admin
+    .from('agenda_perfis')
+    .select('id')
+    .eq('email', email)
+    .limit(1);
+  if (error) throw error;
+  return Array.isArray(data) && data.length > 0;
 }
 
 export default async function handler(req, res) {
