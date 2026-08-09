@@ -1323,6 +1323,10 @@ function _mostrarStep(n) {
     dot.className = 'step-dot' + (i + 1 === n ? ' active' : (i + 1 < n ? ' done' : ''));
   });
   atualizarCabecalhoCadastro(n);
+  const overlay = $('authOverlay');
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (overlay) overlay.scrollTop = 0;
+  if (formArea) formArea.scrollTop = 0;
 }
 
 function primeiroNomeCadastro() {
