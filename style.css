@@ -8597,3 +8597,27 @@ body.auth-performance-mode .notif-item.compact.out {
   }
   #authOverlay[data-auth-screen="formLogin"].keyboard-open .auth-field-error { margin-top: 4px; }
 }
+
+/* V38 — tela cheia mobile sem moldura externa ou faixa de rolagem */
+@media (max-width: 620px) {
+  #authOverlay .auth-modal {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+  #authOverlay .auth-modal::before,
+  #authOverlay .auth-modal::after {
+    content: none !important;
+    display: none !important;
+  }
+  #authOverlay .auth-form-area {
+    border: 0 !important;
+    outline: 0 !important;
+    scrollbar-width: none !important;
+  }
+  #authOverlay .auth-form-area::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
