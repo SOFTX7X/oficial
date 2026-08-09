@@ -1,3 +1,4 @@
+
 // ═══════════════════════════════════════════════════════════════
 // GERENCIADOR ÚNICO DE ROLAGEM
 // Evita que um modal libere a rolagem enquanto outro ainda está aberto.
@@ -763,6 +764,14 @@ function renderCategoriasCadastro(filtro) {
       <span><strong>${c.nome || ''}</strong><small>Toque para selecionar</small></span>
     </button>`;
   }).join('');
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  if (!inp) return;
+  const showing = inp.type === 'text';
+  inp.type = showing ? 'password' : 'text';
+  btn.classList.toggle('show', !showing);
 }
 
 function abrirSeletorCategoria() {
