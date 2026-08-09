@@ -1152,6 +1152,7 @@ function scrollAuthFieldIntoView(field = document.activeElement) {
   const overlay = $('authOverlay');
   const area = overlay?.querySelector('.auth-form-area');
   if (!overlay?.classList.contains('open') || !area || !field?.closest?.('#authOverlay')) return;
+  if (overlay.dataset.authScreen === 'formLogin') return;
   const fieldRect = field.getBoundingClientRect();
   const areaRect = area.getBoundingClientRect();
   const targetTop = area.scrollTop + fieldRect.top - areaRect.top - Math.max(68, area.clientHeight * .34);

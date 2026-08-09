@@ -8472,3 +8472,50 @@ body.square-mode .progress-bar {
     margin-bottom: 20px !important;
   }
 }
+
+/* V35 — login mobile centralizado e sem rolagem */
+@media (max-width: 620px) {
+  #authOverlay[data-auth-screen="formLogin"] .auth-form-area {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    padding: max(22px, env(safe-area-inset-top)) 20px max(22px, env(safe-area-inset-bottom)) !important;
+    overscroll-behavior: none !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"] .auth-brandbar {
+    flex: 0 0 auto !important;
+    margin: 0 0 34px !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"] #formLogin {
+    flex: 0 0 auto !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"].keyboard-open .auth-form-area {
+    justify-content: center !important;
+    padding: max(10px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"].keyboard-open .auth-brandbar {
+    display: none !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"].keyboard-open .auth-form-title {
+    margin-bottom: 8px !important;
+    font-size: clamp(32px, 9.5vw, 39px) !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"].keyboard-open .auth-form-sub {
+    display: none !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"].keyboard-open .form-gap {
+    gap: 10px !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"].keyboard-open .field input {
+    min-height: 50px !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"].keyboard-open .btn-primary {
+    min-height: 50px !important;
+  }
+  #authOverlay[data-auth-screen="formLogin"].keyboard-open .auth-switch {
+    margin-top: 14px !important;
+  }
+}
