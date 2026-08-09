@@ -7735,6 +7735,113 @@ body.square-mode .progress-bar {
   }
 }
 
+/* V40 — autenticação sem faixa superior, sem rolagem e etapas alinhadas */
+#authOverlay.auth-overlay {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+}
+#authOverlay.auth-overlay::-webkit-scrollbar { display: none !important; }
+#authOverlay .auth-modal {
+  height: min(720px, calc(100dvh - 32px)) !important;
+  max-height: calc(100dvh - 32px) !important;
+  overflow: hidden !important;
+}
+#authOverlay .auth-form-area {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  padding: 34px clamp(24px, 6vw, 58px) !important;
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+}
+#authOverlay .auth-form-area::-webkit-scrollbar { display: none !important; }
+#authOverlay .auth-feedback:empty { display: none !important; }
+
+#authOverlay #formCadastro .stepper {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: end !important;
+  gap: 14px !important;
+  width: min(100%, 420px) !important;
+  margin: 0 auto 24px !important;
+}
+#authOverlay #formCadastro .step-dot {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 29px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+#authOverlay #formCadastro .step-dot::before {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
+  left: 0 !important;
+  display: block !important;
+  height: auto !important;
+  color: #6f6279 !important;
+  font: 800 9px/1 'JetBrains Mono', ui-monospace, monospace !important;
+  text-align: center !important;
+}
+#authOverlay #formCadastro .step-dot::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 3px !important;
+  border-radius: 0 !important;
+  background: #281c31 !important;
+  box-shadow: none !important;
+}
+#authOverlay #formCadastro .step-dot.active::before,
+#authOverlay #formCadastro .step-dot.done::before { color: #ead7fa !important; }
+#authOverlay #formCadastro .step-dot.active::after {
+  background: linear-gradient(90deg, #a855f7, #c084fc) !important;
+  box-shadow: 0 0 12px rgba(168,85,247,.38) !important;
+}
+#authOverlay #formCadastro .step-dot.done::after { background: #7c3aed !important; }
+
+@media (max-width: 620px) {
+  #authOverlay.auth-overlay { padding: 0 !important; }
+  #authOverlay .auth-modal {
+    width: 100% !important;
+    height: var(--auth-visual-height, 100dvh) !important;
+    max-height: var(--auth-visual-height, 100dvh) !important;
+  }
+  #authOverlay .auth-form-area {
+    height: 100% !important;
+    padding: max(54px, calc(env(safe-area-inset-top) + 42px)) 16px max(20px, env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+  }
+  #authOverlay #formCadastro .stepper {
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+  }
+  #authOverlay.keyboard-open .auth-form-area {
+    justify-content: flex-start !important;
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+    padding-bottom: 72px !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+  }
+  #authOverlay.keyboard-open .auth-form-area::-webkit-scrollbar { display: none !important; }
+  #authOverlay[data-auth-screen="formCadastro"].keyboard-open .auth-signup-heading {
+    display: none !important;
+  }
+  #authOverlay[data-auth-screen="formCadastro"].keyboard-open #formCadastro .stepper {
+    margin-bottom: 12px !important;
+  }
+}
+
 
 /* V34 — avisos centrais, e-mail duplicado e rolagem segura */
 .system-alert-overlay{position:fixed;inset:0;z-index:20050;display:none;place-items:center;padding:18px;background:rgba(3,2,6,.76);overscroll-behavior:contain}.system-alert-overlay.open{display:grid}.system-alert-card{width:min(430px,100%);display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;padding:22px;border:1px solid rgba(190,112,255,.35);border-radius:0;background:#0d0813;box-shadow:0 28px 80px rgba(0,0,0,.58)}.system-alert-icon{width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(190,112,255,.35);border-radius:0;background:rgba(139,34,238,.12);color:#d7a8ff;font-size:18px;font-weight:900}.system-alert-card.is-error{border-color:rgba(239,68,68,.42)}.system-alert-card.is-error .system-alert-icon{border-color:rgba(239,68,68,.40);background:rgba(239,68,68,.10);color:#ff8c8c}.system-alert-card.is-warning{border-color:rgba(250,204,21,.38)}.system-alert-card.is-warning .system-alert-icon{border-color:rgba(250,204,21,.35);background:rgba(250,204,21,.09);color:#ffe16d}.system-alert-copy strong{display:block;color:#fff;font-size:17px;line-height:1.2}.system-alert-copy p{margin-top:7px;color:#b9abc5;font-size:13.5px;line-height:1.55}.system-alert-close{grid-column:1/-1;min-height:44px;border:1px solid rgba(190,112,255,.28);border-radius:0;background:#15101b;color:#f2e9fa;font:800 13px 'Geist',sans-serif;cursor:pointer}.system-alert-close:hover{border-color:rgba(213,158,255,.52);background:#1b1224}.field-error{display:none;margin-top:7px;color:#ff8c8c;font-size:11.5px;line-height:1.45;font-weight:650}.field-error.show{display:block}#cadEmailField.has-error input{border-color:rgba(239,68,68,.72)!important;box-shadow:0 0 0 3px rgba(239,68,68,.10)!important}#authCategoryPanel{overscroll-behavior:contain!important;touch-action:pan-y}html.vyxora-safe-layer-open,body.vyxora-safe-layer-open{overflow:hidden!important;overscroll-behavior:none!important}@media(max-width:520px){.system-alert-overlay{padding:10px}.system-alert-card{padding:18px;grid-template-columns:40px minmax(0,1fr)}.system-alert-icon{width:40px;height:40px}}
@@ -8720,4 +8827,92 @@ body.auth-performance-mode .notif-item.compact.out {
   #authOverlay[data-auth-screen="formCadastro"].keyboard-open .auth-signup-heading .auth-form-sub {
     margin-bottom: 14px !important;
   }
+}
+
+/* V40.1 — regras finais do layout sem rolagem */
+#authOverlay.auth-overlay { overflow: hidden !important; scrollbar-width: none !important; }
+#authOverlay.auth-overlay::-webkit-scrollbar { display: none !important; }
+#authOverlay .auth-modal {
+  height: min(720px, calc(100dvh - 32px)) !important;
+  max-height: calc(100dvh - 32px) !important;
+  overflow: hidden !important;
+}
+#authOverlay .auth-form-area {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  padding: 34px clamp(24px, 6vw, 58px) !important;
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+}
+#authOverlay .auth-form-area::-webkit-scrollbar { display: none !important; }
+#authOverlay .auth-feedback:empty { display: none !important; }
+#authOverlay #formCadastro .stepper {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  align-items: end !important;
+  gap: 14px !important;
+  width: min(100%,420px) !important;
+  margin: 0 auto 24px !important;
+}
+#authOverlay #formCadastro .step-dot {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 29px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+#authOverlay #formCadastro .step-dot::before {
+  position: absolute !important;
+  inset: 0 0 auto !important;
+  display: block !important;
+  color: #6f6279 !important;
+  font: 800 9px/1 'JetBrains Mono',ui-monospace,monospace !important;
+  text-align: center !important;
+}
+#authOverlay #formCadastro .step-dot::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: auto 0 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 3px !important;
+  background: #281c31 !important;
+  box-shadow: none !important;
+}
+#authOverlay #formCadastro .step-dot.active::before,
+#authOverlay #formCadastro .step-dot.done::before { color: #ead7fa !important; }
+#authOverlay #formCadastro .step-dot.active::after {
+  background: linear-gradient(90deg,#a855f7,#c084fc) !important;
+  box-shadow: 0 0 12px rgba(168,85,247,.38) !important;
+}
+#authOverlay #formCadastro .step-dot.done::after { background: #7c3aed !important; }
+@media (max-width:620px) {
+  #authOverlay.auth-overlay { padding: 0 !important; }
+  #authOverlay .auth-modal {
+    width: 100% !important;
+    height: var(--auth-visual-height,100dvh) !important;
+    max-height: var(--auth-visual-height,100dvh) !important;
+  }
+  #authOverlay .auth-form-area {
+    height: 100% !important;
+    padding: max(54px,calc(env(safe-area-inset-top) + 42px)) 16px max(20px,env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+  }
+  #authOverlay #formCadastro .stepper { gap: 10px !important; margin-bottom: 20px !important; }
+  #authOverlay.keyboard-open .auth-form-area {
+    justify-content: flex-start !important;
+    padding-top: max(12px,env(safe-area-inset-top)) !important;
+    padding-bottom: 72px !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+  }
+  #authOverlay.keyboard-open .auth-form-area::-webkit-scrollbar { display: none !important; }
+  #authOverlay[data-auth-screen="formCadastro"].keyboard-open .auth-signup-heading { display: none !important; }
+  #authOverlay[data-auth-screen="formCadastro"].keyboard-open #formCadastro .stepper { margin-bottom: 12px !important; }
 }
