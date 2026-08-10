@@ -678,6 +678,7 @@ async function init() {
       if (!ok) await db.auth.signOut();
     }
   } catch (e) { console.error('Erro ao verificar sessão:', e); }
+  if (!state.user && window.matchMedia('(max-width: 620px)').matches) abrirBoasVindasMobile();
 }
 
 function getPublicSlug() {
@@ -1273,6 +1274,7 @@ document.addEventListener('focusin', function(e) {
 function openAuth(mode) {
   const overlay = $('authOverlay');
   if (!overlay) return;
+  overlay.classList.remove('mobile-welcome-open', 'mobile-welcome-leaving');
 
   // Garante o acabamento quadrado mesmo em WebViews Android que mantêm
   // regras antigas do CSS em cache ou calculam :not() com especificidade diferente.
@@ -1295,7 +1297,7 @@ function openAuth(mode) {
 
 function closeAuth() {
   const overlay = $('authOverlay');
-  if (overlay) overlay.classList.remove('open');
+  if (overlay) overlay.classList.remove('open', 'mobile-welcome-open', 'mobile-welcome-leaving');
 
   document.documentElement.classList.remove('auth-performance-mode');
   document.body.classList.remove('auth-performance-mode');
@@ -1305,6 +1307,34 @@ function closeAuth() {
   overlay?.style.removeProperty('--auth-visual-height');
   overlay?.style.removeProperty('--auth-visual-top');
   $('notifStack')?.style.removeProperty('--auth-toast-bottom');
+}
+
+function abrirBoasVindasMobile() {
+  if (window.innerWidth > 620 || getPublicSlug() || state.user) return;
+  const overlay = $('authOverlay');
+  if (!overlay) return;
+  esconderTelasAuth();
+  overlay.classList.add('open', 'mobile-welcome-open');
+  document.documentElement.classList.add('auth-performance-mode');
+  document.body.classList.add('auth-performance-mode');
+  VYXORA_SCROLL.lock('auth');
+}
+
+function continuarBoasVindasMobile() {
+  const overlay = $('authOverlay');
+  overlay?.classList.add('mobile-welcome-leaving');
+  setTimeout(() => {
+    overlay?.classList.remove('mobile-welcome-open', 'mobile-welcome-leaving');
+    showLogin();
+    requestAnimationFrame(syncAuthVisualViewport);
+  }, 260);
+}
+
+function pularBoasVindasMobile() {
+  const overlay = $('authOverlay');
+  overlay?.classList.remove('mobile-welcome-open', 'mobile-welcome-leaving');
+  showLogin();
+  requestAnimationFrame(syncAuthVisualViewport);
 }
 
 function showLogin() {
@@ -3400,6 +3430,7 @@ function voltarDaPublica() {
 
 Object.assign(window, {
   openAuth, closeAuth, showLogin, showCadastro,
+  abrirBoasVindasMobile, continuarBoasVindasMobile, pularBoasVindasMobile,
   goStep1, goStep2, goStep3, autoSlug,
   loginComSenha, finalizarCadastro, logout,
   showForgotPassword, confirmarEmailCadastro, reenviarCodigoCadastro, voltarCadastroEmail,
