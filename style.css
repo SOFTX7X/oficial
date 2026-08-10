@@ -10397,3 +10397,57 @@ body.auth-performance-mode .notif-item.compact.out {
   from { opacity:0; transform:translateX(-50%) translateY(-12px) scale(1.05); }
   to { opacity:.9; transform:translateX(-50%) translateY(0) scale(1.015); }
 }
+
+/* V53 — arte compartilhada pelas telas de código */
+@media (max-width:620px) {
+  #authOverlay[data-auth-screen="formVerifyEmail"] .auth-mobile-code-art,
+  #authOverlay[data-auth-screen="formRecoveryCode"] .auth-mobile-code-art {
+    position:absolute;
+    top:0;
+    left:50%;
+    z-index:1;
+    display:block;
+    width:100%;
+    height:43%;
+    max-width:none;
+    object-fit:cover;
+    object-position:center 54%;
+    transform:translateX(-50%) scale(1.02);
+    opacity:.92;
+    pointer-events:none;
+    -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 57%,rgba(0,0,0,.7) 76%,transparent 100%);
+    mask-image:linear-gradient(to bottom,#000 0%,#000 57%,rgba(0,0,0,.7) 76%,transparent 100%);
+    animation:authCodeArtIn .72s cubic-bezier(.16,1,.3,1) both;
+  }
+  #authOverlay[data-auth-screen="formVerifyEmail"]:not(.keyboard-open) .auth-form-area,
+  #authOverlay[data-auth-screen="formRecoveryCode"]:not(.keyboard-open) .auth-form-area {
+    align-items:flex-end !important;
+    justify-content:center !important;
+    padding-top:300px !important;
+    padding-bottom:max(20px,calc(env(safe-area-inset-bottom) + 12px)) !important;
+  }
+  #authOverlay[data-auth-screen="formVerifyEmail"] .auth-flow-icon,
+  #authOverlay[data-auth-screen="formRecoveryCode"] .auth-flow-icon {
+    display:none !important;
+  }
+  #authOverlay[data-auth-screen="formVerifyEmail"] #formVerifyEmail,
+  #authOverlay[data-auth-screen="formRecoveryCode"] #formRecoveryCode {
+    position:relative;
+    z-index:2;
+  }
+  #authOverlay[data-auth-screen="formVerifyEmail"].keyboard-open .auth-mobile-code-art,
+  #authOverlay[data-auth-screen="formRecoveryCode"].keyboard-open .auth-mobile-code-art {
+    opacity:.92 !important;
+    transform:translateX(-50%) translateY(-88px) scale(1.02) !important;
+    transition:transform .22s cubic-bezier(.16,1,.3,1) !important;
+  }
+  #authOverlay[data-auth-screen="formVerifyEmail"].keyboard-open .auth-form-area,
+  #authOverlay[data-auth-screen="formRecoveryCode"].keyboard-open .auth-form-area {
+    transform:translateY(-16px) !important;
+    transition:transform .22s cubic-bezier(.16,1,.3,1) !important;
+  }
+}
+@keyframes authCodeArtIn {
+  from { opacity:0; transform:translateX(-50%) translateY(-12px) scale(1.06); }
+  to { opacity:.92; transform:translateX(-50%) translateY(0) scale(1.02); }
+}
