@@ -6,6 +6,7 @@
 .vx-fin-head h1 { margin:0; color:#F7F3FA; font:800 clamp(30px,4vw,48px)/1.02 'Inter',sans-serif; letter-spacing:-.045em; }
 .vx-fin-head h1 em { color:var(--vx-fin-lilac); font-style:normal; }
 .vx-fin-head p { margin:10px 0 0; color:#9C929F; font-size:14px; }
+.vx-fin-head-actions { position:relative; z-index:1; display:flex; align-items:center; gap:9px; flex:0 0 auto; }
 .vx-charge-primary,.vx-charge-secondary { position:relative; z-index:1; min-height:48px; padding:0 20px; border-radius:8px; font:750 13px/1 'Inter',sans-serif; cursor:pointer; }
 .vx-charge-primary { color:white; border:1px solid rgba(212,154,255,.52); background:linear-gradient(100deg,#A52EFF,#6F1BB0); box-shadow:0 12px 32px rgba(139,36,214,.28),inset 0 1px rgba(255,255,255,.22); }
 .vx-charge-primary:hover { transform:translateY(-1px); box-shadow:0 16px 38px rgba(139,36,214,.38),inset 0 1px rgba(255,255,255,.24); }
@@ -73,12 +74,24 @@
 .vx-charge-modal-head { display:flex; align-items:center; justify-content:space-between; padding:24px 26px 17px; }
 .vx-charge-modal-head span { color:#D49AFF; font:700 10px/1 'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.16em; }
 .vx-charge-modal-head h2 { margin:7px 0 0; color:#F7F3FA; font:750 26px/1 'Inter',sans-serif; }
+.vx-charge-modal-head p { max-width:470px; margin:8px 0 0; color:#8f8399; font-size:12px; line-height:1.45; }
 .vx-charge-modal-head button,.vx-doc-shell>header button { width:42px; height:42px; border:1px solid #352641; border-radius:6px; color:#A99DB2; background:#100A16; font-size:25px; cursor:pointer; }
 .vx-charge-progress { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:0 26px 18px; }.vx-charge-progress i { height:2px; background:#2b2032; }.vx-charge-progress i.active { background:#A52EFF; box-shadow:0 0 12px rgba(165,46,255,.7); }
 .vx-charge-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; padding:4px 26px 24px; }
 .vx-field-wide { grid-column:1/-1; }.vx-field label { display:flex; justify-content:space-between; margin-bottom:8px; color:#AFA3B8; font:700 10px/1 'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.1em; }.vx-field label small { color:#675d6d; text-transform:none; letter-spacing:0; }
 .vx-field input,.vx-field select,.vx-field textarea { width:100%; min-height:48px; padding:0 13px; border:1px solid #30233b; border-radius:6px; outline:none; color:#F7F3FA; background:#07040B; font:500 13px/1.4 'Inter',sans-serif; }.vx-field textarea { padding-top:12px; resize:vertical; }.vx-field input:focus,.vx-field select:focus,.vx-field textarea:focus { border-color:#A52EFF; box-shadow:0 0 0 3px rgba(165,46,255,.1); }
 .vx-charge-modal-foot { display:flex; justify-content:flex-end; gap:9px; padding:17px 26px 24px; border-top:1px solid #211629; }
+.vx-pix-settings-modal { width:min(680px,100%); }
+
+@media (min-width:769px) {
+  .vx-charge-modal { max-height:none; overflow:hidden; }
+  .vx-charge-modal-head { padding:20px 24px 14px; }
+  .vx-charge-progress { padding:0 24px 14px; }
+  .vx-charge-form { gap:12px 14px; padding:2px 24px 18px; }
+  .vx-field label { margin-bottom:6px; }
+  .vx-field input,.vx-field select,.vx-field textarea { min-height:44px; }
+  .vx-charge-modal-foot { padding:14px 24px 18px; }
+}
 
 .vx-doc-shell { width:min(820px,100%); max-height:calc(100dvh - 30px); overflow:auto; border:1px solid rgba(165,46,255,.35); border-radius:9px; background:#09060d; box-shadow:0 30px 100px rgba(0,0,0,.75); }.vx-doc-shell>header,.vx-doc-shell>footer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 18px; border-bottom:1px solid #281d30; }.vx-doc-shell>footer { justify-content:flex-end; border-top:1px solid #281d30; border-bottom:0; }.vx-doc-shell>header span,.vx-doc-shell>header strong { display:block; }.vx-doc-shell>header span { color:#D49AFF; font-size:10px; text-transform:uppercase; letter-spacing:.12em; }.vx-doc-shell>header strong { margin-top:4px; color:#F7F3FA; }.vx-doc-body { padding:20px; }
 .vx-document { width:100%; max-width:780px; margin:auto; border:1px solid #2A2033; border-radius:10px; overflow:hidden; color:#F7F3FA; background:#0B0710; font-family:'Inter',Arial,sans-serif; }.vx-document-top { display:flex; align-items:center; justify-content:space-between; padding:22px 25px; background:linear-gradient(100deg,#5D168A,#8B24D6); }.vx-document-top span,.vx-document-top strong { display:block; }.vx-document-top span { font-size:20px; font-weight:850; letter-spacing:.12em; }.vx-document-top strong { margin-top:5px; font-size:9px; letter-spacing:.18em; }.vx-document-top b { font:700 11px/1 'JetBrains Mono',monospace; }.vx-document-banner { display:flex; align-items:center; gap:12px; margin:18px 22px 0; padding:15px; border:1px solid #30233a; border-radius:7px; }.vx-document-banner>span { display:grid; place-items:center; width:35px; height:35px; border:1px solid #A52EFF; border-radius:6px; color:#D49AFF; }.vx-document-banner strong,.vx-document-banner small { display:block; }.vx-document-banner small { margin-top:4px; color:#8f8399; }.vx-document-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:14px; padding:14px 22px; }.vx-document section { padding:16px; border:1px solid #2A2033; border-radius:7px; }.vx-document h3 { margin:0 0 13px; color:#D49AFF; font-size:11px; text-transform:uppercase; letter-spacing:.1em; }.vx-document dl { display:grid; grid-template-columns:110px 1fr; gap:9px; margin:0; font-size:11px; }.vx-document dt { color:#8f8399; }.vx-document dd { margin:0; text-align:right; font-weight:650; }.vx-document-value strong { display:block; color:#fff; font-size:31px; }.vx-document-value small { display:block; margin-top:8px; color:#8f8399; }.vx-document-service { margin:0 22px 14px; }.vx-document-service div { display:flex; justify-content:space-between; gap:16px; font-size:12px; }.vx-document-pay { display:grid; grid-template-columns:1fr 190px; gap:14px; padding:0 22px 20px; }.vx-document-pay section>span,.vx-document-pay section>strong,.vx-document-pay section>small { display:block; }.vx-document-pay section>span { margin-top:10px; color:#8f8399; font-size:10px; }.vx-document-pay section>strong { margin-top:3px; font-size:12px; }.vx-document-pay section>small { margin-top:3px; color:#B5AABB; word-break:break-all; }.vx-document-pay a { display:block; margin-top:14px; padding:11px; border-radius:5px; color:white; background:#8B24D6; text-align:center; text-decoration:none; font-size:11px; font-weight:750; }.vx-document-qr { display:grid; place-items:center; background:#fff; }.vx-document-qr small { color:#55485f!important; }.vx-document-proof { margin:0 22px 20px; }.vx-document-proof span,.vx-document-proof strong,.vx-document-proof small { display:block; }.vx-document-proof span { color:#8f8399; font-size:10px; }.vx-document-proof strong { margin:5px 0 12px; color:#D49AFF; font-size:20px; }.vx-document-proof small { color:#AAA0B1; }.vx-document>footer { display:flex; justify-content:center; padding:14px; border-top:1px solid #271c2f; color:#74697c; font-size:9px; }
@@ -90,7 +103,7 @@
 @media (max-width:768px) {
   .vx-finance-view { padding-bottom:104px!important; }
   .vx-fin-head { align-items:flex-start; min-height:170px; padding:24px 18px; margin:0 -2px 14px; }
-  .vx-fin-head .vx-charge-primary { display:none; }
+  .vx-fin-head-actions { display:none; }
   .vx-fin-head h1 { font-size:31px; max-width:300px; }.vx-fin-head p { max-width:310px; line-height:1.5; }
   .vx-fin-local-note { align-items:flex-start; flex-direction:column; gap:5px; margin:0 0 12px; }
   .vx-fin-tabs { width:100%; overflow-x:auto; scrollbar-width:none; }.vx-fin-tabs::-webkit-scrollbar { display:none; }.vx-fin-tabs button { flex:1 0 auto; padding:0 14px; }

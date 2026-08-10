@@ -31,6 +31,43 @@
   const empresaId = () => window.state?.empresa?.id || '';
   const storageKey = id => LOCAL_PREFIX + id;
 
+  const semAcentos = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+  const campoPix = nome => String(window.state?.empresa?.[nome] || '').trim();
+  const pixConfigurado = () => Boolean(campoPix('pix_chave') && campoPix('pix_nome_recebedor') && campoPix('pix_cidade'));
+  const tlvPix = (id, value) => `${id}${String(value.length).padStart(2, '0')}${value}`;
+
+  function normalizarChavePix(tipo, valor) {
+    const texto = String(valor || '').trim();
+    if (tipo === 'cpf' || tipo === 'cnpj') return texto.replace(/\D/g, '');
+    if (tipo === 'email') return texto.toLowerCase();
+    if (tipo === 'telefone') {
+      const digitos = texto.replace(/\D/g, '');
+      return `+${digitos.startsWith('55') ? digitos : `55${digitos}`}`;
+    }
+    return texto;
+  }
+
+  function crc16Pix(texto) {
+    let crc = 0xFFFF;
+    for (let i = 0; i < texto.length; i += 1) {
+      crc ^= texto.charCodeAt(i) << 8;
+      for (let bit = 0; bit < 8; bit += 1) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+  }
+
+  function gerarPixCopiaCola(valor, codigo) {
+    const chave = campoPix('pix_chave');
+    const nome = semAcentos(campoPix('pix_nome_recebedor')).replace(/[^A-Z0-9 ]/g, '').slice(0, 25) || 'RECEBEDOR';
+    const cidade = semAcentos(campoPix('pix_cidade')).replace(/[^A-Z0-9 ]/g, '').slice(0, 15) || 'BRASIL';
+    const txid = semAcentos(codigo).replace(/[^A-Z0-9]/g, '').slice(0, 25) || '***';
+    const conta = tlvPix('00', 'BR.GOV.BCB.PIX') + tlvPix('01', chave);
+    const adicionais = tlvPix('05', txid);
+    const base = tlvPix('00', '01') + tlvPix('26', conta) + tlvPix('52', '0000') + tlvPix('53', '986') +
+      tlvPix('54', Number(valor).toFixed(2)) + tlvPix('58', 'BR') + tlvPix('59', nome) + tlvPix('60', cidade) + tlvPix('62', adicionais) + '6304';
+    return base + crc16Pix(base);
+  }
+
   function lerLocal(id) {
     try { return JSON.parse(localStorage.getItem(storageKey(id)) || '[]'); }
     catch (_) { return []; }
@@ -78,7 +115,7 @@
     view.innerHTML = `
       <header class="vx-fin-head">
         <div><span class="vx-fin-kicker">Pagamentos e recebidos</span><h1>Financeiro <em>sem complicação.</em></h1><p>Crie cobranças, confirme pagamentos e entregue recibos.</p></div>
-        <button class="vx-charge-primary" type="button" onclick="abrirNovaCobranca()"><span>＋</span> Nova cobrança</button>
+        <div class="vx-fin-head-actions"><button class="vx-charge-secondary" type="button" onclick="abrirConfiguracaoPix()">Configurar PIX</button><button class="vx-charge-primary" type="button" onclick="abrirNovaCobranca()"><span>＋</span> Nova cobrança</button></div>
       </header>
       <div class="vx-fin-local-note" id="vxFinLocalNote" hidden><strong>Modo de teste local</strong><span>A estrutura visual está ativa. Execute o arquivo SQL incluído no projeto para compartilhar cobranças entre dispositivos.</span></div>
       <nav class="vx-fin-tabs" aria-label="Seções financeiras">
@@ -103,6 +140,7 @@
       </section>
       <button class="vx-mobile-new-charge" type="button" onclick="abrirNovaCobranca()"><span>＋</span> Nova cobrança</button>`;
     criarModalCobranca();
+    criarModalConfiguracaoPix();
     criarVisualizadorDocumento();
   }
 
@@ -121,13 +159,71 @@
             <div class="vx-field"><label>Profissional</label><input id="vxCobProfissional" placeholder="Quem realizou"></div>
             <div class="vx-field"><label>Valor</label><input id="vxCobValor" type="number" min="0" step="0.01" placeholder="0,00"></div>
             <div class="vx-field"><label>Vencimento</label><input id="vxCobVencimento" type="date"></div>
-            <div class="vx-field vx-field-wide"><label>Chave PIX</label><input id="vxCobPixChave" placeholder="CPF, telefone, e-mail ou chave aleatória"></div>
-            <div class="vx-field vx-field-wide"><label>PIX Copia e Cola <small>opcional</small></label><textarea id="vxCobPixCodigo" rows="3" placeholder="Cole o código PIX gerado pelo seu banco"></textarea></div>
-            <div class="vx-field vx-field-wide"><label>Link de pagamento <small>opcional</small></label><input id="vxCobLinkPagamento" placeholder="https://..."></div>
           </div>
           <div class="vx-charge-modal-foot"><button class="vx-charge-secondary" onclick="fecharNovaCobranca()">Cancelar</button><button class="vx-charge-primary" id="vxSaveCharge" onclick="salvarNovaCobranca()">Criar cobrança</button></div>
         </section>
       </div>`);
+  }
+
+  function criarModalConfiguracaoPix() {
+    if ($f('vxPixSettingsModal')) return;
+    document.body.insertAdjacentHTML('beforeend', `
+      <div class="vx-charge-overlay" id="vxPixSettingsModal" aria-hidden="true">
+        <section class="vx-charge-modal vx-pix-settings-modal" role="dialog" aria-modal="true" aria-labelledby="vxPixSettingsTitle">
+          <div class="vx-charge-modal-head"><div><span>Recebimento</span><h2 id="vxPixSettingsTitle">Configurar PIX</h2><p>Cadastre uma vez. As próximas cobranças serão geradas automaticamente.</p></div><button type="button" onclick="fecharConfiguracaoPix()" aria-label="Fechar">×</button></div>
+          <div class="vx-charge-form">
+            <div class="vx-field"><label>Tipo de chave</label><select id="vxPixTipo"><option value="cpf">CPF</option><option value="cnpj">CNPJ</option><option value="telefone">Telefone</option><option value="email">E-mail</option><option value="aleatoria">Chave aleatória</option></select></div>
+            <div class="vx-field"><label>Chave PIX</label><input id="vxPixChave" autocomplete="off" placeholder="Informe sua chave"></div>
+            <div class="vx-field"><label>Nome do recebedor</label><input id="vxPixNome" maxlength="25" placeholder="Como consta no banco"></div>
+            <div class="vx-field"><label>Cidade</label><input id="vxPixCidade" maxlength="15" placeholder="Ex.: Manaus"></div>
+          </div>
+          <div class="vx-charge-modal-foot"><button class="vx-charge-secondary" onclick="fecharConfiguracaoPix()">Cancelar</button><button class="vx-charge-primary" id="vxSavePixSettings" onclick="salvarConfiguracaoPix()">Salvar configuração</button></div>
+        </section>
+      </div>`);
+  }
+
+  function abrirConfiguracaoPix() {
+    montarEstruturaFinanceira();
+    $f('vxPixTipo').value = campoPix('pix_tipo') || 'aleatoria';
+    $f('vxPixChave').value = campoPix('pix_chave');
+    $f('vxPixNome').value = campoPix('pix_nome_recebedor');
+    $f('vxPixCidade').value = campoPix('pix_cidade');
+    $f('vxPixSettingsModal').classList.add('open');
+    $f('vxPixSettingsModal').setAttribute('aria-hidden', 'false');
+    window.VYXORA_SCROLL?.lock('pix-settings-modal');
+  }
+
+  function fecharConfiguracaoPix() {
+    $f('vxPixSettingsModal')?.classList.remove('open');
+    $f('vxPixSettingsModal')?.setAttribute('aria-hidden', 'true');
+    window.VYXORA_SCROLL?.unlock('pix-settings-modal');
+  }
+
+  async function salvarConfiguracaoPix() {
+    const tipo = $f('vxPixTipo')?.value || 'aleatoria';
+    const alteracoes = {
+      pix_tipo: tipo, pix_chave: normalizarChavePix(tipo, $f('vxPixChave')?.value),
+      pix_nome_recebedor: $f('vxPixNome')?.value.trim() || '', pix_cidade: $f('vxPixCidade')?.value.trim() || ''
+    };
+    if (!alteracoes.pix_chave) return window.toast?.('Informe sua chave PIX.', 'err');
+    if (tipo === 'cpf' && alteracoes.pix_chave.length !== 11) return window.toast?.('O CPF da chave PIX precisa ter 11 números.', 'err');
+    if (tipo === 'cnpj' && alteracoes.pix_chave.length !== 14) return window.toast?.('O CNPJ da chave PIX precisa ter 14 números.', 'err');
+    if (tipo === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(alteracoes.pix_chave)) return window.toast?.('Informe um e-mail PIX válido.', 'err');
+    if (tipo === 'telefone' && !/^\+55\d{10,11}$/.test(alteracoes.pix_chave)) return window.toast?.('Informe um telefone PIX brasileiro com DDD.', 'err');
+    if (!alteracoes.pix_nome_recebedor) return window.toast?.('Informe o nome do recebedor.', 'err');
+    if (!alteracoes.pix_cidade) return window.toast?.('Informe a cidade do recebedor.', 'err');
+    const btn = $f('vxSavePixSettings');
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+    try {
+      const { data, error } = await window.db.from('agenda_empresas').update(alteracoes).eq('id', empresaId()).select('*').single();
+      if (error) throw error;
+      window.state.empresa = data;
+      fecharConfiguracaoPix();
+      window.showNotif?.('PIX configurado', 'Agora suas cobranças serão geradas automaticamente.', 'ok', 4000);
+    } catch (error) {
+      console.error(error);
+      window.toast?.('Não foi possível salvar. Execute a atualização PIX no Supabase.', 'err');
+    } finally { if (btn) { btn.disabled = false; btn.textContent = 'Salvar configuração'; } }
   }
 
   function criarVisualizadorDocumento() {
@@ -137,11 +233,16 @@
 
   function abrirNovaCobranca() {
     montarEstruturaFinanceira();
+    if (!pixConfigurado()) {
+      window.toast?.('Configure seu PIX antes de criar a primeira cobrança.', 'warn');
+      abrirConfiguracaoPix();
+      return;
+    }
     const select = $f('vxCobAgendamento');
     const cobrados = new Set((window.state?.cobrancas || []).filter(c => c.status !== 'cancelado' && c.agendamento_id).map(c => String(c.agendamento_id)));
     const agendamentos = (window.state?.agendamentos || []).filter(a => a.status !== 'Excluído' && !cobrados.has(String(a.id)));
     select.innerHTML = '<option value="">Cobrança sem agendamento</option>' + agendamentos.map(a => `<option value="${esc(a.id)}">${esc(a.cliente_nome)} · ${esc(a.servico_nome || 'Serviço')} · ${moeda(a.valor)}</option>`).join('');
-    ['vxCobCliente','vxCobWhatsapp','vxCobServico','vxCobProfissional','vxCobValor','vxCobPixChave','vxCobPixCodigo','vxCobLinkPagamento'].forEach(id => { if ($f(id)) $f(id).value = ''; });
+    ['vxCobCliente','vxCobWhatsapp','vxCobServico','vxCobProfissional','vxCobValor'].forEach(id => { if ($f(id)) $f(id).value = ''; });
     $f('vxCobVencimento').value = addDias(2);
     $f('vxChargeModal').classList.add('open');
     $f('vxChargeModal').setAttribute('aria-hidden', 'false');
@@ -174,12 +275,13 @@
     if (!(valor > 0)) return window.toast?.('Informe um valor maior que zero.', 'err');
     const agendamentoId = $f('vxCobAgendamento')?.value || null;
     if (agendamentoId && (window.state?.cobrancas || []).some(c => String(c.agendamento_id) === String(agendamentoId) && c.status !== 'cancelado')) return window.toast?.('Este agendamento já possui uma cobrança ativa.', 'err');
+    const codigo = gerarCodigo('COB');
     const registro = {
-      empresa_id: empresaId(), agendamento_id: agendamentoId, codigo: gerarCodigo('COB'), public_token: gerarToken(),
+      empresa_id: empresaId(), agendamento_id: agendamentoId, codigo, public_token: gerarToken(),
       cliente_nome: cliente, cliente_whatsapp: $f('vxCobWhatsapp')?.value.trim() || '', servico_nome: servico,
       profissional_nome: $f('vxCobProfissional')?.value.trim() || '', valor, vencimento: $f('vxCobVencimento')?.value || addDias(2),
-      status: 'pendente', forma_pagamento: 'pix', pix_chave: $f('vxCobPixChave')?.value.trim() || '',
-      pix_copia_cola: $f('vxCobPixCodigo')?.value.trim() || '', link_pagamento: $f('vxCobLinkPagamento')?.value.trim() || '',
+      status: 'pendente', forma_pagamento: 'pix', pix_chave: campoPix('pix_chave'),
+      pix_copia_cola: gerarPixCopiaCola(valor, codigo), link_pagamento: '',
       criado_em: new Date().toISOString(), atualizado_em: new Date().toISOString()
     };
     const btn = $f('vxSaveCharge');
@@ -286,7 +388,7 @@
     const { cobranca, tipo } = documentoAtual;
     const popup = window.open('', '_blank', 'width=920,height=1000');
     if (!popup) return window.toast?.('Permita a abertura da janela para salvar o PDF.', 'warn');
-    popup.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(tipo === 'recibo' ? cobranca.recibo_codigo : cobranca.codigo)}</title><link rel="stylesheet" href="${location.origin}${location.pathname.replace(/[^/]*$/, '')}financeiro-cobrancas.css?v=20260810-1"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script></head><body class="vx-print-page">${documentoHTML(cobranca, tipo, false)}<script>window.onload=function(){var t=document.getElementById('vxDocumentQr');if(t&&window.QRCode)new QRCode(t,{text:${JSON.stringify(cobranca.pix_copia_cola || cobranca.link_pagamento || linkPublico(cobranca))},width:132,height:132,colorDark:'#07030D',colorLight:'#ffffff'});setTimeout(function(){window.print()},350)}<\/script></body></html>`);
+    popup.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(tipo === 'recibo' ? cobranca.recibo_codigo : cobranca.codigo)}</title><link rel="stylesheet" href="${location.origin}${location.pathname.replace(/[^/]*$/, '')}financeiro-cobrancas.css?v=20260810-2"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script></head><body class="vx-print-page">${documentoHTML(cobranca, tipo, false)}<script>window.onload=function(){var t=document.getElementById('vxDocumentQr');if(t&&window.QRCode)new QRCode(t,{text:${JSON.stringify(cobranca.pix_copia_cola || cobranca.link_pagamento || linkPublico(cobranca))},width:132,height:132,colorDark:'#07030D',colorLight:'#ffffff'});setTimeout(function(){window.print()},350)}<\/script></body></html>`);
     popup.document.close();
   }
 
@@ -294,7 +396,7 @@
     const status = statusReal(c);
     if (status === 'pago') return `<button class="vx-action primary" onclick="abrirDocumentoFinanceiro('${esc(c.id)}','recibo')">Ver recibo</button><button class="vx-action" onclick="abrirDocumentoFinanceiro('${esc(c.id)}','cobranca')">Cobrança</button>`;
     if (status === 'cancelado') return `<button class="vx-action" onclick="abrirDocumentoFinanceiro('${esc(c.id)}','cobranca')">Visualizar</button>`;
-    return `<button class="vx-action primary" onclick="confirmarPagamentoCobranca('${esc(c.id)}')">Confirmar pagamento</button><button class="vx-action" onclick="abrirDocumentoFinanceiro('${esc(c.id)}','cobranca')">Ver cobrança</button><button class="vx-action icon" onclick="compartilharCobranca('${esc(c.id)}')" aria-label="Compartilhar">↗</button><button class="vx-action icon danger" onclick="cancelarCobranca('${esc(c.id)}')" aria-label="Cancelar">×</button>`;
+    return `<button class="vx-action primary" onclick="confirmarPagamentoCobranca('${esc(c.id)}')">Confirmar pagamento</button><button class="vx-action" onclick="abrirDocumentoFinanceiro('${esc(c.id)}','cobranca')">Ver cobrança</button><button class="vx-action" onclick="copiarLinkCobranca('${esc(c.id)}')">Copiar link</button><button class="vx-action icon" onclick="compartilharCobranca('${esc(c.id)}')" aria-label="Compartilhar no WhatsApp">↗</button><button class="vx-action icon danger" onclick="cancelarCobranca('${esc(c.id)}')" aria-label="Cancelar">×</button>`;
   }
 
   function cardCobranca(c) {
@@ -339,6 +441,11 @@
     window.open(`https://wa.me/${tel}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
   }
 
+  function copiarLinkCobranca(id) {
+    const c = (window.state?.cobrancas || []).find(item => String(item.id) === String(id));
+    if (c) copiarTexto(linkPublico(c), 'Link de pagamento copiado.');
+  }
+
   function isPublicChargeRoute() { return location.hash.startsWith('#cobranca/'); }
   async function loadPublicChargeRoute() {
     const token = location.hash.replace('#cobranca/','').trim();
@@ -360,6 +467,9 @@
   window.fecharNovaCobranca = fecharNovaCobranca;
   window.preencherCobrancaPorAgendamento = preencherCobrancaPorAgendamento;
   window.salvarNovaCobranca = salvarNovaCobranca;
+  window.abrirConfiguracaoPix = abrirConfiguracaoPix;
+  window.fecharConfiguracaoPix = fecharConfiguracaoPix;
+  window.salvarConfiguracaoPix = salvarConfiguracaoPix;
   window.confirmarPagamentoCobranca = confirmarPagamentoCobranca;
   window.cancelarCobranca = cancelarCobranca;
   window.abrirDocumentoFinanceiro = abrirDocumentoFinanceiro;
@@ -368,12 +478,14 @@
   window.imprimirDocumentoFinanceiro = imprimirDocumentoFinanceiro;
   window.mudarAbaFinanceiro = mudarAbaFinanceiro;
   window.compartilharCobranca = compartilharCobranca;
+  window.copiarLinkCobranca = copiarLinkCobranca;
   window.isPublicChargeRoute = isPublicChargeRoute;
   window.loadPublicChargeRoute = loadPublicChargeRoute;
 
   document.addEventListener('DOMContentLoaded', () => {
     montarEstruturaFinanceira();
     $f('vxChargeModal')?.addEventListener('click', event => { if (event.target.id === 'vxChargeModal') fecharNovaCobranca(); });
+    $f('vxPixSettingsModal')?.addEventListener('click', event => { if (event.target.id === 'vxPixSettingsModal') fecharConfiguracaoPix(); });
     $f('vxDocumentModal')?.addEventListener('click', event => { if (event.target.id === 'vxDocumentModal') fecharDocumentoFinanceiro(); });
   });
 })();
