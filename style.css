@@ -2774,6 +2774,7 @@ body.notification-center-open { overflow: hidden; }
    Não altera estrutura, IDs, onclick ou lógica — só apresentação.
 ══════════════════════════════════════════════════════════════ */
 
+@media (min-width: 901px) {
 .sidebar {
   border-radius: 6px;
   border-color: rgba(176,76,255,0.24);
@@ -2913,6 +2914,7 @@ body.notification-center-open { overflow: hidden; }
   background: linear-gradient(90deg, rgba(91,30,145,0.5), rgba(126,34,206,0.5)) !important;
   color: #fff !important;
 }
+} /* fim @media (min-width: 901px) — escopo exclusivo do menu do PC */
 
 /* Menu móvel — inalterado nesta etapa (mantido igual ao anterior) */
 .mobile-menu-body .side-nav-section {
