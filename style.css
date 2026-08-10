@@ -2777,7 +2777,6 @@ body.notification-center-open { overflow: hidden; }
 .sidebar {
   border-radius: 6px;
   border-color: rgba(176,76,255,0.24);
-  position: relative;
 }
 .sidebar::before {
   content: '';
