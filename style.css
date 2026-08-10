@@ -1418,6 +1418,23 @@ a { text-decoration: none; color: inherit; }
     content: ''; width: 4px; height: 4px; background: var(--accent2);
     box-shadow: 0 0 6px rgba(188,99,255,0.7); flex-shrink: 0;
   }
+
+  /* nova composição: cards compactos no topo, gráfico largo, linha inferior */
+  #view-dashboard .dash-stats-top {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  #view-dashboard .dash-stats-top .stats-grid { margin-bottom: 0; display: contents; }
+  #view-dashboard .dash-stats-top .stat-card { padding: 13px; }
+  #view-dashboard .dash-stats-top .stat-icon-badge { width: 26px; height: 26px; font-size: 12px; margin-bottom: 8px; }
+  #view-dashboard .dash-stats-top .stat-value { font-size: 21px; }
+
+  #view-dashboard .dash-bottom-grid {
+    display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; align-items: stretch;
+    margin-top: 16px;
+  }
 }
 
 .apt-list { display: flex; flex-direction: column; gap: 8px; }
