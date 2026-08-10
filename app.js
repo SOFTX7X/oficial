@@ -996,6 +996,19 @@ function authSuccess(message) {
   toast(message, 'ok');
 }
 
+function authCodeStatus(kind, message = '', type = 'info') {
+  const id = kind === 'recovery' ? 'recoveryCodeStatus' : 'verifyCodeStatus';
+  const status = $(id);
+  if (!status) return;
+  status.textContent = String(message || '');
+  status.className = 'auth-code-status' + (message ? ` show ${type}` : '');
+}
+
+function clearAuthCodeStatuses() {
+  authCodeStatus('signup');
+  authCodeStatus('recovery');
+}
+
 function esconderTelasAuth() {
   ['formLogin','formCadastro','formVerifyEmail','formForgotPassword','formRecoveryCode','formNewPassword','authCategoryPanel'].forEach(id => {
     const el = $(id);
@@ -1006,6 +1019,11 @@ function esconderTelasAuth() {
 function mostrarTelaAuth(id) {
   esconderTelasAuth();
   authFeedback();
+  clearAuthCodeStatuses();
+  if (id === 'formVerifyEmail' || id === 'formRecoveryCode') {
+    const operationalNotices = $('notifStack');
+    if (operationalNotices) operationalNotices.innerHTML = '';
+  }
   clearAuthFieldErrors();
   const overlay = $('authOverlay');
   if (overlay) {
@@ -1117,7 +1135,7 @@ async function reenviarCodigoCadastro() {
   const btn = $('btnResendSignup'); if (btn) btn.disabled = true;
   const { error } = await db.auth.resend({ type: 'signup', email });
   if (error) { if (btn) btn.disabled = false; return authFail(mensagemAuth(error, 'Não foi possível reenviar o código.'), 'verifyEmailCode'); }
-  toast('Novo código enviado para seu e-mail.', 'ok');
+  authCodeStatus('signup', 'Novo código enviado. Confira sua caixa de entrada.', 'success');
   iniciarContagemReenvio('btnResendSignup', 60);
 }
 
@@ -1162,8 +1180,8 @@ async function enviarCodigoRecuperacao() {
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) return authFail(payload.error || 'Não foi possível solicitar a recuperação agora.', 'recoveryEmail');
-    toast('Se este e-mail estiver cadastrado, o código chegará em instantes.', 'ok');
     showRecoveryCode(email);
+    authCodeStatus('recovery', 'Se a conta existir, o código chegará em instantes.', 'success');
     iniciarContagemReenvio('btnResendRecovery', 60);
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Enviar código →'; }
@@ -1181,7 +1199,7 @@ async function reenviarCodigoRecuperacao() {
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) return authFail(payload.error || 'Não foi possível solicitar um novo código agora.', 'recoveryCode');
-    toast('Se a conta existir, um novo código chegará em instantes.', 'ok');
+    authCodeStatus('recovery', 'Novo código solicitado. Confira sua caixa de entrada.', 'success');
     iniciarContagemReenvio('btnResendRecovery', 60);
   } finally {
     if (btn && !_resendTimer) btn.disabled = false;
@@ -1464,7 +1482,7 @@ async function goStep2() {
     }
     showVerifyEmail(email);
     iniciarContagemReenvio('btnResendSignup', 60);
-    toast('Conta criada. Digite o código enviado ao seu e-mail.', 'ok');
+    authCodeStatus('signup', 'Código enviado. Confira sua caixa de entrada.', 'success');
   } catch (error) {
     console.error('Erro ao verificar e-mail:', error);
     return authFail('Não foi possível verificar o e-mail. Confira sua conexão e tente novamente.', 'cadEmail');
@@ -1704,7 +1722,7 @@ async function finalizarCadastro() {
 
     showVerifyEmail(email);
     iniciarContagemReenvio('btnResendSignup', 60);
-    toast('Conta criada. Digite o código enviado ao seu e-mail.', 'ok');
+    authCodeStatus('signup', 'Código enviado. Confira sua caixa de entrada.', 'success');
   } catch (e) {
     console.error('Erro em finalizarCadastro:', e);
     toast('Erro inesperado. Tente novamente.', 'err');

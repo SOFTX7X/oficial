@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260809-65">
+<link rel="stylesheet" href="style.css?v=20260810-66">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -407,7 +407,7 @@
         <div class="auth-form-title">Confirme seu e-mail</div>
         <p class="auth-form-sub">Enviamos um código para <strong id="verifyEmailLabel"></strong>.</p>
         <div class="form-gap">
-          <div class="field auth-code-field"><label>Código de confirmação</label><div class="auth-code-segmented" data-code-input="verifyEmailCode"><input id="verifyEmailCode" class="auth-code-input auth-code-native" inputmode="numeric" autocomplete="one-time-code" maxlength="8" aria-label="Código de confirmação"><div class="auth-code-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div></div>
+          <div class="field auth-code-field"><label>Código de confirmação</label><div class="auth-code-segmented" data-code-input="verifyEmailCode"><input id="verifyEmailCode" class="auth-code-input auth-code-native" inputmode="numeric" autocomplete="one-time-code" maxlength="8" aria-label="Código de confirmação"><div class="auth-code-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div><div class="auth-code-status" id="verifyCodeStatus" role="status" aria-live="polite"></div></div>
           <button class="btn btn-primary btn-full" id="btnVerifyEmail" onclick="confirmarEmailCadastro()">Confirmar e continuar</button>
           <button class="btn btn-ghost btn-full" id="btnResendSignup" onclick="reenviarCodigoCadastro()">Reenviar código</button>
         </div>
@@ -428,7 +428,7 @@
         <div class="auth-form-title">Digite o código</div>
         <p class="auth-form-sub">Enviamos um código de recuperação para <strong id="recoveryEmailLabel"></strong>.</p>
         <div class="form-gap">
-          <div class="field auth-code-field"><label>Código de recuperação</label><div class="auth-code-segmented" data-code-input="recoveryCode"><input id="recoveryCode" class="auth-code-input auth-code-native" inputmode="numeric" autocomplete="one-time-code" maxlength="8" aria-label="Código de recuperação"><div class="auth-code-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div></div>
+          <div class="field auth-code-field"><label>Código de recuperação</label><div class="auth-code-segmented" data-code-input="recoveryCode"><input id="recoveryCode" class="auth-code-input auth-code-native" inputmode="numeric" autocomplete="one-time-code" maxlength="8" aria-label="Código de recuperação"><div class="auth-code-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div><div class="auth-code-status" id="recoveryCodeStatus" role="status" aria-live="polite"></div></div>
           <button class="btn btn-primary btn-full" id="btnVerifyRecovery" onclick="validarCodigoRecuperacao()">Validar código</button>
           <button class="btn btn-ghost btn-full" id="btnResendRecovery" onclick="reenviarCodigoRecuperacao()">Reenviar código</button>
         </div>
@@ -1285,6 +1285,6 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script defer src="app.js?v=20260809-63"></script>
+<script defer src="app.js?v=20260809-64"></script>
 </body>
 </html>

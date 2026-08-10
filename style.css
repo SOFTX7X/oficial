@@ -9987,6 +9987,42 @@ body.auth-performance-mode .notif-item.compact.out {
   justify-content: center;
   text-align: center;
 }
+#authOverlay .auth-code-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 0;
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #D49AFF;
+  font: 650 12px/1.45 'Inter',sans-serif;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: max-height .2s ease,margin .2s ease,opacity .2s ease,transform .2s ease;
+}
+#authOverlay .auth-code-status.show {
+  max-height: 46px;
+  margin-top: 11px;
+  opacity: 1;
+  transform: none;
+}
+#authOverlay .auth-code-status.show::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: #A52EFF;
+  box-shadow: 0 0 12px rgba(165,46,255,.8);
+}
+#authOverlay .auth-code-status.success { color: #D49AFF; }
+#authOverlay[data-auth-screen="formVerifyEmail"] > .auth-modal > .auth-form-area > .auth-feedback,
+#authOverlay[data-auth-screen="formRecoveryCode"] > .auth-modal > .auth-form-area > .auth-feedback {
+  display: none !important;
+}
 @media (max-width:620px) {
   #authOverlay .auth-flow-screen .auth-form-sub {
     margin-bottom: 22px !important;
