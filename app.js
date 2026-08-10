@@ -354,6 +354,26 @@ function isFinanceiro(a) {
   return false;
 }
 
+/* Fonte financeira única do dashboard.
+   Cobranças pagas são a referência principal; agendamentos concluídos antigos
+   continuam aparecendo quando ainda não possuem cobrança paga vinculada. */
+function getDashboardFinancialEntries() {
+  const cobrancasPagas = (state.cobrancas || []).filter(c => c.status === 'pago');
+  const agendamentosCobrados = new Set(
+    cobrancasPagas.map(c => String(c.agendamento_id || '')).filter(Boolean)
+  );
+  const recebimentos = cobrancasPagas.map(c => ({
+    valor: Number(c.valor || 0),
+    data: String(c.pago_em || c.atualizado_em || c.criado_em || '').slice(0, 10),
+    origem: 'cobranca'
+  }));
+  const historicoAnterior = (state.agendamentos || [])
+    .filter(isFinanceiro)
+    .filter(a => !agendamentosCobrados.has(String(a.id || '')))
+    .map(a => ({ valor: Number(a.valor || 0), data: dataConclusaoISO(a), origem: 'agendamento' }));
+  return [...recebimentos, ...historicoAnterior].filter(item => item.data && item.valor >= 0);
+}
+
 function isAtivoCliente(c) {
   const st = (c?.status || '').toLowerCase().trim();
   if (st === 'inativo' || st === 'excluido' || st === 'excluído') return false;
@@ -1852,11 +1872,12 @@ function renderStats() {
   const st = s => ativos.filter(a => normStatus(a.status) === s).length;
   const stAll = s => ags.filter(a => normStatus(a.status) === s).length;
   const concluidos = st('Concluído');
-  const base = ativos.filter(a => normStatus(a.status) !== 'Recusado').length;
-  const taxa = base > 0 ? Math.round(concluidos / base * 100) : 0;
-  const fin = ags.filter(isFinanceiro);
-  const fatHoje = fin.filter(a => dataConclusaoISO(a) === hoje).reduce((s, a) => s + Number(a.valor || 0), 0);
-  const fatMes = fin.filter(a => dataConclusaoISO(a).startsWith(mes)).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const confirmados = st('Confirmado') + st('Reagendado') + concluidos;
+  const base = ativos.length;
+  const taxa = base > 0 ? Math.round(confirmados / base * 100) : 0;
+  const fin = getDashboardFinancialEntries();
+  const fatHoje = fin.filter(item => item.data === hoje).reduce((s, item) => s + item.valor, 0);
+  const fatMes = fin.filter(item => item.data.startsWith(mes)).reduce((s, item) => s + item.valor, 0);
   setText('statHoje', ativos.filter(a => a.data === hoje).length);
   setText('statPendentes', st('Pendente')); setText('statConfirmados', st('Confirmado'));
   setText('statReagendados', st('Reagendado')); setText('statConcluidos', concluidos);
@@ -2215,12 +2236,12 @@ const MESES_ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Se
 let chartPeriodAtual = 'dias';
 
 function getChartSeries(period) {
-  const fin = (state.agendamentos || []).filter(isFinanceiro);
+  const fin = getDashboardFinancialEntries();
   const somaNoIntervalo = (deIso, ateIso) => fin
-    .filter(a => { const iso = dataConclusaoISO(a); return iso >= deIso && iso <= ateIso; })
-    .reduce((s, a) => s + Number(a.valor || 0), 0);
+    .filter(item => item.data >= deIso && item.data <= ateIso)
+    .reduce((s, item) => s + item.valor, 0);
   const atendimentosNoIntervalo = (deIso, ateIso) => fin
-    .filter(a => { const iso = dataConclusaoISO(a); return iso >= deIso && iso <= ateIso; }).length;
+    .filter(item => item.data >= deIso && item.data <= ateIso).length;
 
   if (period === 'semanas') {
     const pts = [];
@@ -2239,8 +2260,8 @@ function getChartSeries(period) {
     for (let m = 5; m >= 0; m--) {
       const d = new Date(hoje.getFullYear(), hoje.getMonth() - m, 1);
       const prefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const valor = fin.filter(a => dataConclusaoISO(a).startsWith(prefix)).reduce((s, a) => s + Number(a.valor || 0), 0);
-      const atendimentos = fin.filter(a => dataConclusaoISO(a).startsWith(prefix)).length;
+      const valor = fin.filter(item => item.data.startsWith(prefix)).reduce((s, item) => s + item.valor, 0);
+      const atendimentos = fin.filter(item => item.data.startsWith(prefix)).length;
       pts.push({ label: MESES_ABREV[d.getMonth()], valor, atendimentos, full: `${MESES_ABREV[d.getMonth()]}/${d.getFullYear()}` });
     }
     return pts;
@@ -2470,7 +2491,7 @@ function renderDashPremium() {
   const concluidos = ativos.filter(a => normStatus(a.status) === 'Concluído').length;
   const confirmados = ativos.filter(a => ['Confirmado', 'Reagendado'].includes(normStatus(a.status))).length;
   const pendentes = ativos.filter(a => normStatus(a.status) === 'Pendente').length;
-  const total = ativos.length;
+  const total = concluidos + confirmados + pendentes;
 
   setText('dashDonutValue', total);
   setText('dashLegConcluidos', concluidos);
