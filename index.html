@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260810-68">
+<link rel="stylesheet" href="style.css?v=20260810-69">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -631,6 +631,23 @@
 
     <!-- VIEW: DASHBOARD -->
     <section class="view active" id="view-dashboard">
+      <div class="dash-stats-top">
+        <div class="stats-grid stats-grid-2 dash-mini-stack">
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">💵</div><div class="stat-label">Fat. hoje</div><div class="stat-value" id="statFatHoje">R$0</div></div>
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">💰</div><div class="stat-label">Fat. mês</div><div class="stat-value" id="statFatMes">R$0</div></div>
+          <div class="stat-card stat-card-green"><div class="stat-icon-badge">📊</div><div class="stat-label">Taxa confirmação</div><div class="stat-value green" id="statTaxa">0%</div></div>
+          <div class="stat-card stat-card-blue"><div class="stat-icon-badge">👥</div><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div></div>
+        </div>
+        <div class="stats-grid stats-grid-6">
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">📅</div><div class="stat-label">Hoje</div><div class="stat-value" id="statHoje">0</div></div>
+          <div class="stat-card stat-card-yellow"><div class="stat-icon-badge">⏳</div><div class="stat-label">Pendentes</div><div class="stat-value yellow" id="statPendentes">0</div></div>
+          <div class="stat-card stat-card-green"><div class="stat-icon-badge">✅</div><div class="stat-label">Confirmados</div><div class="stat-value green" id="statConfirmados">0</div></div>
+          <div class="stat-card stat-card-blue"><div class="stat-icon-badge">🎯</div><div class="stat-label">Concluídos</div><div class="stat-value blue" id="statConcluidos">0</div></div>
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">📅</div><div class="stat-label">Reagendados</div><div class="stat-value purple" id="statReagendados">0</div></div>
+          <div class="stat-card stat-card-red"><div class="stat-icon-badge">✕</div><div class="stat-label">Recusados</div><div class="stat-value red" id="statRecusados">0</div></div>
+        </div>
+      </div>
+
       <div class="dash-chart-panel">
         <div class="dash-chart-head">
           <div>
@@ -678,12 +695,13 @@
         </div>
       </div>
 
-      <div class="dash-secondary-grid">
-        <div class="stats-grid stats-grid-2 dash-mini-stack">
-          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">💵</div><div class="stat-label">Fat. hoje</div><div class="stat-value" id="statFatHoje">R$0</div></div>
-          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">💰</div><div class="stat-label">Fat. mês</div><div class="stat-value" id="statFatMes">R$0</div></div>
-          <div class="stat-card stat-card-green"><div class="stat-icon-badge">📊</div><div class="stat-label">Taxa confirmação</div><div class="stat-value green" id="statTaxa">0%</div></div>
-          <div class="stat-card stat-card-blue"><div class="stat-icon-badge">👥</div><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div></div>
+      <div class="dash-bottom-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div><div class="panel-title">Próximos agendamentos</div><div class="panel-sub">Pendentes e confirmados</div></div>
+            <button class="panel-action" onclick="setView('agenda')">Ver todos →</button>
+          </div>
+          <div class="panel-body"><div class="apt-list" id="dashAptList"></div></div>
         </div>
 
         <div class="dash-premium-donut dash-status-panel">
@@ -708,23 +726,6 @@
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-head">
-          <div><div class="panel-title">Próximos agendamentos</div><div class="panel-sub">Pendentes e confirmados</div></div>
-          <button class="panel-action" onclick="setView('agenda')">Ver todos →</button>
-        </div>
-        <div class="panel-body"><div class="apt-list" id="dashAptList"></div></div>
-      </div>
-
-      <div class="section-label" style="margin-top:20px">Todos os status</div>
-      <div class="stats-grid stats-grid-6">
-        <div class="stat-card stat-card-purple"><div class="stat-icon-badge">📅</div><div class="stat-label">Hoje</div><div class="stat-value" id="statHoje">0</div></div>
-        <div class="stat-card stat-card-yellow"><div class="stat-icon-badge">⏳</div><div class="stat-label">Pendentes</div><div class="stat-value yellow" id="statPendentes">0</div></div>
-        <div class="stat-card stat-card-green"><div class="stat-icon-badge">✅</div><div class="stat-label">Confirmados</div><div class="stat-value green" id="statConfirmados">0</div></div>
-        <div class="stat-card stat-card-blue"><div class="stat-icon-badge">🎯</div><div class="stat-label">Concluídos</div><div class="stat-value blue" id="statConcluidos">0</div></div>
-        <div class="stat-card stat-card-purple"><div class="stat-icon-badge">📅</div><div class="stat-label">Reagendados</div><div class="stat-value purple" id="statReagendados">0</div></div>
-        <div class="stat-card stat-card-red"><div class="stat-icon-badge">✕</div><div class="stat-label">Recusados</div><div class="stat-value red" id="statRecusados">0</div></div>
-      </div>
       <div class="dash-hidden-stats" style="display:none">
         <span id="statExcluidos">0</span><span id="statServicos">0</span><span id="statProfissionais">0</span><span id="statTotal">0</span>
       </div>
