@@ -1354,7 +1354,10 @@ a { text-decoration: none; color: inherit; }
 .panel-body { padding: 16px 18px; }
 
 /* ══════════════════════════════════════════════════════════════
-   DASHBOARD PREMIUM — CONSTRUÍDO DO ZERO (DESKTOP)
+   DASHBOARD — DIREÇÃO "LIVRO-CAIXA" (DESKTOP)
+   Numeros grandes em serifada, linhas finas no lugar de cards com
+   ícone em caixinha — a mesma identidade editorial do login/menu,
+   sem o "esqueleto genérico de SaaS" (card roxo + ícone + brilho).
    Escopo: apenas #view-dashboard, dentro de @media (min-width:901px).
    Não altera IDs, estrutura, onclick ou lógica — só apresentação.
    O mobile (Android/WebApp) não é tocado por este bloco.
@@ -1363,203 +1366,158 @@ a { text-decoration: none; color: inherit; }
 
   #view-dashboard { position: relative; }
 
-  @keyframes dashRise {
-    from { opacity: 0; transform: translateY(16px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+  @keyframes ledgerRise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes dashGlow {
-    0%, 100% { box-shadow: 0 20px 50px rgba(124,34,232,0.30), 0 0 0 1px rgba(255,255,255,0.04) inset; }
-    50%      { box-shadow: 0 24px 64px rgba(168,85,247,0.44), 0 0 0 1px rgba(255,255,255,0.07) inset; }
-  }
-  @keyframes dashFloat {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-5px); }
-  }
-  @keyframes dashDraw {
+  @keyframes ledgerDraw {
     from { stroke-dashoffset: 1400; }
     to   { stroke-dashoffset: 0; }
   }
-  @keyframes dashShimmer {
-    0%   { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
 
-  /* ── cards do topo ── */
+  /* ── faixa principal: Fat. hoje como manchete, o resto como registros de livro-caixa ── */
   #view-dashboard .dash-stats-top {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 16px;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 18px;
+    border: 1px solid rgba(176,76,255,0.16);
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.014), transparent);
+    position: relative;
+    overflow: hidden;
+    animation: ledgerRise 0.5s cubic-bezier(.2,.8,.2,1) both;
   }
+  #view-dashboard .dash-stats-top::before,
+  #view-dashboard .dash-stats-top::after {
+    content: ''; position: absolute; width: 8px; height: 8px;
+    border-color: rgba(197,140,255,0.5); pointer-events: none; z-index: 2;
+  }
+  #view-dashboard .dash-stats-top::before { top: -1px; left: -1px; border-top: 1px solid; border-left: 1px solid; }
+  #view-dashboard .dash-stats-top::after { bottom: -1px; right: -1px; border-bottom: 1px solid; border-right: 1px solid; }
+
   #view-dashboard .dash-stats-top .stats-grid { margin-bottom: 0; display: contents; }
 
+  /* reset total do "card" — vira um registro de linha, sem caixa/ícone/sombra */
   #view-dashboard .dash-stats-top .stat-card {
-    border-radius: 18px;
-    padding: 20px;
-    display: flex; flex-direction: column;
-    background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.014));
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(255,255,255,0.07);
-    animation: dashRise 0.5s cubic-bezier(.2,.8,.2,1) both;
-    transition: transform 0.32s cubic-bezier(.2,.8,.2,1), border-color 0.32s ease, box-shadow 0.32s ease;
-    will-change: transform;
+    all: unset;
+    box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 20px 24px;
+    border-right: 1px solid rgba(176,76,255,0.14);
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
   }
-  #view-dashboard .dash-stats-top .stat-card::before { display: none; }
-  #view-dashboard .dash-stats-top .stat-card::after {
-    content: '⋯';
-    position: absolute; top: 16px; right: 18px; z-index: 1;
-    font-size: 18px; line-height: 1; color: var(--text4); font-weight: 700;
-    transform: rotate(90deg);
-    transition: color 0.25s ease;
-  }
-  #view-dashboard .dash-stats-top .stat-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(197,140,255,0.4);
-    box-shadow: 0 18px 40px rgba(80,20,140,0.35);
-  }
-  #view-dashboard .dash-stats-top .stat-card:hover::after { color: var(--text2); }
-
-  /* atraso escalonado: cards principais (1..4) */
-  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:nth-child(1) { animation-delay: 0.02s; }
-  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:nth-child(2) { animation-delay: 0.08s; }
-  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:nth-child(3) { animation-delay: 0.14s; }
-  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:nth-child(4) { animation-delay: 0.20s; }
-  /* atraso escalonado: linha de status (5..10) */
-  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card:nth-child(1) { animation-delay: 0.26s; }
-  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card:nth-child(2) { animation-delay: 0.30s; }
-  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card:nth-child(3) { animation-delay: 0.34s; }
-  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card:nth-child(4) { animation-delay: 0.38s; }
-  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card:nth-child(5) { animation-delay: 0.42s; }
-  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card:nth-child(6) { animation-delay: 0.46s; }
-
-  #view-dashboard .dash-stats-top .stat-icon-badge {
-    width: 38px; height: 38px; border-radius: 12px;
-    font-size: 16px; margin-bottom: 22px;
-    position: relative; z-index: 1;
-    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
-  }
-  #view-dashboard .dash-stats-top .stat-card:hover .stat-icon-badge { transform: scale(1.1) rotate(-6deg); }
+  #view-dashboard .dash-stats-top .stat-card:last-child { border-right: none; }
+  #view-dashboard .dash-stats-top .stat-card::before,
+  #view-dashboard .dash-stats-top .stat-card::after { display: none; content: none; }
+  #view-dashboard .dash-stats-top .stat-icon-badge { display: none; }
 
   #view-dashboard .dash-stats-top .stat-label {
-    font-size: 11.5px; text-transform: none; letter-spacing: 0.01em;
-    color: var(--text3); font-weight: 500; position: relative; z-index: 1;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--text4); font-weight: 600;
   }
   #view-dashboard .dash-stats-top .stat-value {
-    font-family: 'Geist', sans-serif; font-weight: 700;
-    font-size: 25px; margin-top: 6px; position: relative; z-index: 1;
-    transition: text-shadow 0.3s ease;
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 30px; margin-top: 5px;
+    line-height: 1.05;
   }
-  #view-dashboard .dash-stats-top .stat-card:hover .stat-value { text-shadow: 0 0 18px rgba(197,140,255,0.5); }
 
-  /* card em destaque: gradiente vivo + respiração de brilho + flutuação sutil */
+  /* manchete: Fat. hoje — maior, com fundo levemente destacado, sem virar "card roxo" */
+  #view-dashboard .dash-stats-top .dash-mini-stack {
+    flex: 1.5 1 0; display: flex;
+  }
   #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:first-child {
-    background: linear-gradient(150deg, #a44bf0 0%, #7c22e8 45%, #4c1391 100%);
-    background-size: 220% 220%;
-    border-color: transparent;
-    animation: dashRise 0.5s cubic-bezier(.2,.8,.2,1) both, dashGlow 4.5s ease-in-out infinite 0.5s, dashFloat 6s ease-in-out infinite 0.6s;
+    flex: 1 1 auto;
+    background: linear-gradient(120deg, rgba(139,37,235,0.16), rgba(139,37,235,0.02));
   }
-  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:first-child:hover {
-    transform: translateY(-7px) scale(1.015);
+  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:first-child .stat-label { color: #c9a6ff; }
+  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:first-child .stat-value {
+    font-size: 42px; color: #fff;
   }
-  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:first-child .stat-icon-badge {
-    background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.24);
-  }
-  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:first-child .stat-label { color: rgba(255,255,255,0.75); }
-  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:first-child .stat-value { color: #fff; }
-  #view-dashboard .dash-stats-top .dash-mini-stack .stat-card:first-child::after { color: rgba(255,255,255,0.6); }
 
+  /* linha de status (Hoje/Pendentes/Confirmados/...) — segunda faixa do livro-caixa */
   #view-dashboard .dash-stats-top .stats-grid-6 {
-    grid-column: 1 / -1;
-    display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px;
+    flex: 2.4 1 0; display: flex;
+    border-left: 1px solid rgba(176,76,255,0.16);
   }
-  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card { padding: 16px; }
-  #view-dashboard .dash-stats-top .stats-grid-6 .stat-icon-badge { width: 32px; height: 32px; margin-bottom: 14px; }
-  #view-dashboard .dash-stats-top .stats-grid-6 .stat-value { font-size: 21px; }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card { padding: 20px 16px; }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-value { font-size: 24px; }
 
-  /* ── painel do gráfico ── */
+  /* ── painel do gráfico: sóbrio, com a moldura de canto da identidade da marca ── */
   #view-dashboard .dash-chart-panel {
-    border-radius: 22px;
-    border: 1px solid rgba(255,255,255,0.07);
-    background: linear-gradient(165deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008)), var(--bg1);
-    backdrop-filter: blur(14px);
-    animation: dashRise 0.55s cubic-bezier(.2,.8,.2,1) both;
-    animation-delay: 0.5s;
-    position: relative; overflow: hidden;
+    border-radius: 4px;
+    border-color: rgba(176,76,255,0.2);
+    background: var(--bg1);
+    position: relative;
+    animation: ledgerRise 0.5s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay: 0.08s;
   }
-  #view-dashboard .dash-chart-panel::after { opacity: 0.4; }
-  #view-dashboard .dash-chart-panel::before {
-    content: '';
-    position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.05) 50%, transparent 60%);
-    background-size: 200% 100%;
-    animation: dashShimmer 7s ease-in-out infinite 2s;
+  #view-dashboard .dash-chart-panel::before,
+  #view-dashboard .dash-chart-panel::after {
+    content: ''; position: absolute; width: 8px; height: 8px; z-index: 2;
+    border-color: rgba(197,140,255,0.5); pointer-events: none; opacity: 1;
   }
+  #view-dashboard .dash-chart-panel::before { top: -1px; left: -1px; border-top: 1px solid; border-left: 1px solid; background: none; }
+  #view-dashboard .dash-chart-panel::after { bottom: -1px; right: -1px; border-bottom: 1px solid; border-right: 1px solid; opacity: 1; }
+
   #view-dashboard .dash-premium-kicker {
-    font-size: 11px; letter-spacing: 0.08em; font-weight: 700;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9.5px; letter-spacing: 0.15em; font-weight: 700;
   }
-  #view-dashboard .dash-chart-value {
-    background: linear-gradient(90deg, #fff, #d9b8ff);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
+  #view-dashboard .dash-chart-value { font-size: 34px; }
 
   #view-dashboard #chartLine {
     stroke-dasharray: 1400;
-    animation: dashDraw 1.4s cubic-bezier(.2,.8,.2,1) both;
-    animation-delay: 0.7s;
+    animation: ledgerDraw 1.3s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay: 0.4s;
   }
-  #view-dashboard #chartArea { animation: dashRise 1.2s ease both; animation-delay: 0.85s; }
-  #view-dashboard #chartPoints circle { transition: r 0.2s ease, opacity 0.2s ease; }
-  #view-dashboard #chartPoints circle:hover { r: 5; opacity: 1; }
 
-  #view-dashboard .dash-chart-tabs { border-radius: 100px; padding: 4px; }
-  #view-dashboard .dash-chart-tab { border-radius: 100px; transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease; }
-  #view-dashboard .dash-chart-tab:hover { transform: translateY(-1px); }
+  #view-dashboard .dash-chart-tabs { border-radius: 4px; padding: 3px; }
+  #view-dashboard .dash-chart-tab { border-radius: 3px; }
 
   #view-dashboard .dash-chart-legend {
     display: inline-flex; width: fit-content;
-    border: 1px solid rgba(176,76,255,0.16); border-radius: 100px;
-    padding: 5px 12px 5px 10px; margin-left: 44px; margin-top: 14px;
-    background: rgba(255,255,255,0.014);
+    border-top: 1px solid rgba(176,76,255,0.16);
+    padding: 10px 0 0; margin-left: 44px; margin-top: 14px;
+    background: none; border-radius: 0;
   }
-  #view-dashboard .dash-chart-legend-dot { animation: dashFloat 2.4s ease-in-out infinite; }
 
-  /* ── linha inferior: próximos agendamentos + status ── */
+  /* ── linha inferior: próximos agendamentos + status, mesma linguagem sóbria ── */
   #view-dashboard .dash-bottom-grid {
     display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; align-items: stretch;
     margin-top: 16px;
   }
   #view-dashboard .panel,
   #view-dashboard .dash-status-panel {
-    border-radius: 22px;
-    border: 1px solid rgba(255,255,255,0.07);
-    background: linear-gradient(165deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008)), var(--bg2);
-    backdrop-filter: blur(14px);
-    animation: dashRise 0.55s cubic-bezier(.2,.8,.2,1) both;
-    animation-delay: 0.62s;
-    transition: border-color 0.3s ease;
+    border-radius: 4px;
+    border-color: rgba(176,76,255,0.2);
+    background: var(--bg1);
+    position: relative;
+    animation: ledgerRise 0.5s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay: 0.16s;
   }
-  #view-dashboard .panel:hover,
-  #view-dashboard .dash-status-panel:hover { border-color: rgba(197,140,255,0.3); }
+  #view-dashboard .panel::before, #view-dashboard .panel::after,
+  #view-dashboard .dash-status-panel::before, #view-dashboard .dash-status-panel::after {
+    content: ''; position: absolute; width: 8px; height: 8px; z-index: 2;
+    border-color: rgba(197,140,255,0.5); pointer-events: none;
+  }
+  #view-dashboard .panel::before, #view-dashboard .dash-status-panel::before { top: -1px; left: -1px; border-top: 1px solid; border-left: 1px solid; }
+  #view-dashboard .panel::after, #view-dashboard .dash-status-panel::after { bottom: -1px; right: -1px; border-bottom: 1px solid; border-right: 1px solid; }
+
+  #view-dashboard .panel-title { font-family: 'Instrument Serif', serif; }
   #view-dashboard .panel-head { padding: 20px 22px 14px; background: none; border-bottom: none; }
   #view-dashboard .panel-body { padding: 6px 22px 20px; }
-  #view-dashboard .panel-action { border-radius: 100px; transition: transform 0.2s ease, background 0.2s ease; }
-  #view-dashboard .panel-action:hover { transform: translateX(2px); }
+  #view-dashboard .panel-action { border-radius: 3px; }
 
-  #view-dashboard .apt-item {
-    transition: transform 0.22s cubic-bezier(.2,.8,.2,1), background 0.22s ease;
-  }
-  #view-dashboard .apt-item:hover { transform: translateX(4px); }
+  #view-dashboard .apt-item { transition: border-color 0.2s ease; }
+  #view-dashboard .apt-item:hover { border-color: rgba(197,140,255,0.4); }
 
   #view-dashboard .dash-donut-seg { transition: stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); }
-  #view-dashboard .dash-donut-value { transition: text-shadow 0.3s ease; }
-  #view-dashboard .dash-status-panel:hover .dash-donut-value { text-shadow: 0 0 16px rgba(197,140,255,0.5); }
-  #view-dashboard .dash-legend-item { transition: transform 0.2s ease; }
-  #view-dashboard .dash-legend-item:hover { transform: translateX(3px); }
 }
 
-
-.apt-list { display: flex; flex-direction: column; gap: 8px; }
-.apt-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--surface); transition: border-color 0.15s, transform 0.15s; flex-direction: column; }
 .apt-item:hover { border-color: var(--border2); transform: translateX(2px); }
 .apt-row { display: flex; align-items: center; gap: 10px; width: 100%; }
 .apt-av { width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0; background: linear-gradient(135deg, var(--accent4), var(--purple-bg)); border: 1px solid var(--accent-border); color: var(--accent2); display: grid; place-items: center; font-weight: 700; font-size: 13px; }
