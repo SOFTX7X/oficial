@@ -127,7 +127,6 @@
         <div class="vx-fin-metrics" id="vxFinMetrics"></div>
         <div class="vx-fin-split">
           <article class="vx-fin-panel"><div class="vx-panel-head"><div><span>Fluxo recente</span><strong>Últimas cobranças</strong></div><button onclick="mudarAbaFinanceiro('cobrancas')">Ver todas</button></div><div id="vxRecentCharges"></div></article>
-          <article class="vx-fin-panel vx-received-panel"><div class="vx-panel-head"><div><span>Entradas confirmadas</span><strong>Recebidos recentemente</strong></div><button onclick="mudarAbaFinanceiro('recebidos')">Histórico</button></div><div id="vxRecentReceived"></div></article>
         </div>
       </section>
       <section class="vx-fin-pane" data-fin-pane="cobrancas">
@@ -332,16 +331,16 @@
   async function cancelarCobranca(id) {
     const c = (window.state?.cobrancas || []).find(item => String(item.id) === String(id));
     if (!c || c.status === 'pago') return window.toast?.('Uma cobrança paga não pode ser cancelada.', 'warn');
-    window.openConfirmModal?.({ icon: '×', type: 'danger', title: 'Cancelar cobrança?', body: `A cobrança ${c.codigo} deixará de aceitar confirmação.`, btnLabel: 'Cancelar cobrança', cb: async () => {
-      const alteracoes = { status: 'cancelado', cancelado_em: new Date().toISOString(), atualizado_em: new Date().toISOString() };
+    window.openConfirmModal?.({ icon: '×', type: 'danger', title: 'Excluir cobrança?', body: `A cobrança ${c.codigo} será apagada permanentemente.`, btnLabel: 'Excluir cobrança', cb: async () => {
       if (modoLocal) {
-        const lista = lerLocal(empresaId()).map(item => String(item.id) === String(id) ? { ...item, ...alteracoes } : item); salvarLocal(empresaId(), lista); window.state.cobrancas = lista;
+        const lista = lerLocal(empresaId()).filter(item => String(item.id) !== String(id)); salvarLocal(empresaId(), lista); window.state.cobrancas = lista;
       } else {
-        const { data, error } = await window.db.from(TABLE).update(alteracoes).eq('id', id).neq('status', 'pago').select('*').maybeSingle();
-        if (error) return window.toast?.('Não foi possível cancelar.', 'err');
-        if (data) Object.assign(c, data);
+        const { data, error } = await window.db.from(TABLE).delete().eq('id', id).neq('status', 'pago').select('id').maybeSingle();
+        if (error) return window.toast?.('Não foi possível excluir. Execute a atualização de segurança no Supabase.', 'err');
+        if (!data) return window.toast?.('A cobrança já foi paga ou não existe mais.', 'warn');
+        window.state.cobrancas = (window.state.cobrancas || []).filter(item => String(item.id) !== String(id));
       }
-      renderFinanceiroV2(); window.showNotif?.('Cobrança cancelada', c.codigo, 'info');
+      renderFinanceiroV2(); window.showNotif?.('Cobrança excluída', c.codigo, 'info');
     }});
   }
 
@@ -439,14 +438,34 @@
 
   function cardCobranca(c) {
     const status = statusReal(c);
-    return `<article class="vx-charge-card ${status}"><div class="vx-charge-main"><div class="vx-charge-avatar">${esc((c.cliente_nome || '?').slice(0,1).toUpperCase())}</div><div class="vx-charge-person"><strong>${esc(c.cliente_nome)}</strong><span>${esc(c.servico_nome)} · ${esc(c.codigo)}</span></div><div class="vx-charge-amount"><strong>${moeda(c.valor)}</strong><span>Vence ${dataBR(c.vencimento)}</span></div><span class="vx-status ${status}">${textoStatus(status)}</span></div><div class="vx-charge-actions">${acoesCobranca(c)}</div></article>`;
+    return `<article class="vx-charge-card ${status}"><div class="vx-charge-main"><div class="vx-charge-client"><div class="vx-charge-avatar">${esc((c.cliente_nome || '?').slice(0,1).toUpperCase())}</div><div class="vx-charge-person"><strong>${esc(c.cliente_nome)}</strong><span>${esc(c.servico_nome)} · ${esc(c.codigo)}</span></div></div><div class="vx-charge-date" data-label="Criação">${dataBR(c.criado_em)}</div><div class="vx-charge-date" data-label="Vencimento">${dataBR(c.vencimento)}</div><div class="vx-charge-amount"><strong>${moeda(c.valor)}</strong></div><span class="vx-status ${status}">${textoStatus(status)}</span></div><div class="vx-charge-actions">${acoesCobranca(c)}</div></article>`;
+  }
+
+  function listaFinanceiraHTML(lista, vazioTitulo, vazioTexto) {
+    if (!lista.length) return vazioFinanceiro(vazioTitulo, vazioTexto);
+    return `<div class="vx-fin-table"><div class="vx-fin-table-head"><span>Cliente</span><span>Criação</span><span>Vencimento</span><span>Valor</span><span>Situação</span><span>Ações</span></div>${lista.map(cardCobranca).join('')}</div>`;
+  }
+
+  function linhaRelatorio(c) {
+    const pago = c.status === 'pago';
+    return `<div class="vx-report-row"><div class="vx-report-person"><span>${esc((c.cliente_nome || '?').slice(0,1).toUpperCase())}</span><div><strong>${esc(c.cliente_nome)}</strong><small>${esc(c.servico_nome)} · ${esc(c.codigo)}</small></div></div><div data-label="Início">${dataBR(c.criado_em)}</div><div data-label="Término">${dataBR(pago ? c.pago_em : c.vencimento)}</div><div data-label="Valor"><strong>${moeda(c.valor)}</strong></div><div data-label="Situação"><span class="vx-status ${pago ? 'pago' : statusReal(c)}">${pago ? 'Confirmado' : textoStatus(statusReal(c))}</span></div><div class="vx-report-action">${pago ? `<button onclick="abrirDocumentoFinanceiro('${esc(c.id)}','recibo')">Ver recibo</button>` : `<button onclick="abrirDocumentoFinanceiro('${esc(c.id)}','cobranca')">Ver cobrança</button>`}</div></div>`;
+  }
+
+  function renderRelatoriosFinanceiros() {
+    const target = $f('vxFinancialReports');
+    if (!target) return;
+    const lista = [...(window.state?.cobrancas || [])].filter(c => c.status !== 'cancelado').sort((a,b) => String(b.criado_em || '').localeCompare(String(a.criado_em || '')));
+    const pagas = lista.filter(c => c.status === 'pago');
+    const pendentes = lista.filter(c => c.status !== 'pago');
+    const recebido = pagas.reduce((total,c) => total + Number(c.valor || 0), 0);
+    target.innerHTML = `<section class="vx-report-summary"><article><span>Documentos</span><strong>${lista.length}</strong><small>Cobranças e recibos</small></article><article><span>Confirmados</span><strong>${pagas.length}</strong><small>${moeda(recebido)} recebido</small></article><article><span>Pendentes</span><strong>${pendentes.length}</strong><small>Aguardando pagamento</small></article></section><section class="vx-report-panel"><header><div><span>Histórico financeiro</span><strong>Documentos gerados</strong></div><small>Atualizado automaticamente</small></header>${lista.length ? `<div class="vx-report-table"><div class="vx-report-head"><span>Nome</span><span>Data de início</span><span>Data de término</span><span>Valor</span><span>Situação</span><span>Documento</span></div>${lista.map(linhaRelatorio).join('')}</div>` : vazioFinanceiro('Nenhum documento gerado', 'Cobranças e recibos aparecerão aqui.')}</section>`;
   }
 
   function vazioFinanceiro(titulo, texto) { return `<div class="vx-fin-empty"><span>◇</span><strong>${titulo}</strong><p>${texto}</p></div>`; }
 
   function renderFinanceiroV2() {
     montarEstruturaFinanceira();
-    const lista = [...(window.state?.cobrancas || [])].sort((a,b) => String(b.criado_em || '').localeCompare(String(a.criado_em || '')));
+    const lista = [...(window.state?.cobrancas || [])].filter(c => c.status !== 'cancelado').sort((a,b) => String(b.criado_em || '').localeCompare(String(a.criado_em || '')));
     const pagas = lista.filter(c => c.status === 'pago');
     const pendentes = lista.filter(c => ['pendente','vencido'].includes(statusReal(c)));
     const recebidosTotal = pagas.reduce((s,c) => s + Number(c.valor || 0), 0);
@@ -456,12 +475,12 @@
     $f('vxFinLocalNote').hidden = !modoLocal;
     $f('vxPendingBadge').textContent = pendentes.length;
     $f('vxFinMetrics').innerHTML = `<article><span>Recebidos</span><strong>${moeda(recebidosTotal)}</strong><small>${pagas.length} pagamento${pagas.length === 1 ? '' : 's'} confirmado${pagas.length === 1 ? '' : 's'}</small></article><article><span>A receber</span><strong>${moeda(pendenteTotal)}</strong><small>${pendentes.length} cobrança${pendentes.length === 1 ? '' : 's'} em aberto</small></article><article><span>Recebido no mês</span><strong>${moeda(recebidoMes)}</strong><small>${new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</small></article><article><span>Total de cobranças</span><strong>${lista.length}</strong><small>Histórico completo</small></article>`;
-    $f('vxRecentCharges').innerHTML = lista.length ? lista.slice(0,4).map(cardCobranca).join('') : vazioFinanceiro('Nenhuma cobrança criada', 'Crie a primeira cobrança para começar.');
-    $f('vxRecentReceived').innerHTML = pagas.length ? pagas.slice(0,4).map(cardCobranca).join('') : vazioFinanceiro('Nenhum pagamento confirmado', 'Os valores pagos aparecerão aqui.');
+    $f('vxRecentCharges').innerHTML = listaFinanceiraHTML(lista.slice(0,4), 'Nenhuma cobrança criada', 'Crie a primeira cobrança para começar.');
     const filtro = $f('vxChargeFilter')?.value || 'todos';
     const filtradas = filtro === 'todos' ? lista : lista.filter(c => statusReal(c) === filtro);
-    $f('vxChargeList').innerHTML = filtradas.length ? filtradas.map(cardCobranca).join('') : vazioFinanceiro('Nada por aqui', 'Nenhuma cobrança corresponde a este filtro.');
-    $f('vxReceivedList').innerHTML = pagas.length ? pagas.map(cardCobranca).join('') : vazioFinanceiro('Nenhum recebido', 'Confirme um pagamento para liberar o recibo.');
+    $f('vxChargeList').innerHTML = listaFinanceiraHTML(filtradas, 'Nada por aqui', 'Nenhuma cobrança corresponde a este filtro.');
+    $f('vxReceivedList').innerHTML = listaFinanceiraHTML(pagas, 'Nenhum recebido', 'Confirme um pagamento para liberar o recibo.');
+    renderRelatoriosFinanceiros();
     mudarAbaFinanceiro(abaAtual, false);
   }
 
@@ -532,6 +551,7 @@
   window.compartilharCobranca = compartilharCobranca;
   window.copiarLinkCobranca = copiarLinkCobranca;
   window.copiarPixPublico = copiarPixPublico;
+  window.renderRelatoriosFinanceiros = renderRelatoriosFinanceiros;
   window.isPublicChargeRoute = isPublicChargeRoute;
   window.loadPublicChargeRoute = loadPublicChargeRoute;
 
