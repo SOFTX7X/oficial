@@ -1076,7 +1076,7 @@ function iniciarContagemReenvio(buttonId, seconds = 60) {
 function showVerifyEmail(email) {
   _authEmail = String(email || '').trim().toLowerCase();
   setText('verifyEmailLabel', _authEmail);
-  const code = $('verifyEmailCode'); if (code) code.value = '';
+  const code = $('verifyEmailCode'); if (code) { code.value = ''; syncAuthCodeBoxes(code); }
   mostrarTelaAuth('formVerifyEmail');
   setTimeout(() => code?.focus({ preventScroll: true }), 60);
 }
@@ -1091,7 +1091,7 @@ function showForgotPassword() {
 function showRecoveryCode(email) {
   _recoveryEmail = String(email || '').trim().toLowerCase();
   setText('recoveryEmailLabel', _recoveryEmail);
-  const code = $('recoveryCode'); if (code) code.value = '';
+  const code = $('recoveryCode'); if (code) { code.value = ''; syncAuthCodeBoxes(code); }
   mostrarTelaAuth('formRecoveryCode');
   setTimeout(() => code?.focus({ preventScroll: true }), 60);
 }
@@ -1530,8 +1530,46 @@ document.addEventListener('input', function(e) {
 document.addEventListener('change', function(e) { ajustarFonteCampo(e.target); });
 
 document.addEventListener('input', function(e) {
-  if (e.target?.classList?.contains('auth-code-input')) e.target.value = normalizarCodigo(e.target.value);
+  if (e.target?.classList?.contains('auth-code-input')) {
+    e.target.value = normalizarCodigo(e.target.value).slice(0, 8);
+    syncAuthCodeBoxes(e.target);
+  }
 });
+
+function syncAuthCodeBoxes(input) {
+  if (!input) return;
+  const wrap = input.closest('.auth-code-segmented');
+  if (!wrap) return;
+  const value = normalizarCodigo(input.value).slice(0, 8);
+  const boxes = [...wrap.querySelectorAll('.auth-code-boxes span')];
+  boxes.forEach((box, index) => {
+    box.textContent = value[index] || '';
+    box.classList.toggle('is-filled', index < value.length);
+    box.classList.toggle('is-active', document.activeElement === input && index === Math.min(value.length, boxes.length - 1));
+  });
+  wrap.classList.toggle('is-complete', value.length === boxes.length);
+}
+
+function initAuthCodeBoxes() {
+  document.querySelectorAll('.auth-code-segmented').forEach(wrap => {
+    const input = document.getElementById(wrap.dataset.codeInput || '');
+    if (!input || wrap.dataset.ready === '1') return;
+    wrap.dataset.ready = '1';
+    wrap.addEventListener('click', () => input.focus({ preventScroll: true }));
+    input.addEventListener('focus', () => syncAuthCodeBoxes(input));
+    input.addEventListener('blur', () => syncAuthCodeBoxes(input));
+    input.addEventListener('paste', event => {
+      const pasted = normalizarCodigo(event.clipboardData?.getData('text') || '').slice(0, 8);
+      if (!pasted) return;
+      event.preventDefault();
+      input.value = pasted;
+      syncAuthCodeBoxes(input);
+    });
+    syncAuthCodeBoxes(input);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initAuthCodeBoxes, { once: true });
 
 document.addEventListener('keydown', function(e) {
   const overlay = $('authOverlay');
