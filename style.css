@@ -10003,6 +10003,66 @@ body.auth-performance-mode .notif-item.compact.out {
     border-radius: 8px !important;
   }
 }
+
+/* V51 — padrão único de botões do WebApp */
+@media (max-width:620px) {
+  body #authOverlay .auth-form-area button.btn:not(.pw-eye),
+  body #dashboardView button.btn,
+  body #dashboardView .dash-copy-button,
+  body #dashboardView .act-btn,
+  body #dashboardView .save-btn,
+  body #publicView button.btn,
+  body #publicView .pub-confirm-btn,
+  body #publicView .pub-picker-btn {
+    min-height: 52px !important;
+    border-radius: 8px !important;
+    font-family: 'Inter',sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 750 !important;
+    letter-spacing: .01em !important;
+    transition: transform .16s ease,box-shadow .16s ease,filter .16s ease !important;
+  }
+  body #authOverlay .auth-form-area button.btn-primary,
+  body #dashboardView button.btn-primary,
+  body #dashboardView .dash-copy-button,
+  body #dashboardView .save-btn,
+  body #publicView button.btn-primary,
+  body #publicView .pub-confirm-btn {
+    border: 1px solid rgba(212,154,255,.36) !important;
+    border-radius: 8px !important;
+    background: linear-gradient(100deg,#A52EFF 0%,#8B24D6 58%,#5D168A 100%) !important;
+    color: #F7F3FA !important;
+    box-shadow: 0 13px 34px rgba(93,22,138,.42),inset 0 1px rgba(247,243,250,.22) !important;
+  }
+  body #authOverlay .auth-form-area button.btn-primary:hover,
+  body #authOverlay .auth-form-area button.btn-primary:focus,
+  body #dashboardView button.btn-primary:hover,
+  body #publicView button.btn-primary:hover {
+    border-radius: 8px !important;
+    filter: brightness(1.06) !important;
+    transform: translateY(-1px) !important;
+  }
+  body #authOverlay .auth-form-area button.btn-primary:active,
+  body #dashboardView button.btn-primary:active,
+  body #publicView button.btn-primary:active {
+    border-radius: 8px !important;
+    transform: scale(.985) !important;
+  }
+  body #authOverlay .auth-form-area button.btn-ghost,
+  body #dashboardView button.btn-ghost,
+  body #publicView button.btn-ghost {
+    border: 1px solid rgba(93,22,138,.42) !important;
+    border-radius: 8px !important;
+    background: rgba(22,5,37,.72) !important;
+    color: #D49AFF !important;
+    box-shadow: none !important;
+  }
+  body #authOverlay .auth-mobile-next {
+    min-height: 52px !important;
+    border-radius: 8px !important;
+    background: linear-gradient(100deg,#A52EFF 0%,#8B24D6 58%,#5D168A 100%) !important;
+  }
+}
 @keyframes authWelcomeAura { to { transform: translate3d(5%,-2%,0) rotate(4deg); } }
 @keyframes authWelcomeGlow { to { transform: translate3d(8%,4%,0) rotate(-7deg) scale(1.08); opacity:.74; } }
 @keyframes authWelcomeCopyIn { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:none; } }
@@ -10266,5 +10326,28 @@ body.auth-performance-mode .notif-item.compact.out {
   #authOverlay .auth-mobile-welcome-dots i:first-child {
     background:#A52EFF !important;
     box-shadow:0 0 16px rgba(165,46,255,.86) !important;
+  }
+}
+
+/* V51.1 — trava final contra formatos antigos de botão */
+@media (max-width:620px) {
+  html body #authOverlay.auth-overlay .auth-form-area button.btn,
+  html body #authOverlay.auth-overlay .auth-form-area button.btn:hover,
+  html body #authOverlay.auth-overlay .auth-form-area button.btn:focus,
+  html body #authOverlay.auth-overlay .auth-form-area button.btn:active,
+  html body #dashboardView button.btn,
+  html body #publicView button.btn {
+    border-radius: 8px !important;
+  }
+  html body #authOverlay #btnLogin,
+  html body #authOverlay #btnGoStep2,
+  html body #authOverlay #btnVerifyEmail,
+  html body #authOverlay #btnResendSignup,
+  html body #authOverlay #btnSendRecovery,
+  html body #authOverlay #btnVerifyRecovery,
+  html body #authOverlay #btnResendRecovery,
+  html body #authOverlay #btnUpdatePassword {
+    min-height: 52px !important;
+    border-radius: 8px !important;
   }
 }
