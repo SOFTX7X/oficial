@@ -357,7 +357,24 @@
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-modal">
     <button class="auth-close" onclick="closeAuth()">✕</button>
-    <div class="auth-panel-left" aria-hidden="true"></div>
+    <div class="auth-panel-left auth-desktop-message" aria-hidden="true">
+      <div class="auth-desktop-message-copy auth-message-login">
+        <span>ACESSO AO SEU ESPAÇO</span>
+        <strong>Bem-vindo<br>de volta.</strong>
+        <p>Sua rotina continua exatamente de onde você parou.</p>
+      </div>
+      <div class="auth-desktop-message-copy auth-message-signup">
+        <span>UM NOVO COMEÇO</span>
+        <strong>Seu espaço<br>começa aqui.</strong>
+        <p>Crie sua conta e prepare cada detalhe no seu próprio ritmo.</p>
+      </div>
+      <div class="auth-desktop-message-copy auth-message-recovery">
+        <span>ACESSO PROTEGIDO</span>
+        <strong>Vamos recuperar<br>seu acesso.</strong>
+        <p>Confirme seus dados com segurança e volte ao seu painel.</p>
+      </div>
+      <div class="auth-desktop-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+    </div>
     <div class="auth-form-area">
       <div class="auth-feedback" id="authFeedback" role="status" aria-live="polite"></div>
       <div id="formLogin" style="display:none">
