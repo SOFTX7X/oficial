@@ -361,7 +361,45 @@
   }
 
   function fecharDocumentoFinanceiro() { $f('vxDocumentModal')?.classList.remove('open'); $f('vxDocumentModal')?.setAttribute('aria-hidden', 'true'); window.VYXORA_SCROLL?.unlock('finance-doc'); }
-  function copiarTexto(texto, mensagem) { navigator.clipboard?.writeText(texto).then(() => window.toast?.(mensagem, 'ok')).catch(() => window.toast?.('Não foi possível copiar.', 'err')); }
+  async function copiarTextoSeguro(texto) {
+    if (!texto) return false;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(texto);
+        return true;
+      }
+    } catch (_) {}
+    const area = document.createElement('textarea');
+    area.value = texto;
+    area.setAttribute('readonly', '');
+    area.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(area);
+    area.select();
+    area.setSelectionRange(0, area.value.length);
+    let copiado = false;
+    try { copiado = document.execCommand('copy'); } catch (_) {}
+    area.remove();
+    return copiado;
+  }
+
+  async function copiarTexto(texto, mensagem) {
+    const copiado = await copiarTextoSeguro(texto);
+    window.toast?.(copiado ? mensagem : 'Não foi possível copiar.', copiado ? 'ok' : 'err');
+    return copiado;
+  }
+
+  async function copiarPixPublico(botao) {
+    const copiado = await copiarTextoSeguro(window.pixPublicoAtual || '');
+    const retorno = $f('vxPublicCopyFeedback');
+    if (copiado) {
+      botao.classList.add('copied');
+      botao.innerHTML = '<span>✓</span> PIX copiado';
+      if (retorno) retorno.textContent = 'Código copiado. Agora cole no aplicativo do seu banco.';
+      setTimeout(() => { botao.classList.remove('copied'); botao.innerHTML = '<span>▣</span> Copiar código PIX'; }, 2600);
+    } else {
+      if (retorno) retorno.textContent = 'Seu navegador bloqueou a cópia. Selecione o código acima e copie manualmente.';
+    }
+  }
   function copiarLinkCobrancaAtual() { if (documentoAtual) copiarTexto(linkPublico(documentoAtual.cobranca), 'Link da cobrança copiado.'); }
 
   function documentoHTML(c, tipo, modal) {
@@ -457,8 +495,22 @@
     const data = Array.isArray(rows) ? rows[0] : rows;
     if (error || !data) { view.innerHTML = `<div class="vx-public-not-found"><span>◇</span><h1>Cobrança não encontrada</h1><p>Confira se o link recebido está correto.</p></div>`; return; }
     window.state = window.state || {}; window.state.empresa = { nome: data.empresa_nome || 'Estabelecimento' };
-    view.innerHTML = `<div class="vx-public-charge"><div class="vx-public-brand">VYXORA <span>Pagamento seguro</span></div>${documentoHTML(data,'cobranca',false)}<div class="vx-public-actions">${data.pix_copia_cola ? `<button onclick="navigator.clipboard.writeText(${JSON.stringify(data.pix_copia_cola)});this.textContent='PIX copiado ✓'">Copiar PIX</button>` : ''}${data.link_pagamento ? `<a href="${esc(data.link_pagamento)}" target="_blank" rel="noopener">Abrir pagamento</a>` : ''}</div></div>`;
-    const qr = $f('vxDocumentQr'); if (qr && window.QRCode) new window.QRCode(qr,{text:data.pix_copia_cola || data.link_pagamento || location.href,width:132,height:132,colorDark:'#07030D',colorLight:'#fff'});
+    window.pixPublicoAtual = data.pix_copia_cola || '';
+    const pago = data.status === 'pago';
+    view.innerHTML = `<main class="vx-pay-page">
+      <header class="vx-pay-brand"><div class="vx-pay-logo">V</div><div><strong>VYXORA</strong><span>Pagamentos</span></div><div class="vx-pay-secure"><i></i> Ambiente seguro</div></header>
+      <section class="vx-pay-card ${pago ? 'is-paid' : ''}">
+        <div class="vx-pay-status"><span>${pago ? '✓' : '⌁'}</span><div><small>${pago ? 'Pagamento concluído' : 'Cobrança via PIX'}</small><strong>${pago ? 'Pagamento confirmado' : `Pague ${moeda(data.valor)}`}</strong></div></div>
+        <div class="vx-pay-summary"><div><span>Você está pagando para</span><strong>${esc(data.empresa_nome || 'Estabelecimento')}</strong><small>${esc(data.servico_nome || 'Serviço')} ${data.profissional_nome ? `· ${esc(data.profissional_nome)}` : ''}</small></div><div><span>Valor</span><strong>${moeda(data.valor)}</strong></div></div>
+        ${pago ? `<div class="vx-pay-success"><span>✓</span><h2>Pagamento já confirmado</h2><p>Esta cobrança foi quitada em ${dataBR(data.pago_em)}.</p><small>${esc(data.codigo)}</small></div>` : `<div class="vx-pay-content">
+          <section class="vx-pay-qr"><div class="vx-pay-qr-frame"><div id="vxPublicQr"></div></div><strong>Escaneie o QR Code</strong><span>Abra o aplicativo do seu banco e escolha pagar com PIX.</span></section>
+          <section class="vx-pay-copy"><span class="vx-pay-step">Ou use o PIX Copia e Cola</span><label for="vxPublicPixCode">Código PIX</label><textarea id="vxPublicPixCode" readonly onclick="this.select()">${esc(data.pix_copia_cola || '')}</textarea><button type="button" onclick="copiarPixPublico(this)"><span>▣</span> Copiar código PIX</button><p id="vxPublicCopyFeedback">Depois de copiar, cole o código na área PIX do seu banco.</p></section>
+        </div>`}
+        <footer><span>Identificador</span><strong>${esc(data.codigo)}</strong><span>Vencimento</span><strong>${dataBR(data.vencimento)}</strong></footer>
+      </section>
+      <div class="vx-pay-trust"><span>▣ Seus dados estão protegidos</span><span>A VYXORA não solicita sua senha bancária.</span></div>
+    </main>`;
+    const qr = $f('vxPublicQr'); if (qr && window.QRCode && data.pix_copia_cola) new window.QRCode(qr,{text:data.pix_copia_cola,width:190,height:190,colorDark:'#07030D',colorLight:'#fff',correctLevel:window.QRCode.CorrectLevel.M});
   }
 
   window.loadCobrancasFinanceiras = loadCobrancasFinanceiras;
@@ -479,6 +531,7 @@
   window.mudarAbaFinanceiro = mudarAbaFinanceiro;
   window.compartilharCobranca = compartilharCobranca;
   window.copiarLinkCobranca = copiarLinkCobranca;
+  window.copiarPixPublico = copiarPixPublico;
   window.isPublicChargeRoute = isPublicChargeRoute;
   window.loadPublicChargeRoute = loadPublicChargeRoute;
 
