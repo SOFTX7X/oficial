@@ -796,14 +796,33 @@ function abrirSeletorCategoria() {
   renderCategoriasCadastro('');
   const search = $('authCategorySearch');
   if (search) search.value = '';
+  const cadastro = $('formCadastro');
+  if (cadastro) cadastro.style.cssText = 'display:none !important; visibility:hidden !important;';
   const panel = $('authCategoryPanel');
-  if (panel) panel.style.display = 'block';
+  if (panel) panel.style.cssText = 'display:flex !important; visibility:visible !important;';
+  const overlay = $('authOverlay');
+  if (overlay) {
+    overlay.dataset.authScreen = 'formCategory';
+    overlay.scrollTop = 0;
+  }
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (formArea) formArea.scrollTop = 0;
   setTimeout(() => search?.focus({ preventScroll: true }), 60);
 }
 
 function fecharSeletorCategoria() {
   const panel = $('authCategoryPanel');
-  if (panel) panel.style.display = 'none';
+  if (panel) panel.style.cssText = 'display:none !important; visibility:hidden !important;';
+  const cadastro = $('formCadastro');
+  if (cadastro) cadastro.style.cssText = 'display:block !important; visibility:visible !important;';
+  const overlay = $('authOverlay');
+  if (overlay) {
+    overlay.dataset.authScreen = 'formCadastro';
+    overlay.scrollTop = 0;
+  }
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (formArea) formArea.scrollTop = 0;
+  _mostrarStep(2);
 }
 
 function filtrarCategoriasCadastro(valor) {
@@ -977,7 +996,7 @@ function authSuccess(message) {
 }
 
 function esconderTelasAuth() {
-  ['formLogin','formCadastro','formVerifyEmail','formForgotPassword','formRecoveryCode','formNewPassword'].forEach(id => {
+  ['formLogin','formCadastro','formVerifyEmail','formForgotPassword','formRecoveryCode','formNewPassword','authCategoryPanel'].forEach(id => {
     const el = $(id);
     if (el) el.style.display = 'none';
   });
