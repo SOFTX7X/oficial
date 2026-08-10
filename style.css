@@ -8917,6 +8917,52 @@ body.auth-performance-mode .notif-item.compact.out {
   #authOverlay[data-auth-screen="formCadastro"].keyboard-open #formCadastro .stepper { margin-bottom: 12px !important; }
 }
 
+/* V43 — cadastro básico e acabamento dos estados de erro */
+#authOverlay #formCadastro .stepper { display: none !important; }
+#authOverlay .auth-field-error::before {
+  width: 6px !important;
+  min-width: 6px !important;
+  height: 6px !important;
+  min-height: 6px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: #fb7185 !important;
+  box-shadow: 0 0 9px rgba(251,113,133,.58) !important;
+}
+#authOverlay .auth-form-title,
+#authOverlay .auth-desktop-message-copy strong {
+  overflow: visible !important;
+  text-rendering: geometricPrecision;
+}
+@media (min-width:621px) {
+  #authOverlay .auth-desktop-message-copy { max-width: 290px !important; }
+  #authOverlay .auth-desktop-message-copy > strong {
+    font-size: clamp(36px,3.65vw,48px) !important;
+    letter-spacing: -.045em !important;
+    white-space: nowrap !important;
+  }
+  #authOverlay[data-auth-screen="formCadastro"] .auth-modal {
+    height: min(560px,calc(100dvh - 48px)) !important;
+  }
+  #authOverlay[data-auth-screen="formCadastro"] .auth-signup-heading .auth-form-title {
+    padding: .12em .08em !important;
+    font-style: normal !important;
+  }
+  #authOverlay[data-auth-screen="formCadastro"] .auth-signup-heading .auth-form-sub {
+    max-width: 390px !important;
+  }
+}
+@media (max-width:620px) {
+  #authOverlay[data-auth-screen="formCadastro"] .auth-signup-heading .auth-form-title {
+    padding: .12em .08em !important;
+  }
+}
+.side-link-box.is-locked,
+.dash-copy-button.is-locked {
+  cursor: not-allowed !important;
+  opacity: .72;
+}
+
 /* V42 — composição diagonal exclusiva para computador */
 @media (min-width: 621px) {
   #authOverlay.auth-overlay {
@@ -9178,5 +9224,34 @@ body.auth-performance-mode .notif-item.compact.out {
   }
   #authOverlay[data-auth-screen="formCategory"] .auth-category-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* V43.1 — prioridade final */
+#authOverlay #formCadastro .stepper { display: none !important; }
+#authOverlay .auth-field-error::before {
+  width: 6px !important;
+  min-width: 6px !important;
+  height: 6px !important;
+  min-height: 6px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: #fb7185 !important;
+}
+@media (min-width:621px) {
+  #authOverlay .auth-desktop-message-copy { max-width: 290px !important; }
+  #authOverlay .auth-desktop-message-copy > strong {
+    overflow: visible !important;
+    font-size: clamp(36px,3.65vw,48px) !important;
+    letter-spacing: -.045em !important;
+    white-space: nowrap !important;
+  }
+  #authOverlay[data-auth-screen="formCadastro"] .auth-modal {
+    height: min(560px,calc(100dvh - 48px)) !important;
+  }
+  #authOverlay[data-auth-screen="formCadastro"] .auth-signup-heading .auth-form-title {
+    padding: .12em .08em !important;
+    overflow: visible !important;
+    font-style: normal !important;
   }
 }
