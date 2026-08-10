@@ -10084,3 +10084,94 @@ body.auth-performance-mode .notif-item.compact.out {
   from { opacity:0; transform:translateX(-50%) scale(1.06); }
   to { opacity:.94; transform:translateX(-50%) scale(1.015); }
 }
+
+/* V49 — paleta oficial completa do WebApp */
+@media (max-width:620px) {
+  :root {
+    --bg: #07030D;
+    --bg1: #0D0416;
+    --bg2: #160525;
+    --bg3: #25083D;
+    --bg4: #321052;
+    --surface: rgba(93,22,138,.10);
+    --surface2: rgba(93,22,138,.18);
+    --surface3: rgba(139,36,214,.22);
+    --border: rgba(93,22,138,.34);
+    --border2: rgba(139,36,214,.46);
+    --border3: rgba(165,46,255,.62);
+    --text: #F7F3FA;
+    --text2: #D49AFF;
+    --text3: #9C929F;
+    --text4: #766C7A;
+    --accent: #8B24D6;
+    --accent2: #A52EFF;
+    --accent3: rgba(139,36,214,.28);
+    --accent4: rgba(93,22,138,.18);
+    --accent-border: rgba(165,46,255,.58);
+  }
+  html,
+  body,
+  #dashboardView,
+  #dashboardView .dash-main,
+  #publicView {
+    background-color: #07030D !important;
+    color: #F7F3FA !important;
+  }
+  #dashboardView .dash-main,
+  #publicView {
+    background-image:
+      radial-gradient(72% 42% at -8% -5%,rgba(93,22,138,.30),transparent 72%),
+      radial-gradient(60% 36% at 108% 102%,rgba(37,8,61,.65),transparent 76%) !important;
+  }
+  #dashboardView .sidebar,
+  #dashboardView .mobile-menu-drawer,
+  #dashboardView .topbar {
+    background: linear-gradient(165deg,#160525 0%,#07030D 72%) !important;
+    border-color: rgba(93,22,138,.34) !important;
+  }
+  #dashboardView .panel,
+  #dashboardView .stat-card,
+  #dashboardView .side-user-card,
+  #dashboardView .notification-center,
+  #publicView .pub-panel,
+  #publicView .choice,
+  #publicView .pub-success-card {
+    background-color: rgba(22,5,37,.92) !important;
+    border-color: rgba(93,22,138,.38) !important;
+  }
+  #dashboardView .btn-primary,
+  #dashboardView .dash-copy-button,
+  #publicView .btn-primary,
+  #publicView .pub-confirm-btn,
+  #authOverlay .btn-primary,
+  #authOverlay .auth-mobile-next {
+    border-color: rgba(212,154,255,.36) !important;
+    background: linear-gradient(100deg,#A52EFF 0%,#8B24D6 58%,#5D168A 100%) !important;
+    color: #F7F3FA !important;
+    box-shadow: 0 13px 34px rgba(93,22,138,.42),inset 0 1px rgba(247,243,250,.22) !important;
+  }
+  #authOverlay.auth-overlay,
+  #authOverlay.auth-overlay.open {
+    background:
+      radial-gradient(78% 45% at -6% -4%,rgba(93,22,138,.58) 0%,rgba(37,8,61,.48) 40%,transparent 74%),
+      radial-gradient(66% 42% at 108% 104%,rgba(93,22,138,.38),transparent 72%),
+      linear-gradient(155deg,#160525 0%,#07030D 42%,#07030D 100%) !important;
+  }
+  #authOverlay .auth-form-title,
+  #authOverlay .auth-mobile-welcome h1 { color:#F7F3FA !important; }
+  #authOverlay .auth-form-sub,
+  #authOverlay .auth-switch,
+  #authOverlay .auth-mobile-welcome p { color:#9C929F !important; }
+  #authOverlay .auth-mobile-welcome-kicker,
+  #authOverlay .auth-switch button,
+  #authOverlay .auth-forgot-link { color:#D49AFF !important; }
+  #authOverlay .auth-form-area .field input:focus,
+  #authOverlay .auth-form-area .field select:focus,
+  #authOverlay .auth-form-area .field textarea:focus {
+    border-bottom-color:#A52EFF !important;
+  }
+  #authOverlay .auth-mobile-welcome-dots i:first-child {
+    background:#A52EFF !important;
+    box-shadow:0 0 16px rgba(165,46,255,.86) !important;
+  }
+}
