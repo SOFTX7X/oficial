@@ -10825,3 +10825,184 @@ body.auth-performance-mode .notif-item.compact.out {
     margin-top: 12px !important;
   }
 }
+
+/* V72 — núcleo analítico premium do dashboard desktop */
+@media (min-width: 901px) {
+  #view-dashboard .dash-chart-panel {
+    position: relative !important;
+    min-height: 0 !important;
+    margin-bottom: 14px !important;
+    background:
+      radial-gradient(56% 120% at 100% 0%,rgba(139,36,214,.11),transparent 68%),
+      linear-gradient(150deg,#131316 0%,#0f0f12 100%) !important;
+  }
+  #view-dashboard .dash-chart-head {
+    margin-bottom: 14px !important;
+  }
+  #view-dashboard .dash-premium-kicker {
+    color: #c56bff !important;
+    letter-spacing: .13em !important;
+  }
+  #view-dashboard .dash-chart-value {
+    font-family: 'Geist',sans-serif !important;
+    font-size: 34px !important;
+    font-weight: 650 !important;
+    letter-spacing: -.045em !important;
+  }
+  #view-dashboard .dash-chart-tabs {
+    padding: 3px !important;
+    border-color: rgba(255,255,255,.08) !important;
+    background: rgba(255,255,255,.025) !important;
+  }
+  #view-dashboard .dash-chart-tab {
+    min-width: 70px !important;
+    border-radius: 7px !important;
+  }
+  #view-dashboard .dash-chart-tab.active {
+    background: linear-gradient(135deg,#a52eff,#6f1fc2) !important;
+    box-shadow: 0 8px 24px rgba(139,36,214,.28) !important;
+  }
+  #view-dashboard .dash-chart-body {
+    margin-top: 4px !important;
+  }
+  #view-dashboard .dash-chart-svg-wrap,
+  #view-dashboard .dash-chart-yaxis {
+    height: 154px !important;
+  }
+  #view-dashboard .dash-chart-line {
+    stroke-width: 2.4 !important;
+    filter: drop-shadow(0 5px 12px rgba(165,46,255,.34)) !important;
+  }
+  #view-dashboard .dash-chart-grid-line {
+    stroke: rgba(255,255,255,.055) !important;
+  }
+  #view-dashboard .dash-chart-baseline {
+    stroke: rgba(197,107,255,.18) !important;
+  }
+  #view-dashboard .dash-chart-point {
+    fill: #111114 !important;
+    stroke: #b84cff !important;
+    stroke-width: 2 !important;
+  }
+  #view-dashboard .dash-chart-labels {
+    margin-top: 6px !important;
+  }
+  #view-dashboard .dash-chart-legend {
+    margin-left: 44px !important;
+    padding: 5px 10px !important;
+    border: 1px solid rgba(165,46,255,.16) !important;
+    border-radius: 7px !important;
+    background: rgba(165,46,255,.045) !important;
+  }
+  #view-dashboard .dash-chart-foot {
+    display: grid !important;
+    grid-template-columns: repeat(3,minmax(120px,1fr)) !important;
+    gap: 0 !important;
+    margin-top: 14px !important;
+    padding-top: 14px !important;
+  }
+  #view-dashboard .dash-chart-foot-item {
+    min-height: 48px !important;
+    padding: 0 18px !important;
+    border-right: 1px solid rgba(255,255,255,.07) !important;
+  }
+  #view-dashboard .dash-chart-foot-item:first-child {
+    padding-left: 0 !important;
+  }
+  #view-dashboard .dash-chart-foot-item:last-child {
+    border-right: 0 !important;
+  }
+  #view-dashboard .dash-chart-foot-item b {
+    font-family: 'Geist',sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 650 !important;
+  }
+
+  #view-dashboard .dash-bottom-grid {
+    grid-template-columns: minmax(0,1.65fr) minmax(300px,.9fr) !important;
+    align-items: stretch !important;
+  }
+  #view-dashboard .dash-bottom-grid > .panel,
+  #view-dashboard .dash-status-panel {
+    min-height: 304px !important;
+    background:
+      radial-gradient(70% 90% at 100% 0%,rgba(93,22,138,.07),transparent 72%),
+      #111114 !important;
+  }
+  #view-dashboard .panel-title,
+  #view-dashboard .dash-status-title {
+    font-family: 'Geist',sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: -.025em !important;
+  }
+  #view-dashboard .panel-action {
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: rgba(165,46,255,.11) !important;
+  }
+  #view-dashboard .panel-action:hover {
+    background: rgba(165,46,255,.2) !important;
+  }
+  #view-dashboard .panel-body {
+    padding-top: 4px !important;
+  }
+  #view-dashboard .apt-item {
+    padding: 12px 14px !important;
+    border-color: rgba(255,255,255,.065) !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,.018) !important;
+  }
+  #view-dashboard .apt-item:hover {
+    border-color: rgba(165,46,255,.24) !important;
+    background: rgba(165,46,255,.04) !important;
+  }
+  #view-dashboard .empty-state {
+    min-height: 178px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background:
+      radial-gradient(circle at 50% 44%,rgba(139,36,214,.09),transparent 42%),
+      rgba(255,255,255,.012) !important;
+  }
+  #view-dashboard .empty-state .es-icon {
+    width: 46px !important;
+    height: 46px !important;
+    margin: 0 auto 12px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 1px solid rgba(165,46,255,.2) !important;
+    border-radius: 50% !important;
+    background: rgba(139,36,214,.08) !important;
+    filter: grayscale(.25) !important;
+  }
+  #view-dashboard .dash-status-panel {
+    padding: 22px 24px !important;
+  }
+  #view-dashboard .dash-status-title {
+    text-align: left !important;
+    margin-bottom: 10px !important;
+  }
+  #view-dashboard .dash-donut-wrap {
+    width: 142px !important;
+    height: 142px !important;
+    margin-top: 4px !important;
+  }
+  #view-dashboard .dash-donut-track {
+    stroke: rgba(255,255,255,.06) !important;
+  }
+  #view-dashboard .dash-donut-seg {
+    filter: drop-shadow(0 0 5px rgba(165,46,255,.16)) !important;
+  }
+  #view-dashboard .dash-donut-value {
+    font-family: 'Geist',sans-serif !important;
+    font-size: 31px !important;
+    font-weight: 700 !important;
+  }
+  #view-dashboard .dash-premium-legend {
+    padding-top: 12px !important;
+    border-top: 1px solid rgba(255,255,255,.06) !important;
+  }
+  #view-dashboard .dash-legend-item {
+    min-height: 24px !important;
+  }
+}
