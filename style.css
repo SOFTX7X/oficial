@@ -8919,6 +8919,35 @@ body.auth-performance-mode .notif-item.compact.out {
 
 /* V43 — cadastro básico e acabamento dos estados de erro */
 #authOverlay #formCadastro .stepper { display: none !important; }
+/* Campos de autenticação sempre abertos: nenhuma caixa, apenas sublinhado. */
+#authOverlay .auth-form-area .field input,
+#authOverlay .auth-form-area .field input:hover,
+#authOverlay .auth-form-area .field input:focus,
+#authOverlay .auth-form-area .field input:active,
+#authOverlay .auth-form-area .field select,
+#authOverlay .auth-form-area .field textarea {
+  border-width: 0 0 1px !important;
+  border-style: solid !important;
+  border-color: rgba(255,255,255,.32) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+#authOverlay .auth-form-area .field input:focus,
+#authOverlay .auth-form-area .field select:focus,
+#authOverlay .auth-form-area .field textarea:focus {
+  border-bottom-color: #c084fc !important;
+}
+#authOverlay .auth-form-area .pw-wrap,
+#authOverlay .auth-form-area .pw-wrap:hover,
+#authOverlay .auth-form-area .pw-wrap:focus-within {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
 #authOverlay .auth-field-error::before {
   width: 6px !important;
   min-width: 6px !important;
