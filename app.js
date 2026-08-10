@@ -1297,6 +1297,15 @@ function openAuth(mode) {
 
 function closeAuth() {
   const overlay = $('authOverlay');
+  if (window.innerWidth <= 620 && !state.user && !getPublicSlug()) {
+    overlay?.classList.remove('keyboard-open', 'mobile-welcome-leaving');
+    overlay?.style.removeProperty('--auth-visual-height');
+    overlay?.style.removeProperty('--auth-visual-top');
+    $('notifStack')?.style.removeProperty('--auth-toast-bottom');
+    _authViewportBaseline = 0;
+    abrirBoasVindasMobile();
+    return;
+  }
   if (overlay) overlay.classList.remove('open', 'mobile-welcome-open', 'mobile-welcome-leaving');
 
   document.documentElement.classList.remove('auth-performance-mode');
