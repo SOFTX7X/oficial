@@ -85,7 +85,20 @@ create policy "Empresa atualiza suas cobrancas"
   );
 
 revoke all on table public.agenda_cobrancas from anon;
-grant select, insert, update on table public.agenda_cobrancas to authenticated;
+drop policy if exists "Empresa exclui suas cobrancas" on public.agenda_cobrancas;
+create policy "Empresa exclui suas cobrancas"
+  on public.agenda_cobrancas for delete
+  to authenticated
+  using (
+    status <> 'pago'
+    and exists (
+      select 1 from public.agenda_perfis perfil
+      where perfil.empresa_id = agenda_cobrancas.empresa_id
+        and perfil.auth_user_id = auth.uid()
+    )
+  );
+
+grant select, insert, update, delete on table public.agenda_cobrancas to authenticated;
 
 -- A página pública usa uma função restrita: o visitante recebe somente a
 -- cobrança cujo token completo foi informado e nunca pode listar a tabela.

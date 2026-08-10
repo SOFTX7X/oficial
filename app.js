@@ -939,6 +939,7 @@ function setView(view) {
   document.querySelectorAll('.mob-nav-btn').forEach(b => {
     b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
   });
+  if (view === 'relatorios') window.renderRelatoriosFinanceiros?.();
 }
 
 

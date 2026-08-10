@@ -51,7 +51,7 @@
 <script defer src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script defer src="calendar.js?v=20260804-13"></script>
-<link rel="stylesheet" href="financeiro-cobrancas.css?v=20260810-3">
+<link rel="stylesheet" href="financeiro-cobrancas.css?v=20260810-4">
 </head>
 <body class="vx-booting">
 <div class="vyxora-loader vx-premium-loader" id="vyxoraLoader" role="status" aria-live="polite" aria-label="Carregando VyXora Agendas">
@@ -890,9 +890,9 @@
     <!-- VIEW: RELATÓRIOS -->
     <section class="view" id="view-relatorios">
       <div class="dash-hero" style="margin-bottom:20px">
-        <div class="dash-hero-inner"><div><h1>Relatórios <em>e métricas.</em></h1><p>Acompanhe o desempenho detalhado.</p></div></div>
+        <div class="dash-hero-inner"><div><h1>Relatórios <em>financeiros.</em></h1><p>Cobranças, pagamentos e recibos organizados.</p></div></div>
       </div>
-      <div class="empty-state"><div class="es-icon">📈</div><p>Relatórios avançados em breve.</p></div>
+      <div id="vxFinancialReports"></div>
     </section>
 
 
@@ -1287,7 +1287,7 @@
 document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
-<script defer src="financeiro-cobrancas.js?v=20260810-3"></script>
-<script defer src="app.js?v=20260810-65"></script>
+<script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
+<script defer src="app.js?v=20260810-66"></script>
 </body>
 </html>
