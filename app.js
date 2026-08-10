@@ -1337,6 +1337,20 @@ function pularBoasVindasMobile() {
   requestAnimationFrame(syncAuthVisualViewport);
 }
 
+function sairBoasVindasMobile(destino) {
+  const overlay = $('authOverlay');
+  overlay?.classList.add('mobile-welcome-leaving');
+  setTimeout(() => {
+    overlay?.classList.remove('mobile-welcome-open', 'mobile-welcome-leaving');
+    if (destino === 'cadastro') showCadastro();
+    else showLogin();
+    requestAnimationFrame(syncAuthVisualViewport);
+  }, 260);
+}
+
+function abrirCadastroPelasBoasVindas() { sairBoasVindasMobile('cadastro'); }
+function abrirLoginPelasBoasVindas() { sairBoasVindasMobile('login'); }
+
 function showLogin() {
   mostrarTelaAuth('formLogin');
 }
@@ -3431,6 +3445,7 @@ function voltarDaPublica() {
 Object.assign(window, {
   openAuth, closeAuth, showLogin, showCadastro,
   abrirBoasVindasMobile, continuarBoasVindasMobile, pularBoasVindasMobile,
+  abrirCadastroPelasBoasVindas, abrirLoginPelasBoasVindas,
   goStep1, goStep2, goStep3, autoSlug,
   loginComSenha, finalizarCadastro, logout,
   showForgotPassword, confirmarEmailCadastro, reenviarCodigoCadastro, voltarCadastroEmail,
