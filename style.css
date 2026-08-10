@@ -1354,7 +1354,7 @@ a { text-decoration: none; color: inherit; }
 .panel-body { padding: 16px 18px; }
 
 /* ══════════════════════════════════════════════════════════════
-   DASHBOARD — IDENTIDADE EDITORIAL/TÉCNICA (DESKTOP)
+   DASHBOARD — ESTILO REFERÊNCIA (DESKTOP)
    Escopo: apenas #view-dashboard, dentro de @media (min-width:901px).
    Não altera IDs, estrutura, onclick ou lógica — só apresentação.
    O mobile (Android/WebApp) não é tocado por este bloco.
@@ -1362,74 +1362,96 @@ a { text-decoration: none; color: inherit; }
 @media (min-width: 901px) {
 
   #view-dashboard .dash-chart-panel {
-    border-radius: 6px;
-    border-color: rgba(176,76,255,0.26);
+    border-radius: 20px;
+    border-color: rgba(176,76,255,0.22);
+    background: var(--bg1);
   }
-  #view-dashboard .dash-chart-panel::before {
-    content: '';
-    position: absolute; top: 0; left: 26px; right: 26px; height: 1px; z-index: 1;
-    background: linear-gradient(90deg, transparent, rgba(197,140,255,0.5), transparent);
-    pointer-events: none;
-  }
+  #view-dashboard .dash-chart-panel::after { opacity: 0.5; }
   #view-dashboard .dash-premium-kicker {
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 9.5px; letter-spacing: 0.16em; display: flex; align-items: center; gap: 6px;
-  }
-  #view-dashboard .dash-premium-kicker::before {
-    content: ''; width: 4px; height: 4px; background: var(--accent2);
-    box-shadow: 0 0 6px rgba(188,99,255,0.7); flex-shrink: 0;
+    font-size: 11px; letter-spacing: 0.08em; font-weight: 700;
   }
 
-  #view-dashboard .dash-chart-tabs { border-radius: 3px; padding: 3px; }
-  #view-dashboard .dash-chart-tab { border-radius: 2px; }
-  #view-dashboard .dash-chart-tab.active { box-shadow: 0 4px 14px rgba(168,85,247,0.32); }
+  #view-dashboard .dash-chart-tabs { border-radius: 100px; padding: 4px; }
+  #view-dashboard .dash-chart-tab { border-radius: 100px; }
 
   #view-dashboard .dash-chart-legend {
     display: inline-flex; width: fit-content;
-    border: 1px solid rgba(176,76,255,0.18); border-radius: 3px;
-    padding: 5px 11px 5px 9px; margin-left: 44px; margin-top: 14px;
+    border: 1px solid rgba(176,76,255,0.16); border-radius: 100px;
+    padding: 5px 12px 5px 10px; margin-left: 44px; margin-top: 14px;
     background: rgba(255,255,255,0.014);
   }
 
-  #view-dashboard .stat-card {
-    border-radius: 4px;
-  }
-  #view-dashboard .stat-icon-badge { border-radius: 3px; }
-
   #view-dashboard .dash-status-panel {
-    border-radius: 4px; position: relative;
-  }
-  #view-dashboard .dash-status-panel::before,
-  #view-dashboard .dash-status-panel::after {
-    content: ''; position: absolute; width: 7px; height: 7px;
-    border-color: rgba(197,140,255,0.5); pointer-events: none;
-  }
-  #view-dashboard .dash-status-panel::before { top: -1px; left: -1px; border-top: 1px solid; border-left: 1px solid; }
-  #view-dashboard .dash-status-panel::after { bottom: -1px; right: -1px; border-bottom: 1px solid; border-right: 1px solid; }
-
-  #view-dashboard .panel { border-radius: 4px; }
-  #view-dashboard .panel-action { border-radius: 3px; }
-
-  #view-dashboard .section-label {
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    letter-spacing: 0.14em; display: flex; align-items: center; gap: 6px;
-  }
-  #view-dashboard .section-label::before {
-    content: ''; width: 4px; height: 4px; background: var(--accent2);
-    box-shadow: 0 0 6px rgba(188,99,255,0.7); flex-shrink: 0;
+    border-radius: 20px;
   }
 
-  /* nova composição: cards compactos no topo, gráfico largo, linha inferior */
+  #view-dashboard .panel { border-radius: 20px; }
+  #view-dashboard .panel-head { padding: 20px 22px 14px; background: none; border-bottom: none; }
+  #view-dashboard .panel-body { padding: 6px 22px 20px; }
+  #view-dashboard .panel-action { border-radius: 100px; }
+
+  /* ── cards do topo, estilo cartão premium com destaque em gradiente ── */
   #view-dashboard .dash-stats-top {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
     margin-bottom: 16px;
   }
   #view-dashboard .dash-stats-top .stats-grid { margin-bottom: 0; display: contents; }
-  #view-dashboard .dash-stats-top .stat-card { padding: 13px; }
-  #view-dashboard .dash-stats-top .stat-icon-badge { width: 26px; height: 26px; font-size: 12px; margin-bottom: 8px; }
-  #view-dashboard .dash-stats-top .stat-value { font-size: 21px; }
+
+  #view-dashboard .dash-stats-top .stat-card {
+    border-radius: 20px;
+    padding: 20px;
+    display: flex; flex-direction: column;
+  }
+  #view-dashboard .dash-stats-top .stat-card::before { display: none; }
+  #view-dashboard .dash-stats-top .stat-card::after {
+    content: '⋯';
+    position: absolute; top: 16px; right: 18px; z-index: 1;
+    font-size: 18px; line-height: 1; color: var(--text4); font-weight: 700;
+    transform: rotate(90deg);
+  }
+
+  #view-dashboard .dash-stats-top .stat-icon-badge {
+    width: 38px; height: 38px; border-radius: 12px;
+    font-size: 16px; margin-bottom: 22px;
+    position: relative; z-index: 1;
+  }
+
+  #view-dashboard .dash-stats-top .stat-label {
+    font-size: 11.5px; text-transform: none; letter-spacing: 0.01em;
+    color: var(--text3); font-weight: 500; position: relative; z-index: 1;
+  }
+  #view-dashboard .dash-stats-top .stat-value {
+    font-family: 'Geist', sans-serif; font-weight: 700;
+    font-size: 25px; margin-top: 6px; position: relative; z-index: 1;
+  }
+  #view-dashboard .dash-stats-top .stat-caption {
+    font-size: 10.5px; color: var(--text4); margin-top: 6px; position: relative; z-index: 1;
+  }
+
+  /* primeiro card (Fat. hoje) em destaque, com gradiente sólido */
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-card:first-child {
+    background: linear-gradient(150deg, #9333ea 0%, #6d1fc9 55%, #4c1391 100%);
+    border-color: transparent;
+    box-shadow: 0 20px 46px rgba(124,34,232,0.34);
+  }
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-card:first-child .stat-icon-badge {
+    background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.22);
+  }
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-card:first-child .stat-label,
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-card:first-child .stat-caption { color: rgba(255,255,255,0.72); }
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-card:first-child .stat-value { color: #fff; }
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-card:first-child::after { color: rgba(255,255,255,0.55); }
+
+  /* linha de baixo (6 cards de status): mesma linguagem, mais compacta */
+  #view-dashboard .dash-stats-top .stats-grid-6 {
+    grid-column: 1 / -1;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px;
+  }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card { padding: 16px; }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-icon-badge { width: 32px; height: 32px; margin-bottom: 14px; }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-value { font-size: 21px; }
 
   #view-dashboard .dash-bottom-grid {
     display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; align-items: stretch;
