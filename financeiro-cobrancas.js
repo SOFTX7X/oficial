@@ -323,7 +323,11 @@
           if (!data) return window.toast?.('O pagamento já foi confirmado ou a cobrança mudou.', 'warn');
           Object.assign(c, data);
         }
-        renderFinanceiroV2(); window.showNotif?.('Pagamento confirmado!', `${c.cliente_nome} entrou em Recebidos.`, 'ok', 5000);
+        renderFinanceiroV2();
+        window.renderStats?.();
+        window.renderDashPremium?.();
+        window.renderDashChart?.();
+        window.showNotif?.('Pagamento confirmado!', `${c.cliente_nome} entrou em Recebidos.`, 'ok', 5000);
       } catch (error) { console.error(error); window.toast?.('Não foi possível confirmar o pagamento.', 'err'); }
     }});
   }

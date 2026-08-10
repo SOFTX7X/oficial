@@ -888,7 +888,7 @@ function showDashboard() {
     setText('topbarNome', state.empresa.nome);
     setText('sidePlan', state.empresa.plano || 'Grátis');
     const lb = $('sideLinkBox');
-    if (lb) lb.textContent = state.empresa.onboarding_finalizado ? publicUrl(state.empresa.slug) : '🔒 Configure para liberar';
+    if (lb) lb.textContent = (state.empresa.onboarding_finalizado || empresaProntaParaPublicar()) ? publicUrl(state.empresa.slug) : '🔒 Configure para liberar';
   }
   unlockPublicModalScroll();
   setView('dashboard');
@@ -965,6 +965,12 @@ function setView(view) {
   document.querySelectorAll('.mob-nav-btn').forEach(b => {
     b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
   });
+  if (view === 'dashboard') {
+    renderStats();
+    renderDashList();
+    renderDashPremium();
+    renderDashChart();
+  }
   if (view === 'relatorios') window.renderRelatoriosFinanceiros?.();
 }
 
@@ -1808,6 +1814,11 @@ function startAutoSync() {
     if (!state?.empresa?.id) return;
     try {
       const { data } = await db.from('agenda_agendamentos').select('*').eq('empresa_id', state.empresa.id).order('criado_em', { ascending: false });
+      const atuais = state.agendamentos || [];
+      const assinatura = lista => JSON.stringify((lista || []).map(a => [
+        a.id, a.status, a.data, a.hora, a.valor, a.atualizado_em, a.concluido_em, a.financeiro_status
+      ]));
+      if (assinatura(data) === assinatura(atuais)) return;
       const novos = (data || []).filter(a => !lastIds.has(String(a.id)));
       state.agendamentos = ordenarAgendamentosRecentes(data);
       if (novos.length) novos.forEach(a => addAppNotification('Novo agendamento!', `${a.cliente_nome || 'Cliente'} agendou.`, 'new', a.id || ''));
@@ -2727,12 +2738,16 @@ async function salvarConfig() {
     if (slugExiste) return toast('Esse link já está em uso.', 'err');
     updates.slug = slugNovo;
   }
+  const empresaProjetada = { ...state.empresa, ...updates, slug: updates.slug || slugAtual };
+  if (empresaProntaParaPublicar(empresaProjetada)) updates.onboarding_finalizado = true;
   const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
   if (error) return toast('Erro ao salvar: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
   setText('sideNome', state.empresa.nome); setText('topbarNome', state.empresa.nome); renderAvatarPainel();
   const lb = $('sideLinkBox'); if (lb) lb.textContent = publicUrl(state.empresa.slug);
-  renderConfig(); showNotif('Configurações salvas', '', 'ok');
+  atualizarBloqueioPublicacao();
+  renderConfig();
+  showNotif('Configurações salvas', updates.onboarding_finalizado ? 'Sua página pública está liberada.' : '', 'ok');
 }
 
 async function salvarHorarios() {
@@ -3250,7 +3265,7 @@ function excluirAgendamento(id) {
 }
 
 function atualizarBloqueioPublicacao() {
-  const liberada = Boolean(state?.empresa?.onboarding_finalizado);
+  const liberada = Boolean(state?.empresa?.onboarding_finalizado || empresaProntaParaPublicar());
   const sideLink = $('sideLinkBox');
   if (sideLink) {
     sideLink.textContent = liberada ? publicUrl(state.empresa.slug) : '🔒 Configure para liberar';
@@ -3264,14 +3279,39 @@ function atualizarBloqueioPublicacao() {
   });
 }
 
-function copyPublicLink(button = null) {
+function empresaProntaParaPublicar(empresa = state?.empresa) {
+  if (!empresa) return false;
+  const nome = String(empresa.nome || '').trim();
+  const slug = slugify(empresa.slug || '');
+  const whatsapp = String(empresa.whatsapp || '').replace(/\D/g, '');
+  return Boolean(nome && nome.toLowerCase() !== 'meu negócio' && slug && whatsapp.length >= 10);
+}
+
+async function copyPublicLink(button = null) {
   if (!state?.empresa?.slug) return;
-  if (!state.empresa.onboarding_finalizado) {
+  if (!state.empresa.onboarding_finalizado && !empresaProntaParaPublicar()) {
     showNotif('Página ainda bloqueada', 'Complete os dados do negócio no painel para liberar o link.', 'info', 5000);
     return;
   }
   const link = publicUrl(state.empresa.slug);
-  if (navigator.clipboard) navigator.clipboard.writeText(link).catch(() => {});
+  let copiado = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(link);
+      copiado = true;
+    }
+  } catch (_) {}
+  if (!copiado) {
+    const auxiliar = document.createElement('textarea');
+    auxiliar.value = link;
+    auxiliar.setAttribute('readonly', '');
+    auxiliar.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(auxiliar);
+    auxiliar.select();
+    try { copiado = document.execCommand('copy'); } catch (_) {}
+    auxiliar.remove();
+  }
+  if (!copiado) return showNotif('Não foi possível copiar', 'Toque novamente ou copie o endereço do navegador.', 'info', 4000);
   if (button?.classList?.contains('dash-copy-button')) {
     const label = button.querySelector('.dash-copy-label');
     button.classList.add('is-copied');
@@ -3279,7 +3319,7 @@ function copyPublicLink(button = null) {
     clearTimeout(button._copyResetTimer);
     button._copyResetTimer = setTimeout(() => {
       button.classList.remove('is-copied');
-      if (label) label.textContent = 'Copiar link da agenda';
+      if (label) label.textContent = 'Copiar link';
     }, 2400);
   }
   showNotif('Link copiado!', link, 'ok', 3000);
@@ -3287,7 +3327,7 @@ function copyPublicLink(button = null) {
 
 function openPublic() {
   if (!state?.empresa?.slug) return;
-  if (!state.empresa.onboarding_finalizado) {
+  if (!state.empresa.onboarding_finalizado && !empresaProntaParaPublicar()) {
     showNotif('Página ainda bloqueada', 'Complete os dados do negócio antes de publicar.', 'info', 5000);
     return;
   }
@@ -3302,7 +3342,7 @@ async function loadPublic(slug) {
   if (pv) pv.style.display = 'block';
   const { data: empresa, error } = await db.from('agenda_empresas').select('*').eq('slug', slug).single();
   if (error || !empresa) { setText('pubNomeEmpresa', 'Agenda não encontrada'); setText('pubDescEmpresa', 'Verifique se o link está correto.'); return; }
-  if (!empresa.onboarding_finalizado) {
+  if (!empresa.onboarding_finalizado && !empresaProntaParaPublicar(empresa)) {
     setText('pubNomeEmpresa', 'Página em configuração');
     setText('pubDescEmpresa', 'Este espaço ainda não está disponível para agendamentos.');
     return;
