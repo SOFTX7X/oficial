@@ -1,4 +1,3 @@
-
 // ═══════════════════════════════════════════════════════════════
 // GERENCIADOR ÚNICO DE ROLAGEM
 // Evita que um modal libere a rolagem enquanto outro ainda está aberto.
@@ -126,6 +125,12 @@ function renderAvatarPainel() {
   const enquadramento = getEnquadramentoFoto('perfil');
   aplicarEnquadramentoFoto(avatar, enquadramento.x, enquadramento.y, enquadramento.zoom);
   avatar.textContent = foto ? '' : initial(state.empresa.nome);
+  const avatarTopo = $('topbarAvatar');
+  if (avatarTopo) {
+    aplicarImagemFundo(avatarTopo, foto);
+    aplicarEnquadramentoFoto(avatarTopo, enquadramento.x, enquadramento.y, enquadramento.zoom);
+    avatarTopo.textContent = foto ? '' : initial(state.empresa.nome);
+  }
 }
 
 function renderPreviewImagem(id, url) {
@@ -860,6 +865,7 @@ function showDashboard() {
   if (state.empresa) {
     renderAvatarPainel();
     setText('sideNome', state.empresa.nome);
+    setText('topbarNome', state.empresa.nome);
     setText('sidePlan', state.empresa.plano || 'Grátis');
     const lb = $('sideLinkBox');
     if (lb) lb.textContent = state.empresa.onboarding_finalizado ? publicUrl(state.empresa.slug) : '🔒 Configure para liberar';
@@ -2703,7 +2709,7 @@ async function salvarConfig() {
   const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
   if (error) return toast('Erro ao salvar: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
-  setText('sideNome', state.empresa.nome); renderAvatarPainel();
+  setText('sideNome', state.empresa.nome); setText('topbarNome', state.empresa.nome); renderAvatarPainel();
   const lb = $('sideLinkBox'); if (lb) lb.textContent = publicUrl(state.empresa.slug);
   renderConfig(); showNotif('Configurações salvas', '', 'ok');
 }
