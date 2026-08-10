@@ -9259,6 +9259,19 @@ body.auth-performance-mode .notif-item.compact.out {
   border-radius: 50% !important;
   background: #fb7185 !important;
 }
+/* Erro limpo: preserva o campo aberto e destaca somente a linha inferior. */
+#authOverlay .field.has-auth-error input,
+#authOverlay .field.has-auth-error select,
+#authOverlay .field.has-auth-error textarea,
+#authOverlay .field.has-auth-error .pw-wrap input {
+  border-width: 0 0 1px !important;
+  border-style: solid !important;
+  border-color: #fb7185 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: 0 8px 18px -16px rgba(251,113,133,.9) !important;
+  outline: none !important;
+}
 @media (min-width:621px) {
   #authOverlay .auth-desktop-message-copy { max-width: 290px !important; }
   #authOverlay .auth-desktop-message-copy > strong {
