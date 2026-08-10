@@ -8948,6 +8948,30 @@ body.auth-performance-mode .notif-item.compact.out {
   box-shadow: none !important;
   outline: none !important;
 }
+/* Impede Chrome/Android de pintar de branco campos preenchidos ou colados. */
+#authOverlay .auth-form-area .field input:-webkit-autofill,
+#authOverlay .auth-form-area .field input:-webkit-autofill:hover,
+#authOverlay .auth-form-area .field input:-webkit-autofill:focus,
+#authOverlay .auth-form-area .field input:-webkit-autofill:active,
+#authOverlay .auth-form-area .field input:autofill,
+#authOverlay .auth-form-area .field input:autofill:hover,
+#authOverlay .auth-form-area .field input:autofill:focus {
+  border-width: 0 0 1px !important;
+  border-style: solid !important;
+  border-color: rgba(255,255,255,.32) !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  color: #f8f4fb !important;
+  -webkit-text-fill-color: #f8f4fb !important;
+  caret-color: #c084fc !important;
+  -webkit-box-shadow: 0 0 0 1000px #08040d inset !important;
+  box-shadow: 0 0 0 1000px #08040d inset !important;
+  transition: background-color 99999s ease-out 0s !important;
+}
+#authOverlay .auth-form-area .field input:-webkit-autofill:focus,
+#authOverlay .auth-form-area .field input:autofill:focus {
+  border-bottom-color: #c084fc !important;
+}
 #authOverlay .auth-field-error::before {
   width: 6px !important;
   min-width: 6px !important;
