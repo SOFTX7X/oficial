@@ -1276,12 +1276,6 @@ function openAuth(mode) {
   if (!overlay) return;
   overlay.classList.remove('mobile-welcome-open', 'mobile-welcome-leaving');
 
-  // Garante o acabamento quadrado mesmo em WebViews Android que mantêm
-  // regras antigas do CSS em cache ou calculam :not() com especificidade diferente.
-  overlay.querySelectorAll('.btn').forEach(button => {
-    button.style.setProperty('border-radius', '0', 'important');
-  });
-
   // Suspende a página de fundo enquanto a autenticação está aberta.
   document.documentElement.classList.add('auth-performance-mode');
   document.body.classList.add('auth-performance-mode');
