@@ -9773,3 +9773,138 @@ body.auth-performance-mode .notif-item.compact.out {
     font-style: normal !important;
   }
 }
+
+/* V45 — boas-vindas roxa do Android/WebApp */
+.auth-mobile-welcome { display: none; }
+@media (max-width:620px) {
+  #authOverlay.mobile-welcome-open .auth-close,
+  #authOverlay.mobile-welcome-open .auth-panel-left,
+  #authOverlay.mobile-welcome-open .auth-form-area { display: none !important; }
+  #authOverlay.mobile-welcome-open .auth-mobile-welcome {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    height: 100dvh;
+    padding: max(28px,env(safe-area-inset-top)) 24px max(22px,calc(env(safe-area-inset-bottom) + 14px));
+    overflow: hidden;
+    background:
+      radial-gradient(115% 72% at 6% -5%,rgba(169,84,246,.92) 0%,rgba(117,45,208,.72) 22%,rgba(49,15,94,.38) 43%,transparent 68%),
+      radial-gradient(88% 58% at 108% 102%,rgba(106,35,203,.38),transparent 69%),
+      linear-gradient(152deg,#19052f 0%,#090312 44%,#05020b 100%);
+    color: #fff;
+    isolation: isolate;
+  }
+  #authOverlay.mobile-welcome-open .auth-mobile-welcome::before {
+    content: "";
+    position: absolute;
+    inset: -15%;
+    z-index: -2;
+    background:
+      conic-gradient(from 205deg at 12% 4%,transparent 0 22%,rgba(220,170,255,.18) 28%,transparent 38%),
+      radial-gradient(circle at 18% 17%,rgba(233,199,255,.24),transparent 19%);
+    filter: blur(16px);
+    animation: authWelcomeAura 8s ease-in-out infinite alternate;
+  }
+  #authOverlay.mobile-welcome-open .auth-mobile-welcome::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg,rgba(255,255,255,.035),transparent 25%,rgba(0,0,0,.12));
+  }
+  #authOverlay .auth-mobile-welcome-glow {
+    position: absolute;
+    top: -12%;
+    left: -24%;
+    width: 112vw;
+    height: 58vh;
+    border-radius: 50%;
+    background: radial-gradient(ellipse,rgba(190,107,255,.52),rgba(118,42,208,.24) 42%,transparent 72%);
+    filter: blur(28px);
+    transform: rotate(-13deg);
+    opacity: .92;
+    animation: authWelcomeGlow 6s ease-in-out infinite alternate;
+  }
+  #authOverlay .auth-mobile-welcome-copy {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 390px;
+    margin: 0 auto;
+    padding-bottom: 2px;
+    animation: authWelcomeCopyIn .7s .12s cubic-bezier(.16,1,.3,1) both;
+  }
+  #authOverlay .auth-mobile-welcome-kicker {
+    display: block;
+    margin-bottom: 12px;
+    color: #d9b5ff;
+    font: 700 9px/1.2 'JetBrains Mono',monospace;
+    letter-spacing: .16em;
+  }
+  #authOverlay .auth-mobile-welcome h1 {
+    margin: 0;
+    color: #fff;
+    font: 750 clamp(38px,12vw,52px)/.98 'Inter',sans-serif;
+    letter-spacing: -.055em;
+  }
+  #authOverlay .auth-mobile-welcome p {
+    max-width: 315px;
+    margin: 14px 0 15px;
+    color: rgba(255,255,255,.72);
+    font: 400 13px/1.55 'Inter',sans-serif;
+  }
+  #authOverlay .auth-mobile-welcome-dots {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 24px;
+  }
+  #authOverlay .auth-mobile-welcome-dots i {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.38);
+  }
+  #authOverlay .auth-mobile-welcome-dots i:first-child {
+    width: 22px;
+    background: #b853ff;
+    box-shadow: 0 0 14px rgba(184,83,255,.82);
+  }
+  #authOverlay .auth-mobile-next,
+  #authOverlay .auth-mobile-skip {
+    width: 100%;
+    min-height: 52px;
+    border: 0;
+    border-radius: 8px;
+    font: 750 13px/1 'Inter',sans-serif;
+    cursor: pointer;
+  }
+  #authOverlay .auth-mobile-next {
+    color: #fff;
+    background: linear-gradient(100deg,#ad48ff 0%,#7425ce 100%);
+    box-shadow: 0 15px 38px rgba(111,30,195,.42),inset 0 1px rgba(255,255,255,.25);
+  }
+  #authOverlay .auth-mobile-next:active { transform: scale(.985); }
+  #authOverlay .auth-mobile-skip {
+    min-height: 43px;
+    margin-top: 7px;
+    color: rgba(255,255,255,.7);
+    background: transparent;
+  }
+  #authOverlay.mobile-welcome-leaving .auth-mobile-welcome {
+    animation: authWelcomeLeave .28s ease both;
+  }
+}
+@keyframes authWelcomeAura { to { transform: translate3d(5%,-2%,0) rotate(4deg); } }
+@keyframes authWelcomeGlow { to { transform: translate3d(8%,4%,0) rotate(-7deg) scale(1.08); opacity:.74; } }
+@keyframes authWelcomeCopyIn { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:none; } }
+@keyframes authWelcomeLeave { to { opacity:0; transform:translateY(-12px) scale(1.015); } }
+@media (prefers-reduced-motion:reduce) {
+  #authOverlay .auth-mobile-welcome,
+  #authOverlay .auth-mobile-welcome::before,
+  #authOverlay .auth-mobile-welcome-glow,
+  #authOverlay .auth-mobile-welcome-copy { animation:none !important; }
+}
