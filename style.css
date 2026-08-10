@@ -11006,3 +11006,68 @@ body.auth-performance-mode .notif-item.compact.out {
     min-height: 24px !important;
   }
 }
+
+/* V73 — ações do cabeçalho e acabamento mais próximo da referência */
+@media (min-width: 901px) {
+  #dashboardView .topbar-copy-link {
+    position: relative !important;
+    width: auto !important;
+    min-width: 124px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(165,46,255,.3) !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg,rgba(139,36,214,.2),rgba(93,22,138,.1)) !important;
+    color: #e8d9f5 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: .01em !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+  #dashboardView .topbar-copy-link::after {
+    display: none !important;
+  }
+  #dashboardView .topbar-copy-link:hover {
+    border-color: rgba(197,107,255,.56) !important;
+    background: linear-gradient(135deg,rgba(165,46,255,.28),rgba(93,22,138,.16)) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 8px 24px rgba(93,22,138,.18) !important;
+  }
+  #dashboardView .topbar-copy-link.is-copied {
+    border-color: rgba(34,197,94,.35) !important;
+    background: rgba(34,197,94,.1) !important;
+    color: #86efac !important;
+  }
+  #dashboardView .topbar-copy-icon {
+    font-size: 14px !important;
+    line-height: 1 !important;
+  }
+
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-card {
+    min-height: 142px !important;
+    padding: 18px 20px !important;
+  }
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-icon-badge {
+    margin-bottom: 20px !important;
+  }
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-value {
+    font-size: 28px !important;
+    letter-spacing: -.035em !important;
+  }
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-card:nth-child(n+2) {
+    background:
+      linear-gradient(145deg,rgba(255,255,255,.018),transparent 48%),
+      #121215 !important;
+  }
+  #view-dashboard .dash-stats-top .stats-grid:first-of-type .stat-card:nth-child(n+2)::before {
+    display: block !important;
+    opacity: .22 !important;
+  }
+}
