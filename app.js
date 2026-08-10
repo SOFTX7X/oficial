@@ -692,7 +692,7 @@ async function carregarConta(user) {
     const { data: empresa, error: ee } = await db.from('agenda_empresas').select('*').eq('id', perfil.empresa_id).single();
     if (ee || !empresa) { console.warn('Empresa não encontrada para perfil', perfil.id); return false; }
     state.user = user; state.perfil = perfil; state.empresa = empresa;
-    showDashboard(); await loadAll(); return true;
+    showDashboard(); await loadAll(); atualizarBloqueioPublicacao(); return true;
   } catch (e) { console.error('Erro em carregarConta:', e); return false; }
 }
 
@@ -856,7 +856,7 @@ function showDashboard() {
     setText('sideNome', state.empresa.nome);
     setText('sidePlan', state.empresa.plano || 'Grátis');
     const lb = $('sideLinkBox');
-    if (lb) lb.textContent = publicUrl(state.empresa.slug);
+    if (lb) lb.textContent = state.empresa.onboarding_finalizado ? publicUrl(state.empresa.slug) : '🔒 Configure para liberar';
   }
   unlockPublicModalScroll();
   setView('dashboard');
@@ -1359,7 +1359,7 @@ function atualizarCabecalhoCadastro(etapa) {
   if (!titulo || !mensagem) return;
   const nome = primeiroNomeCadastro();
   const textos = {
-    1: [nome ? `Olá, ${nome}` : 'Vamos começar?', 'Conte um pouco sobre você.'],
+    1: [nome ? `Olá, ${nome}` : 'Vamos começar?', 'Crie seu acesso. Você configura o negócio depois, dentro do painel.'],
     2: [nome ? `Olá, ${nome}` : 'Sobre você', 'Agora, conte sobre o seu negócio.'],
     3: [nome ? `Estamos quase lá, ${nome}` : 'Estamos quase lá', 'Vamos preparar os primeiros detalhes da sua agenda.']
   };
@@ -1401,13 +1401,28 @@ async function goStep2() {
     if (payload.exists) {
       return authFail('Este e-mail já possui uma conta. Entre ou redefina sua senha.', 'cadEmail');
     }
-    preencherSelectCategorias();
-    _mostrarStep(2);
+    const signupResponse = await fetch('/api/auth-signup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha, nome })
+    });
+    const signupPayload = await signupResponse.json().catch(() => ({}));
+    if (!signupResponse.ok) {
+      return authFail(mensagemAuth({ message: signupPayload.error }, 'Não foi possível criar a conta.'), 'cadEmail');
+    }
+    const authData = signupPayload.data;
+    if (!authData?.user) return authFail('Não foi possível criar a conta. Tente novamente.', 'cadEmail');
+    guardarCadastroPendente({ email, nomeUser: nome });
+    if (authData.session) {
+      try { await db.auth.signOut(); } catch (_) {}
+    }
+    showVerifyEmail(email);
+    iniciarContagemReenvio('btnResendSignup', 60);
+    toast('Conta criada. Digite o código enviado ao seu e-mail.', 'ok');
   } catch (error) {
     console.error('Erro ao verificar e-mail:', error);
     return authFail('Não foi possível verificar o e-mail. Confira sua conexão e tente novamente.', 'cadEmail');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Continuar'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Criar conta'; }
   }
 }
 
@@ -1514,31 +1529,40 @@ async function provisionarCadastroConfirmado(user, cadastro) {
       const ok = await carregarConta(user);
       return !!ok;
     }
-    const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', cadastro.empSlugVal).maybeSingle();
-    const slugFinal = slugExiste ? cadastro.empSlugVal + '-' + Date.now().toString().slice(-4) : cadastro.empSlugVal;
+    const cadastroBasico = !cadastro.empNomeVal;
+    const slugBase = cadastroBasico ? `agenda-${String(user.id).slice(0, 8)}` : cadastro.empSlugVal;
+    const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', slugBase).maybeSingle();
+    const slugFinal = slugExiste ? slugBase + '-' + Date.now().toString().slice(-4) : slugBase;
     const { data: empresa, error: errEmp } = await db.from('agenda_empresas').insert({
-      nome: cadastro.empNomeVal, slug: slugFinal, area_atuacao: cadastro.areaAtuacao,
-      whatsapp: cadastro.empWhatsappVal, email: cadastro.email, plano: 'Grátis', onboarding_finalizado: true
+      nome: cadastroBasico ? 'Meu negócio' : cadastro.empNomeVal,
+      slug: slugFinal,
+      area_atuacao: cadastroBasico ? 'Outro' : cadastro.areaAtuacao,
+      whatsapp: cadastroBasico ? '' : cadastro.empWhatsappVal,
+      email: cadastro.email,
+      plano: 'Grátis',
+      onboarding_finalizado: !cadastroBasico
     }).select('*').single();
     if (errEmp || !empresa) { console.error(errEmp); toast('Não foi possível criar a empresa: ' + (errEmp?.message || 'tente novamente.'), 'err'); return false; }
     const { error: perfilErr } = await db.from('agenda_perfis').insert({
       auth_user_id: user.id, empresa_id: empresa.id, nome: cadastro.nomeUser,
-      email: cadastro.email, whatsapp: cadastro.empWhatsappVal, cargo: 'Administrador'
+      email: cadastro.email, whatsapp: cadastroBasico ? '' : cadastro.empWhatsappVal, cargo: 'Administrador'
     });
     if (perfilErr) { console.error(perfilErr); toast('Não foi possível criar o perfil.', 'err'); return false; }
-    await db.from('agenda_servicos').insert({
-      empresa_id: empresa.id, nome: cadastro.servNome, preco: Number(cadastro.servPreco || 0),
-      duracao_minutos: Number(cadastro.servDuracao || 60), status: 'ativo', descricao: 'Serviço inicial.'
-    });
-    await db.from('agenda_profissionais').insert({
-      empresa_id: empresa.id, nome: cadastro.profNomeVal,
-      especialidade: cadastro.profEsp || 'Profissional', telefone: cadastro.empWhatsappVal, status: 'ativo'
-    });
+    if (!cadastroBasico) {
+      await db.from('agenda_servicos').insert({
+        empresa_id: empresa.id, nome: cadastro.servNome, preco: Number(cadastro.servPreco || 0),
+        duracao_minutos: Number(cadastro.servDuracao || 60), status: 'ativo', descricao: 'Serviço inicial.'
+      });
+      await db.from('agenda_profissionais').insert({
+        empresa_id: empresa.id, nome: cadastro.profNomeVal,
+        especialidade: cadastro.profEsp || 'Profissional', telefone: cadastro.empWhatsappVal, status: 'ativo'
+      });
+    }
     state.user = user;
     state.perfil = { auth_user_id: user.id, empresa_id: empresa.id, nome: cadastro.nomeUser, email: cadastro.email };
     state.empresa = empresa;
     showDashboard(); await loadAll();
-    showNotif('Tudo pronto!', empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
+    showNotif('Conta confirmada!', cadastroBasico ? 'Complete seu espaço pelo painel.' : empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
     return true;
   } catch (e) {
     console.error('Erro ao provisionar cadastro:', e);
@@ -3085,8 +3109,27 @@ function excluirAgendamento(id) {
   });
 }
 
+function atualizarBloqueioPublicacao() {
+  const liberada = Boolean(state?.empresa?.onboarding_finalizado);
+  const sideLink = $('sideLinkBox');
+  if (sideLink) {
+    sideLink.textContent = liberada ? publicUrl(state.empresa.slug) : '🔒 Configure para liberar';
+    sideLink.classList.toggle('is-locked', !liberada);
+  }
+  document.querySelectorAll('.dash-copy-button').forEach(button => {
+    button.classList.toggle('is-locked', !liberada);
+    button.setAttribute('aria-disabled', String(!liberada));
+    const label = button.querySelector('.dash-copy-label');
+    if (label) label.textContent = liberada ? 'Copiar link' : 'Configurar para publicar';
+  });
+}
+
 function copyPublicLink(button = null) {
   if (!state?.empresa?.slug) return;
+  if (!state.empresa.onboarding_finalizado) {
+    showNotif('Página ainda bloqueada', 'Complete os dados do negócio no painel para liberar o link.', 'info', 5000);
+    return;
+  }
   const link = publicUrl(state.empresa.slug);
   if (navigator.clipboard) navigator.clipboard.writeText(link).catch(() => {});
   if (button?.classList?.contains('dash-copy-button')) {
@@ -3104,6 +3147,10 @@ function copyPublicLink(button = null) {
 
 function openPublic() {
   if (!state?.empresa?.slug) return;
+  if (!state.empresa.onboarding_finalizado) {
+    showNotif('Página ainda bloqueada', 'Complete os dados do negócio antes de publicar.', 'info', 5000);
+    return;
+  }
   history.pushState(null, '', '#agendar/' + state.empresa.slug);
   loadPublic(state.empresa.slug);
 }
@@ -3115,6 +3162,11 @@ async function loadPublic(slug) {
   if (pv) pv.style.display = 'block';
   const { data: empresa, error } = await db.from('agenda_empresas').select('*').eq('slug', slug).single();
   if (error || !empresa) { setText('pubNomeEmpresa', 'Agenda não encontrada'); setText('pubDescEmpresa', 'Verifique se o link está correto.'); return; }
+  if (!empresa.onboarding_finalizado) {
+    setText('pubNomeEmpresa', 'Página em configuração');
+    setText('pubDescEmpresa', 'Este espaço ainda não está disponível para agendamentos.');
+    return;
+  }
   state.pubEmpresa = empresa;
   state.pubDiasFechados = calcDiasFechados(empresa);
   aplicarBloqueioDataPublica(state.pubDiasFechados);
