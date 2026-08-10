@@ -6057,6 +6057,17 @@ body.action-center-open { overflow:hidden!important; }
     transform: none !important;
     box-shadow: none !important;
   }
+  #authOverlay .auth-form-area .field.has-auth-error input,
+  #authOverlay .auth-form-area .field.has-auth-error input:focus,
+  #authOverlay .auth-form-area .field.has-auth-error select:focus,
+  #authOverlay .auth-form-area .field.has-auth-error textarea:focus,
+  #authOverlay .auth-form-area .field.has-auth-error .pw-wrap input:focus {
+    border-width: 0 0 1px !important;
+    border-color: #fb7185 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
 
   .agenda-v2 .tl-card-top {
     display: grid !important;
@@ -9963,5 +9974,81 @@ body.auth-performance-mode .notif-item.compact.out {
   #authOverlay .auth-form-area .field input:-webkit-autofill:active,
   #authOverlay .auth-form-area .field input:autofill {
     border-radius: 10px !important;
+  }
+}
+
+/* V47 — campos mobile idênticos ao desktop: transparentes e sublinhados */
+@media (max-width:620px) {
+  #authOverlay .auth-form-area .field input,
+  #authOverlay .auth-form-area .field input:hover,
+  #authOverlay .auth-form-area .field input:focus,
+  #authOverlay .auth-form-area .field input:active,
+  #authOverlay .auth-form-area .field input:valid,
+  #authOverlay .auth-form-area .field input:invalid,
+  #authOverlay .auth-form-area .field select,
+  #authOverlay .auth-form-area .field textarea {
+    min-height: 50px !important;
+    padding: 0 40px 0 2px !important;
+    border-width: 0 0 1px !important;
+    border-style: solid !important;
+    border-color: rgba(255,255,255,.3) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #f8f4fb !important;
+    -webkit-text-fill-color: #f8f4fb !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transition: border-color .18s ease,color .18s ease !important;
+  }
+  #authOverlay .auth-form-area .field input:focus,
+  #authOverlay .auth-form-area .field select:focus,
+  #authOverlay .auth-form-area .field textarea:focus {
+    border-width: 0 0 1px !important;
+    border-bottom-color: #c084fc !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  #authOverlay .auth-form-area .pw-wrap,
+  #authOverlay .auth-form-area .pw-wrap:hover,
+  #authOverlay .auth-form-area .pw-wrap:focus-within {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  #authOverlay .field.has-auth-error input,
+  #authOverlay .field.has-auth-error select,
+  #authOverlay .field.has-auth-error textarea,
+  #authOverlay .field.has-auth-error .pw-wrap input {
+    border-width: 0 0 1px !important;
+    border-style: solid !important;
+    border-color: #fb7185 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  #authOverlay .auth-form-area .field input:-webkit-autofill,
+  #authOverlay .auth-form-area .field input:-webkit-autofill:hover,
+  #authOverlay .auth-form-area .field input:-webkit-autofill:focus,
+  #authOverlay .auth-form-area .field input:-webkit-autofill:active,
+  #authOverlay .auth-form-area .field input:autofill,
+  #authOverlay .auth-form-area .field input:autofill:hover,
+  #authOverlay .auth-form-area .field input:autofill:focus {
+    border-width: 0 0 1px !important;
+    border-style: solid !important;
+    border-color: rgba(255,255,255,.3) !important;
+    border-radius: 0 !important;
+    background-color: transparent !important;
+    color: #f8f4fb !important;
+    -webkit-text-fill-color: #f8f4fb !important;
+    caret-color: #c084fc !important;
+    -webkit-box-shadow: 0 0 0 1000px #08030f inset !important;
+    box-shadow: 0 0 0 1000px #08030f inset !important;
+  }
+  #authOverlay .auth-form-area .field input:-webkit-autofill:focus,
+  #authOverlay .auth-form-area .field input:autofill:focus {
+    border-bottom-color: #c084fc !important;
   }
 }
