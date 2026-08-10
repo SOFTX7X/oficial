@@ -9910,6 +9910,99 @@ body.auth-performance-mode .notif-item.compact.out {
     animation: authWelcomeLeave .28s ease both;
   }
 }
+
+/* V50 — código OTP organizado em oito caixas */
+#authOverlay .auth-code-field > label {
+  margin-bottom: 11px !important;
+  text-align: center !important;
+}
+#authOverlay .auth-code-segmented {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  cursor: text;
+}
+#authOverlay .auth-code-native,
+#authOverlay .auth-form-area .field input.auth-code-native,
+#authOverlay .auth-form-area .field input.auth-code-native:focus {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 3 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  caret-color: transparent !important;
+  box-shadow: none !important;
+  opacity: .01 !important;
+  cursor: text !important;
+}
+#authOverlay .auth-code-boxes {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(8,minmax(0,1fr));
+  gap: 8px;
+  width: 100%;
+}
+#authOverlay .auth-code-boxes span {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1/1;
+  min-width: 0;
+  border: 1px solid rgba(93,22,138,.58);
+  border-radius: 8px;
+  background: rgba(22,5,37,.82);
+  color: #F7F3FA;
+  font: 750 clamp(15px,3.8vw,19px)/1 'JetBrains Mono',monospace;
+  box-shadow: inset 0 1px rgba(247,243,250,.025);
+  transition: border-color .16s ease,background-color .16s ease,box-shadow .16s ease,transform .16s ease;
+}
+#authOverlay .auth-code-boxes span.is-filled {
+  border-color: rgba(139,36,214,.72);
+  background: rgba(37,8,61,.9);
+}
+#authOverlay .auth-code-boxes span.is-active {
+  border-color: #A52EFF;
+  background: rgba(93,22,138,.22);
+  box-shadow: 0 0 0 3px rgba(165,46,255,.11),0 0 18px rgba(93,22,138,.22);
+  transform: translateY(-1px);
+}
+#authOverlay .auth-code-segmented.is-complete .auth-code-boxes span {
+  border-color: #8B24D6;
+}
+#authOverlay .auth-code-field.has-auth-error .auth-code-boxes span {
+  border-color: rgba(251,113,133,.78);
+  background: rgba(55,12,31,.52);
+  box-shadow: none;
+}
+#authOverlay .auth-code-field .auth-field-error {
+  justify-content: center;
+  text-align: center;
+}
+@media (max-width:620px) {
+  #authOverlay .auth-flow-screen .auth-form-sub {
+    margin-bottom: 22px !important;
+  }
+  #authOverlay .auth-code-segmented { max-width: 350px; }
+  #authOverlay .auth-code-boxes { gap: 6px; }
+  #authOverlay .auth-code-boxes span {
+    border-radius: 7px;
+    font-size: 16px;
+  }
+  #authOverlay .auth-flow-screen .form-gap { gap: 14px !important; }
+  #authOverlay .auth-flow-screen .btn-primary,
+  #authOverlay .auth-flow-screen .btn-ghost {
+    border-radius: 8px !important;
+  }
+}
 @keyframes authWelcomeAura { to { transform: translate3d(5%,-2%,0) rotate(4deg); } }
 @keyframes authWelcomeGlow { to { transform: translate3d(8%,4%,0) rotate(-7deg) scale(1.08); opacity:.74; } }
 @keyframes authWelcomeCopyIn { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:none; } }
