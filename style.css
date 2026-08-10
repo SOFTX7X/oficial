@@ -9777,6 +9777,7 @@ body.auth-performance-mode .notif-item.compact.out {
 /* V45 — boas-vindas roxa do Android/WebApp */
 .auth-mobile-welcome { display: none; }
 @media (max-width:620px) {
+  #landingView { display: none !important; }
   #authOverlay.mobile-welcome-open .auth-close,
   #authOverlay.mobile-welcome-open .auth-panel-left,
   #authOverlay.mobile-welcome-open .auth-form-area { display: none !important; }
