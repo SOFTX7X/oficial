@@ -8951,6 +8951,27 @@ body.auth-performance-mode .notif-item.compact.out {
   #authOverlay[data-auth-screen="formCadastro"] .auth-signup-heading .auth-form-sub {
     max-width: 390px !important;
   }
+  #authOverlay .auth-message-recovery {
+    width: 238px !important;
+    max-width: 238px !important;
+  }
+  #authOverlay .auth-message-recovery > strong {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: clamp(38px,3.2vw,44px) !important;
+    line-height: 1.04 !important;
+    letter-spacing: -.035em !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+  #authOverlay .auth-message-recovery > p {
+    width: 100% !important;
+    max-width: 238px !important;
+    line-height: 1.55 !important;
+  }
 }
 @media (max-width:620px) {
   #authOverlay[data-auth-screen="formCadastro"] .auth-signup-heading .auth-form-title {
