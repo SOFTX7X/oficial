@@ -8916,3 +8916,67 @@ body.auth-performance-mode .notif-item.compact.out {
   #authOverlay[data-auth-screen="formCadastro"].keyboard-open .auth-signup-heading { display: none !important; }
   #authOverlay[data-auth-screen="formCadastro"].keyboard-open #formCadastro .stepper { margin-bottom: 12px !important; }
 }
+
+/* V41 — seletor de categoria como tela exclusiva */
+#authOverlay[data-auth-screen="formCategory"] .auth-form-area {
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+#authOverlay[data-auth-screen="formCategory"] #authCategoryPanel {
+  position: relative !important;
+  inset: auto !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 540px !important;
+  height: min(600px, calc(100dvh - 90px)) !important;
+  max-height: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+#authOverlay[data-auth-screen="formCategory"] .auth-category-head {
+  flex: 0 0 auto !important;
+  margin-bottom: 16px !important;
+}
+#authOverlay[data-auth-screen="formCategory"] .auth-category-search-wrap {
+  flex: 0 0 auto !important;
+}
+#authOverlay[data-auth-screen="formCategory"] .auth-category-grid {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-width: none !important;
+}
+#authOverlay[data-auth-screen="formCategory"] .auth-category-grid::-webkit-scrollbar {
+  display: none !important;
+}
+#authOverlay[data-auth-screen="formCategory"] .auth-category-foot {
+  flex: 0 0 auto !important;
+}
+@media (max-width:620px) {
+  #authOverlay[data-auth-screen="formCategory"] .auth-form-area {
+    justify-content: flex-start !important;
+    padding: max(58px, calc(env(safe-area-inset-top) + 48px)) 16px max(16px, env(safe-area-inset-bottom)) !important;
+  }
+  #authOverlay[data-auth-screen="formCategory"] #authCategoryPanel {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+  #authOverlay[data-auth-screen="formCategory"] .auth-category-head {
+    grid-template-columns: minmax(0,1fr) auto !important;
+    align-items: start !important;
+    gap: 10px !important;
+  }
+  #authOverlay[data-auth-screen="formCategory"] .auth-category-back {
+    width: auto !important;
+    min-width: 74px !important;
+  }
+  #authOverlay[data-auth-screen="formCategory"] .auth-category-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
