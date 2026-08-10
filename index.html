@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260810-67">
+<link rel="stylesheet" href="style.css?v=20260810-68">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -574,6 +574,13 @@
         <p id="pageSub">Controle completo do seu negócio.</p>
       </div>
       <div class="topbar-actions topbar-actions-clean">
+        <div class="topbar-profile" id="topbarProfile">
+          <div class="topbar-profile-text">
+            <span class="topbar-profile-hello">Bem-vindo,</span>
+            <span class="topbar-profile-name" id="topbarNome">Empresa</span>
+          </div>
+          <div class="topbar-avatar" id="topbarAvatar">A</div>
+        </div>
         <button class="notification-bell" id="notificationBell" onclick="openNotificationCenter()" aria-label="Abrir notificações">
           <span class="notification-bell-icon">🔔</span>
           <span class="notification-bell-text">Notificações</span>
@@ -637,10 +644,6 @@
               <button class="dash-chart-tab" data-period="semanas" onclick="setChartPeriod('semanas')">Semanas</button>
               <button class="dash-chart-tab" data-period="meses" onclick="setChartPeriod('meses')">Meses</button>
             </div>
-            <button class="dash-copy-button dash-copy-button-inline" onclick="copyPublicLink(this)">
-              <span class="dash-copy-icon">🔗</span>
-              <span class="dash-copy-label">Copiar link</span>
-            </button>
           </div>
         </div>
 
@@ -1288,6 +1291,6 @@ document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
-<script defer src="app.js?v=20260810-66"></script>
+<script defer src="app.js?v=20260810-67"></script>
 </body>
 </html>
