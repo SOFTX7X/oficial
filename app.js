@@ -57,10 +57,11 @@ function unlockSecondScreen() {
 let state = {
   user: null, empresa: null, perfil: null,
   categorias: [], clientes: [], servicos: [],
-  profissionais: [], agendamentos: [], pagamentos: [],
+  profissionais: [], agendamentos: [], pagamentos: [], cobrancas: [],
   pubEmpresa: null, pubServico: null, pubProfissional: null,
   pubDiasFechados: []
 };
+window.state = state;
 
 let _agendaFilter = 'todos';
 let _confirmCb = null;
@@ -666,6 +667,10 @@ setTimeout(esconderTelaCarregamento, 5200);
 
 async function init() {
   await loadCategorias();
+  if (typeof window.isPublicChargeRoute === 'function' && window.isPublicChargeRoute()) {
+    await window.loadPublicChargeRoute();
+    return;
+  }
   const slug = getPublicSlug();
   if (slug) { await loadPublic(slug); return; }
   try {
@@ -1815,6 +1820,9 @@ async function loadAll() {
     state.clientes = cli.data || []; state.servicos = svc.data || [];
     state.profissionais = prof.data || []; state.agendamentos = ordenarAgendamentosRecentes(ag.data);
     state.pagamentos = pag.data || [];
+    if (typeof window.loadCobrancasFinanceiras === 'function') {
+      state.cobrancas = await window.loadCobrancasFinanceiras(id);
+    }
     lastIds = new Set(state.agendamentos.map(a => String(a.id)));
     renderAll();
   } catch (e) { console.error('Erro ao carregar dados:', e); }
@@ -2342,6 +2350,7 @@ function renderDashChart() {
 }
 
 function renderFinanceiro() {
+  if (typeof window.renderFinanceiroV2 === 'function') return window.renderFinanceiroV2();
   const todos = state.agendamentos || [];
   const fin = todos.filter(isFinanceiro);
   const total = fin.reduce((s, a) => s + Number(a.valor || 0), 0);
