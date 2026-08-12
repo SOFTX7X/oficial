@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="description" content="VyXora Agendas — Sistema de agendamento online premium para profissionais brasileiros. Crie sua agenda, receba agendamentos 24h, gerencie clientes, serviços e financeiro em um painel completo. Grátis para começar."/>
+<meta name="keywords" content="agendamento online, agenda online, sistema de agendamento, agendamento para salão, agendamento para barbearia, nail designer, agendamento grátis, VyXora"/>
+<meta name="author" content="VyXora Agendas"/>
+<meta name="robots" content="index, follow"/>
+<meta name="google-site-verification" content="-jnpvtxvbAZKL8YHFDCdqnsyJzVJyJxJv4GROVFkkWs"/>
+<link rel="canonical" href="https://vyxora.online/"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://vyxora.online/"/>
+<meta property="og:title" content="VyXora Agendas — Sua agenda online, organizada e elegante."/>
+<meta property="og:description" content="Receba agendamentos 24h, gerencie clientes e faturamento. Painel profissional pronto em 3 minutos. Grátis para começar."/>
+<meta property="og:locale" content="pt_BR"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="VyXora Agendas — Sua agenda online, organizada e elegante."/>
+<meta name="twitter:description" content="Receba agendamentos 24h, gerencie clientes e faturamento. Painel profissional pronto em 3 minutos. Grátis para começar."/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "VyXora Agendas",
+  "url": "https://vyxora.online",
+  "description": "Sistema de agendamento online premium para profissionais brasileiros. Gerencie agenda, clientes, serviços e financeiro em um painel completo.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web, Android, iOS",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "BRL"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "2400"
+  }
+}
+</script>
+<title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
+<link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
+<link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
+<link rel="stylesheet" href="style.css?v=20260811-03">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="calendar.css?v=20260601-3">
+<script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script defer src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script defer src="calendar.js?v=20260804-13"></script>
+<link rel="stylesheet" href="financeiro-cobrancas.css?v=20260810-4">
+<link rel="stylesheet" href="dashboard-pc.css?v=20260811-01">
+</head>
+<body class="vx-booting">
+<div class="vyxora-loader vx-premium-loader" id="vyxoraLoader" role="status" aria-live="polite" aria-label="Carregando VyXora Agendas">
+  <div class="vx-premium-loader__shell">
+    <div class="vx-premium-loader__visual" aria-hidden="true">
+      <img src="loader-mascote-vyxora.webp?v=33" alt="" width="760" height="640" fetchpriority="high" decoding="async">
+    </div>
+
+    <div class="vx-premium-loader__content">
+      <div class="vx-premium-loader__eyebrow">VYXORA AGENDAS</div>
+      <h1 id="vyxoraLoaderTitle">Preparando sua experiência</h1>
+      <p id="vyxoraLoaderDetail">Organizando o aplicativo para você</p>
+
+      <div class="vx-premium-loader__progress" aria-hidden="true">
+        <span id="vyxoraLoaderBar"></span>
+      </div>
+
+      <div class="vx-premium-loader__meta">
+        <span id="vyxoraLoaderStage">Iniciando</span>
+        <strong id="vyxoraLoaderPercent">12%</strong>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="bg-noise"></div>
+<div class="bg-grid"></div>
+<div class="bg-glow-tl"></div>
+<div class="bg-glow-br"></div>
+
+<div id="landingView">
+  <nav class="land-nav" id="landNav">
+    <div class="nav-brand" onclick="window.scrollTo(0,0)">
+      <img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">
+      VyXora Agendas
+    </div>
+    <div class="nav-links">
+      <button class="nav-link" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Como funciona</button>
+      <button class="nav-link" onclick="document.getElementById('sec-features').scrollIntoView({behavior:'smooth'})">Funcionalidades</button>
+      <button class="nav-link" onclick="document.getElementById('sec-depo').scrollIntoView({behavior:'smooth'})">Depoimentos</button>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openAuth('login')">Entrar</button>
+      <button class="btn btn-primary btn-sm" onclick="openAuth('register')">Criar conta</button>
+    </div>
+  </nav>
+
+  <section class="vx-home-hero" aria-label="Conheça a VyXora Agendas">
+    <div class="vx-home-grid" aria-hidden="true"></div>
+    <div class="vx-home-orb vx-home-orb-a" aria-hidden="true"></div>
+    <div class="vx-home-orb vx-home-orb-b" aria-hidden="true"></div>
+
+    <div class="vx-home-copy landing-reveal">
+      <div class="vx-home-kicker"><span></span> Plataforma premium de agendamentos</div>
+      <h1>Transforme horários em uma experiência <em>profissional.</em></h1>
+      <p>Agenda online, equipe, clientes, serviços e resultados em um único painel criado para negócios que trabalham com hora marcada.</p>
+
+      <div class="vx-home-actions">
+        <button class="btn vx-btn-primary" onclick="openAuth('register')">Criar minha agenda</button>
+        <button class="btn vx-btn-secondary" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Explorar plataforma</button>
+      </div>
+
+      <div class="vx-home-proof">
+        <div><strong>24h</strong><span>Agendamento online</span></div>
+        <div><strong>100%</strong><span>Responsivo</span></div>
+        <div><strong>3 min</strong><span>Para começar</span></div>
+      </div>
+    </div>
+
+    <div class="vx-home-visual landing-reveal" aria-label="Visão geral da plataforma">
+      <div class="vx-product-preview">
+        <div class="vx-preview-head">
+          <div><span class="vx-preview-dot"></span> Painel online</div>
+          <small>Hoje</small>
+        </div>
+        <div class="vx-preview-stats">
+          <article><span>Agendamentos</span><strong>18</strong><small>+12% esta semana</small></article>
+          <article><span>Clientes</span><strong>248</strong><small>24 novos</small></article>
+          <article><span>Receita</span><strong>R$ 4,2 mil</strong><small>Resumo mensal</small></article>
+        </div>
+        <div class="vx-preview-agenda">
+          <div class="vx-preview-title"><strong>Próximos horários</strong><span>Agenda sincronizada</span></div>
+          <div class="vx-preview-row"><time>09:00</time><i></i><div><strong>Ana Clara</strong><span>Design de sobrancelhas</span></div><b>Confirmado</b></div>
+          <div class="vx-preview-row"><time>10:30</time><i></i><div><strong>Mariana Silva</strong><span>Atendimento premium</span></div><b>Confirmado</b></div>
+          <div class="vx-preview-row"><time>13:00</time><i></i><div><strong>Camila Souza</strong><span>Serviço personalizado</span></div><b class="pending">Pendente</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="land-hero">
+    <div class="hero-eyebrow"><span class="live-dot"></span> Plataforma de Agendamento Premium</div>
+    <h1 class="hero-title">
+      Sua agenda online,<br><em>organizada e elegante.</em>
+    </h1>
+    <p class="hero-sub">Receba agendamentos, gerencie equipe, clientes e faturamento — tudo em um painel profissional.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar minha agenda grátis</button>
+      <button class="btn btn-ghost btn-lg" onclick="document.getElementById('sec-como').scrollIntoView({behavior:'smooth'})">Ver como funciona</button>
+    </div>
+    <div class="hero-trust">
+      <span>★★★★★ 4.9/5</span>
+      <span class="trust-sep"></span>
+      <span>+2.400 profissionais</span>
+      <span class="trust-sep"></span>
+      <span>Pronto em 3 minutos</span>
+      <span class="trust-sep"></span>
+      <span>Grátis para começar</span>
+    </div>
+  </section>
+
+  <div class="hero-mockup">
+    <div class="mockup-glow"></div>
+    <div class="mockup-window">
+      <div class="mockup-bar">
+        <div class="mockup-dots">
+          <div class="mockup-dot r"></div>
+          <div class="mockup-dot y"></div>
+          <div class="mockup-dot g"></div>
+        </div>
+        <div class="mockup-bar-title">VyXora Agendas — Dashboard</div>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-sidebar">
+          <div class="ms-label">Gestão</div>
+          <div class="ms-item active"><div class="ms-icon">📊</div>Dashboard</div>
+          <div class="ms-item"><div class="ms-icon">📅</div>Agenda</div>
+          <div class="ms-item"><div class="ms-icon">👥</div>Clientes</div>
+          <div class="ms-item"><div class="ms-icon">◈</div>Serviços</div>
+          <div class="ms-label" style="margin-top:8px">Financeiro</div>
+          <div class="ms-item"><div class="ms-icon">💰</div>Financeiro</div>
+          <div class="ms-item"><div class="ms-icon">⚙</div>Config</div>
+        </div>
+        <div class="mockup-content">
+          <div class="mc-stats">
+            <div class="mc-stat"><div class="mc-sl">Hoje</div><div class="mc-sv">18</div><div class="mc-sg">↑ 12%</div></div>
+            <div class="mc-stat"><div class="mc-sl">Clientes</div><div class="mc-sv">248</div><div class="mc-sg">↑ 24 novos</div></div>
+            <div class="mc-stat"><div class="mc-sl">Receita</div><div class="mc-sv">R$4.2k</div><div class="mc-sg">↑ 18%</div></div>
+            <div class="mc-stat"><div class="mc-sl">Serviços</div><div class="mc-sv">7</div><div class="mc-sg">Ativos</div></div>
+          </div>
+          <div class="mc-list-title">Próximos agendamentos</div>
+          <div class="mc-rows">
+            <div class="mc-row"><div class="mc-av">A</div><div><div class="mc-name">Ana Caroline</div><div class="mc-meta">Gel · 09:00</div></div><span class="badge badge-green" style="margin-left:auto;font-size:9.5px">Confirmado</span></div>
+            <div class="mc-row"><div class="mc-av">J</div><div><div class="mc-name">Juliana Dias</div><div class="mc-meta">Sobrancelha · 10:30</div></div><span class="badge badge-yellow" style="margin-left:auto;font-size:9.5px">Pendente</span></div>
+            <div class="mc-row"><div class="mc-av">M</div><div><div class="mc-name">Mariana Lima</div><div class="mc-meta">Pedicure · 13:00</div></div><span class="badge badge-green" style="margin-left:auto;font-size:9.5px">Confirmado</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="land-section" id="sec-como">
+    <div class="section-wrap">
+      <div class="section-header landing-reveal">
+        <div class="section-tag">Como funciona</div>
+        <h2 class="section-title">Comece a receber agendamentos <em>em minutos.</em></h2>
+        <p class="section-sub">Sem complicação. Sem mensalidade obrigatória. Tudo online.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card landing-reveal">
+          <div class="step-num">01</div>
+          <div class="step-icon">🏢</div>
+          <div class="step-title">Crie sua conta e configure seu negócio</div>
+          <p class="step-desc">Preencha nome, área e link personalizado. Em 3 minutos seu painel está pronto.</p>
+        </div>
+        <div class="step-card landing-reveal">
+          <div class="step-num">02</div>
+          <div class="step-icon">◈</div>
+          <div class="step-title">Cadastre serviços, profissionais e horários</div>
+          <p class="step-desc">Adicione catálogo com preços, duração e profissionais responsáveis.</p>
+        </div>
+        <div class="step-card landing-reveal">
+          <div class="step-num">03</div>
+          <div class="step-icon">🔗</div>
+          <div class="step-title">Compartilhe seu link e receba agendamentos</div>
+          <p class="step-desc">Link exclusivo no WhatsApp, stories e bio. Clientes agendam sozinhos, 24h.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="land-section" id="sec-features" style="padding-top:40px">
+    <div class="section-wrap">
+      <div class="section-header landing-reveal">
+        <div class="section-tag">Funcionalidades</div>
+        <h2 class="section-title">Tudo que você precisa para <em>crescer.</em></h2>
+      </div>
+      <div class="features-grid">
+        <div class="feat-card landing-reveal"><div class="feat-icon">📅</div><div class="feat-title">Agenda online</div><p class="feat-desc">Painel completo por data e profissional.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">🔗</div><div class="feat-title">Link exclusivo</div><p class="feat-desc">Compartilhe onde quiser, sem app.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">👥</div><div class="feat-title">Gestão de clientes</div><p class="feat-desc">Histórico, total gasto e contatos.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">◈</div><div class="feat-title">Catálogo de serviços</div><p class="feat-desc">Preços, duração e profissionais.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">📊</div><div class="feat-title">Dashboard em tempo real</div><p class="feat-desc">Métricas completas e precisas.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">💰</div><div class="feat-title">Controle financeiro</div><p class="feat-desc">Receita, ticket médio e histórico.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">📱</div><div class="feat-title">WhatsApp integrado</div><p class="feat-desc">Confirme agendamentos em segundos.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">🌐</div><div class="feat-title">Página pública</div><p class="feat-desc">Página elegante de auto-agendamento.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">🔔</div><div class="feat-title">Notificações em tempo real</div><p class="feat-desc">Alertas instantâneos de novos pedidos.</p></div>
+        <div class="feat-card landing-reveal"><div class="feat-icon">📲</div><div class="feat-title">100% mobile</div><p class="feat-desc">Funciona perfeitamente no celular.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="land-section" style="padding-top:40px">
+    <div class="section-wrap mascot-calm-wrap">
+      <div class="mascot-calm-banner">
+        <img src="banner-tranquilidade-vyxora.png?v=1" alt="Mascote VyXora relaxando enquanto a agenda fica organizada" loading="lazy" decoding="async">
+      </div>
+      <div class="mascot-calm-copy">
+        <div>
+          <h2 class="section-title">Sua agenda organizada. <em>Você mais tranquilo.</em></h2>
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Começar agora</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="land-section" style="padding-top:40px">
+    <div class="section-wrap">
+      <div class="section-header landing-reveal">
+        <div class="section-tag">Para quem é</div>
+        <h2 class="section-title">Para todo profissional que <em>trabalha com hora marcada.</em></h2>
+      </div>
+      <div class="segs-wrap">
+        <div class="seg-pill landing-reveal">💅 Nail Designer</div>
+        <div class="seg-pill landing-reveal">✂️ Barbearia</div>
+        <div class="seg-pill landing-reveal">💇 Salão de Beleza</div>
+        <div class="seg-pill landing-reveal">🧖 Estética</div>
+        <div class="seg-pill landing-reveal">🏥 Clínica de Saúde</div>
+        <div class="seg-pill landing-reveal">🏋️ Personal Trainer</div>
+        <div class="seg-pill landing-reveal">🎨 Tatuador</div>
+        <div class="seg-pill landing-reveal">💆 Massoterapia</div>
+        <div class="seg-pill landing-reveal">🦷 Odontologia</div>
+        <div class="seg-pill landing-reveal">👁️ Sobrancelha &amp; Cílios</div>
+        <div class="seg-pill landing-reveal">🧘 Yoga &amp; Pilates</div>
+        <div class="seg-pill landing-reveal">💼 Consultor</div>
+        <div class="seg-pill landing-reveal">📸 Fotógrafo</div>
+        <div class="seg-pill landing-reveal">🐾 Pet Shop</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="land-section" id="sec-depo" style="padding-top:40px">
+    <div class="section-wrap">
+      <div class="section-header landing-reveal">
+        <div class="section-tag">Depoimentos</div>
+        <h2 class="section-title">O que nossos clientes <em>dizem.</em></h2>
+      </div>
+      <div class="test-grid">
+        <div class="test-card landing-reveal">
+          <div class="test-stars">★★★★★</div>
+          <p class="test-quote">Antes anotava tudo no WhatsApp e me perdia toda semana. Agora minhas clientes agendam sozinhas e minha agenda fica organizada.</p>
+          <div class="test-author"><div class="test-av">C</div><div><div class="test-name">Camila Ferreira</div><div class="test-role">Nail Designer · Manaus, AM</div></div></div>
+        </div>
+        <div class="test-card landing-reveal">
+          <div class="test-stars">★★★★★</div>
+          <p class="test-quote">O sistema passa uma imagem muito mais profissional. Parece que minha barbearia ficou maior do dia para a noite. Recomendo demais.</p>
+          <div class="test-author"><div class="test-av">R</div><div><div class="test-name">Rafael Costa</div><div class="test-role">Barbearia Black · Fortaleza, CE</div></div></div>
+        </div>
+        <div class="test-card landing-reveal">
+          <div class="test-stars">★★★★★</div>
+          <p class="test-quote">A página de agendamento ficou linda. Minhas clientes elogiaram muito a facilidade. Deixei de perder horários por falta de confirmação.</p>
+          <div class="test-author"><div class="test-av">J</div><div><div class="test-name">Juliana Lima</div><div class="test-role">Estética Premium · São Paulo, SP</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="land-cta">
+    <div class="cta-inner">
+      <div class="section-tag" style="display:inline-flex;margin:0 auto 20px">Comece agora</div>
+      <h2 class="cta-title">Sua agenda profissional<br>começa <em>agora.</em></h2>
+      <p class="cta-sub">Crie sua conta em menos de 3 minutos e receba seu link exclusivo na hora.</p>
+      <div class="cta-actions">
+        <button class="btn btn-primary btn-lg" onclick="openAuth('register')">Criar minha agenda grátis</button>
+        <button class="btn btn-ghost btn-lg" onclick="openAuth('login')">Já tenho uma conta</button>
+      </div>
+    </div>
+  </section>
+
+ <footer class="land-footer">
+    <div class="nav-brand"><img class="brand-mascot brand-mascot-sm" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">VyXora Agendas</div>
+    <div>© 2025 VyXora Agendas · Plataforma de Agendamento</div>
+    <div class="footer-contact">
+      <a href="https://instagram.com/vyxoraoficial" target="_blank" rel="noopener" class="footer-contact-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        @vyxoraoficial
+      </a>
+      <span class="footer-contact-sep">·</span>
+      <a href="mailto:vyxoraoficial@vyxora.online" class="footer-contact-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+        vyxoraoficial@vyxora.online
+      </a>
+    </div>
+    <div style="color:var(--text4)">Feito com ❤️ para profissionais brasileiros</div>
+  </footer>
+</div>
+<!-- ALERTA CENTRAL DO SISTEMA -->
+<div class="system-alert-overlay" id="systemAlertOverlay" role="dialog" aria-modal="true" aria-labelledby="systemAlertTitle" aria-describedby="systemAlertMessage">
+  <div class="system-alert-card" id="systemAlertCard">
+    <div class="system-alert-icon" id="systemAlertIcon" aria-hidden="true">!</div>
+    <div class="system-alert-copy"><strong id="systemAlertTitle">Atenção</strong><p id="systemAlertMessage"></p></div>
+    <button type="button" class="system-alert-close" id="systemAlertClose" onclick="closeSystemAlert()" aria-label="Fechar aviso">Fechar</button>
+  </div>
+</div>
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal">
+    <section class="auth-mobile-welcome" id="authMobileWelcome" aria-label="Boas-vindas">
+      <img class="auth-mobile-welcome-art" src="vyxora-mobile-welcome.webp?v=3" alt="Agendamento confirmado e atendimento organizado no celular">
+      <div class="auth-mobile-welcome-glow" aria-hidden="true"></div>
+      <div class="auth-mobile-welcome-copy">
+        <span class="auth-mobile-welcome-kicker">SEU ESPAÇO, DO SEU JEITO</span>
+        <h1>Bem-vindo.</h1>
+        <p>Organize sua rotina, seus horários e seus clientes em um só lugar.</p>
+        <div class="auth-mobile-welcome-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <button type="button" class="auth-mobile-next" onclick="abrirCadastroPelasBoasVindas()">Cadastrar</button>
+        <button type="button" class="auth-mobile-skip" onclick="abrirLoginPelasBoasVindas()">Entrar</button>
+      </div>
+    </section>
+    <img class="auth-mobile-screen-art auth-mobile-login-art" src="vyxora-mobile-login.webp?v=2" alt="Sistema profissional de agendamentos VyXora no celular">
+    <img class="auth-mobile-screen-art auth-mobile-code-art" src="vyxora-mobile-code.webp?v=1" alt="Cadeado violeta representando a proteção do código">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+    <div class="auth-panel-left auth-desktop-message" aria-hidden="true">
+      <div class="auth-desktop-message-copy auth-message-login">
+        <span>ACESSO AO SEU ESPAÇO</span>
+        <strong>Bem-vindo<br>de volta.</strong>
+        <p>Sua rotina continua exatamente de onde você parou.</p>
+      </div>
+      <div class="auth-desktop-message-copy auth-message-signup">
+        <span>UM NOVO COMEÇO</span>
+        <strong>Seu espaço<br>começa aqui.</strong>
+        <p>Crie sua conta e prepare cada detalhe no seu próprio ritmo.</p>
+      </div>
+      <div class="auth-desktop-message-copy auth-message-recovery">
+        <span>BOAS-VINDAS</span>
+        <strong>Bem-vindo!</strong>
+        <p>Que bom ter você aqui.<br>Confirme seu e-mail para entrar.</p>
+      </div>
+      <div class="auth-desktop-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+    </div>
+    <div class="auth-form-area">
+      <div class="auth-feedback" id="authFeedback" role="status" aria-live="polite"></div>
+      <div id="formLogin" style="display:none">
+        <div class="auth-form-title">Entrar no painel</div>
+        <p class="auth-form-sub">Use o mesmo e-mail e senha criados no cadastro.</p>
+        <div class="form-gap">
+          <div class="field"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
+          <div class="field"><label>Senha</label><div class="pw-wrap"><input id="loginSenha" type="password" placeholder="Sua senha" autocomplete="current-password"><button type="button" class="pw-eye" onclick="togglePw('loginSenha', this)" aria-label="Mostrar senha"><svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.86 19.86 0 0 1 4.22-5.44M9.9 4.24A9.5 9.5 0 0 1 12 4c7 0 11 8 11 8a19.86 19.86 0 0 1-2.18 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button></div></div>
+          <button class="auth-forgot-link" type="button" onclick="showForgotPassword()">Esqueci minha senha</button>
+          <button class="btn btn-primary btn-full" id="btnLogin" onclick="loginComSenha()">Entrar</button>
+        </div>
+        <div class="auth-switch">Não tenho conta. <button onclick="showCadastro()">Criar cadastro</button></div>
+      </div>
+      <div id="formVerifyEmail" class="auth-flow-screen" style="display:none">
+        <div class="auth-flow-icon">✉</div>
+        <div class="auth-form-title">Confirme seu e-mail</div>
+        <p class="auth-form-sub">Enviamos um código para <strong id="verifyEmailLabel"></strong>.</p>
+        <div class="form-gap">
+          <div class="field auth-code-field"><label>Código de confirmação</label><div class="auth-code-segmented" data-code-input="verifyEmailCode"><input id="verifyEmailCode" class="auth-code-input auth-code-native" inputmode="numeric" autocomplete="one-time-code" maxlength="8" aria-label="Código de confirmação"><div class="auth-code-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div><div class="auth-code-status" id="verifyCodeStatus" role="status" aria-live="polite"></div></div>
+          <button class="btn btn-primary btn-full" id="btnVerifyEmail" onclick="confirmarEmailCadastro()">Confirmar e continuar</button>
+          <button class="btn btn-ghost btn-full" id="btnResendSignup" onclick="reenviarCodigoCadastro()">Reenviar código</button>
+        </div>
+        <div class="auth-switch">E-mail incorreto? <button onclick="voltarCadastroEmail()">Alterar e-mail</button></div>
+      </div>
+      <div id="formForgotPassword" class="auth-flow-screen" style="display:none">
+        <div class="auth-flow-icon">⌁</div>
+        <div class="auth-form-title">Recuperar acesso</div>
+        <p class="auth-form-sub">Digite o e-mail da conta para receber um código de recuperação.</p>
+        <div class="form-gap">
+          <div class="field"><label>E-mail</label><input id="recoveryEmail" type="email" placeholder="seu@email.com" autocomplete="email"></div>
+          <button class="btn btn-primary btn-full" id="btnSendRecovery" onclick="enviarCodigoRecuperacao()">Enviar código</button>
+        </div>
+        <div class="auth-switch"><button onclick="showLogin()">Voltar ao login</button></div>
+      </div>
+      <div id="formRecoveryCode" class="auth-flow-screen" style="display:none">
+        <div class="auth-flow-icon">#</div>
+        <div class="auth-form-title">Digite o código</div>
+        <p class="auth-form-sub">Enviamos um código de recuperação para <strong id="recoveryEmailLabel"></strong>.</p>
+        <div class="form-gap">
+          <div class="field auth-code-field"><label>Código de recuperação</label><div class="auth-code-segmented" data-code-input="recoveryCode"><input id="recoveryCode" class="auth-code-input auth-code-native" inputmode="numeric" autocomplete="one-time-code" maxlength="8" aria-label="Código de recuperação"><div class="auth-code-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div><div class="auth-code-status" id="recoveryCodeStatus" role="status" aria-live="polite"></div></div>
+          <button class="btn btn-primary btn-full" id="btnVerifyRecovery" onclick="validarCodigoRecuperacao()">Validar código</button>
+          <button class="btn btn-ghost btn-full" id="btnResendRecovery" onclick="reenviarCodigoRecuperacao()">Reenviar código</button>
+        </div>
+        <div class="auth-switch"><button onclick="showForgotPassword()">Usar outro e-mail</button></div>
+      </div>
+      <div id="formNewPassword" class="auth-flow-screen" style="display:none">
+        <div class="auth-flow-icon">✓</div>
+        <div class="auth-form-title">Crie uma nova senha</div>
+        <p class="auth-form-sub">Use pelo menos 8 caracteres para proteger sua conta.</p>
+        <div class="form-gap">
+          <div class="field"><label>Nova senha</label><div class="pw-wrap"><input id="newPassword" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"><button type="button" class="pw-eye" onclick="togglePw('newPassword', this)" aria-label="Mostrar senha"><svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.86 19.86 0 0 1 4.22-5.44M9.9 4.24A9.5 9.5 0 0 1 12 4c7 0 11 8 11 8a19.86 19.86 0 0 1-2.18 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button></div></div>
+          <div class="field"><label>Confirmar nova senha</label><div class="pw-wrap"><input id="newPasswordConfirm" type="password" autocomplete="new-password" placeholder="Repita a nova senha"><button type="button" class="pw-eye" onclick="togglePw('newPasswordConfirm', this)" aria-label="Mostrar senha"><svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.86 19.86 0 0 1 4.22-5.44M9.9 4.24A9.5 9.5 0 0 1 12 4c7 0 11 8 11 8a19.86 19.86 0 0 1-2.18 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button></div></div>
+          <button class="btn btn-primary btn-full" id="btnUpdatePassword" onclick="salvarNovaSenha()">Atualizar senha</button>
+        </div>
+      </div>
+      <div id="formCadastro" style="display:none">
+        <div class="auth-signup-heading" aria-live="polite">
+          <div class="auth-form-title" id="cadastroSaudacao">Vamos começar?</div>
+          <p class="auth-form-sub" id="cadastroMensagem">Crie seu acesso. Você configura o negócio depois, dentro do painel.</p>
+        </div>
+        <div class="stepper">
+          <div class="step-dot active" id="st1"></div>
+          <div class="step-dot" id="st2"></div>
+          <div class="step-dot" id="st3"></div>
+        </div>
+        <div id="step1">
+          <div class="form-gap">
+            <div class="field"><label>Seu nome</label><input id="cadNome" placeholder="Ex: Ana Caroline" autocomplete="name"></div>
+            <div class="field" id="cadEmailField"><label>E-mail</label><input id="cadEmail" type="email" placeholder="seu@email.com" autocomplete="email"><small class="field-error" id="cadEmailError" aria-live="polite"></small></div>
+            <div class="field"><label>Senha</label><div class="pw-wrap"><input id="cadSenha" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePw('cadSenha', this)" aria-label="Mostrar senha"><svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.86 19.86 0 0 1 4.22-5.44M9.9 4.24A9.5 9.5 0 0 1 12 4c7 0 11 8 11 8a19.86 19.86 0 0 1-2.18 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button></div></div>
+            <button class="btn btn-primary btn-full" id="btnGoStep2" onclick="goStep2()">Criar conta</button>
+          </div>
+          <div class="auth-switch">Já tenho conta. <button onclick="showLogin()">Entrar</button></div>
+        </div>
+        <div id="step2" style="display:none">
+          <div class="form-gap">
+            <div class="field"><label>Nome do negócio</label><input id="empNome" placeholder="Ex: Nails da Ana" oninput="autoSlug()"></div>
+            <div class="field-row">
+              <div class="field auth-category-field">
+                <label>Área de atuação</label>
+                <button type="button" class="auth-category-trigger" id="empCategoriaTrigger" onclick="abrirSeletorCategoria()" aria-haspopup="dialog" aria-controls="authCategoryPanel">
+                  <span id="empCategoriaTriggerIcon">✦</span>
+                  <strong id="empCategoriaTriggerText">Escolher área de atuação</strong>
+                  <small>Selecionar</small>
+                </button>
+                <select id="empCategoria" class="auth-category-native" tabindex="-1" aria-hidden="true"><option value="">Carregando...</option></select>
+              </div>
+              <div class="field"><label>WhatsApp</label><input id="empWhatsapp" placeholder="(92) 99999-9999"></div>
+            </div>
+            <div class="field"><label>Link personalizado</label><input id="empSlug" placeholder="nails-da-ana"></div>
+            <div class="form-actions">
+              <button class="btn btn-ghost" onclick="goStep1()">Voltar</button>
+              <button class="btn btn-primary" style="flex:1" onclick="goStep3()">Continuar</button>
+            </div>
+          </div>
+        </div>
+        <div id="step3" style="display:none">
+          <div class="form-gap">
+            <div class="field"><label>Primeiro serviço</label><input id="servNome" placeholder="Ex: Alongamento em Gel"></div>
+            <div class="field-row">
+              <div class="field"><label>Preço (R$)</label><input id="servPreco" type="number" placeholder="80"></div>
+              <div class="field"><label>Duração (min)</label><input id="servDuracao" type="number" placeholder="90"></div>
+            </div>
+            <div class="field"><label>Primeiro profissional</label><input id="profNome" placeholder="Ex: Ana Caroline"></div>
+            <div class="field"><label>Especialidade</label><input id="profEsp" placeholder="Ex: Manicure"></div>
+            <div class="form-actions">
+              <button class="btn btn-ghost" onclick="goStep2()">Voltar</button>
+              <button class="btn btn-primary" style="flex:1" id="btnFinalizar" onclick="finalizarCadastro()">Criar painel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="authCategoryPanel" class="auth-category-panel" style="display:none" role="dialog" aria-modal="true" aria-labelledby="authCategoryTitle">
+        <div class="auth-category-head">
+          <div>
+            <div class="auth-category-kicker">PERFIL DO NEGÓCIO</div>
+            <div class="auth-form-title" id="authCategoryTitle">Escolha sua área</div>
+            <p class="auth-form-sub">Selecione a categoria que melhor representa o seu atendimento.</p>
+          </div>
+          <button type="button" class="auth-category-back" onclick="fecharSeletorCategoria()">Voltar</button>
+        </div>
+        <div class="auth-category-search-wrap">
+          <span aria-hidden="true">⌕</span>
+          <input id="authCategorySearch" type="search" placeholder="Pesquisar categoria" autocomplete="off" oninput="filtrarCategoriasCadastro(this.value)">
+        </div>
+        <div class="auth-category-grid" id="authCategoryGrid"></div>
+        <div class="auth-category-foot">A categoria pode ser alterada depois em Dados da empresa.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<section id="dashboardView" style="display:none">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-brand"><img class="brand-mascot" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">VyXora Agendas</div>
+    <div class="side-nav-section">
+      <div class="side-nav-label">Gestão</div>
+      <button class="nav-btn" onclick="setView('dashboard')"><span class="ni">📊</span>Dashboard</button>
+      <button class="nav-btn" onclick="setView('agenda')"><span class="ni">📅</span>Agenda</button>
+      <button class="nav-btn" onclick="setView('clientes')"><span class="ni">👥</span>Clientes</button>
+      <button class="nav-btn" onclick="setView('servicos')"><span class="ni">◈</span>Serviços</button>
+      <button class="nav-btn" onclick="setView('profissionais')"><span class="ni">👤</span>Profissionais</button>
+    </div>
+    <div class="side-nav-sep"></div>
+    <div class="side-nav-section">
+      <div class="side-nav-label">Financeiro</div>
+      <button class="nav-btn" onclick="setView('financeiro')"><span class="ni">💰</span>Financeiro</button>
+      <button class="nav-btn" onclick="setView('relatorios')"><span class="ni">📈</span>Relatórios</button>
+    </div>
+    <div class="side-nav-sep"></div>
+    <div class="side-nav-section">
+      <div class="side-nav-label">Empresa</div>
+      <button class="nav-btn" onclick="openPublic()"><span class="ni">🌐</span>Página Pública</button>
+      <button class="nav-btn" data-config-section="empresa" onclick="openConfigSection('empresa')"><span class="ni">🏢</span>Dados da empresa</button>
+      <button class="nav-btn" data-config-section="redes" onclick="openConfigSection('redes')"><span class="ni">📱</span>Redes sociais</button>
+      <button class="nav-btn" data-config-section="horarios" onclick="openConfigSection('horarios')"><span class="ni">🕐</span>Horários</button>
+      <button class="nav-btn" data-config-section="mensagens" onclick="openConfigSection('mensagens')"><span class="ni">💬</span>Mensagens</button>
+      <button class="nav-btn" data-config-section="fotos" onclick="openConfigSection('fotos')"><span class="ni">📷</span>Fotos</button>
+    </div>
+    <div class="side-bottom">
+      <div class="side-user-card">
+        <div class="side-user-row">
+          <div class="side-avatar" id="sideAvatar">A</div>
+          <div>
+            <div class="side-name" id="sideNome">Empresa</div>
+            <div class="side-plan" id="sidePlan">Grátis</div>
+          </div>
+        </div>
+        <div class="side-link-box" id="sideLinkBox" onclick="copyPublicLink()">Link público...</div>
+      </div>
+      <button class="btn btn-ghost btn-full btn-sm" onclick="logout()">Sair da conta</button>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2 id="pageTitle">Dashboard</h2>
+        <p id="pageSub">Controle completo do seu negócio.</p>
+      </div>
+      <div class="topbar-actions topbar-actions-clean">
+        <div class="topbar-profile" id="topbarProfile">
+          <div class="topbar-profile-text">
+            <span class="topbar-profile-hello">Bem-vindo,</span>
+            <span class="topbar-profile-name" id="topbarNome">Empresa</span>
+          </div>
+          <div class="topbar-avatar" id="topbarAvatar">A</div>
+        </div>
+        <button class="notification-bell" id="notificationBell" onclick="openNotificationCenter()" aria-label="Abrir notificações">
+          <span class="notification-bell-icon">🔔</span>
+          <span class="notification-bell-text">Notificações</span>
+          <span class="notification-badge" id="notificationBadge" hidden>0</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="mobile-menu-trigger" onclick="openMobileMenu()" aria-label="Abrir menu">
+      <span>☰</span> Menu
+    </button>
+
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+    <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+      <div class="mobile-menu-header">
+        <div class="nav-brand" style="font-size:17px"><img class="brand-mascot brand-mascot-sm" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">VyXora Agendas</div>
+        <button class="modal-close" onclick="closeMobileMenu()" style="position:static">✕</button>
+      </div>
+      <div class="mobile-menu-body">
+        <button class="nav-btn mobile-notification-button" onclick="openNotificationCenter();closeMobileMenu()">
+          <span class="ni">🔔</span>
+          <span>Notificações</span>
+          <span class="mobile-notification-badge" id="mobileNotificationBadge" hidden>0</span>
+        </button>
+        <div class="side-nav-label">Gestão</div>
+        <button class="nav-btn" onclick="setView('dashboard');closeMobileMenu()"><span class="ni">📊</span>Dashboard</button>
+        <button class="nav-btn mobile-menu-new" onclick="setView('agenda');closeMobileMenu();setTimeout(()=>{var el=document.getElementById('agCliente');if(el)el.focus()},200)"><span class="ni">＋</span>Novo agendamento</button>
+        <button class="nav-btn" onclick="setView('agenda');closeMobileMenu()"><span class="ni">📅</span>Agenda</button>
+        <button class="nav-btn" onclick="setView('clientes');closeMobileMenu()"><span class="ni">👥</span>Clientes</button>
+        <button class="nav-btn" onclick="setView('servicos');closeMobileMenu()"><span class="ni">◈</span>Serviços</button>
+        <button class="nav-btn" onclick="setView('profissionais');closeMobileMenu()"><span class="ni">👤</span>Profissionais</button>
+        <div class="side-nav-sep"></div>
+        <div class="side-nav-label">Financeiro</div>
+        <button class="nav-btn" onclick="setView('financeiro');closeMobileMenu()"><span class="ni">💰</span>Financeiro</button>
+        <button class="nav-btn" onclick="setView('relatorios');closeMobileMenu()"><span class="ni">📈</span>Relatórios</button>
+        <div class="side-nav-sep"></div>
+        <div class="side-nav-label">Empresa</div>
+        <button class="nav-btn" onclick="openPublic();closeMobileMenu()"><span class="ni">🌐</span>Página Pública</button>
+        <button class="nav-btn" data-config-section="empresa" onclick="openConfigSection('empresa')"><span class="ni">🏢</span>Dados da empresa</button>
+        <button class="nav-btn" data-config-section="redes" onclick="openConfigSection('redes')"><span class="ni">📱</span>Redes sociais</button>
+        <button class="nav-btn" data-config-section="horarios" onclick="openConfigSection('horarios')"><span class="ni">🕐</span>Horários</button>
+        <button class="nav-btn" data-config-section="mensagens" onclick="openConfigSection('mensagens')"><span class="ni">💬</span>Mensagens</button>
+        <button class="nav-btn" data-config-section="fotos" onclick="openConfigSection('fotos')"><span class="ni">📷</span>Fotos</button>
+        <div class="side-nav-sep"></div>
+        <button class="btn btn-ghost btn-full btn-sm" onclick="logout()" style="margin-top:8px">Sair da conta</button>
+      </div>
+    </div>
+
+    <!-- VIEW: DASHBOARD -->
+    <section class="view active" id="view-dashboard">
+      <div class="vxd-legacy">
+      <div class="dash-stats-top">
+        <div class="stats-grid stats-grid-2 dash-mini-stack">
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">💵</div><div class="stat-label">Fat. hoje</div><div class="stat-value" id="statFatHoje">R$0</div><div class="stat-trend-row"><span class="stat-delta" id="statFatHojeDelta"></span><svg class="stat-spark" id="statFatHojeSpark" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="stat-spark-line"></path></svg></div></div>
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">💰</div><div class="stat-label">Fat. mês</div><div class="stat-value" id="statFatMes">R$0</div><div class="stat-trend-row"><span class="stat-delta" id="statFatMesDelta"></span><svg class="stat-spark" id="statFatMesSpark" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="stat-spark-line"></path></svg></div></div>
+          <div class="stat-card stat-card-green"><div class="stat-icon-badge">📊</div><div class="stat-label">Taxa confirmação</div><div class="stat-value green" id="statTaxa">0%</div><div class="stat-trend-row"><span class="stat-delta" id="statTaxaDelta"></span><svg class="stat-spark" id="statTaxaSpark" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="stat-spark-line"></path></svg></div></div>
+          <div class="stat-card stat-card-blue"><div class="stat-icon-badge">👥</div><div class="stat-label">Clientes</div><div class="stat-value" id="statClientes">0</div><div class="stat-trend-row"><span class="stat-delta" id="statClientesDelta"></span><svg class="stat-spark" id="statClientesSpark" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="stat-spark-line"></path></svg></div></div>
+        </div>
+        <div class="stats-grid stats-grid-6">
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">📅</div><div class="stat-label">Hoje</div><div class="stat-value" id="statHoje">0</div></div>
+          <div class="stat-card stat-card-yellow"><div class="stat-icon-badge">⏳</div><div class="stat-label">Pendentes</div><div class="stat-value yellow" id="statPendentes">0</div></div>
+          <div class="stat-card stat-card-green"><div class="stat-icon-badge">✅</div><div class="stat-label">Confirmados</div><div class="stat-value green" id="statConfirmados">0</div></div>
+          <div class="stat-card stat-card-blue"><div class="stat-icon-badge">🎯</div><div class="stat-label">Concluídos</div><div class="stat-value blue" id="statConcluidos">0</div></div>
+          <div class="stat-card stat-card-purple"><div class="stat-icon-badge">📅</div><div class="stat-label">Reagendados</div><div class="stat-value purple" id="statReagendados">0</div></div>
+          <div class="stat-card stat-card-red"><div class="stat-icon-badge">✕</div><div class="stat-label">Recusados</div><div class="stat-value red" id="statRecusados">0</div></div>
+        </div>
+      </div>
+
+      <div class="dash-chart-panel">
+        <div class="dash-chart-head">
+          <div>
+            <div class="dash-premium-kicker">Painel financeiro · tempo real</div>
+            <div class="dash-chart-value" id="chartFatValue">R$0</div>
+            <div class="dash-chart-sub" id="chartFatSub">Faturamento nos últimos 14 dias</div>
+          </div>
+          <div class="dash-chart-top-right">
+            <div class="dash-chart-tabs">
+              <button class="dash-chart-tab active" data-period="dias" onclick="setChartPeriod('dias')">Dias</button>
+              <button class="dash-chart-tab" data-period="semanas" onclick="setChartPeriod('semanas')">Semanas</button>
+              <button class="dash-chart-tab" data-period="meses" onclick="setChartPeriod('meses')">Meses</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-chart-body">
+          <div class="dash-chart-yaxis" id="chartYAxis"></div>
+          <div class="dash-chart-svg-wrap">
+            <svg viewBox="0 0 640 200" class="dash-chart-svg" id="dashChartSvg" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="areaFillGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#a855f7" stop-opacity="0.38"/>
+                  <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="lineStrokeGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#c084fc"/>
+                  <stop offset="100%" stop-color="#e2c2ff"/>
+                </linearGradient>
+                <linearGradient id="lineStrokeGradGreen" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#22c55e"/>
+                  <stop offset="100%" stop-color="#6ee7a0"/>
+                </linearGradient>
+                <linearGradient id="lineStrokeGradRed" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#ef4444"/>
+                  <stop offset="100%" stop-color="#f79a9a"/>
+                </linearGradient>
+                <linearGradient id="barGradRecent" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#e2c2ff"/>
+                  <stop offset="100%" stop-color="#8b24d6"/>
+                </linearGradient>
+                <linearGradient id="barGradPast" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#9c5fd6" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#4c1391" stop-opacity="0.28"/>
+                </linearGradient>
+                <pattern id="barHatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+                  <rect width="6" height="6" fill="transparent"></rect>
+                  <line x1="0" y1="0" x2="0" y2="6" stroke="#ffffff" stroke-opacity="0.16" stroke-width="2"></line>
+                </pattern>
+              </defs>
+              <g id="chartGrid"></g>
+              <path id="chartLineConfirmadosGhost" class="dash-chart-line-ghost is-green"></path>
+              <path id="chartLineRecusadosGhost" class="dash-chart-line-ghost is-red"></path>
+              <path id="chartLineConcluidosGhost" class="dash-chart-line-ghost is-purple"></path>
+              <path id="chartAreaConcluidos" class="dash-chart-area is-purple"></path>
+              <path id="chartLineConfirmados" class="dash-chart-line is-green"></path>
+              <path id="chartLineRecusados" class="dash-chart-line is-red"></path>
+              <path id="chartLineConcluidos" class="dash-chart-line is-purple"></path>
+              <g id="chartDotsConfirmados"></g>
+              <g id="chartDotsRecusados"></g>
+              <g id="chartDotsConcluidos"></g>
+              <line id="chartCrosshair" class="dash-chart-crosshair" x1="0" y1="0" x2="0" y2="200"></line>
+              <g id="chartBarsGhost"></g>
+              <g id="chartBars"></g>
+              <rect id="chartHoverCapture" class="dash-chart-hover-capture" x="0" y="0" width="640" height="200"></rect>
+            </svg>
+            <div class="dash-chart-tooltip" id="chartTooltip"></div>
+          </div>
+        </div>
+        <div class="dash-chart-labels" id="chartLabels"></div>
+        <div class="dash-chart-legend">
+          <span class="dash-chart-legend-item"><span class="dash-chart-legend-dot"></span><span id="chartLegendText">Faturamento por dia</span></span>
+          <span class="dash-chart-legend-item dash-chart-legend-ghost"><span class="dash-chart-legend-dot is-ghost"></span><span id="chartLegendGhostText">Período anterior</span></span>
+        </div>
+
+        <div class="dash-chart-breakdown">
+          <div class="dash-chart-breakdown-item"><span class="dash-chart-breakdown-dot is-green"></span><span class="dash-chart-breakdown-label">Recebido</span><b id="chartBreakdownRecebido">R$0</b></div>
+          <div class="dash-chart-breakdown-item"><span class="dash-chart-breakdown-dot is-yellow"></span><span class="dash-chart-breakdown-label">A receber</span><b id="chartBreakdownAReceber">R$0</b></div>
+          <div class="dash-chart-breakdown-item"><span class="dash-chart-breakdown-dot is-red"></span><span class="dash-chart-breakdown-label">Cancelado</span><b id="chartBreakdownCancelado">R$0</b></div>
+        </div>
+
+        <div class="dash-chart-foot">
+          <div class="dash-chart-foot-item"><span>Melhor momento</span><b id="chartMelhor">—</b></div>
+          <div class="dash-chart-foot-item"><span>Ticket médio</span><b id="chartTicket">R$0</b></div>
+          <div class="dash-chart-foot-item"><span>Atendimentos</span><b id="chartAtendimentos">0</b></div>
+        </div>
+      </div>
+
+      <div class="dash-bottom-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div><div class="panel-title">Próximos agendamentos</div><div class="panel-sub">Pendentes e confirmados</div></div>
+            <button class="panel-action" onclick="setView('agenda')">Ver todos →</button>
+          </div>
+          <div class="panel-body"><div class="apt-list" id="dashAptList"></div></div>
+        </div>
+
+        <div class="dash-premium-donut dash-status-panel">
+          <div class="panel-title dash-status-title">Status dos agendamentos</div>
+          <div class="dash-donut-wrap">
+            <svg viewBox="0 0 120 120" class="dash-donut-svg">
+              <circle cx="60" cy="60" r="52" class="dash-donut-track"></circle>
+              <circle cx="60" cy="60" r="52" class="dash-donut-seg dash-donut-seg-green" id="dashDonutConcluidos"></circle>
+              <circle cx="60" cy="60" r="52" class="dash-donut-seg dash-donut-seg-purple" id="dashDonutConfirmados"></circle>
+              <circle cx="60" cy="60" r="52" class="dash-donut-seg dash-donut-seg-yellow" id="dashDonutPendentes"></circle>
+            </svg>
+            <div class="dash-donut-center">
+              <div class="dash-donut-value" id="dashDonutValue">0</div>
+              <div class="dash-donut-label">Agendamentos</div>
+            </div>
+          </div>
+          <div class="dash-premium-legend">
+            <div class="dash-legend-item"><span class="dash-legend-dot dash-legend-dot-green"></span>Concluídos<b id="dashLegConcluidos">0</b></div>
+            <div class="dash-legend-item"><span class="dash-legend-dot dash-legend-dot-purple"></span>Confirmados<b id="dashLegConfirmados">0</b></div>
+            <div class="dash-legend-item"><span class="dash-legend-dot dash-legend-dot-yellow"></span>Pendentes<b id="dashLegPendentes">0</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-hidden-stats" style="display:none">
+        <span id="statExcluidos">0</span><span id="statServicos">0</span><span id="statProfissionais">0</span><span id="statTotal">0</span>
+      </div>
+      </div>
+      <!-- ==================== VYXORA DASHBOARD PC (nova implementação) ==================== -->
+      <div class="vxd-pc" id="vxdPc">
+        <div class="vxd-kpis">
+          <div class="vxd-kpi">
+            <div class="vxd-kpi-top"><span class="vxd-kpi-label">Faturamento hoje</span><span class="vxd-kpi-delta" id="vxdKpiFatHojeDelta">—</span></div>
+            <div class="vxd-kpi-value" id="vxdKpiFatHoje">R$0</div>
+            <svg class="vxd-kpi-spark" id="vxdKpiFatHojeSpark" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="vxd-kpi-spark-line"></path></svg>
+          </div>
+          <div class="vxd-kpi">
+            <div class="vxd-kpi-top"><span class="vxd-kpi-label">Faturamento mês</span><span class="vxd-kpi-delta" id="vxdKpiFatMesDelta">—</span></div>
+            <div class="vxd-kpi-value" id="vxdKpiFatMes">R$0</div>
+            <svg class="vxd-kpi-spark" id="vxdKpiFatMesSpark" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="vxd-kpi-spark-line"></path></svg>
+          </div>
+          <div class="vxd-kpi">
+            <div class="vxd-kpi-top"><span class="vxd-kpi-label">Taxa confirmação</span><span class="vxd-kpi-delta" id="vxdKpiTaxaDelta">—</span></div>
+            <div class="vxd-kpi-value" id="vxdKpiTaxa">0%</div>
+            <svg class="vxd-kpi-spark" id="vxdKpiTaxaSpark" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="vxd-kpi-spark-line"></path></svg>
+          </div>
+          <div class="vxd-kpi">
+            <div class="vxd-kpi-top"><span class="vxd-kpi-label">Clientes</span><span class="vxd-kpi-delta" id="vxdKpiClientesDelta">—</span></div>
+            <div class="vxd-kpi-value" id="vxdKpiClientes">0</div>
+            <svg class="vxd-kpi-spark" id="vxdKpiClientesSpark" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="vxd-kpi-spark-line"></path></svg>
+          </div>
+        </div>
+
+        <div class="vxd-substrip" id="vxdSubstrip"></div>
+
+        <div class="vxd-grid">
+          <div class="vxd-chart-card">
+            <div class="vxd-chart-head">
+              <div>
+                <div class="vxd-kicker">Painel financeiro · tempo real</div>
+                <div class="vxd-chart-value" id="vxdChartValue">R$0</div>
+                <div class="vxd-chart-sub" id="vxdChartSub">Faturamento nos últimos 14 dias</div>
+              </div>
+              <div class="vxd-tabs" id="vxdTabs">
+                <button class="vxd-tab active" data-period="dias" onclick="setVxdChartPeriod('dias')">Dias</button>
+                <button class="vxd-tab" data-period="semanas" onclick="setVxdChartPeriod('semanas')">Semanas</button>
+                <button class="vxd-tab" data-period="meses" onclick="setVxdChartPeriod('meses')">Meses</button>
+              </div>
+            </div>
+            <div class="vxd-chart-body">
+              <svg viewBox="0 0 640 200" class="vxd-chart-svg" id="vxdChartSvg" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="vxdAreaFillGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#a855f7" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+                  </linearGradient>
+                  <linearGradient id="vxdLineGradGreen" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#6ee7a0"/>
+                  </linearGradient>
+                  <linearGradient id="vxdLineGradRed" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#f79a9a"/>
+                  </linearGradient>
+                  <linearGradient id="vxdLineGradPurple" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#e2c2ff"/>
+                  </linearGradient>
+                </defs>
+                <g id="vxdChartGrid"></g>
+                <path id="vxdAreaConcluidos" class="vxd-area is-purple"></path>
+                <path id="vxdLineConfirmados" class="vxd-line is-green"></path>
+                <path id="vxdLineRecusados" class="vxd-line is-red"></path>
+                <path id="vxdLineConcluidos" class="vxd-line is-purple"></path>
+              </svg>
+            </div>
+            <div class="vxd-chart-labels" id="vxdChartLabels"></div>
+            <div class="vxd-chart-legend">
+              <span><i class="dot green"></i>Confirmados</span>
+              <span><i class="dot red"></i>Recusados</span>
+              <span><i class="dot purple"></i>Concluídos</span>
+            </div>
+          </div>
+
+          <div class="vxd-activity-card">
+            <div class="vxd-card-title">Atividade recente</div>
+            <div class="vxd-activity-list" id="vxdActivityList"></div>
+          </div>
+
+          <div class="vxd-services-card">
+            <div class="vxd-card-title">Serviços em alta este mês</div>
+            <div class="vxd-services-table" id="vxdServicesTable"></div>
+          </div>
+
+          <div class="vxd-donut-card">
+            <div class="vxd-card-title">Status dos agendamentos</div>
+            <div class="vxd-donut-body">
+            <div class="vxd-donut-wrap">
+              <svg viewBox="0 0 140 140" class="vxd-donut-svg">
+                <circle cx="70" cy="70" r="60" class="vxd-donut-track"></circle>
+                <circle cx="70" cy="70" r="60" class="vxd-donut-seg seg-purple" id="vxdDonutConcluidos"></circle>
+                <circle cx="70" cy="70" r="60" class="vxd-donut-seg seg-green" id="vxdDonutConfirmados"></circle>
+                <circle cx="70" cy="70" r="60" class="vxd-donut-seg seg-yellow" id="vxdDonutPendentes"></circle>
+              </svg>
+              <div class="vxd-donut-center">
+                <div class="vxd-donut-value" id="vxdDonutValue">0%</div>
+                <div class="vxd-donut-label">Concluídos</div>
+              </div>
+            </div>
+            <div class="vxd-donut-delta" id="vxdDonutDelta">—</div>
+            <div class="vxd-donut-legend">
+              <div><i class="dot purple"></i>Concluídos<b id="vxdLegConcluidos">0</b></div>
+              <div><i class="dot green"></i>Confirmados<b id="vxdLegConfirmados">0</b></div>
+              <div><i class="dot yellow"></i>Pendentes<b id="vxdLegPendentes">0</b></div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: AGENDA -->
+    <section class="view agenda-v2" id="view-agenda">
+      <div class="agenda-v2-form">
+        <div class="agenda-v2-form-head">
+          <div>
+            <span class="agenda-v2-kicker">NOVO ATENDIMENTO</span>
+            <h2>Criar agendamento</h2>
+            <p>Cadastre cliente, serviço, profissional e horário em uma única etapa.</p>
+          </div>
+          <div class="agenda-v2-form-icon" aria-hidden="true">＋</div>
+        </div>
+
+        <div class="agenda-v2-grid">
+          <div class="field agenda-v2-client"><label><span>01</span> Cliente</label><input id="agCliente" placeholder="Nome do cliente" autocomplete="name"></div>
+          <div class="field agenda-v2-phone"><label><span>02</span> Telefone</label><input id="agTelefone" placeholder="WhatsApp" inputmode="tel" autocomplete="tel"></div>
+          <div class="field agenda-v2-service"><label><span>03</span> Serviço</label><select id="agServico"></select></div>
+          <div class="field agenda-v2-pro"><label><span>04</span> Profissional</label><select id="agProfissional"></select></div>
+          <div class="field agenda-v2-date">
+            <label><span>05</span> Data</label>
+            <button type="button" class="pub-picker-btn agenda-picker-btn" id="agDataBtn" onclick="abrirCalendarioAgendaInterna()">
+              <span id="agDataLabel">Escolher data</span><span class="picker-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <input id="agData" type="hidden">
+          </div>
+          <div class="field agenda-v2-time">
+            <label><span>06</span> Hora</label>
+            <button type="button" class="pub-picker-btn agenda-picker-btn" id="agHoraBtn" onclick="abrirHorariosAgendaInterna()">
+              <span id="agHoraLabel">Escolher horário</span><span class="picker-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <input id="agHora" type="hidden">
+          </div>
+          <div class="field agenda-v2-status"><label><span>07</span> Status</label><select id="agStatus"><option>Confirmado</option><option>Pendente</option></select></div>
+          <div class="field agenda-v2-submit"><button class="btn btn-primary btn-full agenda-v2-save" id="agendaBtnSalvar" onclick="salvarAgendamento()"><span aria-hidden="true">＋</span> Salvar agendamento</button></div>
+        </div>
+      </div>
+
+      <div class="agenda-v2-list-panel">
+        <div class="agenda-v2-list-head">
+          <div>
+            <span class="agenda-v2-kicker">VISÃO GERAL</span>
+            <h2>Seus agendamentos</h2>
+            <p>Acompanhe horários, status e ações de cada atendimento.</p>
+          </div>
+          <div class="agenda-v2-list-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+        </div>
+
+        <div class="agenda-v2-filter-wrap">
+          <div class="filter-bar" id="filterBar">
+            <button class="filter-btn active" onclick="setFilter('todos',this)">Todos <span class="filter-count" id="fc-todos">0</span></button>
+            <button class="filter-btn" onclick="setFilter('pendente',this)">⏳ Pendentes <span class="filter-count" id="fc-pendente">0</span></button>
+            <button class="filter-btn" onclick="setFilter('confirmado',this)">✅ Confirmados <span class="filter-count" id="fc-confirmado">0</span></button>
+            <button class="filter-btn" onclick="setFilter('reagendado',this)">📅 Reagendados <span class="filter-count" id="fc-reagendado">0</span></button>
+            <button class="filter-btn" onclick="setFilter('concluido',this)">🎯 Concluídos <span class="filter-count" id="fc-concluido">0</span></button>
+            <button class="filter-btn" onclick="setFilter('recusado',this)">✕ Recusados <span class="filter-count" id="fc-recusado">0</span></button>
+            <button class="filter-btn" onclick="setFilter('excluido',this)">🗑 Excluídos <span class="filter-count" id="fc-excluido">0</span></button>
+          </div>
+        </div>
+
+        <div class="agenda-v2-timeline-wrap"><div class="timeline" id="agendaTimeline"></div></div>
+      </div>
+    </section>
+
+    <!-- VIEW: CLIENTES -->
+    <section class="view premium-directory-view" id="view-clientes">
+      <div class="directory-intro">
+        <div><span class="directory-kicker">Relacionamento</span><h2>Base de clientes</h2><p>Cadastre contatos e acompanhe o histórico de cada cliente.</p></div>
+        <div class="directory-icon" aria-hidden="true">👥</div>
+      </div>
+      <div class="form-panel directory-form-panel">
+        <div class="directory-form-head"><div><div class="form-panel-title">Adicionar cliente</div><div class="directory-form-sub">Informações principais para contato e atendimento.</div></div><span class="directory-form-badge">Novo cadastro</span></div>
+        <div class="form-grid directory-form-grid">
+          <div class="field"><label>Nome completo</label><input id="cliNome" placeholder="Ex: Maria Oliveira"></div>
+          <div class="field"><label>WhatsApp</label><input id="cliTel" placeholder="(00) 00000-0000"></div>
+          <div class="field"><label>E-mail</label><input id="cliEmail" placeholder="cliente@email.com"></div>
+          <div class="field directory-submit"><button class="btn btn-primary btn-full directory-add-btn" onclick="salvarCliente()"><span>＋</span> Adicionar cliente</button></div>
+        </div>
+      </div>
+      <div class="directory-list-head"><div><strong>Clientes cadastrados</strong><span>Informações, status e resultados</span></div></div>
+      <div class="cards-grid directory-cards-grid" id="clientesGrid"></div>
+    </section>
+
+    <!-- VIEW: SERVIÇOS -->
+    <section class="view premium-directory-view" id="view-servicos">
+      <div class="directory-intro">
+        <div><span class="directory-kicker">Catálogo</span><h2>Serviços e preços</h2><p>Organize seu catálogo com valor e duração de cada atendimento.</p></div>
+        <div class="directory-icon" aria-hidden="true">◈</div>
+      </div>
+      <div class="form-panel directory-form-panel">
+        <div class="directory-form-head"><div><div class="form-panel-title">Adicionar serviço</div><div class="directory-form-sub">Configure um serviço pronto para receber agendamentos.</div></div><span class="directory-form-badge">Novo serviço</span></div>
+        <div class="form-grid directory-form-grid">
+          <div class="field"><label>Nome do serviço</label><input id="srvNome" placeholder="Ex: Corte premium"></div>
+          <div class="field"><label>Preço (R$)</label><input id="srvPreco" type="number" placeholder="80"></div>
+          <div class="field"><label>Duração (min)</label><input id="srvDur" type="number" placeholder="60"></div>
+          <div class="field directory-submit"><button class="btn btn-primary btn-full directory-add-btn" onclick="salvarServico()"><span>＋</span> Adicionar serviço</button></div>
+        </div>
+      </div>
+      <div class="directory-list-head"><div><strong>Catálogo ativo</strong><span>Preços, duração e disponibilidade</span></div></div>
+      <div class="cards-grid directory-cards-grid" id="servicosGrid"></div>
+    </section>
+
+    <!-- VIEW: PROFISSIONAIS -->
+    <section class="view premium-directory-view" id="view-profissionais">
+      <div class="directory-intro">
+        <div><span class="directory-kicker">Equipe</span><h2>Profissionais</h2><p>Gerencie quem realiza os atendimentos e aparece na agenda pública.</p></div>
+        <div class="directory-icon" aria-hidden="true">👤</div>
+      </div>
+      <div class="form-panel directory-form-panel">
+        <div class="directory-form-head"><div><div class="form-panel-title">Adicionar profissional</div><div class="directory-form-sub">Cadastre um novo integrante da sua equipe.</div></div><span class="directory-form-badge">Nova pessoa</span></div>
+        <div class="form-grid directory-form-grid">
+          <div class="field"><label>Nome</label><input id="proNome" placeholder="Nome do profissional"></div>
+          <div class="field"><label>Especialidade</label><input id="proEsp" placeholder="Ex: Manicure"></div>
+          <div class="field"><label>Telefone</label><input id="proTel" placeholder="(00) 00000-0000"></div>
+          <div class="field directory-submit"><button class="btn btn-primary btn-full directory-add-btn" onclick="salvarProfissional()"><span>＋</span> Adicionar profissional</button></div>
+        </div>
+      </div>
+      <div class="directory-list-head"><div><strong>Equipe cadastrada</strong><span>Especialidades, contato e disponibilidade</span></div></div>
+      <div class="cards-grid directory-cards-grid" id="profGrid"></div>
+    </section>
+
+    <!-- VIEW: FINANCEIRO -->
+    <section class="view" id="view-financeiro">
+      <div class="dash-hero" style="margin-bottom:20px">
+        <div class="dash-hero-inner"><div><h1>Resultados <em>financeiros.</em></h1><p>Receita, ticket médio e histórico.</p></div></div>
+      </div>
+
+      <div class="fin-grid">
+        <div class="fin-card"><div class="fin-label">Faturamento hoje</div><div class="fin-value" id="finHoje">R$0</div><div class="fin-sub" id="finHojeSub">—</div></div>
+        <div class="fin-card"><div class="fin-label">Faturamento do mês</div><div class="fin-value" id="finMes">R$0</div><div class="fin-sub" id="finMesSub">—</div></div>
+        <div class="fin-card"><div class="fin-label">Ticket médio</div><div class="fin-value" id="finTicket">R$0</div><div class="fin-sub">Média por atendimento</div></div>
+        <div class="fin-card"><div class="fin-label">Atendimentos concluídos</div><div class="fin-value" id="finPagos">0</div><div class="fin-sub" id="finPagosSub">Todos os tempos</div></div>
+      </div>
+
+      <div class="fin-panel">
+        <div class="fin-panel-head">
+          <div>
+            <div class="fin-panel-title">Faturamento dos últimos 7 dias</div>
+            <div class="fin-panel-sub">Evolução diária dos valores concluídos</div>
+          </div>
+          <div class="fin-panel-badge" id="finMelhorDiaBadge">—</div>
+        </div>
+        <div class="fin-bars" id="finBars7"></div>
+      </div>
+
+      <div class="fin-panel">
+        <div class="fin-panel-head">
+          <div>
+            <div class="fin-panel-title">Melhor dia da semana</div>
+            <div class="fin-panel-sub">Ranking por faturamento acumulado</div>
+          </div>
+        </div>
+        <div class="fin-week-list" id="finWeekList"></div>
+      </div>
+
+      <div class="fin-mini-grid">
+        <div class="fin-mini-card"><div class="fin-mini-icon">👥</div><div class="fin-mini-value" id="finClientesUnicos">0</div><div class="fin-mini-label">Pessoas que agendaram</div></div>
+        <div class="fin-mini-card"><div class="fin-mini-icon">📋</div><div class="fin-mini-value" id="finTotalAgendamentos">0</div><div class="fin-mini-label">Agendamentos no total</div></div>
+        <div class="fin-mini-card"><div class="fin-mini-icon">✅</div><div class="fin-mini-value" id="finTaxaConclusao">0%</div><div class="fin-mini-label">Taxa de conclusão</div></div>
+      </div>
+    </section>
+
+    <!-- VIEW: RELATÓRIOS -->
+    <section class="view" id="view-relatorios">
+      <div class="dash-hero" style="margin-bottom:20px">
+        <div class="dash-hero-inner"><div><h1>Relatórios <em>financeiros.</em></h1><p>Cobranças, pagamentos e recibos organizados.</p></div></div>
+      </div>
+      <div id="vxFinancialReports"></div>
+    </section>
+
+
+    <!-- VIEW: CONFIG -->
+    <section class="view" id="view-config">
+      <div class="dash-hero" style="margin-bottom:20px">
+        <div class="dash-hero-inner"><div><h1 id="configHeroTitle">Dados <em>da empresa.</em></h1><p id="configHeroSub">Informações principais do seu negócio.</p></div></div>
+      </div>
+      <div class="config-tab-content">
+        <div class="config-section config-tab-panel active" data-config-tab="empresa">
+          <div class="config-title"><div class="config-icon">🏢</div>Dados da empresa</div>
+          <div class="form-gap">
+            <div class="field"><label>Nome da empresa</label><input id="cfgNome"></div>
+            <div class="field"><label>WhatsApp</label><input id="cfgWhatsapp"></div>
+            <div class="field"><label>Slug / link</label><input id="cfgSlug"></div>
+            <div class="field">
+              <label>CEP</label>
+              <div class="endereco-cep-wrap">
+                <input id="cfgCep" placeholder="00000-000" maxlength="9" oninput="formatarCep(this)" onblur="buscarCep(this.value)">
+                <span class="cep-spinner" id="cepSpinner" style="display:none">⏳</span>
+              </div>
+            </div>
+            <div class="field" style="position:relative">
+              <label>Endereço</label>
+              <input id="cfgEndereco" placeholder="Rua, número, bairro" autocomplete="off" oninput="autocompleteEndereco(this.value)" onfocus="autocompleteEndereco(this.value)">
+              <div class="endereco-suggestions" id="enderecoSuggestions" style="display:none"></div>
+            </div>
+            <div class="field"><label>Cidade / Estado</label><input id="cfgCidade" placeholder="Ex: Manaus, AM"></div>
+            <button class="btn btn-primary btn-full" onclick="salvarConfig()">Salvar alterações</button>
+            <div id="cfgLinkBox" style="font-size:10.5px;color:var(--text4);padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);word-break:break-all"></div>
+          </div>
+        </div>
+        <div class="config-section config-tab-panel" data-config-tab="redes">
+          <div class="config-title"><div class="config-icon">📱</div>Redes sociais</div>
+          <div class="form-gap">
+            <div class="field"><label>Instagram</label><input id="cfgInstagram" placeholder="@seuinstagram"></div>
+            <div class="field"><label>Facebook</label><input id="cfgFacebook" placeholder="facebook.com/sua-pagina"></div>
+            <div class="field"><label>TikTok</label><input id="cfgTiktok" placeholder="@seutiktok"></div>
+            <div class="field"><label>Site / Link bio</label><input id="cfgSite" placeholder="https://seusite.com"></div>
+            <button class="btn btn-ghost btn-full" onclick="salvarRedesSociais()">Salvar redes sociais</button>
+          </div>
+        </div>
+        <div class="config-section config-tab-panel" data-config-tab="horarios">
+          <div class="config-title"><div class="config-icon">🕐</div>Horários de funcionamento</div>
+
+          <div class="horarios-card">
+            <div class="horarios-section-label">📅 Dias de atendimento</div>
+            <div class="dias-toggle-grid">
+              <button type="button" class="dia-toggle" id="diaSeg" data-campo="seg" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Seg</span>
+                <span class="dia-toggle-full">Segunda</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaTer" data-campo="ter" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Ter</span>
+                <span class="dia-toggle-full">Terça</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaQua" data-campo="qua" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Qua</span>
+                <span class="dia-toggle-full">Quarta</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaQui" data-campo="qui" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Qui</span>
+                <span class="dia-toggle-full">Quinta</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaSex" data-campo="sex" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Sex</span>
+                <span class="dia-toggle-full">Sexta</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaSab" data-campo="sab" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Sáb</span>
+                <span class="dia-toggle-full">Sábado</span>
+              </button>
+              <button type="button" class="dia-toggle" id="diaDom" data-campo="dom" onclick="toggleDia(this)">
+                <span class="dia-toggle-abrev">Dom</span>
+                <span class="dia-toggle-full">Domingo</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="horarios-card" style="margin-top:14px">
+            <div class="horarios-section-label">⏰ Horário de funcionamento</div>
+            <div class="field-row">
+              <div class="field"><label>Início</label><input type="time" id="cfgHorarioInicio" value="09:00"></div>
+              <div class="field"><label>Fim</label><input type="time" id="cfgHorarioFim" value="18:00"></div>
+            </div>
+          </div>
+
+          <div class="horarios-card" style="margin-top:14px">
+            <div class="horarios-section-label">🔁 Intervalo entre horários</div>
+            <div class="intervalo-grid">
+              <button type="button" class="intervalo-btn" data-val="30" onclick="selecionarIntervalo(this)">30 min</button>
+              <button type="button" class="intervalo-btn" data-val="45" onclick="selecionarIntervalo(this)">45 min</button>
+              <button type="button" class="intervalo-btn ativo" data-val="60" onclick="selecionarIntervalo(this)">1 hora</button>
+              <button type="button" class="intervalo-btn" data-val="90" onclick="selecionarIntervalo(this)">1h30</button>
+              <button type="button" class="intervalo-btn" data-val="120" onclick="selecionarIntervalo(this)">2 horas</button>
+            </div>
+            <input type="hidden" id="cfgIntervaloSlots" value="60">
+          </div>
+
+          <button class="btn btn-primary btn-full" style="margin-top:18px" onclick="salvarHorarios()">Salvar horários</button>
+        </div>
+        <div class="config-section config-tab-panel" data-config-tab="mensagens">
+          <div class="config-title"><div class="config-icon">💬</div>Mensagens automáticas</div>
+          <div class="form-gap">
+            <div class="field"><label>Confirmação</label><textarea id="msgConfirmacao"></textarea></div>
+            <div class="field"><label>Recusa</label><textarea id="msgRecusa"></textarea></div>
+            <div class="field"><label>Reagendamento</label><textarea id="msgReagendamento"></textarea></div>
+            <div class="field"><label>Contato pelo botão WA</label><textarea id="msgContato"></textarea></div>
+            <div class="config-hint">Use os marcadores exibidos em cada mensagem para preencher automaticamente os dados do agendamento. O marcador [EMPRESA] é opcional.</div>
+            <button class="btn btn-ghost btn-full" onclick="salvarMensagensWhatsapp()">Salvar mensagens</button>
+            <button class="btn btn-ghost btn-full" onclick="restaurarMensagensWhatsappPadrao()">Restaurar mensagens padrão</button>
+          </div>
+        </div>
+        <div class="config-section config-tab-panel" data-config-tab="fotos">
+          <div class="config-title"><div class="config-icon">📷</div>Fotos de perfil</div>
+          <div class="config-hint" style="margin-bottom:12px">Escolha uma imagem, ajuste o enquadramento no círculo e salve.</div>
+          <div class="profile-images-grid">
+            <label class="profile-image-card">
+              <span class="profile-image-title">Foto do painel</span>
+              <span class="profile-image-sub">Avatar pequeno da sua conta.</span>
+              <span class="profile-image-preview is-avatar" id="previewFotoPerfil"><span>+</span></span>
+              <input type="file" id="inputFotoPerfil" accept="image/jpeg,image/png,image/webp" onchange="abrirEditorFoto('perfil',this)">
+              <span class="profile-image-action">Escolher imagem</span>
+            </label>
+            <label class="profile-image-card">
+              <span class="profile-image-title">Foto da página pública</span>
+              <span class="profile-image-sub">Imagem circular exibida aos seus clientes.</span>
+              <span class="profile-image-preview is-cover" id="previewFotoPublica"><span>+</span></span>
+              <input type="file" id="inputFotoPublica" accept="image/jpeg,image/png,image/webp" onchange="abrirEditorFoto('publica',this)">
+              <span class="profile-image-action">Escolher imagem</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- PÁGINA PÚBLICA -->
+<section id="publicView" style="display:none">
+  <div class="pub-wrap">
+    <button class="pub-back" onclick="voltarDaPublica()">Voltar</button>
+
+    <div class="pub-hero">
+      <div class="pub-hero-inner">
+        <div class="pub-cover" id="pubFotoPublica" style="display:none"></div>
+        <div class="pub-hero-content">
+          <div class="pub-hero-brand">
+            <img class="brand-mascot brand-mascot-xs" src="mascote-icone-vyxora.png?v=8" alt="" loading="lazy" decoding="async">
+            VyXora Agendas
+          </div>
+          <h1 id="pubNomeEmpresa">Agendamento Online</h1>
+          <p id="pubDescEmpresa">Escolha seu serviço, profissional, data e horário.</p>
+          <div id="pubSociais" class="pub-socials" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tela de sucesso: aparece na mesma página após salvar -->
+    <div id="pubConfirmScreen" class="pub-confirm-screen" style="display:none">
+      <div class="pub-success-card">
+        <div class="pub-success-visual">
+          <img src="mascote-icone-vyxora.png?v=8" alt="Mascote VyXora" class="pub-success-mascot" loading="lazy" decoding="async">
+          <div class="pub-success-check" aria-hidden="true">✓</div>
+        </div>
+        <div class="pub-success-kicker">AGENDAMENTO CONCLUÍDO</div>
+        <h2>Agendamento confirmado!</h2>
+        <p>Seu horário foi reservado. Confira os dados abaixo.</p>
+
+        <div class="pub-success-summary">
+          <div class="pub-success-row"><span>Serviço</span><strong id="pubSuccessServico">—</strong></div>
+          <div class="pub-success-row"><span>Profissional</span><strong id="pubSuccessProfissional">—</strong></div>
+          <div class="pub-success-row"><span>Data</span><strong id="pubSuccessData">—</strong></div>
+          <div class="pub-success-row"><span>Horário</span><strong id="pubSuccessHora">—</strong></div>
+        </div>
+
+        <button class="btn btn-primary pub-success-new" onclick="resetPublic()">Fazer novo agendamento</button>
+      </div>
+    </div>
+
+    <!-- Corpo principal -->
+    <div class="pub-body" id="pubMainBody">
+      <div class="pub-panel">
+        <div class="pub-panel-title">Escolha o serviço</div>
+        <div class="choices" id="pubServicos"></div>
+        <div class="pub-panel-sep"></div>
+        <div class="pub-panel-title">Escolha o profissional</div>
+        <div class="choices" id="pubProfissionais"></div>
+      </div>
+      <div class="pub-panel">
+        <div class="pub-panel-title">Seus dados</div>
+        <div class="form-gap">
+          <div class="field">
+            <label>Nome completo</label>
+            <input id="pubClienteNome" placeholder="Seu nome completo">
+          </div>
+          <div class="field">
+            <label>WhatsApp</label>
+            <input id="pubClienteTel" placeholder="(92) 99999-9999">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Data</label>
+              <button class="pub-picker-btn" id="pubDataBtn" onclick="abrirCalendarioPublico()">
+                <span id="pubDataLabel">Escolher data</span>
+                <span class="pub-picker-icon">📅</span>
+              </button>
+              <input id="pubData" type="hidden">
+              <div id="pubDataAviso">⛔ Este dia não está disponível. Escolha outra data.</div>
+            </div>
+            <div class="field">
+              <label>Hora</label>
+              <button class="pub-picker-btn" id="pubHoraBtn" onclick="abrirSlotsPublico()">
+                <span id="pubHoraLabel">Escolher horário</span>
+                <span class="pub-picker-icon">🕐</span>
+              </button>
+              <input id="pubHora" type="hidden">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botão confirmar — ocupa as duas colunas, sempre abaixo de tudo -->
+      <div class="pub-confirm-bar">
+        <button class="btn btn-primary pub-confirm-btn" onclick="confirmarAgendamentoPublico()">
+          Confirmar agendamento ✓
+        </button>
+      </div>
+    </div>
+
+    <!-- Botão WhatsApp flutuante -->
+    <a id="pubWhatsappFab" class="pub-whatsapp-fab" target="_blank" rel="noopener" style="display:none">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      <span>WhatsApp</span>
+    </a>
+  </div>
+</section>
+
+<!-- Modal Calendário Público -->
+<div class="pub-modal-overlay" id="pubCalendarioOverlay" onclick="fecharCalendarioPublico(event)">
+  <div class="pub-modal-full" id="pubCalendarioModal">
+    <div class="pub-modal-header">
+      <button class="pub-modal-back" onclick="fecharCalendarioPublico()">Voltar</button>
+      <span class="pub-modal-title">Escolha a data</span>
+    </div>
+    <div class="pub-cal-wrap">
+      <div class="pub-cal-nav">
+        <button class="pub-cal-arrow" onclick="pubCalMes(-1)">‹</button>
+        <span id="pubCalTitulo"></span>
+        <button class="pub-cal-arrow" onclick="pubCalMes(1)">›</button>
+      </div>
+      <div class="pub-cal-dias-semana">
+        <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+      </div>
+      <div class="pub-cal-grid" id="pubCalGrid"></div>
+      <div class="pub-cal-legenda">
+        <span><i class="pub-cal-dot disponivel"></i>Disponível</span>
+        <span><i class="pub-cal-dot indisponivel"></i>Indisponível</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Slots de Horário Público -->
+<div class="pub-modal-overlay" id="pubSlotsOverlay" onclick="fecharSlotsPublico(event)">
+  <div class="pub-modal-full" id="pubSlotsModal">
+    <div class="pub-modal-header">
+      <button class="pub-modal-back" onclick="fecharSlotsPublico()">Voltar</button>
+      <span class="pub-modal-title" id="pubSlotsTitulo">Escolha o horário</span>
+    </div>
+    <div class="pub-slots-wrap">
+      <div class="pub-slots-grid" id="pubSlotsGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Recusa -->
+<div class="modal-overlay" id="modalRecusaOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModalRecusa()">✕</button>
+    <div class="modal-title">Recusar agendamento</div>
+    <div class="modal-sub" id="recusaInfo">Cliente · data · hora</div>
+    <div class="motivo-list">
+      <div class="motivo-item" onclick="selectMotivo(this,'Horário indisponível')"><div class="motivo-radio"></div>Horário indisponível</div>
+      <div class="motivo-item" onclick="selectMotivo(this,'Profissional indisponível')"><div class="motivo-radio"></div>Profissional indisponível</div>
+      <div class="motivo-item" onclick="selectMotivo(this,'Serviço indisponível')"><div class="motivo-radio"></div>Serviço indisponível</div>
+      <div class="motivo-item" onclick="selectMotivo(this,'Outro motivo')"><div class="motivo-radio"></div>Outro motivo</div>
+    </div>
+    <div class="field"><label>Motivo personalizado (opcional)</label><textarea id="recusaMotivoCustom" placeholder="Descreva o motivo..." style="min-height:68px"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModalRecusa()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarRecusa()">✕ Recusar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Reagendar -->
+<div class="modal-overlay" id="modalReagendarOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModalReagendar()">✕</button>
+    <div class="modal-title">Reagendar horário</div>
+    <div class="modal-sub" id="reagendarInfo">Cliente · data · hora</div>
+    <div class="field-row">
+      <div class="field"><label>Nova data</label><input id="reagendarData" type="date"></div>
+      <div class="field"><label>Novo horário</label><input id="reagendarHora" type="time"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModalReagendar()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarReagendar()">📅 Reagendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="edit-overlay" id="editOverlay">
+  <div class="edit-modal">
+    <button class="modal-close" onclick="closeEditModal()">✕</button>
+    <div class="edit-title" id="editModalTitle">Editar</div>
+    <div id="editModalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1" id="editSaveBtn">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirm -->
+<div class="modal-overlay" id="confirmOverlay">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon-wrap danger" id="confirmIconWrap">⚠️</div>
+    <div class="confirm-title" id="confirmTitle">Tem certeza?</div>
+    <p class="confirm-body" id="confirmBody">Esta ação não pode ser desfeita.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeConfirmModal()">Cancelar</button>
+      <button class="btn btn-danger" id="confirmActionBtn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Editor de foto -->
+<div class="modal-overlay" id="fotoEditorOverlay">
+  <div class="modal foto-editor-modal">
+    <button class="modal-close" onclick="fecharEditorFoto()">✕</button>
+    <div class="modal-title" id="fotoEditorTitulo">Ajustar foto</div>
+    <div class="modal-sub">Arraste a imagem. No computador, use a rolagem do mouse para ajustar o zoom. No celular, use dois dedos.</div>
+    <div class="foto-editor-stage">
+      <div class="foto-editor-circle" id="fotoEditorCircle" onpointerdown="iniciarArrasteFotoEditor(event)"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fecharEditorFoto()">Cancelar</button>
+      <button class="btn btn-primary" id="fotoEditorSalvar" onclick="salvarFotoEditor()">Salvar foto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notif Stack -->
+<div class="notif-stack" id="notifStack"></div>
+
+<div class="notification-center-overlay" id="notificationCenterOverlay" onclick="closeNotificationCenter(event)">
+  <aside class="notification-center" id="notificationCenter" role="dialog" aria-modal="true" aria-labelledby="notificationCenterTitle">
+    <div class="notification-center-header">
+      <div>
+        <div class="notification-center-eyebrow">Central</div>
+        <h3 id="notificationCenterTitle">Notificações</h3>
+        <p>Novos agendamentos aparecem aqui, em ordem do mais recente.</p>
+      </div>
+      <button class="notification-center-close" onclick="closeNotificationCenter()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="notification-center-actions">
+      <button onclick="markAllNotificationsRead()">Marcar todas como lidas</button>
+      <button class="danger" onclick="clearAllNotifications()">Limpar histórico</button>
+    </div>
+    <div class="notification-list" id="notificationList"></div>
+    <div class="notification-empty" id="notificationEmpty">
+      <div class="notification-empty-icon">🔔</div>
+      <strong>Nenhuma notificação</strong>
+      <span>Os próximos agendamentos aparecerão aqui.</span>
+    </div>
+  </aside>
+</div>
+<script defer src="supabase.js?v=20260802-1"></script>
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const agendar = params.get("agendar");
+  if (agendar) {
+    window.location.hash = "agendar/" + agendar;
+  }
+})();
+</script>
+<script>
+document.documentElement.removeAttribute('data-theme');
+try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
+</script>
+<script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
+<script defer src="app.js?v=20260811-04"></script>
+<script defer src="dashboard-pc.js?v=20260811-01"></script>
+</body>
+</html>
