@@ -114,12 +114,16 @@
     view.classList.add('vx-finance-view');
     view.innerHTML = `
       <div class="vx-fin-toolbar">
-        <nav class="vx-fin-tabs" aria-label="Seções financeiras">
+        <nav class="vx-fin-tabs" id="vxFinTabs" aria-label="Seções financeiras">
+          <span class="vx-fin-tab-indicator" id="vxFinTabIndicator"></span>
           <button class="active" data-fin-tab="resumo" onclick="mudarAbaFinanceiro('resumo')">Visão geral</button>
           <button data-fin-tab="cobrancas" onclick="mudarAbaFinanceiro('cobrancas')">Cobranças <span id="vxPendingBadge">0</span></button>
           <button data-fin-tab="recebidos" onclick="mudarAbaFinanceiro('recebidos')">Recebidos</button>
         </nav>
-        <div class="vx-fin-head-actions"><button class="vx-charge-secondary" type="button" onclick="abrirConfiguracaoPix()">Configurar PIX</button><button class="vx-charge-primary" type="button" onclick="abrirNovaCobranca()"><span>＋</span> Nova cobrança</button></div>
+        <div class="vx-fin-head-actions">
+          <button class="vx-charge-secondary" type="button" onclick="abrirConfiguracaoPix()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>Configurar PIX</button>
+          <button class="vx-charge-primary" type="button" onclick="abrirNovaCobranca()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Nova cobrança</button>
+        </div>
       </div>
       <section class="vx-fin-pane active" data-fin-pane="resumo">
         <div class="vx-fin-metrics" id="vxFinMetrics"></div>
@@ -550,6 +554,7 @@
 
   function renderFinanceiroV2() {
     montarEstruturaFinanceira();
+    posicionarIndicadorFinTabs(); // garante o indicador correto mesmo no 1º carregamento
     const lista = [...(window.state?.cobrancas || [])].filter(c => c.status !== 'cancelado').sort((a,b) => String(b.criado_em || '').localeCompare(String(a.criado_em || '')));
     const pagas = lista.filter(c => c.status === 'pago');
     const pendentes = lista.filter(c => ['pendente','vencido'].includes(statusReal(c)));
@@ -572,8 +577,18 @@
     abaAtual = aba;
     document.querySelectorAll('[data-fin-tab]').forEach(btn => btn.classList.toggle('active', btn.dataset.finTab === aba));
     document.querySelectorAll('[data-fin-pane]').forEach(pane => pane.classList.toggle('active', pane.dataset.finPane === aba));
+    posicionarIndicadorFinTabs();
     if (renderizar) renderFinanceiroV2();
   }
+
+  function posicionarIndicadorFinTabs() {
+    const wrap = $f('vxFinTabs'), indicator = $f('vxFinTabIndicator');
+    const ativo = wrap ? wrap.querySelector('button.active') : null;
+    if (!wrap || !indicator || !ativo) return;
+    indicator.style.left = ativo.offsetLeft + 'px';
+    indicator.style.width = ativo.offsetWidth + 'px';
+  }
+  window.addEventListener('resize', posicionarIndicadorFinTabs);
 
   function compartilharCobranca(id) {
     const c = (window.state?.cobrancas || []).find(item => String(item.id) === String(id)); if (!c) return;
