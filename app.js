@@ -1,4 +1,3 @@
-
 // ═══════════════════════════════════════════════════════════════
 // GERENCIADOR ÚNICO DE ROLAGEM
 // Evita que um modal libere a rolagem enquanto outro ainda está aberto.
@@ -909,6 +908,43 @@ function menuNotifications() {
   closeMobileMenu();
   openNotificationCenter();
 }
+
+/* Tooltip real dos ícones da sidebar (substitui o ::after, que ficava cortado pelo
+   overflow da sidebar). Um único elemento, criado sob demanda, reposicionado a cada
+   hover via getBoundingClientRect — nunca é cortado, porque é filho direto do body. */
+(function initSidebarTooltip() {
+  let tipEl = null;
+  function getTip() {
+    if (!tipEl) {
+      tipEl = document.createElement('div');
+      tipEl.className = 'sidebar-tooltip';
+      document.body.appendChild(tipEl);
+    }
+    return tipEl;
+  }
+  function mostrar(el) {
+    const texto = el.getAttribute('data-tip');
+    if (!texto) return;
+    const tip = getTip();
+    tip.textContent = texto;
+    const r = el.getBoundingClientRect();
+    tip.style.left = r.left + 'px';
+    tip.style.top = 'auto';
+    tip.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+    tip.classList.add('show');
+  }
+  function esconder() {
+    if (tipEl) tipEl.classList.remove('show');
+  }
+  document.addEventListener('mouseover', (ev) => {
+    const el = ev.target.closest('.sidebar [data-tip]');
+    if (el) mostrar(el);
+  });
+  document.addEventListener('mouseout', (ev) => {
+    const el = ev.target.closest('.sidebar [data-tip]');
+    if (el) esconder();
+  });
+})();
 
 function setView(view) {
   const target = $('view-' + view);
@@ -2958,6 +2994,22 @@ function renderDashPremium() {
   });
 }
 
+function atualizarPreviewEmpresa() {
+  const nome = ($('cfgNome')?.value || '').trim();
+  const whatsapp = ($('cfgWhatsapp')?.value || '').trim();
+  const slug = ($('cfgSlug')?.value || '').trim();
+  const endereco = ($('cfgEndereco')?.value || '').trim();
+  const cidade = ($('cfgCidade')?.value || '').trim();
+  const setTxt = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+  setTxt('empPrevNome', nome || 'Nome da empresa');
+  const av = $('empPrevAvatar'); if (av) av.textContent = nome ? nome.trim().charAt(0).toUpperCase() : '?';
+  setTxt('empPrevLink', slug ? ('vyxora.online/' + slug) : 'vyxora.online/agenda');
+  setTxt('empPrevWhats', whatsapp || 'WhatsApp não informado');
+  const enderecoCompleto = [endereco, cidade].filter(Boolean).join(' · ');
+  setTxt('empPrevEndereco', enderecoCompleto || 'Endereço não informado');
+}
+window.atualizarPreviewEmpresa = atualizarPreviewEmpresa;
+
 function renderConfig() {
   const e = state.empresa || {};
   const set = (id, v) => { const el = $(id); if (el) el.value = v || ''; };
@@ -2965,6 +3017,7 @@ function renderConfig() {
   set('cfgCep', e.cep); set('cfgEndereco', e.endereco); set('cfgCidade', e.cidade);
   set('cfgInstagram', e.instagram); set('cfgFacebook', e.facebook);
   set('cfgTiktok', e.tiktok); set('cfgSite', e.site);
+  if (typeof atualizarPreviewEmpresa === 'function') atualizarPreviewEmpresa();
   renderPreviewImagem('previewFotoPerfil', e.foto_perfil_url);
   renderPreviewImagem('previewFotoPublica', e.foto_publica_url);
   const enquadramentoPerfil = getEnquadramentoFoto('perfil', e);
