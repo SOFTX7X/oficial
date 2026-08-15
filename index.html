@@ -970,26 +970,46 @@
     <section class="view" id="view-config">
       <div class="config-tab-content">
         <div class="config-section config-tab-panel active" data-config-tab="empresa">
-          <div class="config-title"><div class="config-icon">🏢</div>Dados da empresa</div>
-          <div class="form-gap">
-            <div class="field"><label>Nome da empresa</label><input id="cfgNome"></div>
-            <div class="field"><label>WhatsApp</label><input id="cfgWhatsapp"></div>
-            <div class="field"><label>Slug / link</label><input id="cfgSlug"></div>
-            <div class="field">
-              <label>CEP</label>
-              <div class="endereco-cep-wrap">
-                <input id="cfgCep" placeholder="00000-000" maxlength="9" oninput="formatarCep(this)" onblur="buscarCep(this.value)">
-                <span class="cep-spinner" id="cepSpinner" style="display:none">⏳</span>
+          <div class="config-split">
+            <div class="config-form-col">
+              <div class="config-title"><div class="config-icon">🏢</div>Dados da empresa</div>
+              <div class="form-gap">
+                <div class="field"><label>Nome da empresa</label><input id="cfgNome" oninput="atualizarPreviewEmpresa()"></div>
+                <div class="field"><label>WhatsApp</label><input id="cfgWhatsapp" oninput="atualizarPreviewEmpresa()"></div>
+                <div class="field"><label>Slug / link</label><input id="cfgSlug" oninput="atualizarPreviewEmpresa()"></div>
+                <div class="field">
+                  <label>CEP</label>
+                  <div class="endereco-cep-wrap">
+                    <input id="cfgCep" placeholder="00000-000" maxlength="9" oninput="formatarCep(this)" onblur="buscarCep(this.value)">
+                    <span class="cep-spinner" id="cepSpinner" style="display:none">⏳</span>
+                  </div>
+                </div>
+                <div class="field" style="position:relative">
+                  <label>Endereço</label>
+                  <input id="cfgEndereco" placeholder="Rua, número, bairro" autocomplete="off" oninput="autocompleteEndereco(this.value); atualizarPreviewEmpresa()" onfocus="autocompleteEndereco(this.value)">
+                  <div class="endereco-suggestions" id="enderecoSuggestions" style="display:none"></div>
+                </div>
+                <div class="field"><label>Cidade / Estado</label><input id="cfgCidade" placeholder="Ex: Manaus, AM" oninput="atualizarPreviewEmpresa()"></div>
+                <button class="btn btn-primary btn-full" onclick="salvarConfig()">Salvar alterações</button>
+                <div id="cfgLinkBox" style="font-size:10.5px;color:var(--text4);padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);word-break:break-all"></div>
               </div>
             </div>
-            <div class="field" style="position:relative">
-              <label>Endereço</label>
-              <input id="cfgEndereco" placeholder="Rua, número, bairro" autocomplete="off" oninput="autocompleteEndereco(this.value)" onfocus="autocompleteEndereco(this.value)">
-              <div class="endereco-suggestions" id="enderecoSuggestions" style="display:none"></div>
-            </div>
-            <div class="field"><label>Cidade / Estado</label><input id="cfgCidade" placeholder="Ex: Manaus, AM"></div>
-            <button class="btn btn-primary btn-full" onclick="salvarConfig()">Salvar alterações</button>
-            <div id="cfgLinkBox" style="font-size:10.5px;color:var(--text4);padding:8px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);word-break:break-all"></div>
+            <aside class="config-preview">
+              <div class="config-preview-label">Pré-visualização</div>
+              <div class="config-preview-card">
+                <div class="config-preview-cover"></div>
+                <div class="config-preview-body">
+                  <div class="config-preview-avatar" id="empPrevAvatar">?</div>
+                  <div class="config-preview-name" id="empPrevNome">Nome da empresa</div>
+                  <div class="config-preview-link" id="empPrevLink">vyxora.online/agenda</div>
+                  <div class="config-preview-rows">
+                    <div class="config-preview-row"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5a2 2 0 0 1 2-2h3.28a1 1 0 0 1 .948.684l1.498 4.493a1 1 0 0 1-.502 1.21l-2.257 1.13a11 11 0 0 0 5.516 5.516l1.13-2.257a1 1 0 0 1 1.21-.502l4.493 1.498a1 1 0 0 1 .684.949V19a2 2 0 0 1-2 2h-1C9.716 21 3 14.284 3 6z"></path></svg><span id="empPrevWhats">WhatsApp não informado</span></div>
+                    <div class="config-preview-row"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg><span id="empPrevEndereco">Endereço não informado</span></div>
+                  </div>
+                </div>
+              </div>
+              <p class="config-preview-hint">É assim que o cabeçalho da sua página pública vai aparecer para os clientes.</p>
+            </aside>
           </div>
         </div>
         <div class="config-section config-tab-panel" data-config-tab="redes">
