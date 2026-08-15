@@ -3136,7 +3136,7 @@ body.notification-center-open { overflow: hidden; }
 
 .sidebar {
   border-radius: 14px;
-  border-color: #1f2937;
+  border-color: #1f2937 !important;
   background: linear-gradient(180deg, #111827, #0d1420);
   align-items: center;
   padding: 16px 10px;
@@ -3161,6 +3161,23 @@ body.notification-center-open { overflow: hidden; }
 
 .sidebar .side-nav-label { display: none; }
 .sidebar .side-nav-sep { display: none; }
+
+/* Tooltip real dos ícones da sidebar — não é mais ::after preso dentro da sidebar,
+   porque overflow-y:auto na sidebar obriga o navegador a cortar overflow-x também
+   (regra da própria especificação CSS, não dá pra evitar só com overflow-x:visible).
+   Esse elemento único é criado 1x via JS e reposicionado a cada hover. */
+.sidebar-tooltip {
+  position: fixed; z-index: 200;
+  padding: 6px 10px; border-radius: 6px;
+  background: #1a2233; color: #fff; border: 1px solid #2a3548;
+  font-family: 'Geist', sans-serif; font-size: 11px; font-weight: 600; white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(0,0,0,.45);
+  opacity: 0; pointer-events: none; visibility: hidden;
+  transition: opacity .15s ease, transform .15s ease;
+  transform: translateY(-4px);
+}
+.sidebar-tooltip.show { opacity: 1; visibility: visible; transform: translateY(-8px); }
+
 
 .sidebar .nav-btn {
   position: relative;
@@ -3202,22 +3219,7 @@ body.notification-center-open { overflow: hidden; }
 
 /* Nome do botão vira tooltip (só ícone visível) — aparece ACIMA do ícone no hover */
 .sidebar .nav-btn .nav-label { display: none; }
-.sidebar .nav-btn[data-tip]::after {
-  content: attr(data-tip);
-  position: absolute; left: 50%; bottom: 100%;
-  transform: translateX(-50%) translateY(-6px);
-  padding: 6px 10px; border-radius: 6px;
-  background: #1a2233; color: #fff; border: 1px solid #2a3548;
-  font-family: 'Geist', sans-serif; font-size: 11px; font-weight: 600; white-space: nowrap;
-  opacity: 0; pointer-events: none; visibility: hidden;
-  transition: opacity .15s ease, transform .15s ease;
-  box-shadow: 0 10px 24px rgba(0,0,0,.45);
-  z-index: 80;
-}
-.sidebar .nav-btn[data-tip]:hover::after {
-  opacity: 1; visibility: visible;
-  transform: translateX(-50%) translateY(-10px);
-}
+.sidebar .nav-btn[data-tip] { /* tooltip real via JS, ver .sidebar-tooltip */ }
 
 /* Cartão do usuário vira só avatar (o nome já aparece no cabeçalho de cima — sem repetir) */
 .sidebar .side-bottom { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -3236,16 +3238,7 @@ body.notification-center-open { overflow: hidden; }
 }
 .sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm svg { width: 18px; height: 18px; transform: translateX(1.5px); }
 .sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm:hover { background: #1f2937; }
-.sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm[data-tip]:hover::after {
-  content: attr(data-tip);
-  position: absolute; left: 50%; bottom: 100%;
-  transform: translateX(-50%) translateY(-10px);
-  padding: 6px 10px; border-radius: 6px;
-  background: #1a2233; color: #fff; border: 1px solid #2a3548;
-  font-family: 'Geist', sans-serif; font-size: 11px; font-weight: 600; white-space: nowrap;
-  box-shadow: 0 10px 24px rgba(0,0,0,.45);
-  z-index: 80;
-}
+.sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm { /* tooltip real via JS, ver .sidebar-tooltip */ }
 
 .sidebar .side-link-box { display: none; }
 } /* fim @media (min-width: 901px) — escopo exclusivo do menu do PC */
