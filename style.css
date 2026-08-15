@@ -3147,7 +3147,7 @@ body.notification-center-open { overflow: hidden; }
 
 .sidebar .side-nav-section {
   position: relative;
-  margin: 0 0 4px;
+  margin: 0;
   padding: 0;
   border: none;
   border-radius: 0;
@@ -3160,6 +3160,7 @@ body.notification-center-open { overflow: hidden; }
 }
 
 .sidebar .side-nav-label { display: none; }
+.sidebar .side-nav-sep { display: none; }
 
 .sidebar .nav-btn {
   position: relative;
