@@ -3234,7 +3234,7 @@ body.notification-center-open { overflow: hidden; }
   background: none; border: none;
   display: grid; place-items: center;
 }
-.sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm svg { width: 18px; height: 18px; }
+.sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm svg { width: 18px; height: 18px; transform: translateX(1.5px); }
 .sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm:hover { background: #1f2937; }
 .sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm[data-tip]:hover::after {
   content: attr(data-tip);
