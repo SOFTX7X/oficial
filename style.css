@@ -1,23 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap');
 :root {
-  --bg: #050409;
-  --bg1: #0b0812;
-  --bg2: #110b1c;
-  --bg3: #181027;
-  --bg4: #211333;
+  --bg: #0a0d14;
+  --bg1: #111827;
+  --bg2: #0b0f19;
+  --bg3: #1a2332;
+  --bg4: #232f41;
 
   --surface: rgba(255,255,255,0.03);
   --surface2: rgba(255,255,255,0.055);
   --surface3: rgba(255,255,255,0.08);
 
-  --border: rgba(168,85,247,0.14);
-  --border2: rgba(168,85,247,0.24);
-  --border3: rgba(192,90,255,0.38);
+  --border: #1f2937;
+  --border2: #2a3441;
+  --border3: #3d4a5c;
 
   --text: #faf7ff;
-  --text2: #d4c5f9;
-  --text3: #9c88c7;
-  --text4: #6f5b91;
+  --text2: #d1d5db;
+  --text3: #9ca3af;
+  --text4: #6b7280;
 
   --accent: #7c22e8;
   --accent2: #bc63ff;
@@ -361,11 +361,11 @@ a { text-decoration: none; color: inherit; }
 .btn:hover { transform: translateY(-2px); }
 .btn:active { transform: translateY(0) scale(0.97); }
 .btn-primary {
-  background: var(--accent); color: #fff;
+  background: linear-gradient(100deg, var(--accent2), var(--accent)); color: #fff;
   box-shadow: 0 0 0 1px rgba(188,99,255,0.38), 0 5px 18px rgba(124,34,232,0.32);
 }
 .btn-primary:hover {
-  background: var(--accent2);
+  background: linear-gradient(100deg, var(--accent2), #6d28d9);
   box-shadow: 0 0 0 1px rgba(209,109,255,0.55), 0 9px 26px rgba(124,34,232,0.42);
 }
 .btn-secondary {
@@ -412,6 +412,7 @@ a { text-decoration: none; color: inherit; }
 }
 .field input::placeholder, .field textarea::placeholder { color: var(--text4); }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
 .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 
 .badge {
