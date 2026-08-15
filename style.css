@@ -3223,12 +3223,17 @@ body.notification-center-open { overflow: hidden; }
 .sidebar .side-user-card { display: none; }
 
 .sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm {
-  width: 40px; min-height: 38px; padding: 0;
+  width: 40px; min-height: 38px; padding: 0; gap: 0;
   border-radius: 9px; border: none; background: none;
   display: flex; align-items: center; justify-content: center;
   font-size: 0; position: relative;
 }
-.sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm svg { width: 17px; height: 17px; }
+.sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm .ni {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: none; border: none;
+  display: grid; place-items: center;
+}
+.sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm svg { width: 18px; height: 18px; }
 .sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm:hover { background: #1f2937; }
 .sidebar .side-bottom .btn.btn-ghost.btn-full.btn-sm[data-tip]:hover::after {
   content: attr(data-tip);
