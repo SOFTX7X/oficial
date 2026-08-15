@@ -1,5 +1,11 @@
 /* ============================================================
    VYXORA — Dashboard PC (reconstrução visual completa)
+   Não duplica regra de negócio: lê `state` e as funções globais
+   já existentes em app.js (money, normStatus, isFinanceiro,
+   formatDate, badgeClass, ordenarAtendimentosAgendados, etc).
+   Só é executado/visível em telas >=901px — o Android/WebApp
+   continua usando exatamente a implementação antiga (dashAptList,
+   dashChartSvg, dashDonut...), intocada.
    ============================================================ */
 (function () {
   const $id = (id) => document.getElementById(id);
@@ -25,6 +31,7 @@
     if (fp && tp) tp.setAttribute('d', fp.getAttribute('d') || '');
   }
 
+  /* ---------- KPIs (topo) ---------- */
   function renderVxdKpis() {
     if (!$id('vxdKpiFatHoje')) return;
     mirrorText('statFatHoje', 'vxdKpiFatHoje');
@@ -41,6 +48,7 @@
     mirrorSparkPath('statClientesSpark', 'vxdKpiClientesSpark');
   }
 
+  /* ---------- Substrip de status (dados reais já calculados em renderStats) ---------- */
   function renderVxdSubstrip() {
     const el = $id('vxdSubstrip');
     if (!el) return;
@@ -59,12 +67,27 @@
     }).join('');
   }
 
+  /* ---------- Gráfico principal: reconstrução completa ---------- */
+  /* Usa getStatusSeries() (função pura já existente no app.js) diretamente — não
+     duplica regra de negócio, só transforma o retorno dela em geometria SVG.
+     Período do PC é INDEPENDENTE do período do Android (variável própria abaixo),
+     então trocar de aba aqui nunca afeta o que o Android mostra. */
   let vxdPeriod = 'dias';
-  let vxdChartInstance = null;
+  let vxdChartInstance = null; // instância única do Chart.js, reutilizada/atualizada a cada render
 
   const RANGE_LABEL = { dias: 'Últimos 14 dias', semanas: 'Últimas 8 semanas', meses: 'Últimos 6 meses' };
+
+  /* Soma tudo que aconteceu ANTES da janela visível (usando o próprio getStatusSeries
+     com offsetPeriods, que já existe no app.js — não duplica nenhuma regra de negócio,
+     só chama a função várias vezes pra somar os blocos anteriores). Isso garante que
+     o acumulado nunca reseta: o dia mais antigo que "sai" da tela continua contando
+     pro total, e a janela visível só continua a soma a partir dali. */
   const DIAS_POR_OFFSET = { dias: 14, semanas: 56, meses: 183 };
 
+  /* Data de abertura da conta: usa state.empresa.criado_em (coluna real do Supabase,
+     mesmo padrão de todas as outras tabelas do projeto); se não existir, cai pro
+     agendamento mais antigo já registrado. Usado só pra CORTAR o gráfico — não
+     inventa dado, só evita mostrar meses/semanas vazios de antes da conta existir. */
   function contaAbertaEmVxd() {
     const emp = window.state && window.state.empresa;
     if (emp && emp.criado_em) {
@@ -78,11 +101,21 @@
       const d = new Date(minData + 'T00:00:00');
       if (!isNaN(d.getTime())) return d;
     }
-    return null;
+    return null; // desconhecido — nesse caso não cortamos nada (comportamento antigo)
   }
 
+  /* Recalcula, com a MESMA matemática de data usada dentro de getStatusSeries (não
+     duplica a CONTAGEM/regra de negócio, só a data de cada ponto), a partir de qual
+     índice a janela visível já está dentro do período em que a conta existia. */
   function primeiroIndiceVisivelVxd(period, n) {
+    // O corte só faz sentido pro período "Dias" — é ali que sobrava "período morto"
+    // visível (dias vazios antes da conta existir). Em Semanas/Meses, cada bucket já
+    // é uma faixa larga de tempo; cortar aqui é perigoso porque, se a conta for
+    // recente, o corte pode sobrar só 1 bucket ("Atual"/mês atual sozinho) e o
+    // gráfico fica com cara de quebrado — por isso NÃO cortamos nesses dois períodos,
+    // os buckets anteriores à abertura simplesmente ficam com valor 0, sem problema.
     if (period !== 'dias') return 0;
+
     const abertura = contaAbertaEmVxd();
     if (!abertura) return 0;
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
@@ -93,7 +126,7 @@
       const fimDoPonto = new Date(hoje); fimDoPonto.setDate(fimDoPonto.getDate() - i);
       if (fimDoPonto >= aberturaZero) return idx;
     }
-    return n - 1;
+    return n - 1; // conta abriu hoje mesmo — mostra só o último ponto
   }
 
   function baselineAcumuladoVxd(period) {
@@ -110,7 +143,7 @@
     if (isNaN(min.getTime())) return zero;
     const diasTotais = Math.max(0, Math.round((hoje - min) / 86400000));
     const blocoDias = DIAS_POR_OFFSET[period] || 14;
-    const maxOffset = Math.min(30, Math.ceil(diasTotais / blocoDias));
+    const maxOffset = Math.min(30, Math.ceil(diasTotais / blocoDias)); // limite de segurança
 
     const acc = { confirmados: 0, recusados: 0, concluidos: 0 };
     for (let off = maxOffset; off >= 1; off--) {
@@ -120,6 +153,10 @@
     return acc;
   }
 
+  /* Gráfico principal — modelo Chart.js (fundo #111111, linha roxa #8A2BE2 para
+     Concluídos, mesmo estilo de gradiente/tooltip do modelo pedido), mantendo as
+     3 séries reais (Confirmados/Recusados/Concluídos) e o acumulado histórico
+     calculado acima — só a biblioteca de desenho mudou, o dado é 100% real. */
   function renderVxdChart() {
     const canvas = $id('vxdChartCanvas');
     if (!canvas || typeof window.getStatusSeries !== 'function' || typeof Chart === 'undefined') return;
@@ -137,20 +174,30 @@
       return { ...p, confirmados: accConf, concluidos: accConc, recusados: accRec };
     });
 
+    // Corta os pontos anteriores à abertura da conta — o gráfico começa exatamente
+    // no mês/semana/dia em que a conta foi aberta, em vez de mostrar período "morto"
+    // de antes dela existir. O acumulado (calculado acima) não é afetado, só a
+    // fatia que aparece no eixo X.
     const primeiroIdx = primeiroIndiceVisivelVxd(vxdPeriod, pontos.length);
     if (primeiroIdx > 0) pontos = pontos.slice(primeiroIdx);
 
     const labels = pontos.map(p => p.label);
     const dadosConfirmados = pontos.map(p => p.confirmados);
-    const dadosRecusados = pontos.map(p => -p.recusados); // Retornado o negativo para separar visualmente abaixo do eixo zero
+    // Recusados é plotado NEGATIVO de propósito — visualmente desce abaixo da linha de
+    // zero (igual foi pedido/aprovado antes), enquanto Confirmados/Concluídos sobem.
+    // O tooltip abaixo desfaz esse sinal e mostra sempre o número real (positivo).
+    const dadosRecusados = pontos.map(p => -p.recusados);
     const dadosConcluidos = pontos.map(p => p.concluidos);
 
     const ctx = canvas.getContext('2d');
     const CORES = { confirmados: '#22c55e', recusados: '#ff5a5f', concluidos: '#8A2BE2' };
-    
+    // Gradiente sutil sob cada linha (o "estilo roxo e preto" pedido) — alpha bem baixo
+    // de propósito: um gradiente forte (como antes) empilhava as 3 áreas semi-transparentes
+    // e embaçava a cor do roxo pra um tom azulado. Com alpha baixo o efeito visual continua
+    // (dá profundidade), mas a cor da LINHA em si permanece correta — testado pixel a pixel.
     const gradiente = (cor) => {
       const g = ctx.createLinearGradient(0, 0, 0, 220);
-      g.addColorStop(0, cor + '26');
+      g.addColorStop(0, cor + '26'); // ~15% opacidade
       g.addColorStop(1, cor + '00');
       return g;
     };
@@ -178,7 +225,7 @@
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false },
+          legend: { display: false }, // já existe a legenda própria do VYXORA embaixo do card
           tooltip: {
             mode: 'index',
             intersect: false,
@@ -191,6 +238,7 @@
             usePointStyle: true,
             boxPadding: 4,
             callbacks: {
+              // desfaz o sinal negativo do Recusados só na exibição — o número mostrado é sempre real/positivo
               label: (item) => `${item.dataset.label}: ${Math.abs(item.parsed.y)}`
             }
           }
@@ -200,13 +248,14 @@
           x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { size: 10 } } },
           y: {
             grid: { color: (ctx) => ctx.tick && ctx.tick.value === 0 ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.05)' },
-            ticks: { color: '#888', font: { size: 10 }, callback: (v) => Math.abs(v) }
+            ticks: { color: '#888', font: { size: 10 }, callback: (v) => Math.abs(v) } // eixo também mostra sempre valor real (sem o sinal negativo)
           }
         },
         animation: { duration: 500, easing: 'easeInOutQuad' }
       }
     });
   }
+
 
   function posicionarIndicadorVxdTabs() {
     const wrap = $id('vxdTabs'), indicator = $id('vxdTabIndicator');
@@ -227,6 +276,7 @@
   window.setVxdChartPeriod = setVxdChartPeriod;
   window.addEventListener('resize', posicionarIndicadorVxdTabs);
 
+  /* ---------- Atividade recente (usa os mesmos agendamentos reais do dashAptList) ---------- */
   function tempoRelativo(a) {
     if (!a.data) return '—';
     try {
@@ -236,7 +286,8 @@
       const amanha = new Date(hojeISOStr + 'T00:00:00'); amanha.setDate(amanha.getDate() + 1);
       const amanhaISO = amanha.toISOString().slice(0, 10);
       if (a.data === amanhaISO) return 'Amanhã' + (hora ? ' às ' + hora : '');
-      return ((typeof formatDate === 'function') ? formatDate(a.data) : a.data) + (hora ? ' às ' + hora : '');
+      const dataFmt = (typeof formatDate === 'function') ? formatDate(a.data) : a.data;
+      return dataFmt + (hora ? ' às ' + hora : '');
     } catch (e) { return a.data || '—'; }
   }
 
@@ -269,6 +320,7 @@
     }).join('');
   }
 
+  /* ---------- Serviços em alta (dados reais: contagem de agendamentos do mês por serviço) ---------- */
   function renderVxdServices() {
     const el = $id('vxdServicesTable');
     if (!el || typeof state === 'undefined') return;
@@ -305,6 +357,7 @@
       }).join('');
   }
 
+  /* ---------- Donut (mesmos 3 segmentos reais de status) ---------- */
   function renderVxdDonut() {
     if (!$id('vxdDonutValue')) return;
     const R = 60, C = 2 * Math.PI * R;
@@ -347,4 +400,3 @@
 
   window.renderVxdDashboard = renderVxdDashboard;
 })();
-        
