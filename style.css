@@ -2682,21 +2682,7 @@ body.menu-open { overflow: hidden; touch-action: none; }
 .dia-check input:checked + span { background: var(--accent3); border-color: var(--accent-border); color: var(--accent2); }
 /* ─────────────────────────────────────────────────────────────────── */
 
-/* ── CEP e Autocomplete de Endereço ─────────────────────────────────────── */
-.endereco-cep-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.endereco-cep-wrap input {
-  flex: 1;
-}
-.cep-spinner {
-  position: absolute;
-  right: 12px;
-  font-size: 14px;
-  pointer-events: none;
-}
+/* ── Autocomplete de Endereço ─────────────────────────────────────── */
 
 .endereco-suggestions {
   position: absolute;
