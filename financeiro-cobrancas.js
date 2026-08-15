@@ -113,15 +113,14 @@
     view.dataset.cobrancasV2 = '1';
     view.classList.add('vx-finance-view');
     view.innerHTML = `
-      <header class="vx-fin-head vx-fin-head-slim">
+      <div class="vx-fin-toolbar">
+        <nav class="vx-fin-tabs" aria-label="Seções financeiras">
+          <button class="active" data-fin-tab="resumo" onclick="mudarAbaFinanceiro('resumo')">Visão geral</button>
+          <button data-fin-tab="cobrancas" onclick="mudarAbaFinanceiro('cobrancas')">Cobranças <span id="vxPendingBadge">0</span></button>
+          <button data-fin-tab="recebidos" onclick="mudarAbaFinanceiro('recebidos')">Recebidos</button>
+        </nav>
         <div class="vx-fin-head-actions"><button class="vx-charge-secondary" type="button" onclick="abrirConfiguracaoPix()">Configurar PIX</button><button class="vx-charge-primary" type="button" onclick="abrirNovaCobranca()"><span>＋</span> Nova cobrança</button></div>
-      </header>
-      <div class="vx-fin-local-note" id="vxFinLocalNote" hidden><strong>Modo de teste local</strong><span>A estrutura visual está ativa. Execute o arquivo SQL incluído no projeto para compartilhar cobranças entre dispositivos.</span></div>
-      <nav class="vx-fin-tabs" aria-label="Seções financeiras">
-        <button class="active" data-fin-tab="resumo" onclick="mudarAbaFinanceiro('resumo')">Visão geral</button>
-        <button data-fin-tab="cobrancas" onclick="mudarAbaFinanceiro('cobrancas')">Cobranças <span id="vxPendingBadge">0</span></button>
-        <button data-fin-tab="recebidos" onclick="mudarAbaFinanceiro('recebidos')">Recebidos</button>
-      </nav>
+      </div>
       <section class="vx-fin-pane active" data-fin-pane="resumo">
         <div class="vx-fin-metrics" id="vxFinMetrics"></div>
         <div class="vx-fin-split">
@@ -558,7 +557,6 @@
     const pendenteTotal = pendentes.reduce((s,c) => s + Number(c.valor || 0), 0);
     const mes = dataHoje().slice(0,7);
     const recebidoMes = pagas.filter(c => String(c.pago_em || '').slice(0,7) === mes).reduce((s,c) => s + Number(c.valor || 0), 0);
-    $f('vxFinLocalNote').hidden = !modoLocal;
     $f('vxPendingBadge').textContent = pendentes.length;
     $f('vxFinMetrics').innerHTML = `<article><span>Recebidos</span><strong>${moeda(recebidosTotal)}</strong><small>${pagas.length} pagamento${pagas.length === 1 ? '' : 's'} confirmado${pagas.length === 1 ? '' : 's'}</small></article><article><span>A receber</span><strong>${moeda(pendenteTotal)}</strong><small>${pendentes.length} cobrança${pendentes.length === 1 ? '' : 's'} em aberto</small></article><article><span>Recebido no mês</span><strong>${moeda(recebidoMes)}</strong><small>${new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</small></article><article><span>Total de cobranças</span><strong>${lista.length}</strong><small>Histórico completo</small></article>`;
     $f('vxRecentCharges').innerHTML = listaFinanceiraHTML(lista.slice(0,4), 'Nenhuma cobrança criada', 'Crie a primeira cobrança para começar.');
