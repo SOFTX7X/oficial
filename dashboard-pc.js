@@ -1,6 +1,6 @@
-/* ============================================================ */
-/* VYXORA — Dashboard PC (reconstrução visual completa e alinhada) */
-/* ============================================================ */
+/* ============================================================
+   VYXORA — Dashboard PC (reconstrução visual completa)
+   ============================================================ */
 (function () {
   const $id = (id) => document.getElementById(id);
 
@@ -25,7 +25,6 @@
     if (fp && tp) tp.setAttribute('d', fp.getAttribute('d') || '');
   }
 
-  /* ---------- KPIs (topo) ---------- */
   function renderVxdKpis() {
     if (!$id('vxdKpiFatHoje')) return;
     mirrorText('statFatHoje', 'vxdKpiFatHoje');
@@ -42,7 +41,6 @@
     mirrorSparkPath('statClientesSpark', 'vxdKpiClientesSpark');
   }
 
-  /* ---------- Substrip de status ---------- */
   function renderVxdSubstrip() {
     const el = $id('vxdSubstrip');
     if (!el) return;
@@ -61,7 +59,6 @@
     }).join('');
   }
 
-  /* ---------- Gráfico principal (Chart.js otimizado e alinhado) ---------- */
   let vxdPeriod = 'dias';
   let vxdChartInstance = null;
 
@@ -145,7 +142,7 @@
 
     const labels = pontos.map(p => p.label);
     const dadosConfirmados = pontos.map(p => p.confirmados);
-    const dadosRecusados = pontos.map(p => p.recusados); // Mantido positivo para fluidez correta das linhas e alinhamento do eixo
+    const dadosRecusados = pontos.map(p => -p.recusados); // Retornado o negativo para separar visualmente abaixo do eixo zero
     const dadosConcluidos = pontos.map(p => p.concluidos);
 
     const ctx = canvas.getContext('2d');
@@ -153,7 +150,7 @@
     
     const gradiente = (cor) => {
       const g = ctx.createLinearGradient(0, 0, 0, 220);
-      g.addColorStop(0, cor + '33'); 
+      g.addColorStop(0, cor + '26');
       g.addColorStop(1, cor + '00');
       return g;
     };
@@ -172,9 +169,9 @@
       data: {
         labels,
         datasets: [
-          { label: 'Confirmados', data: dadosConfirmados, borderColor: CORES.confirmados, backgroundColor: gradiente(CORES.confirmados), borderWidth: 2.5, fill: true, tension: 0.35, pointRadius: 2, pointHoverRadius: 5 },
-          { label: 'Recusados', data: dadosRecusados, borderColor: CORES.recusados, backgroundColor: gradiente(CORES.recusados), borderWidth: 2, fill: true, tension: 0.35, pointRadius: 2, pointHoverRadius: 5 },
-          { label: 'Concluídos', data: dadosConcluidos, borderColor: CORES.concluidos, backgroundColor: gradiente(CORES.concluidos), borderWidth: 3, fill: true, tension: 0.35, pointRadius: 2, pointHoverRadius: 5 }
+          { label: 'Confirmados', data: dadosConfirmados, borderColor: CORES.confirmados, backgroundColor: gradiente(CORES.confirmados), borderWidth: 2.5, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: CORES.confirmados },
+          { label: 'Recusados', data: dadosRecusados, borderColor: CORES.recusados, backgroundColor: gradiente(CORES.recusados), borderWidth: 2.5, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: CORES.recusados },
+          { label: 'Concluídos', data: dadosConcluidos, borderColor: CORES.concluidos, backgroundColor: gradiente(CORES.concluidos), borderWidth: 3, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: CORES.concluidos }
         ]
       },
       options: {
@@ -185,26 +182,28 @@
           tooltip: {
             mode: 'index',
             intersect: false,
-            backgroundColor: '#111111',
+            backgroundColor: '#1a1a1a',
             titleColor: '#fff',
             bodyColor: '#ddd',
-            borderColor: 'rgba(255,255,255,0.1)',
+            borderColor: 'rgba(255,255,255,.08)',
             borderWidth: 1,
             padding: 10,
             usePointStyle: true,
-            boxPadding: 4
+            boxPadding: 4,
+            callbacks: {
+              label: (item) => `${item.dataset.label}: ${Math.abs(item.parsed.y)}`
+            }
           }
         },
         interaction: { mode: 'nearest', axis: 'x', intersect: false },
         scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#888', font: { size: 10 } } },
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { size: 10 } } },
           y: {
-            grid: { color: 'rgba(255,255,255,0.04)' },
-            ticks: { color: '#888', font: { size: 10 }, precision: 0 },
-            beginAtZero: true
+            grid: { color: (ctx) => ctx.tick && ctx.tick.value === 0 ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#888', font: { size: 10 }, callback: (v) => Math.abs(v) }
           }
         },
-        animation: { duration: 400, easing: 'easeOutQuad' }
+        animation: { duration: 500, easing: 'easeInOutQuad' }
       }
     });
   }
@@ -228,7 +227,6 @@
   window.setVxdChartPeriod = setVxdChartPeriod;
   window.addEventListener('resize', posicionarIndicadorVxdTabs);
 
-  /* ---------- Atividade recente ---------- */
   function tempoRelativo(a) {
     if (!a.data) return '—';
     try {
@@ -271,7 +269,6 @@
     }).join('');
   }
 
-  /* ---------- Serviços em alta ---------- */
   function renderVxdServices() {
     const el = $id('vxdServicesTable');
     if (!el || typeof state === 'undefined') return;
@@ -308,7 +305,6 @@
       }).join('');
   }
 
-  /* ---------- Donut ---------- */
   function renderVxdDonut() {
     if (!$id('vxdDonutValue')) return;
     const R = 60, C = 2 * Math.PI * R;
@@ -351,4 +347,4 @@
 
   window.renderVxdDashboard = renderVxdDashboard;
 })();
-       
+        
