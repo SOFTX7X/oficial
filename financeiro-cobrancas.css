@@ -1,22 +1,16 @@
 :root { --vx-fin-purple:#A52EFF; --vx-fin-violet:#8B24D6; --vx-fin-lilac:#D49AFF; --vx-fin-ink:#07030D; --vx-fin-deep:#160525; --vx-fin-panel:#100918; }
 .vx-finance-view { padding-bottom:40px; }
-.vx-fin-head { display:flex; align-items:flex-end; justify-content:space-between; gap:28px; padding:30px 32px; margin-bottom:18px; border:1px solid rgba(165,46,255,.22); background:radial-gradient(circle at 72% 20%,rgba(139,36,214,.22),transparent 34%),linear-gradient(135deg,#160525,#09040f 72%); overflow:hidden; position:relative; }
-.vx-fin-head-slim { padding:0; margin-bottom:18px; border:0; background:none; justify-content:flex-end; }
-.vx-fin-head-slim::after { display:none; }
-.vx-fin-head::after { content:''; position:absolute; width:240px; height:240px; right:-90px; top:-120px; border:1px solid rgba(212,154,255,.18); transform:rotate(45deg); }
-.vx-fin-kicker { display:block; margin-bottom:9px; color:var(--vx-fin-lilac); font:700 10px/1.2 'JetBrains Mono',monospace; letter-spacing:.18em; text-transform:uppercase; }
-.vx-fin-head h1 { margin:0; color:#F7F3FA; font:800 clamp(30px,4vw,48px)/1.02 'Inter',sans-serif; letter-spacing:-.045em; }
-.vx-fin-head h1 em { color:var(--vx-fin-lilac); font-style:normal; }
-.vx-fin-head p { margin:10px 0 0; color:#9C929F; font-size:14px; }
 .vx-fin-head-actions { position:relative; z-index:1; display:flex; align-items:center; gap:9px; flex:0 0 auto; }
 .vx-charge-primary,.vx-charge-secondary { position:relative; z-index:1; min-height:48px; padding:0 20px; border-radius:8px; font:750 13px/1 'Inter',sans-serif; cursor:pointer; }
 .vx-charge-primary { color:white; border:1px solid rgba(212,154,255,.52); background:linear-gradient(100deg,#A52EFF,#6F1BB0); box-shadow:0 12px 32px rgba(139,36,214,.28),inset 0 1px rgba(255,255,255,.22); }
 .vx-charge-primary:hover { transform:translateY(-1px); box-shadow:0 16px 38px rgba(139,36,214,.38),inset 0 1px rgba(255,255,255,.24); }
 .vx-charge-primary:disabled { opacity:.55; cursor:wait; transform:none; }
 .vx-charge-secondary { color:#D5CBDC; border:1px solid #34273f; background:#0B0710; }
-.vx-fin-local-note { display:flex; align-items:center; gap:14px; padding:12px 16px; margin-bottom:14px; border-left:3px solid #A52EFF; background:rgba(93,22,138,.14); color:#D49AFF; }
-.vx-fin-local-note span { color:#9C929F; font-size:12px; }
-.vx-fin-tabs { display:flex; gap:4px; padding:5px; margin-bottom:18px; width:max-content; max-width:100%; border:1px solid #2b1c38; background:#0C0712; }
+.vx-charge-secondary:hover { border-color:#4a3a58; background:#120c19; }
+/* Barra única: abas à esquerda, ações à direita — evita os botões ficarem "flutuando"
+   sozinhos numa linha própria, sem nada pra alinhar visualmente. */
+.vx-fin-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+.vx-fin-tabs { display:flex; gap:4px; padding:5px; margin:0; width:max-content; max-width:100%; border:1px solid #2b1c38; background:#0C0712; }
 .vx-fin-tabs button { min-height:42px; padding:0 18px; border:0; border-radius:6px; color:#8f8399; background:transparent; font:700 12px/1 'Inter',sans-serif; cursor:pointer; }
 .vx-fin-tabs button.active { color:#fff; background:linear-gradient(110deg,rgba(165,46,255,.92),rgba(93,22,138,.9)); box-shadow:0 7px 22px rgba(139,36,214,.2); }
 .vx-fin-tabs button span { display:inline-grid; place-items:center; min-width:19px; height:19px; margin-left:5px; border-radius:5px; background:rgba(255,255,255,.12); font-size:10px; }
@@ -179,10 +173,8 @@
 
 @media (max-width:768px) {
   .vx-finance-view { padding-bottom:104px!important; }
-  .vx-fin-head { align-items:flex-start; min-height:170px; padding:24px 18px; margin:0 -2px 14px; }
   .vx-fin-head-actions { display:none; }
-  .vx-fin-head h1 { font-size:31px; max-width:300px; }.vx-fin-head p { max-width:310px; line-height:1.5; }
-  .vx-fin-local-note { align-items:flex-start; flex-direction:column; gap:5px; margin:0 0 12px; }
+  .vx-fin-toolbar { margin:14px 0; }
   .vx-fin-tabs { width:100%; overflow-x:auto; scrollbar-width:none; }.vx-fin-tabs::-webkit-scrollbar { display:none; }.vx-fin-tabs button { flex:1 0 auto; padding:0 14px; }
   .vx-fin-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }.vx-fin-metrics article { min-height:112px; padding:15px; }.vx-fin-metrics strong { font-size:21px; }
   .vx-fin-split { grid-template-columns:1fr; }.vx-fin-panel { padding:13px; }.vx-received-panel { display:none; }
