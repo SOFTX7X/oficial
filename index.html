@@ -977,13 +977,6 @@
                 <div class="field"><label>Nome da empresa</label><input id="cfgNome" oninput="atualizarPreviewEmpresa()"></div>
                 <div class="field"><label>WhatsApp</label><input id="cfgWhatsapp" oninput="atualizarPreviewEmpresa()"></div>
                 <div class="field"><label>Slug / link</label><input id="cfgSlug" oninput="atualizarPreviewEmpresa()"></div>
-                <div class="field">
-                  <label>CEP</label>
-                  <div class="endereco-cep-wrap">
-                    <input id="cfgCep" placeholder="00000-000" maxlength="9" oninput="formatarCep(this)" onblur="buscarCep(this.value)">
-                    <span class="cep-spinner" id="cepSpinner" style="display:none">⏳</span>
-                  </div>
-                </div>
                 <div class="field" style="position:relative">
                   <label>Endereço</label>
                   <input id="cfgEndereco" placeholder="Rua, número, bairro" autocomplete="off" oninput="autocompleteEndereco(this.value); atualizarPreviewEmpresa()" onfocus="autocompleteEndereco(this.value)">
