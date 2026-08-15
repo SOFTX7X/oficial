@@ -3014,7 +3014,7 @@ function renderConfig() {
   const e = state.empresa || {};
   const set = (id, v) => { const el = $(id); if (el) el.value = v || ''; };
   set('cfgNome', e.nome); set('cfgWhatsapp', e.whatsapp); set('cfgSlug', e.slug);
-  set('cfgCep', e.cep); set('cfgEndereco', e.endereco); set('cfgCidade', e.cidade);
+  set('cfgEndereco', e.endereco); set('cfgCidade', e.cidade);
   set('cfgInstagram', e.instagram); set('cfgFacebook', e.facebook);
   set('cfgTiktok', e.tiktok); set('cfgSite', e.site);
   if (typeof atualizarPreviewEmpresa === 'function') atualizarPreviewEmpresa();
@@ -3214,7 +3214,6 @@ async function salvarConfig() {
   const slugNovo = slugify($('cfgSlug')?.value || slugAtual);
   const updates = {
     nome, whatsapp: ($('cfgWhatsapp')?.value || '').trim(),
-    cep: ($('cfgCep')?.value || '').trim(),
     endereco: ($('cfgEndereco')?.value || '').trim(), cidade: ($('cfgCidade')?.value || '').trim()
   };
   if (slugNovo !== slugAtual) {
@@ -4270,33 +4269,6 @@ function selecionarSlot(hora) {
 
 
 // ── CEP e Autocomplete de Endereço ───────────────────────────────────────────
-function formatarCep(input) {
-  let v = input.value.replace(/\D/g, '').slice(0, 8);
-  if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5);
-  input.value = v;
-  if (v.replace('-', '').length === 8) buscarCep(v);
-}
-
-async function buscarCep(cep) {
-  const limpo = (cep || '').replace(/\D/g, '');
-  if (limpo.length !== 8) return;
-  const spinner = $('cepSpinner');
-  if (spinner) spinner.style.display = 'inline';
-  try {
-    const res = await fetch(`https://viacep.com.br/ws/${limpo}/json/`);
-    const d = await res.json();
-    if (d.erro) { toast('CEP não encontrado.', 'err'); return; }
-    const end = $('cfgEndereco');
-    const cid = $('cfgCidade');
-    if (end) end.value = [d.logradouro, d.bairro].filter(Boolean).join(', ');
-    if (cid) cid.value = [d.localidade, d.uf].filter(Boolean).join(', ');
-    toast('Endereço preenchido automaticamente!', 'ok');
-  } catch (e) {
-    toast('Erro ao buscar CEP.', 'err');
-  } finally {
-    if (spinner) spinner.style.display = 'none';
-  }
-}
 
 let _enderecoTimer = null;
 async function autocompleteEndereco(valor) {
