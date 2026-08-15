@@ -465,11 +465,61 @@
     popup.document.close();
   }
 
+  /* Menu "⋯" das ações secundárias — elemento único, fixed, reposicionado via JS a
+     cada clique (evita ser cortado pelo overflow:hidden de .vx-fin-table, mesmo
+     problema resolvido antes no tooltip da sidebar). */
+  let menuAcaoEl = null;
+  function getMenuAcaoEl() {
+    if (!menuAcaoEl) {
+      menuAcaoEl = document.createElement('div');
+      menuAcaoEl.className = 'vx-action-dropdown';
+      document.body.appendChild(menuAcaoEl);
+      menuAcaoEl.addEventListener('click', (ev) => ev.stopPropagation());
+    }
+    return menuAcaoEl;
+  }
+  function toggleAcaoMenu(ev, chargeId) {
+    ev.stopPropagation();
+    const btn = ev.currentTarget;
+    const menu = getMenuAcaoEl();
+    const jaAberto = menu.classList.contains('open') && menu._btnAtual === btn;
+    esconderAcaoMenu();
+    if (jaAberto) return;
+    menu.innerHTML = '';
+    const itens = [
+      ['Ver cobrança', () => abrirDocumentoFinanceiro(chargeId, 'cobranca')],
+      ['Compartilhar no WhatsApp', () => compartilharCobranca(chargeId)],
+      ['Cancelar cobrança', () => cancelarCobranca(chargeId), true]
+    ];
+    itens.forEach(([label, fn, danger]) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      if (danger) b.className = 'is-danger';
+      b.onclick = () => { esconderAcaoMenu(); fn(); };
+      menu.appendChild(b);
+    });
+    menu._btnAtual = btn;
+    const r = btn.getBoundingClientRect();
+    menu.style.left = (r.right - 190) + 'px';
+    menu.style.top = (r.bottom + 6) + 'px';
+    menu.classList.add('open');
+  }
+  window.toggleAcaoMenu = toggleAcaoMenu;
+
+  function esconderAcaoMenu() {
+    if (menuAcaoEl) { menuAcaoEl.classList.remove('open'); menuAcaoEl._btnAtual = null; }
+  }
+  document.addEventListener('click', esconderAcaoMenu);
+  document.addEventListener('scroll', esconderAcaoMenu, true);
+
   function acoesCobranca(c) {
     const status = statusReal(c);
     if (status === 'pago') return `<button class="vx-action primary" onclick="abrirDocumentoFinanceiro('${esc(c.id)}','recibo')">Ver recibo</button><button class="vx-action" onclick="abrirDocumentoFinanceiro('${esc(c.id)}','cobranca')">Cobrança</button>`;
     if (status === 'cancelado') return `<button class="vx-action" onclick="abrirDocumentoFinanceiro('${esc(c.id)}','cobranca')">Visualizar</button>`;
-    return `<button class="vx-action primary" onclick="confirmarPagamentoCobranca('${esc(c.id)}')">Confirmar pagamento</button><button class="vx-action" onclick="abrirDocumentoFinanceiro('${esc(c.id)}','cobranca')">Ver cobrança</button><button class="vx-action" onclick="copiarLinkCobranca('${esc(c.id)}')">Copiar link</button><button class="vx-action icon" onclick="compartilharCobranca('${esc(c.id)}')" aria-label="Compartilhar no WhatsApp">↗</button><button class="vx-action icon danger" onclick="cancelarCobranca('${esc(c.id)}')" aria-label="Cancelar">×</button>`;
+    return `<button class="vx-action primary" onclick="confirmarPagamentoCobranca('${esc(c.id)}')">Confirmar pagamento</button><button class="vx-action" onclick="copiarLinkCobranca('${esc(c.id)}')">Copiar link</button>
+      <div class="vx-action-menu">
+        <button class="vx-action icon" onclick="toggleAcaoMenu(event, '${esc(c.id)}')" aria-label="Mais opções">⋯</button>
+      </div>`;
   }
 
   function cardCobranca(c) {
