@@ -10870,7 +10870,7 @@ body.auth-performance-mode .notif-item.compact.out {
 .mobile-dashboard-intro,
 .mobile-dashboard-actions { display:none; }
 
-@media (max-width:900px) {
+@media (max-width:768px) {
   html:has(#dashboardView[style*="block"]) body,
   body { background:#07030d; }
   body.menu-open { overflow:hidden; }
@@ -10992,4 +10992,176 @@ body.auth-performance-mode .notif-item.compact.out {
 }
 @media (prefers-reduced-motion:reduce) {
   #dashboardView * { animation:none !important; transition:none !important; }
+}
+
+/* V55 — correção compacta para Android
+   Mantida abaixo de 769px para jamais alcançar o painel de PC. */
+@media (max-width:768px) {
+  #dashboardView .dash-main {
+    width:100% !important;
+    max-width:none !important;
+    padding:10px 10px calc(78px + env(safe-area-inset-bottom)) !important;
+    overflow-x:hidden !important;
+  }
+
+  #view-dashboard,
+  #view-dashboard .vxd-legacy { width:100%; min-width:0; }
+
+  #view-dashboard .mobile-dashboard-intro {
+    gap:10px;
+    padding:3px 2px 12px;
+  }
+  #view-dashboard .mobile-dashboard-intro span { margin-bottom:4px; font-size:7.5px; }
+  #view-dashboard .mobile-dashboard-intro h1 { font-size:22px; line-height:1.05; letter-spacing:-.04em; }
+  #view-dashboard .mobile-dashboard-intro p {
+    max-width:260px;
+    margin-top:5px;
+    font-size:10.5px;
+    line-height:1.3;
+  }
+  #dashboardView .mobile-dashboard-notify {
+    width:36px;
+    height:36px;
+    border-radius:12px;
+    font-size:15px;
+  }
+  #dashboardView .mobile-dashboard-notify i { top:6px; right:7px; width:5px; height:5px; }
+
+  #view-dashboard .dash-stats-top .stats-grid-2 {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card {
+    min-width:0;
+    min-height:68px;
+    padding:10px 11px;
+    border-radius:14px;
+  }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card:first-child {
+    grid-column:1 / -1;
+    min-height:78px;
+  }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card:nth-child(3),
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card:nth-child(4) {
+    display:block;
+    min-height:66px;
+  }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card .stat-icon-badge { display:none; }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card .stat-label { font-size:9px; }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card .stat-value {
+    margin-top:5px;
+    font-size:20px;
+    line-height:1;
+  }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card:first-child .stat-value { font-size:25px; }
+
+  #view-dashboard .dash-stats-top .stats-grid-6 {
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:6px;
+    margin-top:7px;
+  }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card {
+    min-width:0;
+    min-height:54px;
+    padding:8px;
+    border-radius:12px;
+  }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-label {
+    overflow:hidden;
+    font-size:8.5px;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-value { margin-top:4px; font-size:17px; line-height:1; }
+
+  #view-dashboard .mobile-dashboard-actions {
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    margin:12px 0;
+  }
+  #view-dashboard .mobile-action {
+    display:flex;
+    min-width:0;
+    min-height:68px;
+    padding:9px 7px;
+    border-radius:14px;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  #view-dashboard .mobile-action span {
+    width:26px;
+    height:26px;
+    margin:0 0 6px;
+    border-radius:8px;
+    font-size:15px;
+  }
+  #view-dashboard .mobile-action strong {
+    display:block;
+    max-width:100%;
+    overflow:hidden;
+    font-size:9px;
+    line-height:1.15;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  #view-dashboard .mobile-action small { display:none; }
+  #view-dashboard .mobile-action-primary {
+    grid-column:1 / -1;
+    display:grid;
+    grid-template-columns:32px 1fr;
+    min-height:58px;
+    padding:9px 12px;
+    text-align:left;
+  }
+  #view-dashboard .mobile-action-primary span {
+    float:none;
+    width:32px;
+    height:32px;
+    margin:0 9px 0 0;
+    grid-row:1 / 3;
+    font-size:19px;
+  }
+  #view-dashboard .mobile-action-primary strong { padding:0; font-size:11px; white-space:normal; }
+  #view-dashboard .mobile-action-primary small { display:block; margin-top:2px; font-size:8.5px; }
+
+  #view-dashboard .dash-bottom-grid { gap:8px; }
+  #view-dashboard .dash-bottom-grid .panel { border-radius:14px; }
+  #view-dashboard .panel-head { padding:11px 11px 7px; }
+  #view-dashboard .panel-title { font-size:13px; }
+  #view-dashboard .panel-sub { font-size:9px; }
+  #view-dashboard .panel-action { min-height:30px; padding:5px 8px; font-size:9px; }
+  #view-dashboard .panel-body { padding:2px 8px 9px; }
+  #view-dashboard .apt-list { max-height:230px; }
+
+  #dashboardView .mobile-app-dock {
+    right:7px;
+    bottom:max(6px,env(safe-area-inset-bottom));
+    left:7px;
+    height:58px;
+    padding:4px 3px 3px;
+    border-radius:18px;
+  }
+  #dashboardView .mob-nav-btn {
+    min-height:48px;
+    padding:3px 1px;
+    font-size:8px;
+  }
+  #dashboardView .mob-nav-btn .mni { font-size:18px; line-height:18px; }
+  #dashboardView .mob-nav-create { transform:translateY(-12px); }
+  #dashboardView .mob-nav-create .mni {
+    width:42px;
+    height:42px;
+    border-radius:14px;
+    font-size:22px;
+  }
+
+  #dashboardView .mobile-menu-drawer {
+    height:min(70dvh,570px);
+    border-radius:20px 20px 0 0;
+  }
+  #dashboardView .mobile-menu-header { padding:16px 14px 9px; }
+  #dashboardView .mobile-menu-body { padding:4px 10px 18px; }
+  #dashboardView .mobile-menu-drawer .nav-btn { min-height:42px; border-radius:10px; font-size:11px; }
 }
