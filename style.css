@@ -10863,3 +10863,133 @@ body.auth-performance-mode .notif-item.compact.out {
   from { opacity:0; transform:translateX(-50%) translateY(-12px) scale(1.06); }
   to { opacity:.92; transform:translateX(-50%) translateY(0) scale(1.02); }
 }
+
+/* V54 — dashboard exclusivo do WebApp
+   O dashboard desktop continua isolado em dashboard-pc.css. */
+.mobile-app-dock,
+.mobile-dashboard-intro,
+.mobile-dashboard-actions { display:none; }
+
+@media (max-width:900px) {
+  html:has(#dashboardView[style*="block"]) body,
+  body { background:#07030d; }
+  body.menu-open { overflow:hidden; }
+  #dashboardView .sidebar { display:none !important; }
+  #dashboardView .dash-main {
+    min-height:100dvh;
+    padding:18px 14px calc(104px + env(safe-area-inset-bottom)) !important;
+    background:
+      radial-gradient(80% 32% at 4% -4%,rgba(139,36,214,.36),transparent 72%),
+      radial-gradient(78% 30% at 100% 100%,rgba(37,8,61,.6),transparent 70%),
+      #07030d !important;
+  }
+  #dashboardView .topbar { display:none !important; }
+  #dashboardView .mobile-menu-trigger { display:none !important; }
+
+  /* O menu sai do canto e se torna uma folha inferior, confortável para o polegar. */
+  #dashboardView .mobile-menu-overlay {
+    position:fixed; inset:0; z-index:99990; opacity:0; visibility:hidden;
+    background:rgba(3,1,7,.72); backdrop-filter:blur(4px); transition:opacity .22s ease,visibility .22s ease;
+  }
+  #dashboardView .mobile-menu-overlay.open { opacity:1; visibility:visible; }
+  #dashboardView .mobile-menu-drawer {
+    top:auto; right:0; bottom:0; left:0; z-index:99991; width:100%; height:min(76dvh,650px);
+    padding-bottom:env(safe-area-inset-bottom); border:1px solid rgba(165,46,255,.34); border-bottom:0;
+    border-radius:26px 26px 0 0; background:linear-gradient(160deg,#160525,#09030f 64%);
+    box-shadow:0 -20px 70px rgba(0,0,0,.6),0 -1px 0 rgba(212,154,255,.12);
+    transform:translateY(105%); transition:transform .3s cubic-bezier(.16,1,.3,1);
+  }
+  #dashboardView .mobile-menu-drawer.open { transform:translateY(0); }
+  #dashboardView .mobile-menu-header { padding:20px 18px 14px; }
+  #dashboardView .mobile-menu-header::before { content:""; position:absolute; top:8px; left:50%; width:42px; height:4px; border-radius:99px; background:rgba(212,154,255,.42); transform:translateX(-50%); }
+  #dashboardView .mobile-menu-body { padding:6px 14px 24px; }
+  #dashboardView .mobile-menu-drawer .nav-btn { min-height:48px; border-radius:12px; }
+
+  #dashboardView .mobile-app-dock {
+    position:fixed; z-index:9990; right:10px; bottom:max(10px,env(safe-area-inset-bottom)); left:10px;
+    display:grid; grid-template-columns:repeat(5,1fr); align-items:end; height:70px;
+    padding:7px 5px 5px; border:1px solid rgba(165,46,255,.3); border-radius:22px;
+    background:rgba(13,4,22,.92); box-shadow:0 15px 45px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.05);
+    backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);
+  }
+  #dashboardView .mob-nav-btn {
+    display:grid; place-items:center; gap:2px; min-width:0; min-height:56px; padding:4px 2px; border:0;
+    background:transparent; color:#9c929f; font-family:'Geist',sans-serif; font-size:9.5px; font-weight:700;
+    transition:color .18s ease,transform .18s ease;
+  }
+  #dashboardView .mob-nav-btn .mni { display:block; font-family:Arial,sans-serif; font-size:21px; line-height:21px; font-weight:400; }
+  #dashboardView .mob-nav-btn.active { color:#d49aff; }
+  #dashboardView .mob-nav-btn:active { transform:scale(.92); }
+  #dashboardView .mob-nav-create { position:relative; color:#fff; transform:translateY(-19px); }
+  #dashboardView .mob-nav-create .mni { display:grid; place-items:center; width:52px; height:52px; margin-bottom:1px; border:1px solid rgba(247,243,250,.32); border-radius:18px; background:linear-gradient(135deg,#a52eff,#6e17bd); box-shadow:0 12px 28px rgba(139,36,214,.58),inset 0 1px rgba(255,255,255,.3); font-size:27px; }
+  #dashboardView .mob-nav-create span:last-child { color:#d49aff; }
+
+  #view-dashboard .mobile-dashboard-intro { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:8px 4px 20px; animation:mobileDashEnter .46s cubic-bezier(.16,1,.3,1) both; }
+  #view-dashboard .mobile-dashboard-intro > div { min-width:0; }
+  #view-dashboard .mobile-dashboard-intro span { display:block; margin-bottom:7px; color:#d49aff; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; letter-spacing:.14em; }
+  #view-dashboard .mobile-dashboard-intro h1 { margin:0; color:#f7f3fa; font-family:'Geist',sans-serif; font-size:29px; line-height:1.08; letter-spacing:-.055em; }
+  #view-dashboard .mobile-dashboard-intro h1 b { overflow-wrap:anywhere; }
+  #view-dashboard .mobile-dashboard-intro p { margin:9px 0 0; color:#9c929f; font-size:12.5px; line-height:1.45; }
+  #dashboardView .mobile-dashboard-notify { position:relative; display:grid; flex:0 0 auto; place-items:center; width:44px; height:44px; padding:0; border:1px solid rgba(165,46,255,.34); border-radius:15px; background:rgba(22,5,37,.72); box-shadow:inset 0 1px rgba(255,255,255,.04); font-size:18px; }
+  #dashboardView .mobile-dashboard-notify i { position:absolute; top:8px; right:9px; display:block; width:6px; height:6px; border-radius:50%; background:#a52eff; box-shadow:0 0 12px #a52eff; }
+
+  #view-dashboard .dash-stats-top { display:block; animation:mobileDashEnter .5s .04s cubic-bezier(.16,1,.3,1) both; }
+  #view-dashboard .dash-stats-top .stats-grid-2 { display:grid; grid-template-columns:1.1fr .9fr; gap:10px; }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card { min-height:120px; padding:15px; border-radius:18px; background:linear-gradient(145deg,rgba(22,5,37,.95),rgba(12,4,19,.94)); }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card:first-child { background:linear-gradient(135deg,#9e2af2,#5d168a 96%) !important; border-color:rgba(212,154,255,.55); box-shadow:0 13px 30px rgba(93,22,138,.3); }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card:nth-child(2) { display:none; }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card .stat-icon-badge { margin-bottom:13px; }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card .stat-value { font-size:26px; }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card:first-child .stat-label,
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card:first-child .stat-value { color:#fff; }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card .stat-trend-row { display:none; }
+  #view-dashboard .dash-stats-top .stats-grid-6 { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:9px; }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card { min-height:78px; padding:11px 10px; border-radius:14px; background:rgba(22,5,37,.66); }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-card:nth-child(n+4) { display:none; }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-icon-badge { display:none; }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-label { font-size:10px; }
+  #view-dashboard .dash-stats-top .stats-grid-6 .stat-value { margin-top:7px; font-size:20px; }
+
+  /* Sem gráfico no celular: as ações úteis entram no lugar. */
+  #view-dashboard .dash-chart-panel { display:none !important; }
+  #view-dashboard .mobile-dashboard-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:18px 0; animation:mobileDashEnter .5s .09s cubic-bezier(.16,1,.3,1) both; }
+  #view-dashboard .mobile-action { min-height:116px; padding:14px; border:1px solid rgba(93,22,138,.44); border-radius:18px; background:rgba(22,5,37,.66); color:#f7f3fa; text-align:left; transition:transform .18s ease,border-color .18s ease,background .18s ease; }
+  #view-dashboard .mobile-action:active { transform:scale(.975); }
+  #view-dashboard .mobile-action span { display:grid; place-items:center; width:30px; height:30px; margin-bottom:13px; border-radius:10px; background:rgba(165,46,255,.15); color:#d49aff; font-size:18px; }
+  #view-dashboard .mobile-action strong { display:block; font-size:12px; font-weight:750; }
+  #view-dashboard .mobile-action small { display:block; margin-top:5px; color:#9c929f; font-size:10px; line-height:1.3; }
+  #view-dashboard .mobile-action-primary { grid-column:span 2; min-height:100px; background:linear-gradient(105deg,#a52eff,#7b20c6 64%,#4d116f); border-color:rgba(212,154,255,.58); box-shadow:0 13px 30px rgba(93,22,138,.28); }
+  #view-dashboard .mobile-action-primary span { float:left; width:40px; height:40px; margin:1px 12px 0 0; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.13); font-size:25px; }
+  #view-dashboard .mobile-action-primary strong { padding-top:4px; font-size:13px; }
+  #view-dashboard .mobile-action-primary small { color:rgba(255,255,255,.76); }
+
+  #view-dashboard .dash-bottom-grid { display:grid; grid-template-columns:1fr; gap:12px; animation:mobileDashEnter .55s .14s cubic-bezier(.16,1,.3,1) both; }
+  #view-dashboard .dash-bottom-grid .panel,
+  #view-dashboard .dash-status-panel { border-radius:18px; background:rgba(22,5,37,.65); }
+  #view-dashboard .dash-status-panel { display:none; }
+  #view-dashboard .panel-head { padding:15px 15px 10px; }
+  #view-dashboard .panel-body { padding:4px 10px 12px; }
+  #view-dashboard .apt-list { max-height:320px; overflow:auto; }
+
+  #view-agenda,
+  #view-clientes,
+  #view-servicos,
+  #view-profissionais,
+  #view-financeiro,
+  #view-relatorios,
+  #view-config { animation:mobileDashEnter .35s cubic-bezier(.16,1,.3,1) both; }
+}
+
+@media (max-width:420px) {
+  #view-dashboard .mobile-dashboard-intro h1 { font-size:27px; }
+  #view-dashboard .dash-stats-top .stats-grid-2 .stat-card { min-height:112px; }
+  #view-dashboard .mobile-action { min-height:110px; }
+}
+
+@keyframes mobileDashEnter {
+  from { opacity:0; transform:translateY(12px); }
+  to { opacity:1; transform:translateY(0); }
+}
+@media (prefers-reduced-motion:reduce) {
+  #dashboardView * { animation:none !important; transition:none !important; }
+}

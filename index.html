@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260811-03">
+<link rel="stylesheet" href="style.css?v=20260815-05">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -634,9 +634,26 @@
       </div>
     </div>
 
+    <!-- Navegação exclusiva do WebApp. No desktop ela permanece invisível. -->
+    <nav class="mobile-app-dock" aria-label="Navegação principal">
+      <button class="mob-nav-btn active" type="button" onclick="setView('dashboard')"><span class="mni">⌂</span><span>Início</span></button>
+      <button class="mob-nav-btn" type="button" onclick="setView('agenda')"><span class="mni">◫</span><span>Agenda</span></button>
+      <button class="mob-nav-btn mob-nav-create" type="button" onclick="setView('agenda');setTimeout(()=>document.getElementById('agCliente')?.focus(),180)" aria-label="Novo agendamento"><span class="mni">＋</span><span>Novo</span></button>
+      <button class="mob-nav-btn" type="button" onclick="setView('financeiro')"><span class="mni">◈</span><span>Financeiro</span></button>
+      <button class="mob-nav-btn mob-nav-more" type="button" onclick="openMobileMenu()"><span class="mni">☰</span><span>Mais</span></button>
+    </nav>
+
     <!-- VIEW: DASHBOARD -->
     <section class="view active" id="view-dashboard">
       <div class="vxd-legacy">
+      <section class="mobile-dashboard-intro" aria-label="Resumo do dia">
+        <div>
+          <span>SEU ESPAÇO</span>
+          <h1>Olá, <b id="mobileDashNome">Empresa</b></h1>
+          <p>Seu negócio organizado, um atendimento por vez.</p>
+        </div>
+        <button type="button" class="mobile-dashboard-notify" onclick="openNotificationCenter()" aria-label="Abrir notificações">🔔<i id="mobileDashNotifyDot"></i></button>
+      </section>
       <div class="dash-stats-top">
         <div class="stats-grid stats-grid-2 dash-mini-stack">
           <div class="stat-card stat-card-purple"><div class="stat-icon-badge">💵</div><div class="stat-label">Fat. hoje</div><div class="stat-value" id="statFatHoje">R$0</div><div class="stat-trend-row"><span class="stat-delta" id="statFatHojeDelta"></span><svg class="stat-spark" id="statFatHojeSpark" viewBox="0 0 100 28" preserveAspectRatio="none"><path class="stat-spark-line"></path></svg></div></div>
@@ -653,6 +670,13 @@
           <div class="stat-card stat-card-red"><div class="stat-icon-badge">✕</div><div class="stat-label">Recusados</div><div class="stat-value red" id="statRecusados">0</div></div>
         </div>
       </div>
+
+      <section class="mobile-dashboard-actions" aria-label="Ações rápidas">
+        <button type="button" class="mobile-action mobile-action-primary" onclick="setView('agenda');setTimeout(()=>document.getElementById('agCliente')?.focus(),180)"><span>＋</span><strong>Novo agendamento</strong><small>Cadastre um horário agora</small></button>
+        <button type="button" class="mobile-action" onclick="setView('agenda')"><span>◫</span><strong>Minha agenda</strong><small>Veja seu dia</small></button>
+        <button type="button" class="mobile-action" onclick="setView('financeiro')"><span>◈</span><strong>Recebimentos</strong><small>PIX e cobranças</small></button>
+        <button type="button" class="mobile-action" onclick="copyPublicLink(this)"><span>↗</span><strong>Meu link</strong><small>Copiar página pública</small></button>
+      </section>
 
       <div class="dash-chart-panel">
         <div class="dash-chart-head">
@@ -1368,7 +1392,7 @@ document.documentElement.removeAttribute('data-theme');
 try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
-<script defer src="app.js?v=20260811-04"></script>
+<script defer src="app.js?v=20260815-05"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>
