@@ -866,6 +866,7 @@ function showDashboard() {
     renderAvatarPainel();
     setText('sideNome', state.empresa.nome);
     setText('topbarNome', state.empresa.nome);
+    setText('mobileDashNome', state.empresa.nome);
     setText('sidePlan', state.empresa.plano || 'Grátis');
     const sideCard = $('sideAvatar')?.closest('.side-user-card');
     if (sideCard) sideCard.setAttribute('data-tip', state.empresa.nome || 'Empresa');
@@ -3224,7 +3225,7 @@ async function salvarConfig() {
   const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
   if (error) return toast('Erro ao salvar: ' + error.message, 'err');
   state.empresa = data || { ...state.empresa, ...updates };
-  setText('sideNome', state.empresa.nome); setText('topbarNome', state.empresa.nome); renderAvatarPainel();
+  setText('sideNome', state.empresa.nome); setText('topbarNome', state.empresa.nome); setText('mobileDashNome', state.empresa.nome); renderAvatarPainel();
   { const sideCard = $('sideAvatar')?.closest('.side-user-card'); if (sideCard) sideCard.setAttribute('data-tip', state.empresa.nome || 'Empresa'); }
   const lb = $('sideLinkBox'); if (lb) lb.textContent = publicUrl(state.empresa.slug);
   renderConfig(); showNotif('Configurações salvas', '', 'ok');
