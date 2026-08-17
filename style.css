@@ -11165,3 +11165,288 @@ body.auth-performance-mode .notif-item.compact.out {
   #dashboardView .mobile-menu-body { padding:4px 10px 18px; }
   #dashboardView .mobile-menu-drawer .nav-btn { min-height:42px; border-radius:10px; font-size:11px; }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PÁGINA PÚBLICA — AJUSTES FINAIS
+   1) horários passados indisponíveis
+   2) WhatsApp desktop compacto
+   3) confirmação mais direta e profissional
+═══════════════════════════════════════════════════════════════ */
+
+/* Horário do dia atual que já passou: visual indisponível e sem interação. */
+#pubSlotsOverlay .pub-slot.passado {
+  pointer-events: none;
+  min-height: 52px;
+  border: 1px solid rgba(173, 145, 184, 0.12);
+  background: rgba(117, 91, 128, 0.035);
+  color: rgba(190, 171, 198, 0.32);
+  cursor: not-allowed;
+}
+
+#pubSlotsOverlay .pub-slot.passado::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: rgba(184, 158, 194, 0.28);
+}
+
+#pubSlotsOverlay .pub-slot.passado .slot-tag {
+  color: rgba(190, 171, 198, 0.42);
+}
+
+/* Confirmação: hierarquia limpa, sem mascote/ilustração e sem efeitos decorativos. */
+#publicView .pub-confirm-screen {
+  min-height: calc(100dvh - 24px);
+  padding: clamp(38px, 7vh, 76px) 16px 48px;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  animation: pubSuccessEnter .28s ease-out both;
+}
+
+#publicView .pub-confirm-screen[style*="display: block"] {
+  display: flex !important;
+}
+
+#publicView .pub-success-card {
+  width: min(570px, 100%);
+  margin: 0 auto;
+  padding: 38px 38px 30px;
+  overflow: visible;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(20, 12, 29, .98), rgba(10, 7, 14, .99));
+  border: 1px solid rgba(181, 116, 238, .27);
+  border-radius: 14px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .38);
+}
+
+#publicView .pub-success-card::before {
+  display: none;
+}
+
+#publicView .pub-success-status {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 18px;
+  display: grid;
+  place-items: center;
+  color: #d9b3ff;
+  background: rgba(137, 53, 208, .13);
+  border: 1px solid rgba(188, 113, 247, .42);
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(100, 35, 157, .12);
+}
+
+#publicView .pub-success-status svg {
+  width: 24px;
+  height: 24px;
+}
+
+#publicView .pub-success-kicker {
+  margin: 0 0 9px;
+  color: #b879ef;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: .17em;
+}
+
+#publicView .pub-success-card h2 {
+  margin: 0;
+  color: #f8f4fb;
+  font-family: 'Geist', sans-serif;
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 720;
+  line-height: 1.1;
+  letter-spacing: -.035em;
+}
+
+#publicView .pub-success-card > p {
+  margin: 10px 0 0;
+  color: #9e91a8;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+#publicView .pub-success-summary {
+  display: block;
+  margin: 30px 0 18px;
+  overflow: hidden;
+  text-align: left;
+  background: rgba(7, 4, 11, .58);
+  border: 1px solid rgba(183, 133, 219, .16);
+  border-radius: 10px;
+}
+
+#publicView .pub-success-summary-head {
+  padding: 13px 16px 11px;
+  color: #82738d;
+  border-bottom: 1px solid rgba(183, 133, 219, .12);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+#publicView .pub-success-row {
+  min-height: 54px;
+  margin: 0;
+  padding: 13px 16px;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+#publicView .pub-success-row-main + .pub-success-row-main {
+  border-top: 1px solid rgba(183, 133, 219, .10);
+}
+
+#publicView .pub-success-row span {
+  color: #75677f;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+#publicView .pub-success-row strong {
+  min-width: 0;
+  color: #f2edf5;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+#publicView .pub-success-when {
+  display: grid;
+  grid-template-columns: 1.5fr .8fr;
+  border-top: 1px solid rgba(183, 133, 219, .10);
+  background: rgba(139, 65, 192, .035);
+}
+
+#publicView .pub-success-when .pub-success-row {
+  grid-template-columns: 1fr;
+  gap: 5px;
+  min-height: 66px;
+  align-content: center;
+}
+
+#publicView .pub-success-when .pub-success-row + .pub-success-row {
+  border-left: 1px solid rgba(183, 133, 219, .10);
+}
+
+#publicView .pub-success-when .pub-success-row strong {
+  font-size: 14px;
+}
+
+#publicView .pub-success-new {
+  width: 100%;
+  min-height: 50px;
+  margin: 0;
+  border-radius: 9px !important;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  box-shadow: 0 10px 26px rgba(126, 34, 206, .18);
+}
+
+#publicView .pub-success-footnote {
+  margin-top: 14px;
+  color: #62586a;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+/* Somente desktop/PC. O WhatsApp do webapp/Android permanece sob as regras mobile. */
+@media (min-width: 769px) {
+  #publicView .pub-whatsapp-fab {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    min-height: 50px;
+    right: 24px;
+    bottom: 24px;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    gap: 0;
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(145deg, #25c76f, #149553);
+    border: 1px solid rgba(151, 255, 190, .32);
+    border-radius: 14px !important;
+    box-shadow: 0 9px 26px rgba(13, 126, 67, .22);
+  }
+
+  #publicView .pub-whatsapp-fab span {
+    display: none !important;
+  }
+
+  #publicView .pub-whatsapp-fab svg {
+    width: 21px;
+    height: 21px;
+    margin: 0;
+  }
+
+  #publicView .pub-whatsapp-fab:hover {
+    transform: translateY(-2px);
+    border-color: rgba(181, 255, 210, .52);
+    box-shadow: 0 13px 32px rgba(13, 126, 67, .28);
+  }
+}
+
+@media (max-width: 700px) {
+  #publicView .pub-confirm-screen {
+    min-height: 100dvh;
+    padding: 24px 12px calc(28px + env(safe-area-inset-bottom));
+  }
+
+  #publicView .pub-success-card {
+    width: 100%;
+    padding: 30px 18px 23px;
+    border-radius: 12px;
+  }
+
+  #publicView .pub-success-status {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 16px;
+  }
+
+  #publicView .pub-success-summary {
+    margin-top: 26px;
+  }
+
+  #publicView .pub-success-row {
+    grid-template-columns: 94px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px 13px;
+  }
+
+  #publicView .pub-success-when {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #publicView .pub-success-when .pub-success-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  #publicView .pub-success-card {
+    padding-inline: 14px;
+  }
+
+  #publicView .pub-success-row-main {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
