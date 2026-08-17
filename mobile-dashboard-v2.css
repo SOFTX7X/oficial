@@ -1,171 +1,147 @@
-(function(){
-  const isMobile=()=>matchMedia('(max-width:768px)').matches;
-  const moneyNumber=text=>Number(String(text||'').replace(/[^0-9,-]/g,'').replace('.','').replace(',','.'))||0;
-  const money=value=>Number(value||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  const esc=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-  const normStatus=value=>{
-    const s=String(value||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    return ({pendente:'Pendente',confirmado:'Confirmado',reagendado:'Reagendado',concluido:'Concluído',recusado:'Recusado',excluido:'Excluído'})[s]||String(value||'—');
-  };
-  const statusClass=value=>'vx-st-'+normStatus(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  const fmtDate=value=>{
-    if(!value)return '—';
-    const [y,m,d]=String(value).slice(0,10).split('-');
-    return y&&m&&d?`${d}/${m}/${y}`:String(value);
-  };
-  const actions=[
-    ['▦','Agenda',()=>window.setView?.('agenda')],['♙','Clientes',()=>window.setView?.('clientes')],['◇','Serviços',()=>window.setView?.('servicos')],['♧','Equipe',()=>window.setView?.('profissionais')],
-    ['R$','Financeiro',()=>window.setView?.('financeiro')],['↗','Relatórios',()=>window.setView?.('relatorios')],['⌂','Página',()=>window.openPublic?.()],['⚙','Empresa',()=>window.openConfigSection?.('empresa')]
-  ];
-  const viewMeta={
-    agenda:['Agenda','Crie e acompanhe seus horários.','▦'],clientes:['Clientes','Contatos e histórico em um só lugar.','♙'],servicos:['Serviços','Organize seu catálogo e seus valores.','◇'],profissionais:['Equipe','Gerencie quem realiza os atendimentos.','♧'],financeiro:['Financeiro','Cobranças, PIX e recebimentos.','R$'],relatorios:['Relatórios','Acompanhe os resultados do negócio.','↗'],config:['Empresa','Personalize o funcionamento da sua agenda.','⚙']
-  };
-  let recentPage=0;
-  const RECENT_PAGE_SIZE=5;
+@media (max-width: 768px) {
+  html:has(body.vx-android-dashboard) { min-height:100%;background:#090610 !important; }
+  body.vx-android-dashboard { padding-bottom:0 !important;overflow-x:hidden;min-height:100dvh;background:radial-gradient(circle at 88% 4%,rgba(132,72,220,.18),transparent 30%),linear-gradient(165deg,#100a19 0%,#0b0712 48%,#08060d 100%) fixed !important;background-size:100vw 100dvh !important;background-repeat:no-repeat !important; }
+  body.vx-android-dashboard #dashboardView,body.vx-android-dashboard .dash-main,body.vx-android-dashboard #view-dashboard { background:transparent !important; }
+  body.vx-android-dashboard #dashboardView { min-height:100dvh !important; }
+  body.vx-android-dashboard .dash-main { padding: 0 0 calc(88px + env(safe-area-inset-bottom,0px)) !important; min-height: 100dvh; overflow: visible; }
+  body.vx-android-dashboard .topbar,
+  body.vx-android-dashboard .mobile-nav-bar,
+  body.vx-android-dashboard .mobile-menu-trigger,
+  body.vx-android-dashboard .mobile-app-dock,
+  body.vx-android-dashboard .mobile-menu-drawer,
+  body.vx-android-dashboard .mobile-menu-overlay,
+  body.vx-android-dashboard #view-dashboard > .vxd-legacy { display: none !important;visibility:hidden !important;pointer-events:none !important; }
+  body.vx-android-dashboard #view-dashboard > :not(.vx-mobile-home) { display: none !important; }
+  body.vx-android-dashboard #view-dashboard { display: none; min-height: 100dvh; padding: 0; overflow: visible; }
+  body.vx-android-dashboard #view-dashboard.active { display: block; }
 
-  function animateBalance(element,target){
-    if(!element)return;
-    const from=moneyNumber(element.dataset.value);element.dataset.value=target;const start=performance.now(),duration=620;
-    const frame=now=>{const p=Math.min(1,(now-start)/duration),e=1-Math.pow(1-p,4);element.innerHTML=`<small>R$</small>${money(from+(target-from)*e).replace('R$ ','')}`;if(p<1)requestAnimationFrame(frame)};requestAnimationFrame(frame);
-  }
+  .vx-mobile-home { min-height: calc(100dvh + 1px); padding-bottom:1px;color:#f8f5ff;font-family:Geist,Inter,sans-serif;background:transparent !important; }
+  .vx-mob-head { min-height: 66px; padding: calc(13px + env(safe-area-inset-top,0px)) 15px 9px; display:flex;align-items:center;justify-content:space-between;gap:12px; }
+  .vx-mob-user { min-width:0;display:flex;align-items:center;gap:9px; }
+  .vx-mob-avatar { width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(145deg,#9f67ff,#6d36d7);font-size:11px;font-weight:800;box-shadow:0 8px 25px rgba(125,62,220,.3); }
+  .vx-mob-greeting { min-width:0; }
+  .vx-mob-greeting small { display:block;color:#898292;font-size:8px;letter-spacing:.04em;margin-bottom:2px; }
+  .vx-mob-greeting b { display:block;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:700; }
+  .vx-mob-head-actions {display:flex;gap:6px}.vx-mob-iconbtn{width:31px;height:31px;border:1px solid #29242f;border-radius:10px;background:#121016;color:#c9c2d0;display:grid;place-items:center;font-size:12px;position:relative}.vx-mob-iconbtn:active{transform:scale(.9);background:#20182d}.vx-mob-dot{position:absolute;right:6px;top:6px;width:4px;height:4px;border-radius:50%;background:#a969ff;box-shadow:0 0 8px #a969ff}
+  .vx-mob-link{height:31px;padding:0 9px;border:1px solid rgba(169,105,255,.22);border-radius:10px;background:linear-gradient(145deg,#191320,#110e16);color:#b87cff;display:flex;align-items:center;gap:5px;font:750 7px Geist,Inter,sans-serif;letter-spacing:.08em;position:relative;overflow:hidden;transition:.2s}.vx-mob-link::after{content:"";position:absolute;inset:-20% auto -20% -35%;width:25%;transform:skewX(-22deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);animation:vxLinkShine 3.2s ease-in-out infinite}.vx-mob-link i{font-style:normal;font-size:11px}.vx-mob-link:active{transform:scale(.91)}.vx-mob-link.copied{color:#63dda0;border-color:rgba(63,211,139,.35);background:#0e1b16}
 
-  function activeAppointments(){
-    return (window.state?.agendamentos||[]).filter(a=>normStatus(a.status)!=='Excluído');
-  }
+  .vx-bank-card { margin: 2px 12px 12px; min-height:112px;padding:15px 16px;border:1px solid rgba(178,122,255,.2);border-radius:18px;background:linear-gradient(145deg,#17121f,#0f0d13 68%);box-shadow:0 18px 45px rgba(0,0,0,.35);position:relative;overflow:hidden; }
+  .vx-bank-card::before{content:"";position:absolute;width:150px;height:150px;border-radius:50%;right:-65px;top:-75px;background:radial-gradient(circle,rgba(161,88,255,.28),transparent 65%);animation:vxBankGlow 4s ease-in-out infinite}.vx-bank-card::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:1px;background:linear-gradient(90deg,transparent,#8d54df,transparent)}
+  .vx-bank-top{display:flex;justify-content:space-between;align-items:center;position:relative}.vx-bank-label{font-size:8px;color:#8f8798;letter-spacing:.08em;text-transform:uppercase}.vx-bank-eye{border:0;background:none;color:#8f8798;font-size:11px;padding:4px}.vx-bank-value{position:relative;margin-top:5px;font-size:23px;line-height:1.15;font-weight:720;letter-spacing:-.035em;font-variant-numeric:tabular-nums}.vx-bank-value small{font-size:10px;color:#aaa2b2;margin-right:3px}.vx-bank-meta{position:relative;margin-top:11px;display:flex;gap:17px}.vx-bank-meta span{font-size:7px;color:#77707f;text-transform:uppercase;letter-spacing:.05em}.vx-bank-meta b{display:block;color:#cfc8d6;font-size:9px;margin-top:2px;text-transform:none;letter-spacing:0}
+  .vx-bank-live{display:flex;align-items:center;gap:4px;color:#70dca5;font-size:5.8px;font-weight:800;letter-spacing:.08em}.vx-bank-live i{width:5px;height:5px;border-radius:50%;background:#39dc8d;box-shadow:0 0 0 0 rgba(57,220,141,.55);animation:vxLivePulse 1.45s ease-out infinite}
+  .vx-trend-card{padding:11px 11px 8px;border:1px solid rgba(169,105,255,.15);border-radius:15px;background:linear-gradient(155deg,rgba(21,17,27,.94),rgba(12,10,15,.96));overflow:hidden;box-shadow:0 15px 36px rgba(0,0,0,.25)}.vx-trend-head{display:flex;align-items:center;gap:15px;padding:0 2px 7px}.vx-trend-head>div{display:grid;grid-template-columns:auto auto;column-gap:4px;align-items:center}.vx-trend-head small{font-size:6.5px;color:#817988}.vx-trend-head b{grid-column:2;font-size:10px;line-height:1.1}.vx-trend-head em{margin-left:auto;color:#716979;font-size:6px;font-style:normal}.vx-trend-dot{width:5px;height:5px;border-radius:50%;grid-row:1/3}.vx-trend-dot.green{background:#39dc8d;box-shadow:0 0 8px rgba(57,220,141,.4)}.vx-trend-dot.red{background:#ff5570;box-shadow:0 0 8px rgba(255,85,112,.35)}.vx-trend-chart{display:block;width:100%;height:90px;overflow:visible}.vx-chart-grid path{fill:none;stroke:rgba(255,255,255,.045);stroke-width:1;stroke-dasharray:3 5}.vx-area.green{fill:url(#vxGreenFill)}.vx-area.red{fill:url(#vxRedFill)}.vx-line{fill:none;stroke-width:2;stroke-linecap:round;filter:drop-shadow(0 0 5px currentColor);stroke-dasharray:430;stroke-dashoffset:430;animation:vxDrawLine 1.4s cubic-bezier(.2,.8,.2,1) forwards}.vx-line.green{stroke:#39dc8d;color:rgba(57,220,141,.5)}.vx-line.red{stroke:#ff5570;color:rgba(255,85,112,.45);animation-delay:.18s}.vx-chart-days{display:flex;justify-content:space-between;padding:0 2px;color:#625b68;font-size:5.5px}
 
-  function recentAppointments(){
-    return activeAppointments().filter(a=>['Confirmado','Concluído'].includes(normStatus(a.status))).slice().sort((a,b)=>{
-      const ca=Date.parse(a.criado_em||'')||0,cb=Date.parse(b.criado_em||'')||0;
-      if(ca!==cb)return cb-ca;
-      return String(`${b.data||''} ${b.hora||''}`).localeCompare(String(`${a.data||''} ${a.hora||''}`));
-    });
-  }
+  .vx-mob-section { padding: 0 12px; margin-top: 12px; }
+  .vx-mob-section-head { display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 2px; }
+  .vx-mob-section-head h2 { margin:0;font-size:10px;font-weight:700;letter-spacing:.02em;color:#dfd9e5; }
+  .vx-mob-section-head button { border:0;background:none;color:#9f67ff;font-size:8px;font-weight:700;padding:5px; }
+  .vx-quick-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px; }
+  .vx-quick { min-width:0;min-height:68px;padding:8px 3px 7px;border:1px solid #25212b;border-radius:13px;background:linear-gradient(155deg,#131117,#0e0c11);color:#bab3c1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-family:inherit;transition:transform .18s,border-color .18s,background .18s;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent; }
+  .vx-quick::after{content:"";position:absolute;width:45px;height:45px;border-radius:50%;background:rgba(161,91,255,.2);transform:scale(0);opacity:0;transition:.3s}.vx-quick:active{transform:scale(.92);border-color:#7945bc;background:#191221}.vx-quick:active::after{transform:scale(2.8);opacity:1}.vx-quick i{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:#1d1726;color:#a969ff;font-style:normal;font-size:12px;border:1px solid rgba(169,105,255,.12);position:relative;z-index:1}.vx-quick span{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-size:7.5px;font-weight:650;position:relative;z-index:1}
 
-  function nextAppointment(){
-    const now=new Date();
-    return activeAppointments()
-      .filter(a=>normStatus(a.status)==='Confirmado'&&a.data)
-      .map(a=>({a,when:new Date(`${a.data}T${String(a.hora||'00:00').slice(0,5)}:00`)}))
-      .filter(x=>!Number.isNaN(x.when.getTime())&&x.when.getTime()>=now.getTime()-60000)
-      .sort((x,y)=>x.when-y.when)[0]?.a||null;
-  }
+  .vx-mob-summary { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px; }
+  .vx-summary-card{min-width:0;padding:9px 6px;border:1px solid #242029;border-radius:12px;background:#100e13}.vx-summary-card small{display:block;color:#77707f;font-size:6.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vx-summary-card b{display:block;margin-top:4px;font-size:11px;font-variant-numeric:tabular-nums;color:#eee9f2}.vx-summary-card b.green{color:#5bd69a}.vx-summary-card b.yellow{color:#f4c45d}.vx-summary-card b.purple{color:#b984ff}
+  .vx-mob-list{border:1px solid #25212a;border-radius:14px;background:#100e13;overflow:hidden}.vx-mob-empty{min-height:85px;padding:17px;display:grid;place-items:center;text-align:center;color:#77707f;font-size:8px;line-height:1.55}.vx-mob-appointment{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;padding:10px;border-bottom:1px solid #211d25}.vx-mob-appointment:last-child{border:0}.vx-ap-time{font-size:8px;color:#a969ff;font-weight:800}.vx-ap-copy{min-width:0}.vx-ap-copy b{display:block;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vx-ap-copy span{display:block;font-size:7px;color:#797280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vx-ap-status{font-size:6px;padding:4px 6px;border-radius:10px;background:#1c1722;color:#aaa2b1}
 
-  function renderStatuses(){
-    const map=[['vxPending','statPendentes'],['vxRefused','statRecusados'],['vxConfirmed','statConfirmados'],['vxFinished','statConcluidos']];
-    map.forEach(([to,from])=>{const el=document.getElementById(to),src=document.getElementById(from);if(el&&src)el.textContent=src.textContent||'0'});
-  }
+  .vx-float-launcher{position:fixed;z-index:100020;right:12px;bottom:calc(13px + env(safe-area-inset-bottom,0px));width:41px;height:41px;border:1px solid rgba(220,195,255,.38);border-radius:13px;background:linear-gradient(145deg,#a66cff,#7135cc);color:white;box-shadow:0 10px 28px rgba(100,41,190,.46),inset 0 1px rgba(255,255,255,.2);display:grid;place-items:center;touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .18s,box-shadow .18s}.vx-float-launcher:active{transform:scale(.92)}.vx-float-launcher i{font-style:normal;font-size:15px;transition:transform .25s}.vx-float-launcher.open i{transform:rotate(45deg)}.vx-float-launcher::after{content:"";position:absolute;inset:-4px;border:1px solid rgba(169,105,255,.18);border-radius:16px;animation:vxLauncherPulse 2.4s ease-in-out infinite}
+  .vx-menu-backdrop{position:fixed;z-index:100010;inset:0;background:rgba(3,2,5,.63);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .22s}.vx-menu-backdrop.open{opacity:1;pointer-events:auto}
+  .vx-float-panel{position:fixed;z-index:100015;left:8px;right:8px;bottom:calc(65px + env(safe-area-inset-bottom,0px));width:auto;padding:12px;border:1px solid rgba(185,129,255,.24);border-radius:18px;background:linear-gradient(145deg,rgba(25,20,31,.97),rgba(12,10,15,.97));box-shadow:0 22px 65px rgba(0,0,0,.72),0 0 0 1px rgba(255,255,255,.025),inset 0 1px rgba(255,255,255,.055);backdrop-filter:blur(26px) saturate(1.25);transform:translateY(14px) scale(.97);transform-origin:bottom center;opacity:0;pointer-events:none;transition:.24s cubic-bezier(.2,.8,.2,1)}.vx-float-panel.open{transform:none;opacity:1;pointer-events:auto}.vx-float-head{display:flex;align-items:center;justify-content:space-between;padding:1px 2px 10px;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:9px}.vx-float-head div{font-size:9px;font-weight:750;letter-spacing:.02em}.vx-float-head span{font-size:7px;color:#756d7c}.vx-dashboard-return{display:flex;justify-content:center;margin:0 0 8px}.vx-float-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.vx-float-option{min-width:0;min-height:66px;padding:8px 3px;border:1px solid #2a2430;border-radius:12px;background:linear-gradient(150deg,#18141d,#100e13);color:#b6aebd;font-size:7.5px;font-family:inherit;display:grid;place-items:center;align-content:center;gap:5px;transition:transform .16s,border-color .16s,background .16s}.vx-float-dashboard{width:calc(25% - 5px);border-color:rgba(166,108,255,.38);background:linear-gradient(150deg,#251734,#140e1d);color:#d4b7ff}.vx-float-option i{width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:rgba(166,108,255,.1);border:1px solid rgba(166,108,255,.09);font-style:normal;color:#bd86ff;font-size:12px}.vx-float-option:active{transform:scale(.91);border-color:#8150bd;background:#21162e}
+  @keyframes vxBankGlow{50%{transform:scale(1.18);opacity:.6}}@keyframes vxLauncherPulse{50%{transform:scale(1.1);opacity:.25}}@keyframes vxLivePulse{70%{box-shadow:0 0 0 6px rgba(57,220,141,0)}100%{box-shadow:0 0 0 0 rgba(57,220,141,0)}}@keyframes vxLinkShine{0%,65%{left:-35%}85%,100%{left:125%}}@keyframes vxDrawLine{to{stroke-dashoffset:0}}
+}
+@media(max-width:340px){.vx-quick-grid,.vx-mob-summary,.vx-float-grid{gap:4px}.vx-quick{min-height:62px}.vx-quick span{font-size:6.8px}.vx-bank-card{margin-inline:8px}.vx-mob-section{padding-inline:8px}}
+@media(prefers-reduced-motion:reduce){.vx-bank-card::before,.vx-float-launcher::after{animation:none!important}.vx-quick,.vx-float-panel,.vx-menu-backdrop{transition:none!important}}
 
-  function renderNext(){
-    const target=document.querySelector('.vx-next-body');if(!target)return;
-    const a=nextAppointment();
-    if(!a){target.innerHTML='<div class="vx-next-empty"><b>Nenhum atendimento confirmado</b><span>O próximo horário confirmado aparecerá aqui.</span></div>';return;}
-    target.innerHTML=`<div class="vx-next-time"><strong>${esc(a.hora||'—')}</strong><span>${esc(fmtDate(a.data))}</span></div><div class="vx-next-copy"><b>${esc(a.cliente_nome||'Cliente')}</b><span>${esc(a.servico_nome||'Serviço')}</span></div><span class="vx-status-pill ${statusClass(a.status)}">${esc(normStatus(a.status))}</span>`;
-  }
+/* =============================================================
+   VYXORA ANDROID — DASHBOARD COMPACTO + MENU BOTTOM SHEET
+   ============================================================= */
+@media (max-width:768px){
+  /* O fundo do WebApp é uma superfície contínua até a safe area. */
+  html:has(body.vx-android-dashboard),
+  body.vx-android-dashboard,
+  body.vx-android-dashboard #dashboardView,
+  body.vx-android-dashboard .dash-main,
+  body.vx-android-dashboard .view{background-color:#090610!important}
+  body.vx-android-dashboard .vx-mobile-home{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px));}
 
-  function renderRecent(){
-    const target=document.querySelector('.vx-recent-list');if(!target)return;
-    const rows=recentAppointments();
-    const pages=Math.max(1,Math.ceil(rows.length/RECENT_PAGE_SIZE));
-    recentPage=Math.min(recentPage,pages-1);
-    const pageRows=rows.slice(recentPage*RECENT_PAGE_SIZE,(recentPage+1)*RECENT_PAGE_SIZE);
-    if(!pageRows.length){target.innerHTML='<div class="vx-mob-empty">Nenhum agendamento registrado ainda.</div>';}else{
-      target.innerHTML=pageRows.map(a=>`<article class="vx-recent-item"><div class="vx-recent-top"><time>${esc(a.hora||'—')}</time><span class="vx-status-pill ${statusClass(a.status)}">${esc(normStatus(a.status))}</span></div><div class="vx-recent-line"><b>${esc(a.cliente_nome||'Cliente')}</b><small>CLIENTE</small></div><div class="vx-recent-line"><span>${esc(a.servico_nome||'Serviço')}</span><small>SERVIÇO</small></div><div class="vx-recent-date">${esc(fmtDate(a.data))}</div></article>`).join('');
-    }
-    const pager=document.querySelector('.vx-recent-pager');
-    if(!pager)return;
-    pager.hidden=rows.length<=RECENT_PAGE_SIZE;
-    const prev=pager.querySelector('[data-recent-prev]'),next=pager.querySelector('[data-recent-next]'),label=pager.querySelector('[data-recent-page]');
-    if(label)label.textContent=`${recentPage+1} / ${pages}`;
-    if(prev)prev.disabled=recentPage===0;
-    if(next)next.disabled=recentPage>=pages-1;
-  }
+  .vx-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .vx-status-card{position:relative;min-width:0;min-height:62px;padding:10px 11px;border:1px solid rgba(255,255,255,.075);border-radius:13px;background:linear-gradient(150deg,rgba(19,16,24,.96),rgba(12,10,15,.98));overflow:hidden;box-shadow:inset 0 1px rgba(255,255,255,.025)}
+  .vx-status-card::after{content:"";position:absolute;inset:auto 10px 0;height:1px;opacity:.58;background:currentColor}
+  .vx-status-card small{display:block;color:#817a88;font-size:6.8px;font-weight:650;letter-spacing:.045em;text-transform:uppercase}
+  .vx-status-card b{display:block;margin-top:6px;font-size:16px;line-height:1;font-weight:760;font-variant-numeric:tabular-nums;color:#f3eef8}
+  .vx-status-card.refused{color:#ff667d}.vx-status-card.rescheduled{color:#bb78ff}.vx-status-card.confirmed{color:#52d99a}.vx-status-card.finished{color:#8f9dff}
 
-  function sync(){
-    const balance=document.querySelector('.vx-bank-value');if(!balance)return;
-    animateBalance(balance,moneyNumber(document.getElementById('chartFatValue')?.textContent));
-    const todaySrc=document.getElementById('statFatHoje');const today=document.getElementById('vxBankToday');if(today&&todaySrc)today.textContent=todaySrc.textContent||'R$ 0';
-    const fin=activeAppointments().filter(a=>normStatus(a.status)==='Concluído');
-    const total=fin.reduce((s,a)=>s+Number(a.valor||0),0);const ticket=fin.length?total/fin.length:0;const ticketEl=document.getElementById('vxBankTicket');if(ticketEl)ticketEl.textContent=money(ticket).replace(',00','');
-    renderStatuses();renderNext();renderRecent();
-    const name=document.getElementById('sideNome')?.textContent||window.state?.empresa?.nome||'Seu negócio';document.querySelector('.vx-mob-greeting b')?.replaceChildren(name);document.querySelector('.vx-mob-avatar')?.replaceChildren(name.trim()[0]?.toUpperCase()||'V');const company=window.state?.empresa?.nome||name;document.querySelector('.vx-mob-company')?.replaceChildren(company);
-    updateFloatVisibility();
-  }
+  .vx-next-card{border:1px solid rgba(174,114,255,.14);border-radius:14px;background:linear-gradient(150deg,rgba(20,16,26,.96),rgba(12,10,15,.98));overflow:hidden}
+  .vx-next-body{min-height:68px;padding:11px;display:grid;grid-template-columns:55px minmax(0,1fr) auto;gap:9px;align-items:center}
+  .vx-next-time{min-width:0;padding-right:8px;border-right:1px solid rgba(255,255,255,.065)}
+  .vx-next-time strong{display:block;color:#c28cff;font-size:13px;font-variant-numeric:tabular-nums}
+  .vx-next-time span{display:block;margin-top:3px;color:#6f6875;font-size:5.8px}
+  .vx-next-copy{min-width:0}.vx-next-copy b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8.5px;color:#eee9f2}.vx-next-copy span{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:6.7px;color:#7f7786}
+  .vx-next-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:3px}.vx-next-empty b{font-size:8px;color:#aaa2b0}.vx-next-empty span{font-size:6.8px;color:#6f6875}
 
-  function go(fn){
-    closeMenu();
-    const publicView=document.getElementById('publicView'),dashboardView=document.getElementById('dashboardView');
-    if(publicView)publicView.style.display='none';
-    if(dashboardView)dashboardView.style.display='block';
-    document.body.classList.remove('public-mode');
-    if(location.hash.startsWith('#agendar/'))history.replaceState(null,'',location.pathname+location.search);
-    window.unlockPublicModalScroll?.();
-    fn();
-    setTimeout(updateFloatVisibility,0);
-  }
+  .vx-section-note{color:#706879;font-size:6.2px;letter-spacing:.03em}
+  .vx-recent-list{border:1px solid rgba(255,255,255,.075);border-radius:14px;background:rgba(13,11,16,.92);overflow:hidden}
+  .vx-recent-item{position:relative;padding:9px 10px 8px;border-bottom:1px solid rgba(255,255,255,.055)}.vx-recent-item:last-child{border-bottom:0}
+  .vx-recent-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}.vx-recent-top time{color:#c28cff;font-size:8.5px;font-weight:800;font-variant-numeric:tabular-nums}
+  .vx-recent-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;min-height:15px}.vx-recent-line b,.vx-recent-line span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7.8px;color:#e9e3ee}.vx-recent-line span{font-size:7px;color:#a099a6}.vx-recent-line small{font-size:5px;color:#625b69;font-weight:750;letter-spacing:.08em}
+  .vx-recent-date{position:absolute;right:10px;bottom:7px;color:#514b56;font-size:5.4px;font-variant-numeric:tabular-nums}
+  .vx-status-pill{flex:0 0 auto;max-width:88px;padding:4px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.06);background:#17131c;color:#9f98a6;font-size:5.3px;font-weight:780;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap}
+  .vx-status-pill.vx-st-pendente{color:#f0c35d;background:rgba(215,161,40,.09);border-color:rgba(215,161,40,.12)}
+  .vx-status-pill.vx-st-confirmado{color:#59d99b;background:rgba(54,190,126,.09);border-color:rgba(54,190,126,.13)}
+  .vx-status-pill.vx-st-reagendado{color:#bd82ff;background:rgba(162,95,235,.10);border-color:rgba(162,95,235,.14)}
+  .vx-status-pill.vx-st-concluido{color:#9ba7ff;background:rgba(102,119,235,.10);border-color:rgba(102,119,235,.14)}
+  .vx-status-pill.vx-st-recusado{color:#ff6c82;background:rgba(230,67,93,.09);border-color:rgba(230,67,93,.13)}
 
-  function build(){
-    if(!isMobile()||document.querySelector('.vx-mobile-home'))return;
-    document.body.classList.add('vx-android-dashboard');
-    const view=document.getElementById('view-dashboard');if(!view)return;
-    const home=document.createElement('div');home.className='vx-mobile-home';home.innerHTML=`
-      <header class="vx-mob-head"><div class="vx-mob-user"><div class="vx-mob-avatar">V</div><div class="vx-mob-greeting"><small>Bom dia</small><b>Seu negócio</b><em class="vx-mob-company">VYXORA</em></div></div><div class="vx-mob-head-actions"><button class="vx-mob-link" data-copy-link><i>⌁</i><span>LINK</span></button><button class="vx-mob-iconbtn" data-notifications aria-label="Notificações">♢<i class="vx-mob-dot"></i></button></div></header>
-      <section class="vx-bank-card"><div class="vx-bank-top"><span class="vx-bank-label">Faturamento do período</span><span class="vx-bank-live" aria-label="Dados em tempo real"><i></i> AO VIVO</span></div><div class="vx-bank-value" data-value="0"><small>R$</small>0,00</div><div class="vx-bank-meta"><span>Hoje<b id="vxBankToday">R$ 0</b></span><span>Ticket médio<b id="vxBankTicket">R$ 0</b></span></div></section>
-      <section class="vx-mob-section"><div class="vx-mob-section-head"><h2>Resumo dos agendamentos</h2><button data-reports>Ver relatório</button></div><div class="vx-status-grid"><article class="vx-status-card pending"><small>Pendentes</small><b id="vxPending">0</b></article><article class="vx-status-card refused"><small>Recusados</small><b id="vxRefused">0</b></article><article class="vx-status-card confirmed"><small>Confirmados</small><b id="vxConfirmed">0</b></article><article class="vx-status-card finished"><small>Concluídos</small><b id="vxFinished">0</b></article></div></section>
-      <section class="vx-mob-section"><div class="vx-mob-section-head"><h2>Próximo atendimento</h2><button data-agenda>Ver agenda</button></div><div class="vx-next-card"><div class="vx-next-body"><div class="vx-mob-empty">Carregando…</div></div></div></section>
-      <section class="vx-mob-section vx-recent-section"><div class="vx-mob-section-head"><h2>Agendamentos recentes</h2><span class="vx-section-note">Mais recentes</span></div><div class="vx-recent-list"><div class="vx-mob-empty">Carregando…</div></div><nav class="vx-recent-pager" hidden aria-label="Paginação dos agendamentos recentes"><button data-recent-prev>‹ Anterior</button><span data-recent-page>1 / 1</span><button data-recent-next>Próximo ›</button></nav></section>`;
-    view.prepend(home);
-    decorateViews();
-    home.querySelectorAll('[data-agenda]').forEach(b=>b.addEventListener('click',()=>go(actions[0][2])));
-    home.querySelector('[data-reports]')?.addEventListener('click',()=>go(actions[5][2]));
-    home.querySelector('[data-notifications]')?.addEventListener('click',()=>window.openNotificationCenter?.());
-    home.querySelector('[data-copy-link]')?.addEventListener('click',function(){window.copyPublicLink?.(this);this.classList.add('copied');this.querySelector('span').textContent='COPIADO';setTimeout(()=>{this.classList.remove('copied');this.querySelector('span').textContent='LINK'},1500)});
-    home.querySelector('[data-recent-prev]')?.addEventListener('click',()=>{if(recentPage>0){recentPage--;renderRecent();home.querySelector('.vx-recent-section')?.scrollIntoView({behavior:'smooth',block:'start'})}});
-    home.querySelector('[data-recent-next]')?.addEventListener('click',()=>{const pages=Math.ceil(recentAppointments().length/RECENT_PAGE_SIZE);if(recentPage<pages-1){recentPage++;renderRecent();home.querySelector('.vx-recent-section')?.scrollIntoView({behavior:'smooth',block:'start'})}});
-    buildFloat();sync();setInterval(sync,1600);
-  }
+  .vx-recent-pager{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:7px;margin-top:7px}.vx-recent-pager[hidden]{display:none!important}.vx-recent-pager button{height:31px;padding:0 9px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:#100d14;color:#a77be0;font:700 6.7px Geist,Inter,sans-serif;transition:transform .16s,border-color .16s,opacity .16s}.vx-recent-pager button:last-child{justify-self:end}.vx-recent-pager button:active:not(:disabled){transform:scale(.95);border-color:rgba(169,105,255,.4)}.vx-recent-pager button:disabled{opacity:.28;color:#77707f}.vx-recent-pager span{min-width:34px;text-align:center;color:#6e6675;font-size:6.4px;font-variant-numeric:tabular-nums}
 
-  function decorateViews(){Object.entries(viewMeta).forEach(([key,[title,subtitle,icon]])=>{const target=document.getElementById('view-'+key);if(!target||target.querySelector(':scope > .vx-mobile-view-head'))return;const head=document.createElement('header');head.className='vx-mobile-view-head';head.innerHTML=`<div><small>VYXORA · GESTÃO</small><h1>${title}</h1><p>${subtitle}</p></div><span class="vx-mobile-view-mark">${icon}</span>`;target.prepend(head)})}
+  /* Launcher só aparece na área autenticada. Sem drag: posição estável de app. */
+  .vx-float-launcher{display:grid!important;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(10px) scale(.88);right:14px!important;left:auto!important;top:auto!important;bottom:calc(14px + env(safe-area-inset-bottom,0px))!important;width:45px;height:45px;border:1px solid rgba(225,205,255,.28);border-radius:15px;background:linear-gradient(145deg,#a86aff 0%,#7a3bdd 65%,#6630c0 100%);box-shadow:0 14px 34px rgba(87,36,162,.46),inset 0 1px rgba(255,255,255,.22);transition:opacity .2s,visibility .2s,transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+  .vx-float-launcher.is-visible{opacity:1;visibility:visible;pointer-events:auto;transform:none}.vx-float-launcher::before{content:"";position:absolute;inset:5px;border-radius:11px;border:1px solid rgba(255,255,255,.11);pointer-events:none}.vx-float-launcher::after{display:none!important}.vx-float-launcher i{font-size:19px;font-weight:300;line-height:1;transition:transform .32s cubic-bezier(.2,.8,.2,1)}.vx-float-launcher.open{transform:scale(.96);box-shadow:0 9px 24px rgba(87,36,162,.38)}.vx-float-launcher.open i{transform:rotate(45deg)}
 
-  function buildFloat(){
-    if(document.querySelector('.vx-float-launcher'))return;
-    const backdrop=document.createElement('div');backdrop.className='vx-menu-backdrop';
-    const panel=document.createElement('div');panel.className='vx-float-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Menu Vyxora');panel.innerHTML=`<div class="vx-float-handle" aria-hidden="true"></div><div class="vx-float-head"><div><strong>Menu Vyxora</strong><span>Acesso rápido</span></div><button class="vx-float-close" type="button" aria-label="Fechar menu">×</button></div><div class="vx-float-grid"><button class="vx-float-option vx-float-dashboard" data-dashboard-action><i>⌂</i><span>Dashboard</span></button>${actions.map((a,i)=>`<button class="vx-float-option" data-float-action="${i}"><i>${a[0]}</i><span>${a[1]}</span></button>`).join('')}</div>`;
-    const launcher=document.createElement('button');launcher.className='vx-float-launcher';launcher.setAttribute('aria-label','Abrir menu Vyxora');launcher.setAttribute('aria-expanded','false');launcher.innerHTML='<i>＋</i>';
-    document.body.append(backdrop,panel,launcher);
-    launcher.addEventListener('click',toggleMenu);
-    backdrop.addEventListener('click',closeMenu);
-    panel.querySelector('.vx-float-close')?.addEventListener('click',closeMenu);
-    panel.querySelector('[data-dashboard-action]')?.addEventListener('click',()=>go(()=>window.setView?.('dashboard')));
-    panel.querySelectorAll('[data-float-action]').forEach(b=>b.addEventListener('click',()=>go(actions[Number(b.dataset.floatAction)][2])));
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
-    window.addEventListener('hashchange',()=>{closeMenu();updateFloatVisibility()});
-    const observer=new MutationObserver(updateFloatVisibility);observer.observe(document.body,{attributes:true,attributeFilter:['class']});
-    ['publicView','dashboardView'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{attributes:true,attributeFilter:['style','class']})});
-    updateFloatVisibility();
-  }
+  .vx-menu-backdrop{background:rgba(4,2,7,.72);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);transition:opacity .25s ease}
+  .vx-float-panel{left:8px;right:8px;bottom:calc(70px + env(safe-area-inset-bottom,0px));padding:9px 10px 11px;border:1px solid rgba(190,137,255,.18);border-radius:21px;background:linear-gradient(155deg,rgba(25,20,31,.985),rgba(12,10,15,.99));box-shadow:0 26px 70px rgba(0,0,0,.64),inset 0 1px rgba(255,255,255,.04);backdrop-filter:blur(24px) saturate(1.15);-webkit-backdrop-filter:blur(24px) saturate(1.15);transform:translateY(24px) scale(.985);transition:transform .28s cubic-bezier(.16,1,.3,1),opacity .22s ease}
+  .vx-float-panel.open{transform:none}.vx-float-handle{width:27px;height:3px;margin:0 auto 8px;border-radius:999px;background:rgba(255,255,255,.12)}
+  .vx-float-head{margin:0 1px 8px;padding:0 2px 9px}.vx-float-head>div{display:flex;flex-direction:column;gap:2px}.vx-float-head strong{font-size:8.8px;color:#eee9f3;letter-spacing:.01em}.vx-float-head span{font-size:6px;color:#706979}.vx-float-close{width:27px;height:27px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:#151119;color:#8e8696;font-size:15px;line-height:1}
+  .vx-float-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .vx-float-option,.vx-float-dashboard{width:auto!important;min-width:0;min-height:61px;padding:7px 4px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:linear-gradient(150deg,rgba(24,20,29,.98),rgba(15,13,18,.98));color:#aaa2b1;font-size:6.8px;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:transform .16s,border-color .16s,background .16s,color .16s;animation:vxMenuItemIn .32s both}
+  .vx-float-option:nth-child(2){animation-delay:.025s}.vx-float-option:nth-child(3){animation-delay:.05s}.vx-float-option:nth-child(4){animation-delay:.075s}.vx-float-option:nth-child(5){animation-delay:.10s}.vx-float-option:nth-child(6){animation-delay:.125s}.vx-float-option:nth-child(7){animation-delay:.15s}.vx-float-option:nth-child(8){animation-delay:.175s}.vx-float-option:nth-child(9){animation-delay:.20s}
+  .vx-float-dashboard{border-color:rgba(169,105,255,.26);background:linear-gradient(150deg,rgba(57,35,78,.74),rgba(25,17,34,.95));color:#d2b5fa}.vx-float-option i{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:rgba(166,108,255,.08);border:1px solid rgba(166,108,255,.08);font-style:normal;color:#b77dff;font-size:11px}.vx-float-option span{font-size:6.7px}.vx-float-option:active{transform:scale(.94);border-color:rgba(169,105,255,.34);background:#201629;color:#e2d6ee}
 
-  function shouldShowFloat(){
-    if(!isMobile()||!window.state?.user)return false;
-    if(document.body.classList.contains('public-mode')||location.hash.startsWith('#agendar/'))return false;
-    const publicView=document.getElementById('publicView');
-    if(publicView&&getComputedStyle(publicView).display!=='none')return false;
-    const dashboardView=document.getElementById('dashboardView');
-    if(dashboardView&&getComputedStyle(dashboardView).display==='none')return false;
-    return true;
-  }
-  function updateFloatVisibility(){
-    const show=shouldShowFloat();
-    document.querySelector('.vx-float-launcher')?.classList.toggle('is-visible',show);
-    if(!show)closeMenu();
-  }
-  function toggleMenu(){
-    if(!shouldShowFloat())return;
-    const panel=document.querySelector('.vx-float-panel'),backdrop=document.querySelector('.vx-menu-backdrop'),launcher=document.querySelector('.vx-float-launcher');
-    const open=!panel?.classList.contains('open');
-    panel?.classList.toggle('open',open);backdrop?.classList.toggle('open',open);launcher?.classList.toggle('open',open);launcher?.setAttribute('aria-expanded',String(open));
-  }
-  function closeMenu(){document.querySelector('.vx-menu-backdrop')?.classList.remove('open');document.querySelector('.vx-float-panel')?.classList.remove('open');const launcher=document.querySelector('.vx-float-launcher');launcher?.classList.remove('open');launcher?.setAttribute('aria-expanded','false')}
+  @keyframes vxMenuItemIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+}
 
-  function preview(){if(!new URLSearchParams(location.search).has('mobile-preview'))return;setTimeout(()=>{document.getElementById('landingView')?.style.setProperty('display','none');document.getElementById('authOverlay')?.style.setProperty('display','none');document.getElementById('dashboardView')?.style.setProperty('display','block');document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-dashboard'));if(document.getElementById('chartFatValue'))document.getElementById('chartFatValue').textContent='R$ 8.742';sync()},400)}
-  document.addEventListener('DOMContentLoaded',()=>{build();preview()});if(document.readyState!=='loading'){build();preview()}
-})();
+@media(max-width:340px){
+  .vx-status-grid{gap:5px}.vx-status-card{min-height:57px;padding:9px}.vx-next-body{grid-template-columns:50px minmax(0,1fr) auto;gap:7px}.vx-float-grid{gap:5px}.vx-float-option,.vx-float-dashboard{min-height:57px}
+}
+
+
+/* Vyxora Android — refinamento dashboard round 2 */
+@media (max-width:768px){
+  .vx-mob-head{
+    min-height:52px;
+    margin:0 10px 8px;
+    padding:calc(6px + env(safe-area-inset-top,0px)) 9px 6px;
+    border:1px solid rgba(255,255,255,.055);
+    border-radius:12px;
+    background:rgba(15,12,18,.82);
+    box-shadow:0 8px 28px rgba(0,0,0,.14);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+  .vx-mob-avatar{width:28px;height:28px;flex-basis:28px;border-radius:9px;font-size:10px}
+  .vx-mob-user{gap:7px}
+  .vx-mob-greeting small{font-size:6.5px;margin-bottom:0;line-height:1.05}
+  .vx-mob-greeting b{max-width:145px;font-size:8.5px;line-height:1.15}
+  .vx-mob-greeting em{display:block;max-width:145px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#625b69;font:650 5.2px/1.1 Geist,Inter,sans-serif;font-style:normal;letter-spacing:.06em;text-transform:uppercase}
+  .vx-mob-head-actions{gap:4px}
+  .vx-mob-link{height:27px;padding:0 7px;border-radius:8px;font-size:6px}
+  .vx-mob-iconbtn{width:27px;height:27px;border-radius:8px}
+
+  .vx-status-card.pending{border-color:rgba(221,169,63,.13);background:linear-gradient(145deg,rgba(40,31,13,.36),rgba(14,12,16,.96))}
+  .vx-status-card.pending small{color:#bfa467}
+  .vx-status-card.pending b{color:#f0c35d}
+
+  .vx-recent-item{padding:9px 10px 10px}
+  .vx-recent-line{grid-template-columns:minmax(0,1fr) 48px;gap:8px;padding-right:0}
+  .vx-recent-line small{text-align:right}
+  .vx-recent-date{position:static;display:block;margin-top:4px;text-align:right;color:#514b56;font-size:5.4px;font-variant-numeric:tabular-nums}
+}
