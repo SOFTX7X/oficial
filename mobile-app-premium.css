@@ -895,3 +895,87 @@
     font-size:5px!important;
   }
 }
+
+
+/* =============================================================
+   VYXORA ANDROID — AGENDA V3 / DADOS + NOVO AGENDAMENTO
+   ============================================================= */
+@media (max-width:768px){
+  /* + Adicionar agora é ação direta para Cliente; sheet antigo não é usado. */
+  .vx-agenda-add-sheet{display:none!important}
+
+  /* Tela de novo agendamento mais centralizada e premium. */
+  #view-agenda.vx-form-open>.agenda-v2-form{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    padding:calc(12px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px))!important;
+  }
+  #view-agenda .vx-agenda-form-mobile-head{
+    width:min(100%,560px)!important;
+    height:40px!important;
+    margin:0 auto 10px!important;
+    grid-template-columns:32px 1fr!important;
+  }
+  #view-agenda .vx-agenda-form-mobile-head>button{
+    width:28px!important;height:28px!important;border-radius:3px!important;
+  }
+  #view-agenda .vx-agenda-form-mobile-head small{font-size:5px!important}
+  #view-agenda .vx-agenda-form-mobile-head strong{font-size:9.5px!important}
+
+  #view-agenda .agenda-v2-grid{
+    width:min(100%,560px)!important;
+    margin:0 auto!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:7px 8px!important;
+  }
+  #view-agenda .agenda-v2-grid .field{
+    margin:0!important;
+  }
+  #view-agenda .agenda-v2-grid label{
+    margin-bottom:4px!important;
+    font-size:5.8px!important;
+    letter-spacing:.02em!important;
+  }
+  #view-agenda .agenda-v2-grid label span{
+    font-size:6.5px!important;
+    color:#a667f0!important;
+  }
+  #view-agenda .agenda-v2-grid input,
+  #view-agenda .agenda-v2-grid select,
+  #view-agenda .agenda-picker-btn{
+    height:36px!important;
+    min-height:36px!important;
+    padding:0 10px!important;
+    border-radius:3px!important;
+    border-color:rgba(255,255,255,.08)!important;
+    background:#0c0a0f!important;
+    font-size:7.4px!important;
+  }
+  #view-agenda .agenda-v2-grid .agenda-v2-status{
+    grid-column:1/-1!important;
+  }
+  #view-agenda .agenda-v2-grid .agenda-v2-submit{
+    grid-column:1/-1!important;
+    margin-top:2px!important;
+  }
+  #view-agenda .agenda-v2-save{
+    height:36px!important;
+    min-height:36px!important;
+    border-radius:3px!important;
+    font-size:7px!important;
+    letter-spacing:.02em!important;
+  }
+
+  @media (max-width:430px){
+    #view-agenda .agenda-v2-grid{
+      grid-template-columns:1fr!important;
+      width:min(100%,360px)!important;
+    }
+    #view-agenda .agenda-v2-grid .agenda-v2-status,
+    #view-agenda .agenda-v2-grid .agenda-v2-submit{
+      grid-column:1!important;
+    }
+  }
+}

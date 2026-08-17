@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=9';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=10';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2117,9 +2117,42 @@ function vxAgendaDateLabel(d){
   const prefix=diff===0?'HOJE':diff===1?'AMANHÃ':diff===-1?'ONTEM':x.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','').toUpperCase();
   return `${prefix} · ${String(x.getDate()).padStart(2,'0')} ${mon}`;
 }
+
+function vxNormalizeAgendaDate(value){
+  if(!value) return '';
+  const s=String(value).trim();
+  const m=s.match(/^(\d{4}-\d{2}-\d{2})/);
+  if(m) return m[1];
+  const d=new Date(s);
+  if(Number.isNaN(d.getTime())) return s.slice(0,10);
+  return vxISODate(d);
+}
+function vxAgendaRowsForSelectedDay(){
+  const selected=vxISODate(_vxAgendaDate);
+  return ordenarAgendamentosRecentes(state.agendamentos).filter(a=>vxNormalizeAgendaDate(a.data)===selected);
+}
+function vxUpdateAgendaFilterCounts(){
+  if(!vxIsMobileAgenda()) return;
+  const rows=vxAgendaRowsForSelectedDay().filter(a=>normStatus(a.status)!=='Excluído');
+  const counts={
+    todos:rows.length,
+    pendente:rows.filter(a=>normStatus(a.status)==='Pendente').length,
+    confirmado:rows.filter(a=>normStatus(a.status)==='Confirmado').length,
+    reagendado:rows.filter(a=>normStatus(a.status)==='Reagendado').length,
+    concluido:rows.filter(a=>normStatus(a.status)==='Concluído').length,
+    recusado:rows.filter(a=>normStatus(a.status)==='Recusado').length,
+    excluido:vxAgendaRowsForSelectedDay().filter(a=>normStatus(a.status)==='Excluído').length
+  };
+  Object.entries(counts).forEach(([k,v])=>{
+    const el=document.getElementById('fc-'+k);
+    if(el) el.textContent=String(v);
+  });
+}
+
 function vxAgendaSyncDateUI(){
   const t=document.getElementById('vxAgendaDateText'); if(t)t.textContent=vxAgendaDateLabel(_vxAgendaDate);
   const p=document.getElementById('vxAgendaDatePicker'); if(p)p.value=vxISODate(_vxAgendaDate);
+  vxUpdateAgendaFilterCounts();
 }
 function vxAgendaDay(step){ _vxAgendaDate.setDate(_vxAgendaDate.getDate()+step); vxAgendaSyncDateUI(); renderTimeline(); }
 function vxAgendaPickDate(){ const p=document.getElementById('vxAgendaDatePicker'); if(!p)return; if(typeof p.showPicker==='function')p.showPicker(); else p.click(); }
@@ -2128,8 +2161,11 @@ function vxCloseAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet')
 function vxOpenAgendaForm(type){
   vxCloseAgendaAdd();
   if(type==='agendamento'){ document.getElementById('view-agenda')?.classList.add('vx-form-open'); setTimeout(()=>document.getElementById('agCliente')?.focus(),180); return; }
-  const map={cliente:'clientes',servico:'servicos',profissional:'profissionais'};
-  if(map[type] && typeof showView==='function') showView(map[type]);
+  if(type==='cliente'){
+    if(typeof setView==='function') { setView('clientes'); return; }
+    if(typeof showView==='function') { showView('clientes'); return; }
+    document.querySelector('[data-view="clientes"]')?.click();
+  }
 }
 function vxCloseAgendaForm(){ document.getElementById('view-agenda')?.classList.remove('vx-form-open'); }
 
@@ -2161,7 +2197,7 @@ function renderTimeline() {
   let ags=all;
   if(mobile){
     const selected=vxISODate(_vxAgendaDate);
-    ags=all.filter(a=>a.data===selected);
+    ags=all.filter(a=>vxNormalizeAgendaDate(a.data)===selected);
   }
   const statusMap = { pendente:'Pendente', confirmado:'Confirmado', reagendado:'Reagendado', concluido:'Concluído', recusado:'Recusado', excluido:'Excluído' };
   let filtered;
@@ -2171,6 +2207,7 @@ function renderTimeline() {
 
   if (!filtered.length) {
     el.innerHTML = `<div class="empty-state vx-agenda-empty"><p>${mobile?'Nenhum atendimento neste dia.':'Nenhum agendamento neste filtro.'}</p></div>`;
+    vxUpdateAgendaFilterCounts();
     return;
   }
   el.innerHTML='';
@@ -2207,6 +2244,7 @@ function renderTimeline() {
     if(card)card.appendChild(menu);
     el.appendChild(block);
   });
+  vxUpdateAgendaFilterCounts();
 }
 function renderAcoes(a) {
   const tel=(a.cliente_telefone||a.telefone||'').replace(/\D/g,'');
