@@ -505,3 +505,23 @@
   /* Botão do menu menor e acima da área segura, sem competir com ações da tela. */
   body.vx-android-dashboard .vx-float-launcher { width:37px!important; height:37px!important; right:11px!important; bottom:calc(12px + env(safe-area-inset-bottom,0px))!important; border-radius:11px!important; }
 }
+
+/* V3 — refinamento do launcher/menu Android. Mantém as otimizações gerais,
+   mas permite o acabamento e as transições do bottom sheet novo. */
+@media (max-width:768px) {
+  body.vx-android-dashboard .vx-float-launcher {
+    width:45px!important;
+    height:45px!important;
+    right:14px!important;
+    bottom:calc(14px + env(safe-area-inset-bottom,0px))!important;
+    border-radius:15px!important;
+  }
+  body.vx-android-dashboard .vx-menu-backdrop {
+    backdrop-filter:blur(8px)!important;
+    -webkit-backdrop-filter:blur(8px)!important;
+  }
+  body.vx-android-dashboard .vx-float-panel {
+    backdrop-filter:blur(20px) saturate(1.12)!important;
+    -webkit-backdrop-filter:blur(20px) saturate(1.12)!important;
+  }
+}
