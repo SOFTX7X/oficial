@@ -3931,6 +3931,15 @@ async function confirmarAgendamentoPublico() {
   if (!pubNome) return toast('Informe seu nome completo.', 'warn');
   if (!pubTel || pubTel.replace(/\D/g, '').length < 10) return toast('Informe um WhatsApp válido.', 'warn');
   if (isDiaFechado(pubData, state.pubDiasFechados || [])) { validarDataPublica(pubData); return toast('Este dia não está disponível. Escolha outra data.', 'err'); }
+  if (horarioPublicoJaPassou(pubData, pubHora)) {
+    const horaInput = $('pubHora');
+    const horaLabel = $('pubHoraLabel');
+    const horaBtn = $('pubHoraBtn');
+    if (horaInput) horaInput.value = '';
+    if (horaLabel) horaLabel.textContent = 'Escolher horário';
+    if (horaBtn) horaBtn.classList.remove('selecionado');
+    return toast('Este horário já passou. Escolha um horário disponível.', 'warn');
+  }
 
   const botao = document.querySelector('.pub-confirm-btn');
   if (botao) {
@@ -4197,6 +4206,23 @@ function selecionarDataPublica(iso) {
 }
 
 // ── SLOTS DE HORÁRIO ────────────────────────────────────────────────────────────
+// Na agenda pública, horários que já passaram no dia atual não podem ser reservados.
+// A comparação usa o horário local do dispositivo do cliente, sem afetar datas futuras.
+function horarioPublicoJaPassou(dataISO, horaHHMM) {
+  if (!dataISO || !horaHHMM) return false;
+  const agora = new Date();
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  const dia = String(agora.getDate()).padStart(2, '0');
+  const hojeISO = `${ano}-${mes}-${dia}`;
+  if (dataISO !== hojeISO) return false;
+
+  const [h, m] = String(horaHHMM).slice(0, 5).split(':').map(Number);
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return false;
+  const horarioSelecionado = new Date(ano, agora.getMonth(), agora.getDate(), h, m, 0, 0);
+  return horarioSelecionado <= agora;
+}
+
 async function abrirSlotsPublico() {
   const data = document.getElementById('pubData')?.value;
   const prof = state.pubProfissional;
@@ -4249,7 +4275,11 @@ async function abrirSlotsPublico() {
   if (grid) {
     grid.innerHTML = slots.length ? slots.map(s => {
       const ocup = ocupados.has(s);
-      return `<div class="pub-slot${ocup?' ocupado':' livre'}" ${!ocup?`onclick="selecionarSlot('${s}')"`:''}>${s}${ocup?'<span class="slot-tag">Ocupado</span>':''}</div>`;
+      const passou = horarioPublicoJaPassou(data, s);
+      const indisponivel = ocup || passou;
+      const classe = passou ? 'passado' : (ocup ? 'ocupado' : 'livre');
+      const tag = passou ? '<span class="slot-tag">Indisponível</span>' : (ocup ? '<span class="slot-tag">Ocupado</span>' : '');
+      return `<div class="pub-slot ${classe}" ${!indisponivel ? `onclick="selecionarSlot('${s}')"` : ''}>${s}${tag}</div>`;
     }).join('') : '<p style="color:var(--text3);text-align:center;padding:24px">Nenhum horário disponível neste dia.</p>';
   }
 
