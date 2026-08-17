@@ -11450,3 +11450,87 @@ body.auth-performance-mode .notif-item.compact.out {
     gap: 4px;
   }
 }
+
+
+/* =============================================================
+   VYXORA — LOADER ÚNICO (SITE + WEBAPP)
+   ============================================================= */
+#vyxoraLoader.vx-unified-loader{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:2147483000 !important;
+  display:grid !important;
+  place-items:center !important;
+  background:#08070a !important;
+  color:#f4eff8 !important;
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transition:opacity .28s ease, visibility .28s ease;
+}
+
+#vyxoraLoader.vx-unified-loader.is-hidden{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+#vyxoraLoader .vx-unified-loader__inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  padding:24px;
+}
+
+#vyxoraLoader .vx-unified-loader__brand{
+  color:#f3eef8;
+  font:800 16px/1 Geist,Inter,system-ui,sans-serif;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  text-align:center;
+  white-space:nowrap;
+  animation:vxUnifiedBrandIn .52s cubic-bezier(.2,.8,.2,1) both;
+}
+
+#vyxoraLoader .vx-unified-loader__track{
+  position:relative;
+  width:82px;
+  height:2px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+}
+
+#vyxoraLoader .vx-unified-loader__track span{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  width:36%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#7440ca,#c58cff);
+  box-shadow:0 0 14px rgba(181,112,255,.42);
+  animation:vxUnifiedLoaderMove 1.05s ease-in-out infinite;
+}
+
+@keyframes vxUnifiedLoaderMove{
+  0%{transform:translateX(-130%)}
+  55%{transform:translateX(165%)}
+  100%{transform:translateX(320%)}
+}
+
+@keyframes vxUnifiedBrandIn{
+  from{opacity:0;transform:translateY(5px);letter-spacing:.29em}
+  to{opacity:1;transform:none;letter-spacing:.22em}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #vyxoraLoader .vx-unified-loader__brand{animation:none}
+  #vyxoraLoader .vx-unified-loader__track span{
+    animation:none;
+    width:100%;
+    opacity:.75;
+  }
+}

@@ -41,7 +41,7 @@
 <title>VyXora Agendas — Sistema de Agendamento Online Premium</title>
 <link rel="icon" type="image/png" href="favicon-vyxora.png?v=10">
 <link rel="apple-touch-icon" href="favicon-vyxora.png?v=10">
-<link rel="stylesheet" href="style.css?v=20260815-06">
+<link rel="stylesheet" href="style.css?v=20260817-21">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js"></script>
@@ -55,33 +55,14 @@
 <link rel="stylesheet" href="dashboard-pc.css?v=20260815-01">
 </head>
 <body class="vx-booting">
-<div class="vyxora-loader vx-premium-loader" id="vyxoraLoader" role="status" aria-live="polite" aria-label="Carregando VyXora Agendas">
-  <div class="vx-premium-loader__shell">
-    <div class="vx-premium-loader__visual" aria-hidden="true">
-      <img src="loader-mascote-vyxora.webp?v=33" alt="" width="760" height="640" fetchpriority="high" decoding="async">
-    </div>
-
-    <div class="vx-premium-loader__content">
-      <div class="vx-premium-loader__eyebrow">VYXORA AGENDAS</div>
-      <h1 id="vyxoraLoaderTitle">Preparando sua experiência</h1>
-      <p id="vyxoraLoaderDetail">Organizando o aplicativo para você</p>
-
-      <div class="vx-premium-loader__progress" aria-hidden="true">
-        <span id="vyxoraLoaderBar"></span>
-      </div>
-
-      <div class="vx-premium-loader__meta">
-        <span id="vyxoraLoaderStage">Iniciando</span>
-        <strong id="vyxoraLoaderPercent">12%</strong>
-      </div>
+<div class="vyxora-loader vx-unified-loader" id="vyxoraLoader" role="status" aria-live="polite" aria-label="Carregando VyXora Agendas">
+  <div class="vx-unified-loader__inner">
+    <div class="vx-unified-loader__brand">VYXORA AGENDAS</div>
+    <div class="vx-unified-loader__track" aria-hidden="true">
+      <span id="vyxoraLoaderBar"></span>
     </div>
   </div>
 </div>
-<div class="bg-noise"></div>
-<div class="bg-grid"></div>
-<div class="bg-glow-tl"></div>
-<div class="bg-glow-br"></div>
-
 <div id="landingView">
   <nav class="land-nav" id="landNav">
     <div class="nav-brand" onclick="window.scrollTo(0,0)">
@@ -1399,7 +1380,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260817-20"></script>
+<script defer src="app.js?v=20260817-21"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>
