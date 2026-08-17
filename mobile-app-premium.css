@@ -12,13 +12,13 @@
   }
   body.vx-android-dashboard .dash-main { padding:0 0 calc(72px + env(safe-area-inset-bottom,0px))!important; }
   body.vx-android-dashboard .view:not(#view-dashboard) { width:100%!important; min-width:0!important; padding:10px!important; margin:0!important; overflow:visible!important; }
-  body.vx-android-dashboard .view.active:not(#view-dashboard) { display:block!important; animation:vmViewIn .3s cubic-bezier(.16,1,.3,1) both; }
+  body.vx-android-dashboard .view.active:not(#view-dashboard) { display:block!important; animation:none!important; }
 
-  .vx-mobile-view-head { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:68px; margin:0 0 9px; padding:12px 13px; border:1px solid rgba(166,108,255,.20); border-radius:15px; background:linear-gradient(135deg,rgba(29,20,39,.96),rgba(14,10,18,.96)); box-shadow:0 12px 35px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.035); }
+  .vx-mobile-view-head { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:68px; margin:0 0 9px; padding:12px 13px; border:1px solid rgba(166,108,255,.20); border-radius:15px; background:#17101e; box-shadow:none; }
   .vx-mobile-view-head small { display:block; margin-bottom:4px; color:var(--vm-purple); font-size:6.5px; font-weight:800; letter-spacing:.17em; }
   .vx-mobile-view-head h1 { margin:0; color:var(--vm-text); font-size:15px; line-height:1.1; letter-spacing:-.025em; }
   .vx-mobile-view-head p { margin:4px 0 0; color:var(--vm-soft); font-size:7.5px; line-height:1.35; }
-  .vx-mobile-view-mark { display:grid; place-items:center; flex:0 0 31px; width:31px; height:31px; border:1px solid rgba(170,108,255,.28); border-radius:10px; color:#c696ff; background:rgba(138,72,224,.10); font-size:12px; box-shadow:0 0 22px rgba(128,60,220,.10); }
+  .vx-mobile-view-mark { display:grid; place-items:center; flex:0 0 31px; width:31px; height:31px; border:1px solid rgba(170,108,255,.28); border-radius:10px; color:#c696ff; background:#21142d; font-size:12px; box-shadow:none; }
 
   /* Base comum: superfícies, campos e botões. */
   body.vx-android-dashboard .field { min-width:0!important; margin:0!important; }
@@ -42,7 +42,7 @@
   body.vx-android-dashboard .vx-charge-primary,
   body.vx-android-dashboard .vx-charge-secondary { min-height:39px!important; height:auto!important; padding:9px 12px!important; border-radius:10px!important; font-size:8px!important; font-weight:800!important; letter-spacing:.01em; }
   body.vx-android-dashboard .btn-primary,
-  body.vx-android-dashboard .vx-charge-primary { border:1px solid rgba(218,188,255,.28)!important; color:#fff!important; background:linear-gradient(120deg,#a466fb,#7032c6)!important; box-shadow:0 9px 24px rgba(105,43,190,.23),inset 0 1px rgba(255,255,255,.18)!important; }
+  body.vx-android-dashboard .vx-charge-primary { border:1px solid rgba(218,188,255,.28)!important; color:#fff!important; background:#8237d5!important; box-shadow:none!important; }
   body.vx-android-dashboard button { -webkit-tap-highlight-color:transparent; }
   body.vx-android-dashboard button:active { transform:scale(.97); }
 
@@ -205,11 +205,11 @@
   body.vx-android-dashboard .modal-overlay,
   body.vx-android-dashboard .edit-overlay,
   body.vx-android-dashboard .vx-charge-overlay,
-  body.vx-android-dashboard .vx-doc-overlay { padding:8px!important; background:rgba(3,2,5,.72)!important; backdrop-filter:blur(8px)!important; }
+  body.vx-android-dashboard .vx-doc-overlay { padding:8px!important; background:rgba(3,2,5,.88)!important; backdrop-filter:none!important; -webkit-backdrop-filter:none!important; }
   body.vx-android-dashboard .modal,
   body.vx-android-dashboard .edit-modal,
   body.vx-android-dashboard .vx-charge-modal,
-  body.vx-android-dashboard .vx-doc-shell { width:100%!important; max-height:calc(100dvh - 16px)!important; border:1px solid rgba(172,108,255,.30)!important; border-radius:17px!important; background:linear-gradient(145deg,#17111d,#0c0910)!important; box-shadow:0 24px 70px rgba(0,0,0,.65)!important; }
+  body.vx-android-dashboard .vx-doc-shell { width:100%!important; max-height:calc(100dvh - 16px)!important; border:1px solid rgba(172,108,255,.30)!important; border-radius:17px!important; background:#100c14!important; box-shadow:none!important; }
   body.vx-android-dashboard .modal-title,
   body.vx-android-dashboard .edit-title,
   body.vx-android-dashboard .vx-charge-modal-head h2 { font-size:14px!important; }
@@ -226,28 +226,24 @@
   @keyframes vmViewIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
 }
 
-/* V3 — acabamento visual completo: fundo contínuo e linguagem única de ações. */
+/* V3 — acabamento visual leve para WebView Android. */
 @media (max-width:768px) {
   html,
   body.vx-android-dashboard,
   body.vx-android-dashboard #dashboardView,
   body.vx-android-dashboard #dashboardView .dash-main {
-    background-color:#08050c!important;
-    background-image:
-      radial-gradient(110% 46% at -8% -6%,rgba(120,47,190,.32) 0,rgba(69,25,111,.15) 38%,transparent 72%),
-      radial-gradient(82% 38% at 108% 31%,rgba(94,36,157,.20) 0,transparent 72%),
-      radial-gradient(105% 42% at -12% 82%,rgba(78,25,132,.18) 0,transparent 74%),
-      linear-gradient(180deg,#0c0712 0%,#08050c 42%,#0a0610 100%)!important;
-    background-attachment:fixed!important;
+    min-height:100%;
+    background-color:#0b0710!important;
+    background-image:linear-gradient(180deg,#160b20 0,#0f0916 220px,#0b0710 520px,#0b0710 100%)!important;
+    background-attachment:scroll!important;
     background-repeat:no-repeat!important;
   }
   body.vx-android-dashboard #dashboardView .dash-main::before {
-    content:''; position:fixed; z-index:-1; inset:0; pointer-events:none;
-    background:linear-gradient(115deg,rgba(187,122,255,.025),transparent 28%,rgba(118,56,208,.035) 70%,transparent);
+    content:none!important;
   }
   body.vx-android-dashboard .view:not(#view-dashboard) { background:transparent!important; }
 
-  /* Superfícies translúcidas, iguais em qualquer módulo. */
+  /* Superfícies sólidas, sem blur durante a rolagem. */
   body.vx-android-dashboard .vx-mobile-view-head,
   body.vx-android-dashboard .agenda-v2-form,
   body.vx-android-dashboard .agenda-v2-list-panel,
@@ -263,19 +259,19 @@
   body.vx-android-dashboard .config-section,
   body.vx-android-dashboard .horarios-card {
     border-color:rgba(174,112,240,.20)!important;
-    background:linear-gradient(145deg,rgba(29,20,38,.91),rgba(13,9,18,.94))!important;
-    box-shadow:0 15px 42px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.035)!important;
-    backdrop-filter:blur(16px) saturate(1.12);
-    -webkit-backdrop-filter:blur(16px) saturate(1.12);
+    background:#141019!important;
+    box-shadow:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
   }
   body.vx-android-dashboard .vx-mobile-view-head {
     position:relative; overflow:hidden; border-color:rgba(178,112,250,.28)!important;
-    background:radial-gradient(circle at 100% 0,rgba(145,74,230,.16),transparent 38%),linear-gradient(135deg,rgba(31,21,41,.96),rgba(15,10,20,.96))!important;
+    background:#181020!important;
   }
   body.vx-android-dashboard .vx-mobile-view-head::after {
-    content:''; position:absolute; right:-28px; top:-34px; width:92px; height:92px; border:1px solid rgba(184,123,255,.08); border-radius:50%; box-shadow:0 0 42px rgba(138,67,225,.09);
+    content:none!important;
   }
-  body.vx-android-dashboard .vx-mobile-view-mark { position:relative; z-index:1; border-color:rgba(184,123,255,.35); background:linear-gradient(145deg,rgba(143,74,227,.18),rgba(79,35,129,.10)); }
+  body.vx-android-dashboard .vx-mobile-view-mark { position:relative; z-index:1; border-color:rgba(184,123,255,.35); background:#21142d; }
   body.vx-android-dashboard .directory-list-head,
   body.vx-android-dashboard .agenda-v2-list-head { position:relative; }
 
@@ -288,7 +284,7 @@
   body.vx-android-dashboard .vx-action,
   body.vx-android-dashboard .act-btn {
     position:relative!important; isolation:isolate; overflow:hidden!important;
-    transition:transform .16s cubic-bezier(.2,.8,.2,1),filter .16s ease,box-shadow .16s ease,border-color .16s ease!important;
+    transition:transform .12s ease!important;
   }
   body.vx-android-dashboard .btn::after,
   body.vx-android-dashboard .agenda-v2-save::after,
@@ -296,8 +292,7 @@
   body.vx-android-dashboard .vx-charge-primary::after,
   body.vx-android-dashboard .vx-action::after,
   body.vx-android-dashboard .act-btn::after {
-    content:''; position:absolute; z-index:-1; top:-70%; left:-35%; width:32%; height:240%; pointer-events:none;
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); transform:rotate(18deg); transition:left .45s ease;
+    content:none!important;
   }
   body.vx-android-dashboard .btn:active,
   body.vx-android-dashboard .agenda-v2-save:active,
@@ -305,7 +300,7 @@
   body.vx-android-dashboard .vx-charge-primary:active,
   body.vx-android-dashboard .vx-charge-secondary:active,
   body.vx-android-dashboard .vx-action:active,
-  body.vx-android-dashboard .act-btn:active { transform:scale(.975)!important; filter:brightness(1.08); }
+  body.vx-android-dashboard .act-btn:active { transform:scale(.98)!important; filter:none!important; }
   body.vx-android-dashboard .btn:active::after,
   body.vx-android-dashboard .vx-action:active::after,
   body.vx-android-dashboard .act-btn:active::after { left:112%; }
@@ -318,7 +313,7 @@
     border:1px solid rgba(215,181,255,.40)!important;
     color:#fff!important;
     background:linear-gradient(118deg,#a962ff 0%,#8a3fe2 48%,#6622b3 100%)!important;
-    box-shadow:0 10px 25px rgba(101,38,181,.30),inset 0 1px rgba(255,255,255,.24),inset 0 -1px rgba(55,14,94,.35)!important;
+    box-shadow:0 4px 10px rgba(72,25,127,.18)!important;
     text-shadow:0 1px 2px rgba(30,5,52,.32);
   }
   body.vx-android-dashboard .btn-ghost,
@@ -327,7 +322,7 @@
     border:1px solid rgba(168,124,205,.22)!important;
     color:#c8bdcf!important;
     background:linear-gradient(145deg,rgba(28,20,35,.90),rgba(13,9,17,.94))!important;
-    box-shadow:inset 0 1px rgba(255,255,255,.03)!important;
+    box-shadow:none!important;
   }
 
   /* Ações de atendimento com significado visual claro. */
@@ -335,7 +330,7 @@
   body.vx-android-dashboard .act-btn.confirm {
     border:1px solid rgba(54,221,139,.34)!important; color:#72e9aa!important;
     background:linear-gradient(135deg,rgba(18,83,54,.43),rgba(8,35,25,.58))!important;
-    box-shadow:inset 0 1px rgba(126,255,187,.06),0 8px 24px rgba(12,104,61,.10)!important;
+    box-shadow:none!important;
   }
   body.vx-android-dashboard .act-btn.refuse {
     border:1px solid rgba(255,87,111,.30)!important; color:#ff9aaa!important;
@@ -352,7 +347,7 @@
   body.vx-android-dashboard .act-btn.whatsapp {
     min-height:43px!important; border:1px solid rgba(95,241,151,.45)!important; color:#fff!important;
     background:linear-gradient(120deg,#1fbd68 0%,#159653 58%,#0d6d3a 100%)!important;
-    box-shadow:0 10px 27px rgba(22,166,88,.22),inset 0 1px rgba(203,255,225,.24)!important;
+    box-shadow:0 4px 10px rgba(12,104,61,.16)!important;
     text-shadow:0 1px 2px rgba(4,55,27,.38);
   }
 
@@ -362,8 +357,8 @@
     min-width:48px; min-height:48px; padding:0 15px!important;
     border:1px solid rgba(158,255,196,.42)!important; border-radius:15px!important;
     color:#fff!important; background:linear-gradient(135deg,#27c978,#128a4d)!important;
-    box-shadow:0 14px 38px rgba(18,159,82,.34),inset 0 1px rgba(255,255,255,.24)!important;
-    animation:vmWhatsPulse 2.8s ease-in-out infinite;
+    box-shadow:0 5px 12px rgba(18,159,82,.18)!important;
+    animation:none!important;
   }
   body.vx-android-dashboard #publicView .pub-whatsapp-fab svg { width:19px!important; height:19px!important; }
 
@@ -373,10 +368,6 @@
   body.vx-android-dashboard .vx-charge-actions,
   body.vx-android-dashboard .agenda-v2 .apt-actions { border-top-color:rgba(182,127,238,.11)!important; }
 
-  @keyframes vmWhatsPulse {
-    0%,100% { box-shadow:0 14px 38px rgba(18,159,82,.30),0 0 0 0 rgba(54,220,124,.18),inset 0 1px rgba(255,255,255,.24); }
-    50% { box-shadow:0 16px 42px rgba(18,159,82,.38),0 0 0 7px rgba(54,220,124,0),inset 0 1px rgba(255,255,255,.24); }
-  }
 }
 
 @media (max-width:340px) {
@@ -393,6 +384,15 @@
 
 /* V2 — telas secundárias seguem fluxo vertical. Grades compactas ficam só no Dashboard. */
 @media (max-width:768px) {
+  body.vx-android-dashboard .bg-noise,
+  body.vx-android-dashboard .bg-grid,
+  body.vx-android-dashboard .bg-glow-tl,
+  body.vx-android-dashboard .bg-glow-br { display:none!important; }
+  body.vx-android-dashboard .view:not(#view-dashboard),
+  body.vx-android-dashboard .view:not(#view-dashboard) * { animation:none!important; }
+  body.vx-android-dashboard .vx-float-launcher::after { animation:none!important; display:none!important; }
+  body.vx-android-dashboard .vx-menu-backdrop,
+  body.vx-android-dashboard .vx-float-panel { backdrop-filter:none!important; -webkit-backdrop-filter:none!important; }
   body.vx-android-dashboard #dashboardView .dash-main {
     width:100vw!important;
     max-width:100vw!important;
