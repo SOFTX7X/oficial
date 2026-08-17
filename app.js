@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=8';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=9';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2132,6 +2132,14 @@ function vxOpenAgendaForm(type){
   if(map[type] && typeof showView==='function') showView(map[type]);
 }
 function vxCloseAgendaForm(){ document.getElementById('view-agenda')?.classList.remove('vx-form-open'); }
+
+window.vxOpenAgendaAdd = vxOpenAgendaAdd;
+window.vxCloseAgendaAdd = vxCloseAgendaAdd;
+window.vxOpenAgendaForm = vxOpenAgendaForm;
+window.vxCloseAgendaForm = vxCloseAgendaForm;
+window.vxAgendaDay = vxAgendaDay;
+window.vxAgendaPickDate = vxAgendaPickDate;
+
 document.addEventListener('DOMContentLoaded',()=>{
   vxAgendaSyncDateUI();
   const p=document.getElementById('vxAgendaDatePicker');
@@ -2206,7 +2214,7 @@ function renderAcoes(a) {
   const wa=tel?`<button class="act-btn whatsapp vx-action-wide" onclick="abrirWA('${a.id}')">WhatsApp</button>`:'';
   if(s==='Excluído') return `<div class="apt-actions vx-actions-compact"><button class="act-btn muted" disabled>Excluído</button></div>`;
   if(s==='Recusado') return `<div class="apt-actions vx-actions-compact">${wa||'<button class="act-btn muted" disabled>Recusado</button>'}</div>`;
-  if(s==='Concluído') return `<div class="apt-actions vx-actions-compact">${wa}<button class="act-btn refuse vx-action-wide" onclick="excluirAgendamento('${a.id}')">Arquivar</button></div>`;
+  if(s==='Concluído') return `<div class="apt-actions vx-actions-compact vx-actions-completed">${wa}<button class="act-btn refuse" onclick="excluirAgendamento('${a.id}')">Arquivar</button></div>`;
   return `<div class="apt-actions vx-actions-compact">
     ${s!=='Confirmado'?`<button class="act-btn confirm" onclick="confirmarAg('${a.id}')">Confirmar</button>`:`<button class="act-btn confirm" disabled>Confirmado</button>`}
     <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">Recusar</button>

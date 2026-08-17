@@ -664,3 +664,234 @@
 @media (min-width:769px){
   .vx-agenda-mobile-head,.vx-agenda-datebar,.vx-agenda-date-picker,.vx-agenda-add-sheet,.vx-agenda-form-mobile-head{display:none!important}
 }
+
+
+/* =============================================================
+   VYXORA ANDROID — AGENDA V2 / CORREÇÕES VISUAIS
+   ============================================================= */
+@media (max-width:768px){
+
+  /* A Agenda usa apenas o cabeçalho próprio compacto. */
+  #view-agenda > .vx-mobile-view-head{
+    display:none!important;
+  }
+
+  #view-agenda.agenda-v2{
+    padding-top:0!important;
+  }
+
+  #view-agenda .vx-agenda-mobile-head{
+    min-height:42px!important;
+    height:42px!important;
+    margin:0 -10px 6px!important;
+    padding:5px 10px!important;
+    border-radius:0!important;
+  }
+  #view-agenda .vx-agenda-mobile-head small{
+    font-size:5px!important;
+    line-height:1!important;
+  }
+  #view-agenda .vx-agenda-mobile-head h2{
+    margin-top:2px!important;
+    font-size:12px!important;
+    line-height:1!important;
+  }
+  #view-agenda .vx-agenda-add{
+    height:27px!important;
+    padding:0 8px!important;
+    border-radius:3px!important;
+    font-size:5.8px!important;
+  }
+
+  #view-agenda .vx-agenda-datebar{
+    height:30px!important;
+    margin-bottom:6px!important;
+    border-radius:3px!important;
+  }
+  #view-agenda .vx-agenda-datebar{
+    grid-template-columns:32px 1fr 32px!important;
+  }
+  #view-agenda .vx-agenda-datebar button{
+    font-size:13px!important;
+  }
+  #view-agenda .vx-agenda-datebar .vx-agenda-date-current{
+    font-size:6px!important;
+  }
+
+  #view-agenda .agenda-v2-filter-wrap{
+    margin-bottom:6px!important;
+  }
+  #view-agenda .filter-btn{
+    height:25px!important;
+    padding:0 7px!important;
+    border-radius:3px!important;
+    font-size:5.6px!important;
+  }
+  #view-agenda .filter-count{
+    font-size:5px!important;
+  }
+
+  /* Timeline extremamente mais compacta */
+  #view-agenda .timeline{
+    gap:4px!important;
+  }
+  #view-agenda .tl-block{
+    grid-template-columns:32px minmax(0,1fr)!important;
+    gap:5px!important;
+  }
+  #view-agenda .tl-time{
+    padding-top:7px!important;
+    font-size:6.2px!important;
+  }
+  #view-agenda .tl-card{
+    min-height:0!important;
+    padding:7px!important;
+    border-radius:3px!important;
+  }
+  #view-agenda .tl-card-top{
+    grid-template-columns:24px minmax(0,1fr) auto!important;
+    gap:6px!important;
+    min-height:24px!important;
+    padding:0!important;
+  }
+  #view-agenda .apt-av{
+    width:24px!important;
+    height:24px!important;
+    border-radius:3px!important;
+    font-size:7px!important;
+  }
+  #view-agenda .tl-card-info{
+    min-width:0!important;
+    padding-right:2px!important;
+  }
+  #view-agenda .tl-card-name{
+    font-size:7.3px!important;
+    line-height:1.1!important;
+  }
+  #view-agenda .tl-card-service{
+    margin-top:2px!important;
+    font-size:5.8px!important;
+    line-height:1.1!important;
+  }
+  #view-agenda .tl-card-contact{
+    margin-top:2px!important;
+    font-size:5px!important;
+    line-height:1.1!important;
+  }
+
+  /* Status fica definitivamente no canto superior direito. */
+  #view-agenda .tl-card-status{
+    position:static!important;
+    align-self:start!important;
+    justify-self:end!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+  }
+  #view-agenda .tl-card-status .badge{
+    display:inline-flex!important;
+    align-items:center!important;
+    min-height:17px!important;
+    height:17px!important;
+    margin:0!important;
+    padding:0 5px!important;
+    border-radius:3px!important;
+    font-size:4.6px!important;
+    line-height:1!important;
+  }
+
+  /* Ações: 2 + 2 + 1, realmente baixas. */
+  #view-agenda .apt-actions.vx-actions-compact{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    grid-auto-rows:24px!important;
+    gap:4px!important;
+    margin:6px 0 0!important;
+    padding:6px 0 0!important;
+    border-top:1px solid rgba(255,255,255,.045)!important;
+  }
+  #view-agenda .apt-actions.vx-actions-compact .act-btn{
+    min-height:24px!important;
+    max-height:24px!important;
+    height:24px!important;
+    padding:0 4px!important;
+    margin:0!important;
+    border-radius:3px!important;
+    font-size:5.4px!important;
+    line-height:1!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+  }
+  #view-agenda .apt-actions.vx-actions-compact .vx-action-wide{
+    grid-column:1/-1!important;
+  }
+
+  /* Concluído: duas ações lado a lado, em vez de duas faixas gigantes. */
+  #view-agenda .apt-actions.vx-actions-completed{
+    grid-template-columns:1fr 1fr!important;
+  }
+  #view-agenda .apt-actions.vx-actions-completed .vx-action-wide{
+    grid-column:auto!important;
+  }
+
+  #view-agenda .action-menu-wrap{
+    top:3px!important;
+    right:3px!important;
+    transform:scale(.72)!important;
+  }
+
+  /* Bottom sheet: backdrop atrás, painel obrigatoriamente acima. */
+  .vx-agenda-add-sheet{
+    z-index:100040!important;
+  }
+  .vx-agenda-sheet-backdrop{
+    z-index:0!important;
+  }
+  .vx-agenda-sheet-panel{
+    z-index:2!important;
+    left:10px!important;
+    right:10px!important;
+    bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;
+    padding:8px!important;
+    border-radius:4px!important;
+    transform:translateY(12px);
+    opacity:0;
+    transition:transform .2s ease,opacity .18s ease;
+  }
+  .vx-agenda-add-sheet.open .vx-agenda-sheet-panel{
+    transform:none;
+    opacity:1;
+  }
+  .vx-agenda-sheet-panel header{
+    padding:1px 1px 7px!important;
+  }
+  .vx-agenda-sheet-panel header strong{
+    font-size:8px!important;
+  }
+  .vx-agenda-sheet-panel header>button{
+    width:25px!important;
+    height:25px!important;
+    border-radius:3px!important;
+  }
+  .vx-agenda-add-grid{
+    gap:4px!important;
+  }
+  .vx-agenda-add-grid>button{
+    min-height:62px!important;
+    padding:8px!important;
+    border-radius:3px!important;
+  }
+  .vx-agenda-add-grid b{
+    font-size:11px!important;
+  }
+  .vx-agenda-add-grid span{
+    margin-top:7px!important;
+    font-size:6.3px!important;
+  }
+  .vx-agenda-add-grid small{
+    margin-top:2px!important;
+    font-size:5px!important;
+  }
+}
