@@ -34,7 +34,7 @@
   }
 
   function recentAppointments(){
-    return activeAppointments().slice().sort((a,b)=>{
+    return activeAppointments().filter(a=>['Confirmado','Concluído'].includes(normStatus(a.status))).slice().sort((a,b)=>{
       const ca=Date.parse(a.criado_em||'')||0,cb=Date.parse(b.criado_em||'')||0;
       if(ca!==cb)return cb-ca;
       return String(`${b.data||''} ${b.hora||''}`).localeCompare(String(`${a.data||''} ${a.hora||''}`));
@@ -44,21 +44,21 @@
   function nextAppointment(){
     const now=new Date();
     return activeAppointments()
-      .filter(a=>['Pendente','Confirmado','Reagendado'].includes(normStatus(a.status))&&a.data)
+      .filter(a=>normStatus(a.status)==='Confirmado'&&a.data)
       .map(a=>({a,when:new Date(`${a.data}T${String(a.hora||'00:00').slice(0,5)}:00`)}))
       .filter(x=>!Number.isNaN(x.when.getTime())&&x.when.getTime()>=now.getTime()-60000)
       .sort((x,y)=>x.when-y.when)[0]?.a||null;
   }
 
   function renderStatuses(){
-    const map=[['vxRefused','statRecusados'],['vxRescheduled','statReagendados'],['vxConfirmed','statConfirmados'],['vxFinished','statConcluidos']];
+    const map=[['vxPending','statPendentes'],['vxRefused','statRecusados'],['vxConfirmed','statConfirmados'],['vxFinished','statConcluidos']];
     map.forEach(([to,from])=>{const el=document.getElementById(to),src=document.getElementById(from);if(el&&src)el.textContent=src.textContent||'0'});
   }
 
   function renderNext(){
     const target=document.querySelector('.vx-next-body');if(!target)return;
     const a=nextAppointment();
-    if(!a){target.innerHTML='<div class="vx-next-empty"><b>Nenhum próximo atendimento</b><span>Quando houver um horário futuro, ele aparecerá aqui.</span></div>';return;}
+    if(!a){target.innerHTML='<div class="vx-next-empty"><b>Nenhum atendimento confirmado</b><span>O próximo horário confirmado aparecerá aqui.</span></div>';return;}
     target.innerHTML=`<div class="vx-next-time"><strong>${esc(a.hora||'—')}</strong><span>${esc(fmtDate(a.data))}</span></div><div class="vx-next-copy"><b>${esc(a.cliente_nome||'Cliente')}</b><span>${esc(a.servico_nome||'Serviço')}</span></div><span class="vx-status-pill ${statusClass(a.status)}">${esc(normStatus(a.status))}</span>`;
   }
 
@@ -87,7 +87,7 @@
     const fin=activeAppointments().filter(a=>normStatus(a.status)==='Concluído');
     const total=fin.reduce((s,a)=>s+Number(a.valor||0),0);const ticket=fin.length?total/fin.length:0;const ticketEl=document.getElementById('vxBankTicket');if(ticketEl)ticketEl.textContent=money(ticket).replace(',00','');
     renderStatuses();renderNext();renderRecent();
-    const name=document.getElementById('sideNome')?.textContent||window.state?.empresa?.nome||'Seu negócio';document.querySelector('.vx-mob-greeting b')?.replaceChildren(name);document.querySelector('.vx-mob-avatar')?.replaceChildren(name.trim()[0]?.toUpperCase()||'V');
+    const name=document.getElementById('sideNome')?.textContent||window.state?.empresa?.nome||'Seu negócio';document.querySelector('.vx-mob-greeting b')?.replaceChildren(name);document.querySelector('.vx-mob-avatar')?.replaceChildren(name.trim()[0]?.toUpperCase()||'V');const company=window.state?.empresa?.nome||name;document.querySelector('.vx-mob-company')?.replaceChildren(company);
     updateFloatVisibility();
   }
 
@@ -108,9 +108,9 @@
     document.body.classList.add('vx-android-dashboard');
     const view=document.getElementById('view-dashboard');if(!view)return;
     const home=document.createElement('div');home.className='vx-mobile-home';home.innerHTML=`
-      <header class="vx-mob-head"><div class="vx-mob-user"><div class="vx-mob-avatar">V</div><div class="vx-mob-greeting"><small>Bom dia</small><b>Seu negócio</b></div></div><div class="vx-mob-head-actions"><button class="vx-mob-link" data-copy-link><i>⌁</i><span>LINK</span></button><button class="vx-mob-iconbtn" data-notifications aria-label="Notificações">♢<i class="vx-mob-dot"></i></button></div></header>
+      <header class="vx-mob-head"><div class="vx-mob-user"><div class="vx-mob-avatar">V</div><div class="vx-mob-greeting"><small>Bom dia</small><b>Seu negócio</b><em class="vx-mob-company">VYXORA</em></div></div><div class="vx-mob-head-actions"><button class="vx-mob-link" data-copy-link><i>⌁</i><span>LINK</span></button><button class="vx-mob-iconbtn" data-notifications aria-label="Notificações">♢<i class="vx-mob-dot"></i></button></div></header>
       <section class="vx-bank-card"><div class="vx-bank-top"><span class="vx-bank-label">Faturamento do período</span><span class="vx-bank-live" aria-label="Dados em tempo real"><i></i> AO VIVO</span></div><div class="vx-bank-value" data-value="0"><small>R$</small>0,00</div><div class="vx-bank-meta"><span>Hoje<b id="vxBankToday">R$ 0</b></span><span>Ticket médio<b id="vxBankTicket">R$ 0</b></span></div></section>
-      <section class="vx-mob-section"><div class="vx-mob-section-head"><h2>Resumo dos agendamentos</h2><button data-reports>Ver relatório</button></div><div class="vx-status-grid"><article class="vx-status-card refused"><small>Recusados</small><b id="vxRefused">0</b></article><article class="vx-status-card rescheduled"><small>Reagendados</small><b id="vxRescheduled">0</b></article><article class="vx-status-card confirmed"><small>Confirmados</small><b id="vxConfirmed">0</b></article><article class="vx-status-card finished"><small>Concluídos</small><b id="vxFinished">0</b></article></div></section>
+      <section class="vx-mob-section"><div class="vx-mob-section-head"><h2>Resumo dos agendamentos</h2><button data-reports>Ver relatório</button></div><div class="vx-status-grid"><article class="vx-status-card pending"><small>Pendentes</small><b id="vxPending">0</b></article><article class="vx-status-card refused"><small>Recusados</small><b id="vxRefused">0</b></article><article class="vx-status-card confirmed"><small>Confirmados</small><b id="vxConfirmed">0</b></article><article class="vx-status-card finished"><small>Concluídos</small><b id="vxFinished">0</b></article></div></section>
       <section class="vx-mob-section"><div class="vx-mob-section-head"><h2>Próximo atendimento</h2><button data-agenda>Ver agenda</button></div><div class="vx-next-card"><div class="vx-next-body"><div class="vx-mob-empty">Carregando…</div></div></div></section>
       <section class="vx-mob-section vx-recent-section"><div class="vx-mob-section-head"><h2>Agendamentos recentes</h2><span class="vx-section-note">Mais recentes</span></div><div class="vx-recent-list"><div class="vx-mob-empty">Carregando…</div></div><nav class="vx-recent-pager" hidden aria-label="Paginação dos agendamentos recentes"><button data-recent-prev>‹ Anterior</button><span data-recent-page>1 / 1</span><button data-recent-next>Próximo ›</button></nav></section>`;
     view.prepend(home);
