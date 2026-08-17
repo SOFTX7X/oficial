@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=10';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=11';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2133,7 +2133,8 @@ function vxAgendaRowsForSelectedDay(){
 }
 function vxUpdateAgendaFilterCounts(){
   if(!vxIsMobileAgenda()) return;
-  const rows=vxAgendaRowsForSelectedDay().filter(a=>normStatus(a.status)!=='Excluído');
+  const all=ordenarAgendamentosRecentes(state.agendamentos);
+  const rows=all.filter(a=>normStatus(a.status)!=='Excluído');
   const counts={
     todos:rows.length,
     pendente:rows.filter(a=>normStatus(a.status)==='Pendente').length,
@@ -2141,20 +2142,19 @@ function vxUpdateAgendaFilterCounts(){
     reagendado:rows.filter(a=>normStatus(a.status)==='Reagendado').length,
     concluido:rows.filter(a=>normStatus(a.status)==='Concluído').length,
     recusado:rows.filter(a=>normStatus(a.status)==='Recusado').length,
-    excluido:vxAgendaRowsForSelectedDay().filter(a=>normStatus(a.status)==='Excluído').length
+    excluido:all.filter(a=>normStatus(a.status)==='Excluído').length
   };
   Object.entries(counts).forEach(([k,v])=>{
     const el=document.getElementById('fc-'+k);
     if(el) el.textContent=String(v);
   });
 }
-
 function vxAgendaSyncDateUI(){
   const t=document.getElementById('vxAgendaDateText'); if(t)t.textContent=vxAgendaDateLabel(_vxAgendaDate);
   const p=document.getElementById('vxAgendaDatePicker'); if(p)p.value=vxISODate(_vxAgendaDate);
   vxUpdateAgendaFilterCounts();
 }
-function vxAgendaDay(step){ _vxAgendaDate.setDate(_vxAgendaDate.getDate()+step); vxAgendaSyncDateUI(); renderTimeline(); }
+function vxAgendaDay(step){ _vxAgendaDate.setDate(_vxAgendaDate.getDate()+step); vxAgendaSyncDateUI(); const agData=document.getElementById('agData'); if(agData) agData.value=vxISODate(_vxAgendaDate); }
 function vxAgendaPickDate(){ const p=document.getElementById('vxAgendaDatePicker'); if(!p)return; if(typeof p.showPicker==='function')p.showPicker(); else p.click(); }
 function vxOpenAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet'); if(!s)return; s.classList.add('open');s.setAttribute('aria-hidden','false'); }
 function vxCloseAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet'); if(!s)return; s.classList.remove('open');s.setAttribute('aria-hidden','true'); }
@@ -2168,7 +2168,46 @@ function vxOpenAgendaForm(type){
   }
 }
 function vxCloseAgendaForm(){ document.getElementById('view-agenda')?.classList.remove('vx-form-open'); }
+function vxOpenAgendaClient(){
+  const screen=document.getElementById('vxAgendaClientScreen');
+  if(!screen) return;
+  screen.classList.add('open');
+  screen.setAttribute('aria-hidden','false');
+  setTimeout(()=>document.getElementById('vxAgCliNome')?.focus(),160);
+}
+function vxCloseAgendaClient(){
+  const screen=document.getElementById('vxAgendaClientScreen');
+  if(!screen) return;
+  screen.classList.remove('open');
+  screen.setAttribute('aria-hidden','true');
+}
+async function vxSalvarClienteRapido(){
+  const nome=(document.getElementById('vxAgCliNome')?.value||'').trim();
+  if(!nome) return toast('Digite o nome.', 'err');
+  const btn=document.getElementById('vxAgendaClientSave');
+  if(btn) btn.disabled=true;
+  try{
+    const { error }=await db.from('agenda_clientes').insert({
+      empresa_id:state.empresa.id,
+      nome,
+      telefone:(document.getElementById('vxAgCliTel')?.value||'').trim(),
+      email:(document.getElementById('vxAgCliEmail')?.value||'').trim(),
+      status:'ativo'
+    });
+    if(error) return toast('Erro ao salvar: '+error.message,'err');
+    ['vxAgCliNome','vxAgCliTel','vxAgCliEmail'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    await loadAll();
+    vxCloseAgendaClient();
+    showNotif('Cliente adicionado',nome+' salvo com sucesso.','ok');
+  } finally {
+    if(btn) btn.disabled=false;
+  }
+}
 
+
+window.vxOpenAgendaClient = vxOpenAgendaClient;
+window.vxCloseAgendaClient = vxCloseAgendaClient;
+window.vxSalvarClienteRapido = vxSalvarClienteRapido;
 window.vxOpenAgendaAdd = vxOpenAgendaAdd;
 window.vxCloseAgendaAdd = vxCloseAgendaAdd;
 window.vxOpenAgendaForm = vxOpenAgendaForm;
@@ -2179,7 +2218,7 @@ window.vxAgendaPickDate = vxAgendaPickDate;
 document.addEventListener('DOMContentLoaded',()=>{
   vxAgendaSyncDateUI();
   const p=document.getElementById('vxAgendaDatePicker');
-  p?.addEventListener('change',()=>{ if(!p.value)return; _vxAgendaDate=new Date(p.value+'T12:00:00'); vxAgendaSyncDateUI(); renderTimeline(); });
+  p?.addEventListener('change',()=>{ if(!p.value)return; _vxAgendaDate=new Date(p.value+'T12:00:00'); vxAgendaSyncDateUI(); const agData=document.getElementById('agData'); if(agData) agData.value=p.value; });
 });
 
 function setFilter(filter, btn) {
@@ -2194,11 +2233,7 @@ function renderTimeline() {
   if (!el) return;
   const mobile=vxIsMobileAgenda();
   const all=ordenarAgendamentosRecentes(state.agendamentos);
-  let ags=all;
-  if(mobile){
-    const selected=vxISODate(_vxAgendaDate);
-    ags=all.filter(a=>vxNormalizeAgendaDate(a.data)===selected);
-  }
+  const ags=all;
   const statusMap = { pendente:'Pendente', confirmado:'Confirmado', reagendado:'Reagendado', concluido:'Concluído', recusado:'Recusado', excluido:'Excluído' };
   let filtered;
   if (_agendaFilter === 'excluido') filtered = ags.filter(a => normStatus(a.status) === 'Excluído');
@@ -2206,7 +2241,7 @@ function renderTimeline() {
   else filtered=ags.filter(a=>normStatus(a.status)!=='Excluído');
 
   if (!filtered.length) {
-    el.innerHTML = `<div class="empty-state vx-agenda-empty"><p>${mobile?'Nenhum atendimento neste dia.':'Nenhum agendamento neste filtro.'}</p></div>`;
+    el.innerHTML = `<div class="empty-state vx-agenda-empty"><p>Nenhum agendamento neste filtro.</p></div>`;
     vxUpdateAgendaFilterCounts();
     return;
   }

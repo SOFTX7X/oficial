@@ -825,7 +825,7 @@
     <section class="view agenda-v2" id="view-agenda">
       <div class="vx-agenda-mobile-head">
         <div><small>GESTÃO</small><h2>Agenda</h2></div>
-        <button type="button" class="vx-agenda-add" onclick="vxOpenAgendaForm('cliente')">＋ ADICIONAR</button>
+        <button type="button" class="vx-agenda-add" onclick="vxOpenAgendaClient()">＋ ADICIONAR</button>
       </div>
       <div class="vx-agenda-datebar">
         <button type="button" aria-label="Dia anterior" onclick="vxAgendaDay(-1)">‹</button>
@@ -833,6 +833,26 @@
         <button type="button" aria-label="Próximo dia" onclick="vxAgendaDay(1)">›</button>
       </div>
       <input type="date" id="vxAgendaDatePicker" class="vx-agenda-date-picker" aria-label="Escolher data">
+      <div class="vx-agenda-client-screen" id="vxAgendaClientScreen" aria-hidden="true">
+        <div class="vx-agenda-client-card">
+          <header class="vx-agenda-client-head">
+            <button type="button" onclick="vxCloseAgendaClient()" aria-label="Voltar">‹</button>
+            <div><small>NOVO</small><strong>Cliente</strong></div>
+          </header>
+          <div class="vx-agenda-client-copy">
+            <span>CADASTRO RÁPIDO</span>
+            <h3>Novo cliente</h3>
+            <p>Adicione os dados principais sem sair da Agenda.</p>
+          </div>
+          <div class="vx-agenda-client-fields">
+            <label>Nome completo<input id="vxAgCliNome" autocomplete="name" placeholder="Nome do cliente"></label>
+            <label>WhatsApp<input id="vxAgCliTel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000"></label>
+            <label>E-mail<input id="vxAgCliEmail" inputmode="email" autocomplete="email" placeholder="cliente@email.com"></label>
+          </div>
+          <button type="button" class="vx-agenda-client-save" id="vxAgendaClientSave" onclick="vxSalvarClienteRapido()">＋ Adicionar cliente</button>
+        </div>
+      </div>
+
       <div class="agenda-v2-form">
         <div class="vx-agenda-form-mobile-head">
           <button type="button" onclick="vxCloseAgendaForm()">‹</button>
@@ -885,12 +905,12 @@
         <div class="agenda-v2-filter-wrap">
           <div class="filter-bar" id="filterBar">
             <button class="filter-btn active" onclick="setFilter('todos',this)">Todos <span class="filter-count" id="fc-todos">0</span></button>
-            <button class="filter-btn" onclick="setFilter('pendente',this)">⏳ Pendentes <span class="filter-count" id="fc-pendente">0</span></button>
-            <button class="filter-btn" onclick="setFilter('confirmado',this)">✅ Confirmados <span class="filter-count" id="fc-confirmado">0</span></button>
-            <button class="filter-btn" onclick="setFilter('reagendado',this)">📅 Reagendados <span class="filter-count" id="fc-reagendado">0</span></button>
-            <button class="filter-btn" onclick="setFilter('concluido',this)">🎯 Concluídos <span class="filter-count" id="fc-concluido">0</span></button>
-            <button class="filter-btn" onclick="setFilter('recusado',this)">✕ Recusados <span class="filter-count" id="fc-recusado">0</span></button>
-            <button class="filter-btn" onclick="setFilter('excluido',this)">🗑 Excluídos <span class="filter-count" id="fc-excluido">0</span></button>
+            <button class="filter-btn" onclick="setFilter('pendente',this)">Pendentes <span class="filter-count" id="fc-pendente">0</span></button>
+            <button class="filter-btn" onclick="setFilter('confirmado',this)">Confirmados <span class="filter-count" id="fc-confirmado">0</span></button>
+            <button class="filter-btn" onclick="setFilter('reagendado',this)">Reagendados <span class="filter-count" id="fc-reagendado">0</span></button>
+            <button class="filter-btn" onclick="setFilter('concluido',this)">Concluídos <span class="filter-count" id="fc-concluido">0</span></button>
+            <button class="filter-btn" onclick="setFilter('recusado',this)">Recusados <span class="filter-count" id="fc-recusado">0</span></button>
+            <button class="filter-btn" onclick="setFilter('excluido',this)">Excluídos <span class="filter-count" id="fc-excluido">0</span></button>
           </div>
         </div>
 
@@ -1395,7 +1415,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260817-40"></script>
+<script defer src="app.js?v=20260817-50"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>
