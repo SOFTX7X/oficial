@@ -112,3 +112,36 @@
 @media(max-width:340px){
   .vx-status-grid{gap:5px}.vx-status-card{min-height:57px;padding:9px}.vx-next-body{grid-template-columns:50px minmax(0,1fr) auto;gap:7px}.vx-float-grid{gap:5px}.vx-float-option,.vx-float-dashboard{min-height:57px}
 }
+
+
+/* Vyxora Android — refinamento dashboard round 2 */
+@media (max-width:768px){
+  .vx-mob-head{
+    min-height:52px;
+    margin:0 10px 8px;
+    padding:calc(6px + env(safe-area-inset-top,0px)) 9px 6px;
+    border:1px solid rgba(255,255,255,.055);
+    border-radius:12px;
+    background:rgba(15,12,18,.82);
+    box-shadow:0 8px 28px rgba(0,0,0,.14);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+  .vx-mob-avatar{width:28px;height:28px;flex-basis:28px;border-radius:9px;font-size:10px}
+  .vx-mob-user{gap:7px}
+  .vx-mob-greeting small{font-size:6.5px;margin-bottom:0;line-height:1.05}
+  .vx-mob-greeting b{max-width:145px;font-size:8.5px;line-height:1.15}
+  .vx-mob-greeting em{display:block;max-width:145px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#625b69;font:650 5.2px/1.1 Geist,Inter,sans-serif;font-style:normal;letter-spacing:.06em;text-transform:uppercase}
+  .vx-mob-head-actions{gap:4px}
+  .vx-mob-link{height:27px;padding:0 7px;border-radius:8px;font-size:6px}
+  .vx-mob-iconbtn{width:27px;height:27px;border-radius:8px}
+
+  .vx-status-card.pending{border-color:rgba(221,169,63,.13);background:linear-gradient(145deg,rgba(40,31,13,.36),rgba(14,12,16,.96))}
+  .vx-status-card.pending small{color:#bfa467}
+  .vx-status-card.pending b{color:#f0c35d}
+
+  .vx-recent-item{padding:9px 10px 10px}
+  .vx-recent-line{grid-template-columns:minmax(0,1fr) 48px;gap:8px;padding-right:0}
+  .vx-recent-line small{text-align:right}
+  .vx-recent-date{position:static;display:block;margin-top:4px;text-align:right;color:#514b56;font-size:5.4px;font-variant-numeric:tabular-nums}
+}
