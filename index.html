@@ -825,15 +825,10 @@
     <section class="view agenda-v2" id="view-agenda">
       <div class="vx-agenda-mobile-head">
         <div><small>GESTÃO</small><h2>Agenda</h2></div>
-        <button type="button" class="vx-agenda-add" onclick="vxOpenAgendaClient()">＋ ADICIONAR</button>
+        <button type="button" class="vx-agenda-add" onclick="vxOpenAgendaForm('agendamento')">＋ ADICIONAR</button>
       </div>
-      <div class="vx-agenda-datebar">
-        <button type="button" aria-label="Dia anterior" onclick="vxAgendaDay(-1)">‹</button>
-        <button type="button" class="vx-agenda-date-current" onclick="vxAgendaPickDate()"><span id="vxAgendaDateText">HOJE</span></button>
-        <button type="button" aria-label="Próximo dia" onclick="vxAgendaDay(1)">›</button>
-      </div>
-      <input type="date" id="vxAgendaDatePicker" class="vx-agenda-date-picker" aria-label="Escolher data">
-      <div class="vx-agenda-client-screen" id="vxAgendaClientScreen" aria-hidden="true">
+      
+      <div class="vx-agenda-client-screen" id="vxAgendaClientScreen" aria-hidden="true" data-return="agenda">
         <div class="vx-agenda-client-card">
           <header class="vx-agenda-client-head">
             <button type="button" onclick="vxCloseAgendaClient()" aria-label="Voltar">‹</button>
@@ -869,7 +864,13 @@
         </div>
 
         <div class="agenda-v2-grid">
-          <div class="field agenda-v2-client"><label><span>01</span> Cliente</label><input id="agCliente" placeholder="Nome do cliente" autocomplete="name"></div>
+          <div class="field agenda-v2-client">
+            <div class="vx-agenda-field-head">
+              <label><span>01</span> Cliente</label>
+              <button type="button" class="vx-new-client-inline" onclick="vxOpenAgendaClient('appointment')">＋ Novo cliente</button>
+            </div>
+            <input id="agCliente" placeholder="Nome do cliente" autocomplete="name">
+          </div>
           <div class="field agenda-v2-phone"><label><span>02</span> Telefone</label><input id="agTelefone" placeholder="WhatsApp" inputmode="tel" autocomplete="tel"></div>
           <div class="field agenda-v2-service"><label><span>03</span> Serviço</label><select id="agServico"></select></div>
           <div class="field agenda-v2-pro"><label><span>04</span> Profissional</label><select id="agProfissional"></select></div>
@@ -1415,7 +1416,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260817-50"></script>
+<script defer src="app.js?v=20260817-60"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>

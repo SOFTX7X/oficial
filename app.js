@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=11';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=12';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2168,37 +2168,56 @@ function vxOpenAgendaForm(type){
   }
 }
 function vxCloseAgendaForm(){ document.getElementById('view-agenda')?.classList.remove('vx-form-open'); }
-function vxOpenAgendaClient(){
+function vxOpenAgendaClient(returnTo='agenda'){
   const screen=document.getElementById('vxAgendaClientScreen');
   if(!screen) return;
+  screen.dataset.return=returnTo;
   screen.classList.add('open');
   screen.setAttribute('aria-hidden','false');
-  setTimeout(()=>document.getElementById('vxAgCliNome')?.focus(),160);
+  document.body.classList.add('vx-agenda-client-open');
+  setTimeout(()=>document.getElementById('vxAgCliNome')?.focus(),120);
 }
 function vxCloseAgendaClient(){
   const screen=document.getElementById('vxAgendaClientScreen');
   if(!screen) return;
   screen.classList.remove('open');
   screen.setAttribute('aria-hidden','true');
+  document.body.classList.remove('vx-agenda-client-open');
 }
 async function vxSalvarClienteRapido(){
   const nome=(document.getElementById('vxAgCliNome')?.value||'').trim();
+  const telefone=(document.getElementById('vxAgCliTel')?.value||'').trim();
+  const email=(document.getElementById('vxAgCliEmail')?.value||'').trim();
   if(!nome) return toast('Digite o nome.', 'err');
+  const screen=document.getElementById('vxAgendaClientScreen');
+  const returnTo=screen?.dataset.return||'agenda';
   const btn=document.getElementById('vxAgendaClientSave');
   if(btn) btn.disabled=true;
   try{
     const { error }=await db.from('agenda_clientes').insert({
       empresa_id:state.empresa.id,
       nome,
-      telefone:(document.getElementById('vxAgCliTel')?.value||'').trim(),
-      email:(document.getElementById('vxAgCliEmail')?.value||'').trim(),
+      telefone,
+      email,
       status:'ativo'
     });
     if(error) return toast('Erro ao salvar: '+error.message,'err');
-    ['vxAgCliNome','vxAgCliTel','vxAgCliEmail'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     await loadAll();
+    if(returnTo==='appointment'){
+      const nomeInput=document.getElementById('agCliente');
+      const telInput=document.getElementById('agTelefone');
+      if(nomeInput) nomeInput.value=nome;
+      if(telInput) telInput.value=telefone;
+    }
+    ['vxAgCliNome','vxAgCliTel','vxAgCliEmail'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value='';
+    });
     vxCloseAgendaClient();
     showNotif('Cliente adicionado',nome+' salvo com sucesso.','ok');
+    if(returnTo==='appointment'){
+      setTimeout(()=>document.getElementById('agServico')?.focus(),120);
+    }
   } finally {
     if(btn) btn.disabled=false;
   }
@@ -2216,9 +2235,7 @@ window.vxAgendaDay = vxAgendaDay;
 window.vxAgendaPickDate = vxAgendaPickDate;
 
 document.addEventListener('DOMContentLoaded',()=>{
-  vxAgendaSyncDateUI();
-  const p=document.getElementById('vxAgendaDatePicker');
-  p?.addEventListener('change',()=>{ if(!p.value)return; _vxAgendaDate=new Date(p.value+'T12:00:00'); vxAgendaSyncDateUI(); const agData=document.getElementById('agData'); if(agData) agData.value=p.value; });
+  vxUpdateAgendaFilterCounts();
 });
 
 function setFilter(filter, btn) {

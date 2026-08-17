@@ -1120,3 +1120,142 @@
   /* Não mostrar a tela completa de Clientes ao usar Adicionar da Agenda. */
   #view-agenda .vx-agenda-add-sheet{display:none!important}
 }
+
+
+/* =============================================================
+   VYXORA ANDROID — AGENDA V5 FINAL
+   ============================================================= */
+@media (max-width:768px){
+  /* Removido da tela principal */
+  #view-agenda .vx-agenda-datebar,
+  #view-agenda .vx-agenda-date-picker{
+    display:none!important;
+  }
+
+  /* Agenda principal mais direta */
+  #view-agenda .vx-agenda-mobile-head{
+    margin-bottom:6px!important;
+  }
+  #view-agenda .agenda-v2-filter-wrap{
+    margin-top:0!important;
+    margin-bottom:6px!important;
+  }
+
+  /* Novo Agendamento centralizado/compacto */
+  #view-agenda.vx-form-open>.agenda-v2-form{
+    position:fixed!important;
+    inset:0!important;
+    z-index:10020!important;
+    width:100%!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    box-sizing:border-box!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    padding:calc(8px + env(safe-area-inset-top,0px)) 12px calc(14px + env(safe-area-inset-bottom,0px))!important;
+    background:#09080b!important;
+  }
+
+  #view-agenda .vx-agenda-form-mobile-head{
+    width:min(100%,430px)!important;
+    height:38px!important;
+    margin:0 auto 8px!important;
+  }
+  #view-agenda .agenda-v2-grid{
+    width:min(100%,430px)!important;
+    margin:0 auto!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:7px 8px!important;
+  }
+
+  /* + Novo cliente dentro do campo Cliente */
+  #view-agenda .vx-agenda-field-head{
+    min-height:18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:4px;
+  }
+  #view-agenda .vx-agenda-field-head label{
+    margin:0!important;
+  }
+  #view-agenda .vx-new-client-inline{
+    height:20px;
+    padding:0 6px;
+    border:1px solid rgba(166,102,244,.18);
+    border-radius:3px;
+    background:rgba(125,68,193,.08);
+    color:#ad7de9;
+    font:750 5.2px Geist,Inter,sans-serif;
+  }
+
+  /* Cadastro rápido de cliente: curto e centralizado */
+  .vx-agenda-client-screen{
+    position:fixed!important;
+    inset:0!important;
+    z-index:100060!important;
+    width:100%!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+    padding:calc(12px + env(safe-area-inset-top,0px)) 14px calc(12px + env(safe-area-inset-bottom,0px))!important;
+    background:#09080b!important;
+    display:none!important;
+    place-items:center!important;
+  }
+  .vx-agenda-client-screen.open{
+    display:grid!important;
+  }
+  .vx-agenda-client-card{
+    width:min(100%,380px)!important;
+    max-height:calc(100dvh - 44px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+    margin:0!important;
+    overflow:auto!important;
+    border-radius:4px!important;
+  }
+  .vx-agenda-client-copy{
+    padding:12px 14px 7px!important;
+  }
+  .vx-agenda-client-fields{
+    gap:7px!important;
+    padding:7px 14px 10px!important;
+  }
+  .vx-agenda-client-fields input{
+    height:35px!important;
+  }
+  .vx-agenda-client-save{
+    height:35px!important;
+    margin-bottom:12px!important;
+  }
+  body.vx-agenda-client-open{
+    overflow:hidden!important;
+  }
+
+  @media (max-width:430px){
+    #view-agenda .agenda-v2-grid{
+      width:min(100%,350px)!important;
+      grid-template-columns:1fr!important;
+      gap:7px!important;
+    }
+    #view-agenda .agenda-v2-status,
+    #view-agenda .agenda-v2-submit{
+      grid-column:1!important;
+    }
+  }
+
+  @media (max-height:620px){
+    .vx-agenda-client-screen{
+      overflow:auto!important;
+      place-items:start center!important;
+    }
+    .vx-agenda-client-card{
+      max-height:none!important;
+    }
+  }
+}
