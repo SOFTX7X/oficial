@@ -37,7 +37,15 @@ const VYXORA_SCROLL = {
 };
 
 window.VYXORA_SCROLL = VYXORA_SCROLL;
-VYXORA_SCROLL.lock('loader');
+const VYXORA_MOBILE_DIRECT_BOOT = window.matchMedia('(max-width: 768px)').matches;
+if (!VYXORA_MOBILE_DIRECT_BOOT) {
+  VYXORA_SCROLL.lock('loader');
+} else {
+  // No WebApp Android a interface abre direto, sem tela de carregamento.
+  document.body?.classList.remove('vx-booting');
+  document.body?.classList.add('vx-ready');
+  document.getElementById('vyxoraLoader')?.remove();
+}
 
 const VYXORA_SAFE_LAYER = {
   lock() { VYXORA_SCROLL.lock(); },
@@ -56,14 +64,14 @@ function unlockSecondScreen() {
 // não alterar o layout e o comportamento do painel desktop.
 const vxMobileDashboardStyles = document.createElement('link');
 vxMobileDashboardStyles.rel = 'stylesheet';
-vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=9';
+vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=10';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
 vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=4';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
-vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=9';
+vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=10';
 vxMobileDashboardScript.defer = true;
 document.head.appendChild(vxMobileDashboardScript);
 
@@ -672,8 +680,17 @@ function esconderTelaCarregamento() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  iniciarEtapasCarregamento();
+  if (VYXORA_MOBILE_DIRECT_BOOT) {
+    // Android/WebApp: inicia os dados em segundo plano e mantém a superfície do app visível.
+    document.body.classList.remove('vx-booting');
+    document.body.classList.add('vx-ready');
+    document.getElementById('vyxoraLoader')?.remove();
+    VYXORA_SCROLL.unlock('loader');
+    Promise.resolve(init()).catch(err => console.error('Erro ao iniciar VyXora:', err));
+    return;
+  }
 
+  iniciarEtapasCarregamento();
   const minimumDisplay = new Promise(resolve => setTimeout(resolve, 2350));
   const startup = init();
 
