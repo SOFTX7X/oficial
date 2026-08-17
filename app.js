@@ -38,14 +38,8 @@ const VYXORA_SCROLL = {
 
 window.VYXORA_SCROLL = VYXORA_SCROLL;
 const VYXORA_MOBILE_DIRECT_BOOT = window.matchMedia('(max-width: 768px)').matches;
-if (!VYXORA_MOBILE_DIRECT_BOOT) {
-  VYXORA_SCROLL.lock('loader');
-} else {
-  // No WebApp Android a interface abre direto, sem tela de carregamento.
-  document.body?.classList.remove('vx-booting');
-  document.body?.classList.add('vx-ready');
-  document.getElementById('vyxoraLoader')?.remove();
-}
+// Loader único para desktop e Android. No Android ele fica visível por menos tempo.
+VYXORA_SCROLL.lock('loader');
 
 const VYXORA_SAFE_LAYER = {
   lock() { VYXORA_SCROLL.lock(); },
@@ -680,18 +674,11 @@ function esconderTelaCarregamento() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (VYXORA_MOBILE_DIRECT_BOOT) {
-    // Android/WebApp: inicia os dados em segundo plano e mantém a superfície do app visível.
-    document.body.classList.remove('vx-booting');
-    document.body.classList.add('vx-ready');
-    document.getElementById('vyxoraLoader')?.remove();
-    VYXORA_SCROLL.unlock('loader');
-    Promise.resolve(init()).catch(err => console.error('Erro ao iniciar VyXora:', err));
-    return;
-  }
+  // O Android usa o mesmo loader, porém com duração mínima curta para sensação de app nativo.
+  if (!VYXORA_MOBILE_DIRECT_BOOT) iniciarEtapasCarregamento();
 
-  iniciarEtapasCarregamento();
-  const minimumDisplay = new Promise(resolve => setTimeout(resolve, 2350));
+  const minimumDelay = VYXORA_MOBILE_DIRECT_BOOT ? 700 : 2350;
+  const minimumDisplay = new Promise(resolve => setTimeout(resolve, minimumDelay));
   const startup = init();
 
   Promise.allSettled([startup, minimumDisplay]).finally(() => {
