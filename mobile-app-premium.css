@@ -226,6 +226,159 @@
   @keyframes vmViewIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
 }
 
+/* V3 — acabamento visual completo: fundo contínuo e linguagem única de ações. */
+@media (max-width:768px) {
+  html,
+  body.vx-android-dashboard,
+  body.vx-android-dashboard #dashboardView,
+  body.vx-android-dashboard #dashboardView .dash-main {
+    background-color:#08050c!important;
+    background-image:
+      radial-gradient(110% 46% at -8% -6%,rgba(120,47,190,.32) 0,rgba(69,25,111,.15) 38%,transparent 72%),
+      radial-gradient(82% 38% at 108% 31%,rgba(94,36,157,.20) 0,transparent 72%),
+      radial-gradient(105% 42% at -12% 82%,rgba(78,25,132,.18) 0,transparent 74%),
+      linear-gradient(180deg,#0c0712 0%,#08050c 42%,#0a0610 100%)!important;
+    background-attachment:fixed!important;
+    background-repeat:no-repeat!important;
+  }
+  body.vx-android-dashboard #dashboardView .dash-main::before {
+    content:''; position:fixed; z-index:-1; inset:0; pointer-events:none;
+    background:linear-gradient(115deg,rgba(187,122,255,.025),transparent 28%,rgba(118,56,208,.035) 70%,transparent);
+  }
+  body.vx-android-dashboard .view:not(#view-dashboard) { background:transparent!important; }
+
+  /* Superfícies translúcidas, iguais em qualquer módulo. */
+  body.vx-android-dashboard .vx-mobile-view-head,
+  body.vx-android-dashboard .agenda-v2-form,
+  body.vx-android-dashboard .agenda-v2-list-panel,
+  body.vx-android-dashboard .directory-form-panel,
+  body.vx-android-dashboard .premium-record-card,
+  body.vx-android-dashboard .vx-fin-metrics article,
+  body.vx-android-dashboard .vx-fin-panel,
+  body.vx-android-dashboard .vx-list-toolbar,
+  body.vx-android-dashboard .vx-charge-card,
+  body.vx-android-dashboard .vx-report-summary article,
+  body.vx-android-dashboard .vx-report-panel>header,
+  body.vx-android-dashboard .vx-report-row,
+  body.vx-android-dashboard .config-section,
+  body.vx-android-dashboard .horarios-card {
+    border-color:rgba(174,112,240,.20)!important;
+    background:linear-gradient(145deg,rgba(29,20,38,.91),rgba(13,9,18,.94))!important;
+    box-shadow:0 15px 42px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.035)!important;
+    backdrop-filter:blur(16px) saturate(1.12);
+    -webkit-backdrop-filter:blur(16px) saturate(1.12);
+  }
+  body.vx-android-dashboard .vx-mobile-view-head {
+    position:relative; overflow:hidden; border-color:rgba(178,112,250,.28)!important;
+    background:radial-gradient(circle at 100% 0,rgba(145,74,230,.16),transparent 38%),linear-gradient(135deg,rgba(31,21,41,.96),rgba(15,10,20,.96))!important;
+  }
+  body.vx-android-dashboard .vx-mobile-view-head::after {
+    content:''; position:absolute; right:-28px; top:-34px; width:92px; height:92px; border:1px solid rgba(184,123,255,.08); border-radius:50%; box-shadow:0 0 42px rgba(138,67,225,.09);
+  }
+  body.vx-android-dashboard .vx-mobile-view-mark { position:relative; z-index:1; border-color:rgba(184,123,255,.35); background:linear-gradient(145deg,rgba(143,74,227,.18),rgba(79,35,129,.10)); }
+  body.vx-android-dashboard .directory-list-head,
+  body.vx-android-dashboard .agenda-v2-list-head { position:relative; }
+
+  /* Botões principais: brilho sutil, profundidade e resposta tátil. */
+  body.vx-android-dashboard .btn,
+  body.vx-android-dashboard .agenda-v2-save,
+  body.vx-android-dashboard .directory-add-btn,
+  body.vx-android-dashboard .vx-charge-primary,
+  body.vx-android-dashboard .vx-charge-secondary,
+  body.vx-android-dashboard .vx-action,
+  body.vx-android-dashboard .act-btn {
+    position:relative!important; isolation:isolate; overflow:hidden!important;
+    transition:transform .16s cubic-bezier(.2,.8,.2,1),filter .16s ease,box-shadow .16s ease,border-color .16s ease!important;
+  }
+  body.vx-android-dashboard .btn::after,
+  body.vx-android-dashboard .agenda-v2-save::after,
+  body.vx-android-dashboard .directory-add-btn::after,
+  body.vx-android-dashboard .vx-charge-primary::after,
+  body.vx-android-dashboard .vx-action::after,
+  body.vx-android-dashboard .act-btn::after {
+    content:''; position:absolute; z-index:-1; top:-70%; left:-35%; width:32%; height:240%; pointer-events:none;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); transform:rotate(18deg); transition:left .45s ease;
+  }
+  body.vx-android-dashboard .btn:active,
+  body.vx-android-dashboard .agenda-v2-save:active,
+  body.vx-android-dashboard .directory-add-btn:active,
+  body.vx-android-dashboard .vx-charge-primary:active,
+  body.vx-android-dashboard .vx-charge-secondary:active,
+  body.vx-android-dashboard .vx-action:active,
+  body.vx-android-dashboard .act-btn:active { transform:scale(.975)!important; filter:brightness(1.08); }
+  body.vx-android-dashboard .btn:active::after,
+  body.vx-android-dashboard .vx-action:active::after,
+  body.vx-android-dashboard .act-btn:active::after { left:112%; }
+
+  body.vx-android-dashboard .btn-primary,
+  body.vx-android-dashboard .agenda-v2-save,
+  body.vx-android-dashboard .directory-add-btn,
+  body.vx-android-dashboard .vx-charge-primary,
+  body.vx-android-dashboard .vx-action.primary {
+    border:1px solid rgba(215,181,255,.40)!important;
+    color:#fff!important;
+    background:linear-gradient(118deg,#a962ff 0%,#8a3fe2 48%,#6622b3 100%)!important;
+    box-shadow:0 10px 25px rgba(101,38,181,.30),inset 0 1px rgba(255,255,255,.24),inset 0 -1px rgba(55,14,94,.35)!important;
+    text-shadow:0 1px 2px rgba(30,5,52,.32);
+  }
+  body.vx-android-dashboard .btn-ghost,
+  body.vx-android-dashboard .vx-charge-secondary,
+  body.vx-android-dashboard .vx-action:not(.primary) {
+    border:1px solid rgba(168,124,205,.22)!important;
+    color:#c8bdcf!important;
+    background:linear-gradient(145deg,rgba(28,20,35,.90),rgba(13,9,17,.94))!important;
+    box-shadow:inset 0 1px rgba(255,255,255,.03)!important;
+  }
+
+  /* Ações de atendimento com significado visual claro. */
+  body.vx-android-dashboard .act-btn { min-height:40px!important; border-radius:11px!important; font-size:8px!important; font-weight:800!important; letter-spacing:.005em; }
+  body.vx-android-dashboard .act-btn.confirm {
+    border:1px solid rgba(54,221,139,.34)!important; color:#72e9aa!important;
+    background:linear-gradient(135deg,rgba(18,83,54,.43),rgba(8,35,25,.58))!important;
+    box-shadow:inset 0 1px rgba(126,255,187,.06),0 8px 24px rgba(12,104,61,.10)!important;
+  }
+  body.vx-android-dashboard .act-btn.refuse {
+    border:1px solid rgba(255,87,111,.30)!important; color:#ff9aaa!important;
+    background:linear-gradient(135deg,rgba(91,27,40,.42),rgba(38,11,18,.58))!important;
+  }
+  body.vx-android-dashboard .act-btn.reschedule {
+    border:1px solid rgba(176,108,255,.36)!important; color:#d3a8ff!important;
+    background:linear-gradient(135deg,rgba(89,40,144,.42),rgba(34,17,52,.60))!important;
+  }
+  body.vx-android-dashboard .act-btn.conclude {
+    border:1px solid rgba(93,163,255,.30)!important; color:#91bdff!important;
+    background:linear-gradient(135deg,rgba(29,62,113,.42),rgba(12,25,50,.60))!important;
+  }
+  body.vx-android-dashboard .act-btn.whatsapp {
+    min-height:43px!important; border:1px solid rgba(95,241,151,.45)!important; color:#fff!important;
+    background:linear-gradient(120deg,#1fbd68 0%,#159653 58%,#0d6d3a 100%)!important;
+    box-shadow:0 10px 27px rgba(22,166,88,.22),inset 0 1px rgba(203,255,225,.24)!important;
+    text-shadow:0 1px 2px rgba(4,55,27,.38);
+  }
+
+  /* Página pública: WhatsApp flutuante mais limpo e premium. */
+  body.vx-android-dashboard #publicView .pub-whatsapp-fab {
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    min-width:48px; min-height:48px; padding:0 15px!important;
+    border:1px solid rgba(158,255,196,.42)!important; border-radius:15px!important;
+    color:#fff!important; background:linear-gradient(135deg,#27c978,#128a4d)!important;
+    box-shadow:0 14px 38px rgba(18,159,82,.34),inset 0 1px rgba(255,255,255,.24)!important;
+    animation:vmWhatsPulse 2.8s ease-in-out infinite;
+  }
+  body.vx-android-dashboard #publicView .pub-whatsapp-fab svg { width:19px!important; height:19px!important; }
+
+  /* Estados e badges deixam de parecer blocos soltos. */
+  body.vx-android-dashboard .badge,
+  body.vx-android-dashboard .vx-status { border-radius:999px!important; letter-spacing:.035em!important; }
+  body.vx-android-dashboard .vx-charge-actions,
+  body.vx-android-dashboard .agenda-v2 .apt-actions { border-top-color:rgba(182,127,238,.11)!important; }
+
+  @keyframes vmWhatsPulse {
+    0%,100% { box-shadow:0 14px 38px rgba(18,159,82,.30),0 0 0 0 rgba(54,220,124,.18),inset 0 1px rgba(255,255,255,.24); }
+    50% { box-shadow:0 16px 42px rgba(18,159,82,.38),0 0 0 7px rgba(54,220,124,0),inset 0 1px rgba(255,255,255,.24); }
+  }
+}
+
 @media (max-width:340px) {
   body.vx-android-dashboard .directory-form-grid,
   body.vx-android-dashboard .agenda-v2-grid { gap:7px 6px!important; }
