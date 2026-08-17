@@ -823,7 +823,35 @@
 
     <!-- VIEW: AGENDA -->
     <section class="view agenda-v2" id="view-agenda">
+      <div class="vx-agenda-mobile-head">
+        <div><small>GESTÃO</small><h2>Agenda</h2></div>
+        <button type="button" class="vx-agenda-add" onclick="vxOpenAgendaAdd()">＋ ADICIONAR</button>
+      </div>
+      <div class="vx-agenda-datebar">
+        <button type="button" aria-label="Dia anterior" onclick="vxAgendaDay(-1)">‹</button>
+        <button type="button" class="vx-agenda-date-current" onclick="vxAgendaPickDate()"><span id="vxAgendaDateText">HOJE</span></button>
+        <button type="button" aria-label="Próximo dia" onclick="vxAgendaDay(1)">›</button>
+      </div>
+      <input type="date" id="vxAgendaDatePicker" class="vx-agenda-date-picker" aria-label="Escolher data">
+      <div class="vx-agenda-add-sheet" id="vxAgendaAddSheet" aria-hidden="true">
+        <button class="vx-agenda-sheet-backdrop" type="button" onclick="vxCloseAgendaAdd()" aria-label="Fechar"></button>
+        <section class="vx-agenda-sheet-panel">
+          <header><div><small>ADICIONAR</small><strong>O que deseja cadastrar?</strong></div><button type="button" onclick="vxCloseAgendaAdd()">×</button></header>
+          <div class="vx-agenda-add-grid">
+            <button type="button" onclick="vxOpenAgendaForm('agendamento')"><b>＋</b><span>AGENDAMENTO</span><small>Novo horário</small></button>
+            <button type="button" onclick="vxOpenAgendaForm('cliente')"><b>＋</b><span>CLIENTE</span><small>Cadastrar</small></button>
+            <button type="button" onclick="vxOpenAgendaForm('servico')"><b>＋</b><span>SERVIÇO</span><small>Cadastrar</small></button>
+            <button type="button" onclick="vxOpenAgendaForm('profissional')"><b>＋</b><span>PROFISSIONAL</span><small>Cadastrar</small></button>
+          </div>
+        </section>
+      </div>
+
       <div class="agenda-v2-form">
+        <div class="vx-agenda-form-mobile-head">
+          <button type="button" onclick="vxCloseAgendaForm()">‹</button>
+          <div><small>NOVO</small><strong>Agendamento</strong></div>
+        </div>
+
         <div class="agenda-v2-form-head">
           <div>
             <span class="agenda-v2-kicker">NOVO ATENDIMENTO</span>
@@ -1380,7 +1408,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260817-22"></script>
+<script defer src="app.js?v=20260817-30"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>

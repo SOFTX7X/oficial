@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=7';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=8';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2102,6 +2102,42 @@ function renderSelects() {
   }
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// VYXORA ANDROID — AGENDA PREMIUM
+// ═══════════════════════════════════════════════════════════════
+let _vxAgendaDate = new Date();
+function vxIsMobileAgenda(){ return window.matchMedia('(max-width: 768px)').matches; }
+function vxISODate(d){ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function vxAgendaDateLabel(d){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const x=new Date(d); x.setHours(0,0,0,0);
+  const diff=Math.round((x-today)/86400000);
+  const mon=x.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase();
+  const prefix=diff===0?'HOJE':diff===1?'AMANHÃ':diff===-1?'ONTEM':x.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','').toUpperCase();
+  return `${prefix} · ${String(x.getDate()).padStart(2,'0')} ${mon}`;
+}
+function vxAgendaSyncDateUI(){
+  const t=document.getElementById('vxAgendaDateText'); if(t)t.textContent=vxAgendaDateLabel(_vxAgendaDate);
+  const p=document.getElementById('vxAgendaDatePicker'); if(p)p.value=vxISODate(_vxAgendaDate);
+}
+function vxAgendaDay(step){ _vxAgendaDate.setDate(_vxAgendaDate.getDate()+step); vxAgendaSyncDateUI(); renderTimeline(); }
+function vxAgendaPickDate(){ const p=document.getElementById('vxAgendaDatePicker'); if(!p)return; if(typeof p.showPicker==='function')p.showPicker(); else p.click(); }
+function vxOpenAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet'); if(!s)return; s.classList.add('open');s.setAttribute('aria-hidden','false'); }
+function vxCloseAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet'); if(!s)return; s.classList.remove('open');s.setAttribute('aria-hidden','true'); }
+function vxOpenAgendaForm(type){
+  vxCloseAgendaAdd();
+  if(type==='agendamento'){ document.getElementById('view-agenda')?.classList.add('vx-form-open'); setTimeout(()=>document.getElementById('agCliente')?.focus(),180); return; }
+  const map={cliente:'clientes',servico:'servicos',profissional:'profissionais'};
+  if(map[type] && typeof showView==='function') showView(map[type]);
+}
+function vxCloseAgendaForm(){ document.getElementById('view-agenda')?.classList.remove('vx-form-open'); }
+document.addEventListener('DOMContentLoaded',()=>{
+  vxAgendaSyncDateUI();
+  const p=document.getElementById('vxAgendaDatePicker');
+  p?.addEventListener('change',()=>{ if(!p.value)return; _vxAgendaDate=new Date(p.value+'T12:00:00'); vxAgendaSyncDateUI(); renderTimeline(); });
+});
+
 function setFilter(filter, btn) {
   _agendaFilter = filter;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -2112,69 +2148,73 @@ function setFilter(filter, btn) {
 function renderTimeline() {
   const el = $('agendaTimeline');
   if (!el) return;
-  const ags = ordenarAgendamentosRecentes(state.agendamentos);
-  if (!ags.length) {
-    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento ainda.</p></div>'; return;
+  const mobile=vxIsMobileAgenda();
+  const all=ordenarAgendamentosRecentes(state.agendamentos);
+  let ags=all;
+  if(mobile){
+    const selected=vxISODate(_vxAgendaDate);
+    ags=all.filter(a=>a.data===selected);
   }
-  const statusMap = { pendente: 'Pendente', confirmado: 'Confirmado', reagendado: 'Reagendado', concluido: 'Concluído', recusado: 'Recusado', excluido: 'Excluído' };
+  const statusMap = { pendente:'Pendente', confirmado:'Confirmado', reagendado:'Reagendado', concluido:'Concluído', recusado:'Recusado', excluido:'Excluído' };
   let filtered;
   if (_agendaFilter === 'excluido') filtered = ags.filter(a => normStatus(a.status) === 'Excluído');
-  else if (_agendaFilter !== 'todos') { const target = statusMap[_agendaFilter]; filtered = ags.filter(a => normStatus(a.status) === target); }
-  else filtered = ags.filter(a => normStatus(a.status) !== 'Excluído');
+  else if (_agendaFilter !== 'todos') { const target=statusMap[_agendaFilter]; filtered=ags.filter(a=>normStatus(a.status)===target); }
+  else filtered=ags.filter(a=>normStatus(a.status)!=='Excluído');
+
   if (!filtered.length) {
-    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento neste filtro.</p></div>'; return;
+    el.innerHTML = `<div class="empty-state vx-agenda-empty"><p>${mobile?'Nenhum atendimento neste dia.':'Nenhum agendamento neste filtro.'}</p></div>`;
+    return;
   }
-  el.innerHTML = '';
-  filtered.forEach(a => {
-    const block = document.createElement('div');
-    block.className = 'tl-block'; block.id = 'ag-' + a.id;
-    block.innerHTML = `
-      <div class="tl-time">${String(a.hora || '—').slice(0,5)}</div>
+  el.innerHTML='';
+  filtered.forEach(a=>{
+    const block=document.createElement('div');
+    block.className='tl-block'; block.id='ag-'+a.id;
+    const tel=(a.cliente_telefone||a.telefone||'').trim();
+    const email=(a.cliente_email||a.email||'').trim();
+    const contact=[tel,email].filter(Boolean).join(' | ');
+    block.innerHTML=`
+      <div class="tl-time">${String(a.hora||'—').slice(0,5)}</div>
       <div class="tl-line"></div>
       <div class="tl-content">
         <div class="tl-card">
           <div class="tl-card-top">
-            <div class="apt-av" style="width:34px;height:34px;border-radius:9px;flex-shrink:0">${initial(a.cliente_nome)}</div>
+            <div class="apt-av">${initial(a.cliente_nome)}</div>
             <div class="tl-card-info">
-              <div class="tl-card-name">${a.cliente_nome || 'Cliente'}</div>
-              <div class="tl-card-meta">${a.servico_nome || '—'} · ${a.profissional_nome || '—'} · ${formatDate(a.data)}${a.cliente_telefone ? ' · ' + a.cliente_telefone : ''}</div>
+              <div class="tl-card-name">${a.cliente_nome||'Cliente'}</div>
+              <div class="tl-card-service">${a.servico_nome||'—'}</div>
+              ${contact?`<div class="tl-card-contact" title="${contact.replace(/"/g,'&quot;')}">${contact}</div>`:''}
             </div>
             <div class="tl-card-status"><span class="badge ${badgeClass(a.status)}">${normStatus(a.status)}</span></div>
           </div>
           ${renderAcoes(a)}
         </div>
       </div>`;
-    const card = block.querySelector('.tl-card');
-    const menu = buildActionMenu(a.id, [
-      { icon: '✏️', label: 'Editar', action: () => editAgendamento(a.id) },
-      { icon: '📋', label: 'Duplicar', action: () => duplicarAgendamento(a.id) },
+    const card=block.querySelector('.tl-card');
+    const menu=buildActionMenu(a.id,[
+      {icon:'✏️',label:'Editar',action:()=>editAgendamento(a.id)},
+      {icon:'📋',label:'Duplicar',action:()=>duplicarAgendamento(a.id)},
       'sep',
-      { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirAgendamento(a.id) }
+      {icon:'🗑',label:'Excluir',cls:'danger',action:()=>excluirAgendamento(a.id)}
     ]);
-    if (card) card.appendChild(menu);
+    if(card)card.appendChild(menu);
     el.appendChild(block);
   });
 }
-
 function renderAcoes(a) {
-  const tel = (a.cliente_telefone || a.telefone || '').replace(/\D/g, '');
-  const s = normStatus(a.status);
-  if (s === 'Excluído') return `<div class="apt-actions muted-actions"><span class="badge badge-gray">🗑 Excluído</span></div>`;
-  if (s === 'Recusado') return `<div class="apt-actions muted-actions"><span class="badge badge-red">✕ Recusado</span></div>`;
-  if (s === 'Concluído') return `<div class="apt-actions muted-actions">
-    <span class="badge badge-blue">✓ Concluído</span>
-    ${tel ? `<button class="act-btn whatsapp" onclick="abrirWA('${a.id}')">💬 WA</button>` : ''}
-    <button class="act-btn refuse" onclick="excluirAgendamento('${a.id}')">🗑 Arquivar</button>
-  </div>`;
-  return `<div class="apt-actions">
-    ${s !== 'Confirmado' ? `<button class="act-btn confirm" onclick="confirmarAg('${a.id}')">✅ Confirmar</button>` : ''}
-    <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">✕ Recusar</button>
-    <button class="act-btn reschedule" onclick="openModalReagendar('${a.id}')">📅 Reagendar</button>
-    <button class="act-btn conclude" onclick="concluirAg('${a.id}')">✓ Concluir</button>
-    ${tel ? `<button class="act-btn whatsapp" onclick="abrirWA('${a.id}')">💬 WA</button>` : ''}
+  const tel=(a.cliente_telefone||a.telefone||'').replace(/\D/g,'');
+  const s=normStatus(a.status);
+  const wa=tel?`<button class="act-btn whatsapp vx-action-wide" onclick="abrirWA('${a.id}')">WhatsApp</button>`:'';
+  if(s==='Excluído') return `<div class="apt-actions vx-actions-compact"><button class="act-btn muted" disabled>Excluído</button></div>`;
+  if(s==='Recusado') return `<div class="apt-actions vx-actions-compact">${wa||'<button class="act-btn muted" disabled>Recusado</button>'}</div>`;
+  if(s==='Concluído') return `<div class="apt-actions vx-actions-compact">${wa}<button class="act-btn refuse vx-action-wide" onclick="excluirAgendamento('${a.id}')">Arquivar</button></div>`;
+  return `<div class="apt-actions vx-actions-compact">
+    ${s!=='Confirmado'?`<button class="act-btn confirm" onclick="confirmarAg('${a.id}')">Confirmar</button>`:`<button class="act-btn confirm" disabled>Confirmado</button>`}
+    <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">Recusar</button>
+    <button class="act-btn reschedule" onclick="openModalReagendar('${a.id}')">Reagendar</button>
+    <button class="act-btn conclude" onclick="concluirAg('${a.id}')">Concluir</button>
+    ${wa}
   </div>`;
 }
-
 function ensureActionCenterModal() {
   let modal = document.getElementById('actionCenterModal');
   if (modal) return modal;
@@ -3219,6 +3259,7 @@ async function salvarAgendamento() {
     if ($('agHora')) $('agHora').value = '';
 
     await loadAll();
+    if (vxIsMobileAgenda()) vxCloseAgendaForm();
     showNotif('Agendamento criado!', `${agCli} — ${formatDate(agData)} às ${agHora}.`, 'ok');
   } finally {
     salvarAgendamento._running = false;
