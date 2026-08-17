@@ -52,6 +52,17 @@ function unlockSecondScreen() {
   VYXORA_SAFE_LAYER.unlock();
 }
 
+// Dashboard exclusivo do WebApp Android. Carregado como camada isolada para
+// não alterar o layout e o comportamento do painel desktop.
+const vxMobileDashboardStyles = document.createElement('link');
+vxMobileDashboardStyles.rel = 'stylesheet';
+vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=6';
+document.head.appendChild(vxMobileDashboardStyles);
+const vxMobileDashboardScript = document.createElement('script');
+vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=6';
+vxMobileDashboardScript.defer = true;
+document.head.appendChild(vxMobileDashboardScript);
+
 // ── STATE ──
 let state = {
   user: null, empresa: null, perfil: null,
