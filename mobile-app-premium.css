@@ -1284,3 +1284,160 @@
     #view-agenda .agenda-v2-service,#view-agenda .agenda-v2-pro,#view-agenda .agenda-v2-date,#view-agenda .agenda-v2-time,#view-agenda .agenda-v2-status,#view-agenda .agenda-v2-submit{grid-column:1!important}
   }
 }
+
+
+/* VYXORA ANDROID — NOVO CLIENTE / TELA FINAL PREMIUM */
+@media (max-width:768px){
+  .vx-agenda-client-screen{
+    position:fixed!important;
+    inset:0!important;
+    z-index:100060!important;
+    width:100vw!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    max-height:100dvh!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+    padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(10px + env(safe-area-inset-bottom,0px))!important;
+    background:
+      radial-gradient(circle at 50% 38%,rgba(93,46,135,.075),transparent 34%),
+      linear-gradient(180deg,#08070a 0%,#09070b 100%)!important;
+  }
+  .vx-agenda-client-screen.open{
+    display:grid!important;
+    place-items:center!important;
+  }
+  .vx-agenda-client-card{
+    width:min(100%,360px)!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    overflow:visible!important;
+    border:1px solid rgba(255,255,255,.075)!important;
+    border-radius:2px!important;
+    background:linear-gradient(160deg,rgba(17,14,20,.995),rgba(10,9,12,.995))!important;
+    box-shadow:0 22px 70px rgba(0,0,0,.42),0 0 0 1px rgba(131,75,190,.035) inset!important;
+  }
+  .vx-agenda-client-head{
+    height:42px!important;
+    padding:0 10px!important;
+    grid-template-columns:28px 1fr!important;
+    gap:8px!important;
+    border-bottom:1px solid rgba(255,255,255,.055)!important;
+    background:rgba(255,255,255,.008)!important;
+  }
+  .vx-agenda-client-head>button{
+    width:27px!important;
+    height:27px!important;
+    border:1px solid rgba(174,113,242,.18)!important;
+    border-radius:2px!important;
+    background:#0d0b10!important;
+    color:#b77aef!important;
+    font-size:16px!important;
+    line-height:1!important;
+    box-shadow:none!important;
+  }
+  .vx-agenda-client-head small{
+    color:#736c78!important;
+    font-size:4.9px!important;
+    letter-spacing:.16em!important;
+  }
+  .vx-agenda-client-head strong{
+    margin-top:1px!important;
+    color:#ece6f0!important;
+    font-size:8.8px!important;
+    line-height:1.05!important;
+  }
+  .vx-agenda-client-copy{
+    padding:13px 16px 8px!important;
+    text-align:center!important;
+  }
+  .vx-agenda-client-copy>span{
+    color:#aa6ee9!important;
+    font-size:5.1px!important;
+    font-weight:800!important;
+    letter-spacing:.16em!important;
+  }
+  .vx-agenda-client-copy h3{
+    margin:4px 0 3px!important;
+    color:#f1ecf4!important;
+    font-size:12px!important;
+    line-height:1.05!important;
+    font-weight:800!important;
+  }
+  .vx-agenda-client-copy p{
+    max-width:250px!important;
+    margin:0 auto!important;
+    color:#716a76!important;
+    font-size:5.8px!important;
+    line-height:1.35!important;
+  }
+  .vx-agenda-client-fields{
+    display:grid!important;
+    gap:7px!important;
+    padding:8px 16px 10px!important;
+  }
+  .vx-agenda-client-fields label{
+    gap:4px!important;
+    color:#8b8490!important;
+    font-size:5.5px!important;
+    font-weight:780!important;
+    letter-spacing:.035em!important;
+  }
+  .vx-agenda-client-fields input{
+    width:100%!important;
+    height:36px!important;
+    min-height:36px!important;
+    box-sizing:border-box!important;
+    padding:0 10px!important;
+    border:1px solid rgba(255,255,255,.075)!important;
+    border-radius:2px!important;
+    outline:0!important;
+    background:#09080c!important;
+    color:#ede7f1!important;
+    font:600 7.1px Geist,Inter,sans-serif!important;
+    box-shadow:none!important;
+  }
+  .vx-agenda-client-fields input::placeholder{
+    color:#5f5963!important;
+    opacity:1!important;
+  }
+  .vx-agenda-client-fields input:focus{
+    border-color:rgba(170,102,238,.42)!important;
+    background:#0b0910!important;
+    box-shadow:0 0 0 2px rgba(120,62,180,.07)!important;
+  }
+  .vx-agenda-client-save{
+    width:calc(100% - 32px)!important;
+    height:37px!important;
+    min-height:37px!important;
+    margin:0 16px 14px!important;
+    padding:0 12px!important;
+    border:1px solid rgba(177,108,246,.32)!important;
+    border-radius:2px!important;
+    background:linear-gradient(90deg,#8a28db 0%,#7a24ba 100%)!important;
+    color:#fff!important;
+    font:800 6.8px Geist,Inter,sans-serif!important;
+    letter-spacing:.01em!important;
+    box-shadow:0 10px 26px rgba(105,32,172,.16)!important;
+  }
+  body.vx-agenda-client-open .vx-float-launcher,
+  body.vx-agenda-client-open .vx-float-panel{
+    display:none!important;
+  }
+  body.vx-agenda-client-open{
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+  @media (max-height:560px){
+    .vx-agenda-client-screen{
+      overflow-y:auto!important;
+      place-items:start center!important;
+    }
+    .vx-agenda-client-card{
+      margin:8px 0!important;
+    }
+  }
+}
