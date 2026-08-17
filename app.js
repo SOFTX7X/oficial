@@ -3931,6 +3931,11 @@ async function confirmarAgendamentoPublico() {
   if (!pubNome) return toast('Informe seu nome completo.', 'warn');
   if (!pubTel || pubTel.replace(/\D/g, '').length < 10) return toast('Informe um WhatsApp válido.', 'warn');
   if (isDiaFechado(pubData, state.pubDiasFechados || [])) { validarDataPublica(pubData); return toast('Este dia não está disponível. Escolha outra data.', 'err'); }
+  if (horarioPublicoJaPassou(pubData, pubHora)) {
+    const horaInput = $('pubHora'); if (horaInput) horaInput.value = '';
+    const horaLabel = $('pubHoraLabel'); if (horaLabel) horaLabel.textContent = 'Escolher horário';
+    return toast('Esse horário já passou. Escolha um horário futuro.', 'warn');
+  }
 
   const botao = document.querySelector('.pub-confirm-btn');
   if (botao) {
@@ -3979,6 +3984,8 @@ async function finalizarAgendamentoPublico() {
     preencher('pubSuccessProfissional', state.pubProfissional?.nome);
     preencher('pubSuccessData', dataFormatada);
     preencher('pubSuccessHora', pubHora);
+    preencher('pubSuccessEmpresa', state.pubEmpresa?.nome || 'VYXORA AGENDAS');
+    preencher('pubSuccessGreeting', `Tudo certo, ${pubNome.split(/\s+/)[0]}. Agora é só chegar no horário combinado.`);
 
     const hero = document.querySelector('#publicView .pub-hero');
     if (mb) mb.style.display = 'none';
@@ -4197,6 +4204,16 @@ function selecionarDataPublica(iso) {
 }
 
 // ── SLOTS DE HORÁRIO ────────────────────────────────────────────────────────────
+function horarioPublicoJaPassou(dataISO, hora) {
+  if (!dataISO || !hora) return false;
+  const agora = new Date();
+  const hojeLocal = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+  if (dataISO < hojeLocal) return true;
+  if (dataISO > hojeLocal) return false;
+  const [h, m] = hora.slice(0, 5).split(':').map(Number);
+  return (h * 60 + m) <= (agora.getHours() * 60 + agora.getMinutes());
+}
+
 async function abrirSlotsPublico() {
   const data = document.getElementById('pubData')?.value;
   const prof = state.pubProfissional;
@@ -4241,7 +4258,8 @@ async function abrirSlotsPublico() {
   while (atual < fimMin) {
     const h = String(Math.floor(atual/60)).padStart(2,'0');
     const m = String(atual%60).padStart(2,'0');
-    slots.push(`${h}:${m}`);
+    const slot = `${h}:${m}`;
+    if (!horarioPublicoJaPassou(data, slot)) slots.push(slot);
     atual += intervalo;
   }
 
