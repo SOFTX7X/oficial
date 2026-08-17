@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=12';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=13';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2085,9 +2085,10 @@ function renderCalendar() {
 }
 
 function renderSelects() {
-  const agS = $('agServico'), agP = $('agProfissional');
+  const agS = $('agServico'), agP = $('agProfissional'), agC = $('agClienteSelect');
   const selectedServico = agS ? agS.value : '';
   const selectedProfissional = agP ? agP.value : '';
+  const selectedCliente = agC ? agC.value : '';
   if (agS) {
     agS.innerHTML = '<option value="">Escolha serviço</option>' +
       (state.servicos || []).filter(s => (s.status || 'ativo') === 'ativo')
@@ -2099,6 +2100,15 @@ function renderSelects() {
       (state.profissionais || []).filter(p => (p.status || 'ativo') === 'ativo')
         .map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
     if (selectedProfissional && [...agP.options].some(o => o.value === selectedProfissional)) agP.value = selectedProfissional;
+  }
+  if (agC) {
+    agC.innerHTML = '<option value="">Escolha o cliente</option>' +
+      (state.clientes || []).filter(c => (c.status || 'ativo') === 'ativo')
+        .map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+    if (selectedCliente && [...agC.options].some(o => o.value === selectedCliente)) {
+      agC.value = selectedCliente;
+      vxAgendaClienteSelecionado(selectedCliente);
+    }
   }
 }
 
@@ -2237,6 +2247,29 @@ window.vxAgendaPickDate = vxAgendaPickDate;
 document.addEventListener('DOMContentLoaded',()=>{
   vxUpdateAgendaFilterCounts();
 });
+
+
+function vxAgendaClienteSelecionado(id){
+  const cliente=(state.clientes||[]).find(c=>String(c.id)===String(id));
+  const nomeInput=document.getElementById('agCliente');
+  const telInput=document.getElementById('agTelefone');
+  const summary=document.getElementById('vxAgendaClientSummary');
+  const summaryName=document.getElementById('vxAgendaClientSummaryName');
+  const summaryContact=document.getElementById('vxAgendaClientSummaryContact');
+  if(!cliente){
+    if(nomeInput) nomeInput.value='';
+    if(telInput) telInput.value='';
+    if(summary) summary.hidden=true;
+    return;
+  }
+  if(nomeInput) nomeInput.value=cliente.nome||'';
+  if(telInput) telInput.value=cliente.telefone||'';
+  const contact=[cliente.telefone,cliente.email].filter(Boolean).join(' | ');
+  if(summaryName) summaryName.textContent=cliente.nome||'Cliente';
+  if(summaryContact) summaryContact.textContent=contact||'Sem contato informado';
+  if(summary) summary.hidden=false;
+}
+window.vxAgendaClienteSelecionado=vxAgendaClienteSelecionado;
 
 function setFilter(filter, btn) {
   _agendaFilter = filter;
@@ -3299,31 +3332,19 @@ async function salvarAgendamento() {
   if (botao) botao.disabled = true;
 
   try {
+    const clienteId = $('agClienteSelect')?.value;
     const agCli = $('agCliente')?.value?.trim();
     const agSvc = $('agServico')?.value;
     const agProf = $('agProfissional')?.value;
     const agData = $('agData')?.value;
     const agHora = $('agHora')?.value;
-    if (!agCli || !agSvc || !agProf || !agData || !agHora) {
+    if (!clienteId || !agCli || !agSvc || !agProf || !agData || !agHora) {
       toast('Preencha todos os campos.', 'err');
       return;
     }
 
     const serv = (state.servicos || []).find(s => s.id === agSvc);
     const prof = (state.profissionais || []).find(p => p.id === agProf);
-    let clienteId = null;
-
-    try {
-      const { data: cli } = await db.from('agenda_clientes').insert({
-        empresa_id: state.empresa.id,
-        nome: agCli,
-        telefone: ($('agTelefone')?.value || '').trim(),
-        status: 'ativo'
-      }).select('*').single();
-      if (cli) clienteId = cli.id;
-    } catch (e) {
-      console.warn('Não foi possível criar o cliente automaticamente:', e);
-    }
 
     const { error } = await db.from('agenda_agendamentos').insert({
       empresa_id: state.empresa.id,
@@ -3345,8 +3366,10 @@ async function salvarAgendamento() {
       return;
     }
 
+    if ($('agClienteSelect')) $('agClienteSelect').value = '';
     if ($('agCliente')) $('agCliente').value = '';
     if ($('agTelefone')) $('agTelefone').value = '';
+    if ($('vxAgendaClientSummary')) $('vxAgendaClientSummary').hidden = true;
     if ($('agServico')) $('agServico').value = '';
     if ($('agProfissional')) $('agProfissional').value = '';
     if ($('agStatus')) $('agStatus').value = 'Confirmado';

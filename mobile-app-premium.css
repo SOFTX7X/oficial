@@ -1259,3 +1259,28 @@
     }
   }
 }
+
+@media (max-width:768px){
+  #view-agenda .vx-new-client-inline,#view-agenda .vx-agenda-field-head{display:none!important}
+  #view-agenda.vx-form-open>.agenda-v2-form{justify-content:flex-start!important;padding-top:calc(12px + env(safe-area-inset-top,0px))!important}
+  #view-agenda .vx-agenda-form-mobile-head{width:min(100%,390px)!important;height:42px!important;margin-bottom:14px!important}
+  #view-agenda .agenda-v2-grid{width:min(100%,390px)!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+  #view-agenda .agenda-v2-client{grid-column:1/-1!important}
+  #view-agenda .agenda-v2-grid label{margin-bottom:5px!important;color:#8d8493!important;font-size:5.9px!important;font-weight:800!important;letter-spacing:.045em!important}
+  #view-agenda .agenda-v2-grid label span{color:#a768ed!important;font-size:6.2px!important}
+  #view-agenda .agenda-v2-grid input,#view-agenda .agenda-v2-grid select,#view-agenda .agenda-picker-btn{width:100%!important;height:40px!important;min-height:40px!important;box-sizing:border-box!important;padding:0 11px!important;border:1px solid rgba(255,255,255,.075)!important;border-radius:4px!important;background:#0b090d!important;color:#eee8f2!important;font-size:7.5px!important;box-shadow:none!important}
+  #view-agenda .vx-agenda-client-summary{margin-top:6px;padding:8px 10px;border:1px solid rgba(161,103,232,.12);border-radius:4px;background:rgba(120,66,182,.055)}
+  #view-agenda .vx-agenda-client-summary strong{display:block;color:#d9cedf;font-size:6.8px;line-height:1.15}
+  #view-agenda .vx-agenda-client-summary span{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#716976;font-size:5.6px}
+  #view-agenda .agenda-v2-status,#view-agenda .agenda-v2-submit{grid-column:1/-1!important}
+  #view-agenda .agenda-v2-save{height:40px!important;min-height:40px!important;border-radius:4px!important;box-shadow:0 10px 28px rgba(117,38,205,.18)!important;font-size:7.3px!important}
+  .vx-agenda-client-card{width:min(100%,350px)!important;border-radius:4px!important}
+  .vx-agenda-client-copy{padding:14px 16px 8px!important}
+  .vx-agenda-client-fields{padding:8px 16px 11px!important;gap:8px!important}
+  .vx-agenda-client-fields input{height:37px!important;border-radius:4px!important;font-size:7.2px!important}
+  .vx-agenda-client-save{width:calc(100% - 32px)!important;margin:0 16px 14px!important;height:37px!important;border-radius:4px!important;font-size:7px!important}
+  @media (max-width:390px){
+    #view-agenda .agenda-v2-grid{width:min(100%,340px)!important;grid-template-columns:1fr!important}
+    #view-agenda .agenda-v2-service,#view-agenda .agenda-v2-pro,#view-agenda .agenda-v2-date,#view-agenda .agenda-v2-time,#view-agenda .agenda-v2-status,#view-agenda .agenda-v2-submit{grid-column:1!important}
+  }
+}
