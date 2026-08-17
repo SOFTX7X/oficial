@@ -60,7 +60,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=9';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=2';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=3';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=9';
