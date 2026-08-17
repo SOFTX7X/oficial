@@ -50,3 +50,65 @@
 }
 @media(max-width:340px){.vx-quick-grid,.vx-mob-summary,.vx-float-grid{gap:4px}.vx-quick{min-height:62px}.vx-quick span{font-size:6.8px}.vx-bank-card{margin-inline:8px}.vx-mob-section{padding-inline:8px}}
 @media(prefers-reduced-motion:reduce){.vx-bank-card::before,.vx-float-launcher::after{animation:none!important}.vx-quick,.vx-float-panel,.vx-menu-backdrop{transition:none!important}}
+
+/* =============================================================
+   VYXORA ANDROID — DASHBOARD COMPACTO + MENU BOTTOM SHEET
+   ============================================================= */
+@media (max-width:768px){
+  /* O fundo do WebApp é uma superfície contínua até a safe area. */
+  html:has(body.vx-android-dashboard),
+  body.vx-android-dashboard,
+  body.vx-android-dashboard #dashboardView,
+  body.vx-android-dashboard .dash-main,
+  body.vx-android-dashboard .view{background-color:#090610!important}
+  body.vx-android-dashboard .vx-mobile-home{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px));}
+
+  .vx-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .vx-status-card{position:relative;min-width:0;min-height:62px;padding:10px 11px;border:1px solid rgba(255,255,255,.075);border-radius:13px;background:linear-gradient(150deg,rgba(19,16,24,.96),rgba(12,10,15,.98));overflow:hidden;box-shadow:inset 0 1px rgba(255,255,255,.025)}
+  .vx-status-card::after{content:"";position:absolute;inset:auto 10px 0;height:1px;opacity:.58;background:currentColor}
+  .vx-status-card small{display:block;color:#817a88;font-size:6.8px;font-weight:650;letter-spacing:.045em;text-transform:uppercase}
+  .vx-status-card b{display:block;margin-top:6px;font-size:16px;line-height:1;font-weight:760;font-variant-numeric:tabular-nums;color:#f3eef8}
+  .vx-status-card.refused{color:#ff667d}.vx-status-card.rescheduled{color:#bb78ff}.vx-status-card.confirmed{color:#52d99a}.vx-status-card.finished{color:#8f9dff}
+
+  .vx-next-card{border:1px solid rgba(174,114,255,.14);border-radius:14px;background:linear-gradient(150deg,rgba(20,16,26,.96),rgba(12,10,15,.98));overflow:hidden}
+  .vx-next-body{min-height:68px;padding:11px;display:grid;grid-template-columns:55px minmax(0,1fr) auto;gap:9px;align-items:center}
+  .vx-next-time{min-width:0;padding-right:8px;border-right:1px solid rgba(255,255,255,.065)}
+  .vx-next-time strong{display:block;color:#c28cff;font-size:13px;font-variant-numeric:tabular-nums}
+  .vx-next-time span{display:block;margin-top:3px;color:#6f6875;font-size:5.8px}
+  .vx-next-copy{min-width:0}.vx-next-copy b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8.5px;color:#eee9f2}.vx-next-copy span{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:6.7px;color:#7f7786}
+  .vx-next-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:3px}.vx-next-empty b{font-size:8px;color:#aaa2b0}.vx-next-empty span{font-size:6.8px;color:#6f6875}
+
+  .vx-section-note{color:#706879;font-size:6.2px;letter-spacing:.03em}
+  .vx-recent-list{border:1px solid rgba(255,255,255,.075);border-radius:14px;background:rgba(13,11,16,.92);overflow:hidden}
+  .vx-recent-item{position:relative;padding:9px 10px 8px;border-bottom:1px solid rgba(255,255,255,.055)}.vx-recent-item:last-child{border-bottom:0}
+  .vx-recent-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}.vx-recent-top time{color:#c28cff;font-size:8.5px;font-weight:800;font-variant-numeric:tabular-nums}
+  .vx-recent-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;min-height:15px}.vx-recent-line b,.vx-recent-line span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7.8px;color:#e9e3ee}.vx-recent-line span{font-size:7px;color:#a099a6}.vx-recent-line small{font-size:5px;color:#625b69;font-weight:750;letter-spacing:.08em}
+  .vx-recent-date{position:absolute;right:10px;bottom:7px;color:#514b56;font-size:5.4px;font-variant-numeric:tabular-nums}
+  .vx-status-pill{flex:0 0 auto;max-width:88px;padding:4px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.06);background:#17131c;color:#9f98a6;font-size:5.3px;font-weight:780;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap}
+  .vx-status-pill.vx-st-pendente{color:#f0c35d;background:rgba(215,161,40,.09);border-color:rgba(215,161,40,.12)}
+  .vx-status-pill.vx-st-confirmado{color:#59d99b;background:rgba(54,190,126,.09);border-color:rgba(54,190,126,.13)}
+  .vx-status-pill.vx-st-reagendado{color:#bd82ff;background:rgba(162,95,235,.10);border-color:rgba(162,95,235,.14)}
+  .vx-status-pill.vx-st-concluido{color:#9ba7ff;background:rgba(102,119,235,.10);border-color:rgba(102,119,235,.14)}
+  .vx-status-pill.vx-st-recusado{color:#ff6c82;background:rgba(230,67,93,.09);border-color:rgba(230,67,93,.13)}
+
+  .vx-recent-pager{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:7px;margin-top:7px}.vx-recent-pager[hidden]{display:none!important}.vx-recent-pager button{height:31px;padding:0 9px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:#100d14;color:#a77be0;font:700 6.7px Geist,Inter,sans-serif;transition:transform .16s,border-color .16s,opacity .16s}.vx-recent-pager button:last-child{justify-self:end}.vx-recent-pager button:active:not(:disabled){transform:scale(.95);border-color:rgba(169,105,255,.4)}.vx-recent-pager button:disabled{opacity:.28;color:#77707f}.vx-recent-pager span{min-width:34px;text-align:center;color:#6e6675;font-size:6.4px;font-variant-numeric:tabular-nums}
+
+  /* Launcher só aparece na área autenticada. Sem drag: posição estável de app. */
+  .vx-float-launcher{display:grid!important;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(10px) scale(.88);right:14px!important;left:auto!important;top:auto!important;bottom:calc(14px + env(safe-area-inset-bottom,0px))!important;width:45px;height:45px;border:1px solid rgba(225,205,255,.28);border-radius:15px;background:linear-gradient(145deg,#a86aff 0%,#7a3bdd 65%,#6630c0 100%);box-shadow:0 14px 34px rgba(87,36,162,.46),inset 0 1px rgba(255,255,255,.22);transition:opacity .2s,visibility .2s,transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+  .vx-float-launcher.is-visible{opacity:1;visibility:visible;pointer-events:auto;transform:none}.vx-float-launcher::before{content:"";position:absolute;inset:5px;border-radius:11px;border:1px solid rgba(255,255,255,.11);pointer-events:none}.vx-float-launcher::after{display:none!important}.vx-float-launcher i{font-size:19px;font-weight:300;line-height:1;transition:transform .32s cubic-bezier(.2,.8,.2,1)}.vx-float-launcher.open{transform:scale(.96);box-shadow:0 9px 24px rgba(87,36,162,.38)}.vx-float-launcher.open i{transform:rotate(45deg)}
+
+  .vx-menu-backdrop{background:rgba(4,2,7,.72);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);transition:opacity .25s ease}
+  .vx-float-panel{left:8px;right:8px;bottom:calc(70px + env(safe-area-inset-bottom,0px));padding:9px 10px 11px;border:1px solid rgba(190,137,255,.18);border-radius:21px;background:linear-gradient(155deg,rgba(25,20,31,.985),rgba(12,10,15,.99));box-shadow:0 26px 70px rgba(0,0,0,.64),inset 0 1px rgba(255,255,255,.04);backdrop-filter:blur(24px) saturate(1.15);-webkit-backdrop-filter:blur(24px) saturate(1.15);transform:translateY(24px) scale(.985);transition:transform .28s cubic-bezier(.16,1,.3,1),opacity .22s ease}
+  .vx-float-panel.open{transform:none}.vx-float-handle{width:27px;height:3px;margin:0 auto 8px;border-radius:999px;background:rgba(255,255,255,.12)}
+  .vx-float-head{margin:0 1px 8px;padding:0 2px 9px}.vx-float-head>div{display:flex;flex-direction:column;gap:2px}.vx-float-head strong{font-size:8.8px;color:#eee9f3;letter-spacing:.01em}.vx-float-head span{font-size:6px;color:#706979}.vx-float-close{width:27px;height:27px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:#151119;color:#8e8696;font-size:15px;line-height:1}
+  .vx-float-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .vx-float-option,.vx-float-dashboard{width:auto!important;min-width:0;min-height:61px;padding:7px 4px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:linear-gradient(150deg,rgba(24,20,29,.98),rgba(15,13,18,.98));color:#aaa2b1;font-size:6.8px;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:transform .16s,border-color .16s,background .16s,color .16s;animation:vxMenuItemIn .32s both}
+  .vx-float-option:nth-child(2){animation-delay:.025s}.vx-float-option:nth-child(3){animation-delay:.05s}.vx-float-option:nth-child(4){animation-delay:.075s}.vx-float-option:nth-child(5){animation-delay:.10s}.vx-float-option:nth-child(6){animation-delay:.125s}.vx-float-option:nth-child(7){animation-delay:.15s}.vx-float-option:nth-child(8){animation-delay:.175s}.vx-float-option:nth-child(9){animation-delay:.20s}
+  .vx-float-dashboard{border-color:rgba(169,105,255,.26);background:linear-gradient(150deg,rgba(57,35,78,.74),rgba(25,17,34,.95));color:#d2b5fa}.vx-float-option i{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:rgba(166,108,255,.08);border:1px solid rgba(166,108,255,.08);font-style:normal;color:#b77dff;font-size:11px}.vx-float-option span{font-size:6.7px}.vx-float-option:active{transform:scale(.94);border-color:rgba(169,105,255,.34);background:#201629;color:#e2d6ee}
+
+  @keyframes vxMenuItemIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+}
+
+@media(max-width:340px){
+  .vx-status-grid{gap:5px}.vx-status-card{min-height:57px;padding:9px}.vx-next-body{grid-template-columns:50px minmax(0,1fr) auto;gap:7px}.vx-float-grid{gap:5px}.vx-float-option,.vx-float-dashboard{min-height:57px}
+}
