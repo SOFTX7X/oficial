@@ -6,7 +6,11 @@
   body.vx-android-dashboard .dash-main { padding: 0 0 calc(88px + env(safe-area-inset-bottom,0px)) !important; min-height: 100dvh; overflow: visible; }
   body.vx-android-dashboard .topbar,
   body.vx-android-dashboard .mobile-nav-bar,
-  body.vx-android-dashboard .mobile-menu-trigger { display: none !important; }
+  body.vx-android-dashboard .mobile-menu-trigger,
+  body.vx-android-dashboard .mobile-app-dock,
+  body.vx-android-dashboard .mobile-menu-drawer,
+  body.vx-android-dashboard .mobile-menu-overlay,
+  body.vx-android-dashboard #view-dashboard > .vxd-legacy { display: none !important;visibility:hidden !important;pointer-events:none !important; }
   body.vx-android-dashboard #view-dashboard > :not(.vx-mobile-home) { display: none !important; }
   body.vx-android-dashboard #view-dashboard { display: none; min-height: 100dvh; padding: 0; overflow: visible; }
   body.vx-android-dashboard #view-dashboard.active { display: block; }
