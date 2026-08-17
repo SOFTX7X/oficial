@@ -525,3 +525,46 @@
     -webkit-backdrop-filter:blur(20px) saturate(1.12)!important;
   }
 }
+
+
+/* Vyxora Android — splash próprio, desktop permanece com loader original */
+@media (max-width:768px){
+  #vyxoraLoader.vyxora-loader{
+    position:fixed!important;
+    inset:0!important;
+    z-index:2147483000!important;
+    display:grid!important;
+    place-items:center!important;
+    background:#08070a!important;
+    opacity:1;
+  }
+  #vyxoraLoader .vx-premium-loader__shell{
+    width:auto!important;max-width:none!important;min-height:0!important;
+    padding:0!important;margin:0!important;border:0!important;background:transparent!important;
+    box-shadow:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:18px!important;
+  }
+  #vyxoraLoader .vx-premium-loader__visual,
+  #vyxoraLoader .vx-premium-loader__content > h1,
+  #vyxoraLoader .vx-premium-loader__content > p,
+  #vyxoraLoader .vx-premium-loader__meta{display:none!important}
+  #vyxoraLoader .vx-premium-loader__content{display:flex!important;flex-direction:column!important;align-items:center!important;gap:17px!important;padding:0!important;margin:0!important}
+  #vyxoraLoader .vx-premium-loader__eyebrow{
+    display:block!important;margin:0!important;color:#f2edf7!important;
+    font:800 16px/1 Geist,Inter,sans-serif!important;letter-spacing:.22em!important;
+    text-transform:uppercase!important;text-align:center!important;
+    animation:vxSplashBrand .55s cubic-bezier(.2,.8,.2,1) both;
+  }
+  #vyxoraLoader .vx-premium-loader__progress{
+    display:block!important;position:relative!important;width:76px!important;height:2px!important;
+    margin:0!important;border:0!important;border-radius:99px!important;overflow:hidden!important;
+    background:rgba(255,255,255,.08)!important;
+  }
+  #vyxoraLoader .vx-premium-loader__progress span{
+    position:absolute!important;inset:0 auto 0 0!important;width:34%!important;height:100%!important;
+    border-radius:99px!important;background:linear-gradient(90deg,#7d45d7,#c58cff)!important;
+    box-shadow:0 0 14px rgba(177,111,255,.45)!important;
+    animation:vxSplashLoad 1.05s ease-in-out infinite!important;
+  }
+  @keyframes vxSplashLoad{0%{transform:translateX(-120%)}55%{transform:translateX(170%)}100%{transform:translateX(320%)}}
+  @keyframes vxSplashBrand{from{opacity:0;transform:translateY(5px);letter-spacing:.3em}to{opacity:1;transform:none;letter-spacing:.22em}}
+}
