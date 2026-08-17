@@ -1399,45 +1399,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script>
-(function () {
-  const FALLBACK_VERSION = '2.0';
-
-  function loadScript(src, onload) {
-    const s = document.createElement('script');
-    s.src = src;
-    s.defer = true;
-    s.async = false;
-    if (onload) s.onload = onload;
-    document.body.appendChild(s);
-  }
-
-  async function bootVyxora() {
-    let version = FALLBACK_VERSION;
-
-    try {
-      const response = await fetch('version.json?_=' + Date.now(), {
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.version) version = String(data.version).trim();
-      }
-    } catch (err) {
-      console.warn('[Vyxora] version.json indisponível; usando versão fallback.', err);
-    }
-
-    window.VYXORA_VERSION = version;
-    const v = encodeURIComponent(version);
-
-    loadScript('app.js?v=' + v, function () {
-      loadScript('dashboard-pc.js?v=' + v);
-    });
-  }
-
-  bootVyxora();
-})();
-</script>
+<script defer src="app.js?v=20260817-20"></script>
+<script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>
