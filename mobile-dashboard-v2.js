@@ -31,7 +31,7 @@
     buildFloat();sync();setInterval(sync,1600);
   }
   function buildFloat(){
-    const backdrop=document.createElement('div');backdrop.className='vx-menu-backdrop';const panel=document.createElement('div');panel.className='vx-float-panel';panel.innerHTML=`<div class="vx-float-head"><div>Menu Vyxora</div><span>Toque em uma opção</span></div><div class="vx-float-grid">${actions.map((a,i)=>`<button class="vx-float-option" data-float-action="${i}"><i>${a[0]}</i>${a[1]}</button>`).join('')}</div>`;const launcher=document.createElement('button');launcher.className='vx-float-launcher';launcher.setAttribute('aria-label','Abrir menu móvel');launcher.innerHTML='<i>＋</i>';document.body.append(backdrop,panel,launcher);
+    const backdrop=document.createElement('div');backdrop.className='vx-menu-backdrop';const panel=document.createElement('div');panel.className='vx-float-panel';panel.innerHTML=`<div class="vx-float-head"><div>Menu Vyxora</div><span>Toque em uma opção</span></div><div class="vx-dashboard-return"><button class="vx-float-option vx-float-dashboard" data-dashboard-action><i>⌂</i>Dashboard</button></div><div class="vx-float-grid">${actions.map((a,i)=>`<button class="vx-float-option" data-float-action="${i}"><i>${a[0]}</i>${a[1]}</button>`).join('')}</div>`;const launcher=document.createElement('button');launcher.className='vx-float-launcher';launcher.setAttribute('aria-label','Abrir menu móvel');launcher.innerHTML='<i>＋</i>';document.body.append(backdrop,panel,launcher);
     const saved=JSON.parse(localStorage.getItem('vx_float_pos')||'null');if(saved){launcher.style.left=saved.x+'px';launcher.style.top=saved.y+'px';launcher.style.right='auto';launcher.style.bottom='auto'}
     let drag=null,moved=false,suppressClick=false;
     launcher.addEventListener('pointerdown',e=>{drag={offsetX:e.clientX-launcher.offsetLeft,offsetY:e.clientY-launcher.offsetTop,startX:e.clientX,startY:e.clientY};moved=false;launcher.setPointerCapture(e.pointerId)});
@@ -39,7 +39,7 @@
     launcher.addEventListener('pointerup',()=>{if(drag&&moved){localStorage.setItem('vx_float_pos',JSON.stringify({x:launcher.offsetLeft,y:launcher.offsetTop}));suppressClick=true}drag=null});
     launcher.addEventListener('pointercancel',()=>{drag=null;moved=false});
     launcher.addEventListener('click',e=>{if(suppressClick){suppressClick=false;e.preventDefault();return}toggleMenu()});
-    backdrop.addEventListener('click',closeMenu);panel.querySelectorAll('[data-float-action]').forEach(b=>b.addEventListener('click',()=>go(actions[Number(b.dataset.floatAction)][2])));
+    backdrop.addEventListener('click',closeMenu);panel.querySelector('[data-dashboard-action]')?.addEventListener('click',()=>go(()=>window.setView?.('dashboard')));panel.querySelectorAll('[data-float-action]').forEach(b=>b.addEventListener('click',()=>go(actions[Number(b.dataset.floatAction)][2])));
   }
   function toggleMenu(){document.querySelector('.vx-menu-backdrop')?.classList.toggle('open');document.querySelector('.vx-float-panel')?.classList.toggle('open');document.querySelector('.vx-float-launcher')?.classList.toggle('open')}
   function closeMenu(){document.querySelectorAll('.vx-menu-backdrop,.vx-float-panel,.vx-float-launcher').forEach(e=>e.classList.remove('open'))}
