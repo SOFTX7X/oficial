@@ -17,7 +17,16 @@
     const name=document.getElementById('sideNome')?.textContent||'Seu negócio';document.querySelector('.vx-mob-greeting b')?.replaceChildren(name);document.querySelector('.vx-mob-avatar')?.replaceChildren(name.trim()[0]?.toUpperCase()||'V');
     const source=document.getElementById('dashAptList'),target=document.querySelector('.vx-mob-list');if(target&&source){const rows=[...source.querySelectorAll('.apt-item,.appointment-item')].slice(0,3);if(!rows.length){target.innerHTML='<div class="vx-mob-empty">Sua agenda aparecerá aqui.<br>Use o atalho acima para criar o primeiro atendimento.</div>'}}
   }
-  function go(fn){closeMenu();fn();}
+  function go(fn){
+    closeMenu();
+    const publicView=document.getElementById('publicView'),dashboardView=document.getElementById('dashboardView');
+    if(publicView)publicView.style.display='none';
+    if(dashboardView)dashboardView.style.display='block';
+    document.body.classList.remove('public-mode');
+    if(location.hash.startsWith('#agendar/'))history.replaceState(null,'',location.pathname+location.search);
+    window.unlockPublicModalScroll?.();
+    fn();
+  }
   function build(){
     if(!isMobile()||document.querySelector('.vx-mobile-home'))return;document.body.classList.add('vx-android-dashboard');
     const view=document.getElementById('view-dashboard');if(!view)return;
