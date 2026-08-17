@@ -114,34 +114,119 @@
 }
 
 
-/* Vyxora Android — refinamento dashboard round 2 */
+
+
+/* =============================================================
+   VYXORA ANDROID — REGRAS FINAIS DO DASHBOARD
+   ============================================================= */
 @media (max-width:768px){
   .vx-mob-head{
-    min-height:52px;
-    margin:0 10px 8px;
-    padding:calc(6px + env(safe-area-inset-top,0px)) 9px 6px;
-    border:1px solid rgba(255,255,255,.055);
-    border-radius:12px;
-    background:rgba(15,12,18,.82);
-    box-shadow:0 8px 28px rgba(0,0,0,.14);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
+    width:100%;
+    box-sizing:border-box;
+    min-height:50px;
+    margin:0 0 8px;
+    padding:calc(6px + env(safe-area-inset-top,0px)) 12px 6px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    border:0;
+    border-bottom:1px solid rgba(174,114,255,.13);
+    border-radius:0;
+    background:linear-gradient(180deg,rgba(18,13,23,.98),rgba(12,10,15,.96));
+    box-shadow:0 8px 24px rgba(0,0,0,.12);
   }
-  .vx-mob-avatar{width:28px;height:28px;flex-basis:28px;border-radius:9px;font-size:10px}
-  .vx-mob-user{gap:7px}
-  .vx-mob-greeting small{font-size:6.5px;margin-bottom:0;line-height:1.05}
-  .vx-mob-greeting b{max-width:145px;font-size:8.5px;line-height:1.15}
-  .vx-mob-greeting em{display:block;max-width:145px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#625b69;font:650 5.2px/1.1 Geist,Inter,sans-serif;font-style:normal;letter-spacing:.06em;text-transform:uppercase}
-  .vx-mob-head-actions{gap:4px}
-  .vx-mob-link{height:27px;padding:0 7px;border-radius:8px;font-size:6px}
+
+  .vx-mob-user{min-width:0;display:flex;align-items:center;gap:7px}
+  .vx-mob-avatar{
+    width:28px;height:28px;flex:0 0 28px;
+    display:grid;place-items:center;
+    border-radius:9px;
+    background:linear-gradient(145deg,#9f67ff,#6d36d7);
+    font-size:10px;font-weight:800;
+    box-shadow:0 8px 22px rgba(125,62,220,.24);
+  }
+  .vx-mob-greeting{min-width:0}
+  .vx-mob-greeting small{display:block;color:#898292;font-size:6.5px;line-height:1.05;margin:0 0 1px}
+  .vx-mob-greeting b{
+    display:block;
+    max-width:145px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:8.5px;
+    line-height:1.15;
+    font-weight:700;
+  }
+  .vx-mob-greeting em{display:none!important}
+
+  .vx-mob-head-actions{display:flex;gap:4px}
+  .vx-mob-link{
+    height:27px;padding:0 7px;border-radius:8px;
+    font-size:6px;
+  }
   .vx-mob-iconbtn{width:27px;height:27px;border-radius:8px}
 
-  .vx-status-card.pending{border-color:rgba(221,169,63,.13);background:linear-gradient(145deg,rgba(40,31,13,.36),rgba(14,12,16,.96))}
+  .vx-status-card.pending{
+    border-color:rgba(221,169,63,.13);
+    background:linear-gradient(145deg,rgba(40,31,13,.36),rgba(14,12,16,.96));
+  }
   .vx-status-card.pending small{color:#bfa467}
   .vx-status-card.pending b{color:#f0c35d}
 
   .vx-recent-item{padding:9px 10px 10px}
-  .vx-recent-line{grid-template-columns:minmax(0,1fr) 48px;gap:8px;padding-right:0}
+  .vx-recent-line{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 48px;
+    gap:8px;
+    align-items:center;
+    min-height:15px;
+    padding-right:0;
+  }
   .vx-recent-line small{text-align:right}
-  .vx-recent-date{position:static;display:block;margin-top:4px;text-align:right;color:#514b56;font-size:5.4px;font-variant-numeric:tabular-nums}
+  .vx-recent-date{
+    position:static;
+    display:block;
+    margin-top:4px;
+    text-align:right;
+    color:#514b56;
+    font-size:5.4px;
+    font-variant-numeric:tabular-nums;
+  }
+
+  .vx-recent-pager{
+    display:grid;
+    grid-template-columns:92px 1fr 92px;
+    align-items:center;
+    gap:8px;
+    margin-top:7px;
+  }
+  .vx-recent-pager[hidden]{display:none!important}
+  .vx-recent-pager button{
+    width:92px;
+    height:32px;
+    padding:0 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+    border:1px solid rgba(255,255,255,.075);
+    border-radius:10px;
+    background:#100d14;
+    color:#a77be0;
+    font:700 6.7px Geist,Inter,sans-serif;
+    transition:transform .16s,border-color .16s,opacity .16s;
+  }
+  .vx-recent-pager button:first-child{justify-self:start}
+  .vx-recent-pager button:last-child{justify-self:end}
+  .vx-recent-pager button:active:not(:disabled){transform:scale(.95);border-color:rgba(169,105,255,.4)}
+  .vx-recent-pager button:disabled{opacity:.28;color:#77707f}
+  .vx-recent-pager [data-recent-page]{
+    justify-self:center;
+    min-width:34px;
+    text-align:center;
+    color:#6e6675;
+    font-size:6.4px;
+    font-variant-numeric:tabular-nums;
+  }
 }
