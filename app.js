@@ -56,10 +56,10 @@ function unlockSecondScreen() {
 // não alterar o layout e o comportamento do painel desktop.
 const vxMobileDashboardStyles = document.createElement('link');
 vxMobileDashboardStyles.rel = 'stylesheet';
-vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=6';
+vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=7';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobileDashboardScript = document.createElement('script');
-vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=6';
+vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=7';
 vxMobileDashboardScript.defer = true;
 document.head.appendChild(vxMobileDashboardScript);
 
