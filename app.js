@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=71';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=80';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2247,7 +2247,7 @@ window.vxAgendaDay = vxAgendaDay;
 window.vxAgendaPickDate = vxAgendaPickDate;
 
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('vxAgCliente')?.addEventListener('change',vxAgendaModalClienteInfo);
+  
   vxUpdateAgendaFilterCounts();
 });
 
@@ -2275,35 +2275,241 @@ function vxAgendaClienteSelecionado(id){
 window.vxAgendaClienteSelecionado=vxAgendaClienteSelecionado;
 
 
+
+let _vxAgendaPickerType='';
+let _vxAgendaCalDate=new Date();
+
+function vxFormatAgendaDate(iso){
+  if(!iso) return 'Escolher data';
+  const [y,m,d]=iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function vxSyncAgendaModalControlLabels(){
+  const clienteId=$('vxAgCliente')?.value;
+  const servicoId=$('vxAgServico')?.value;
+  const profissionalId=$('vxAgProfissional')?.value;
+
+  const cliente=(state.clientes||[]).find(x=>String(x.id)===String(clienteId));
+  const servico=(state.servicos||[]).find(x=>String(x.id)===String(servicoId));
+  const prof=(state.profissionais||[]).find(x=>String(x.id)===String(profissionalId));
+
+  if($('vxAgClienteLabel')) $('vxAgClienteLabel').textContent=cliente?.nome||'Escolha o cliente';
+  if($('vxAgServicoLabel')) $('vxAgServicoLabel').textContent=servico?.nome||'Escolha o serviço';
+  if($('vxAgProfissionalLabel')) $('vxAgProfissionalLabel').textContent=prof?.nome||'Escolha o profissional';
+  if($('vxAgDataLabel')) $('vxAgDataLabel').textContent=$('vxAgData')?.value?vxFormatAgendaDate($('vxAgData').value):'Escolher data';
+  if($('vxAgHoraLabel')) $('vxAgHoraLabel').textContent=$('vxAgHora')?.value||'Escolher horário';
+  if($('vxAgStatusLabel')) $('vxAgStatusLabel').textContent=$('vxAgStatus')?.value||'Pendente';
+}
+
+function vxOpenAgendaPickerBase(title){
+  const layer=$('vxAgendaPickerLayer');
+  const titleEl=$('vxAgendaPickerTitle');
+  const content=$('vxAgendaPickerContent');
+  if(!layer||!content) return null;
+  if(titleEl) titleEl.textContent=title;
+  layer.hidden=false;
+  layer.style.setProperty('display','grid','important');
+  return content;
+}
+
+function vxCloseAgendaPicker(){
+  const layer=$('vxAgendaPickerLayer');
+  if(!layer) return;
+  layer.hidden=true;
+  layer.style.setProperty('display','none','important');
+  _vxAgendaPickerType='';
+}
+window.vxCloseAgendaPicker=vxCloseAgendaPicker;
+
+function vxAgendaChoiceItems(type){
+  if(type==='cliente'){
+    return (state.clientes||[])
+      .filter(x=>(x.status||'ativo')==='ativo')
+      .map(x=>({value:String(x.id),label:x.nome,sub:[x.telefone,x.email].filter(Boolean).join(' | ')}));
+  }
+  if(type==='servico'){
+    return (state.servicos||[])
+      .filter(x=>(x.status||'ativo')==='ativo')
+      .map(x=>({value:String(x.id),label:x.nome,sub:x.preco!=null?money(x.preco):''}));
+  }
+  if(type==='profissional'){
+    return (state.profissionais||[])
+      .filter(x=>(x.status||'ativo')==='ativo')
+      .map(x=>({value:String(x.id),label:x.nome,sub:''}));
+  }
+  if(type==='status'){
+    return [
+      {value:'Pendente',label:'Pendente',sub:''},
+      {value:'Confirmado',label:'Confirmado',sub:''}
+    ];
+  }
+  return [];
+}
+
+function vxOpenAgendaChoice(type){
+  _vxAgendaPickerType=type;
+  const titles={cliente:'Escolha o cliente',servico:'Escolha o serviço',profissional:'Escolha o profissional',status:'Escolha o status'};
+  const content=vxOpenAgendaPickerBase(titles[type]||'Escolha');
+  if(!content) return;
+
+  const current=$(`vxAg${type==='cliente'?'Cliente':type==='servico'?'Servico':type==='profissional'?'Profissional':'Status'}`)?.value||'';
+  const items=vxAgendaChoiceItems(type);
+
+  content.innerHTML=`<div class="vx-agenda-choice-list">${
+    items.length ? items.map(item=>`
+      <button type="button" class="vx-agenda-choice-item${String(current)===item.value?' selected':''}" onclick="vxSelectAgendaChoice('${type}','${String(item.value).replace(/'/g,"\\'")}')">
+        <span><strong>${escapeHtml(item.label||'')}</strong>${item.sub?`<small>${escapeHtml(item.sub)}</small>`:''}</span>
+        <i>${String(current)===item.value?'✓':''}</i>
+      </button>`).join('')
+      : '<div class="vx-agenda-picker-empty">Nenhuma opção disponível.</div>'
+  }</div>`;
+}
+window.vxOpenAgendaChoice=vxOpenAgendaChoice;
+
+function vxSelectAgendaChoice(type,value){
+  const map={cliente:'vxAgCliente',servico:'vxAgServico',profissional:'vxAgProfissional',status:'vxAgStatus'};
+  const input=$(map[type]);
+  if(input) input.value=value;
+
+  if(type==='cliente') vxAgendaModalClienteInfo();
+
+  // Trocar profissional ou serviço invalida horário anterior.
+  if(type==='profissional'||type==='servico'){
+    if($('vxAgHora')) $('vxAgHora').value='';
+  }
+
+  vxSyncAgendaModalControlLabels();
+  vxCloseAgendaPicker();
+}
+window.vxSelectAgendaChoice=vxSelectAgendaChoice;
+
+function vxOpenAgendaCalendar(){
+  _vxAgendaPickerType='data';
+  const current=$('vxAgData')?.value;
+  _vxAgendaCalDate=current?new Date(current+'T12:00:00'):new Date();
+  vxRenderAgendaCalendar();
+}
+window.vxOpenAgendaCalendar=vxOpenAgendaCalendar;
+
+function vxAgendaCalMove(delta){
+  _vxAgendaCalDate=new Date(_vxAgendaCalDate.getFullYear(),_vxAgendaCalDate.getMonth()+delta,1);
+  vxRenderAgendaCalendar();
+}
+window.vxAgendaCalMove=vxAgendaCalMove;
+
+function vxRenderAgendaCalendar(){
+  const content=vxOpenAgendaPickerBase('Escolha a data');
+  if(!content) return;
+
+  const y=_vxAgendaCalDate.getFullYear();
+  const m=_vxAgendaCalDate.getMonth();
+  const first=new Date(y,m,1);
+  const last=new Date(y,m+1,0);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const closed=state.empresa?.dias_fechados||state.diasFechados||[];
+  const selected=$('vxAgData')?.value||'';
+  const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  let days='';
+  for(let i=0;i<first.getDay();i++) days+='<span class="vx-agenda-cal-empty"></span>';
+  for(let d=1;d<=last.getDate();d++){
+    const dt=new Date(y,m,d); dt.setHours(0,0,0,0);
+    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const disabled=dt<today||closed.includes(dt.getDay());
+    days+=`<button type="button" class="vx-agenda-cal-day${selected===iso?' selected':''}${disabled?' disabled':''}" ${disabled?'disabled':`onclick="vxSelectAgendaDate('${iso}')"`}>${d}</button>`;
+  }
+
+  content.innerHTML=`
+    <div class="vx-agenda-cal-nav">
+      <button type="button" onclick="vxAgendaCalMove(-1)">‹</button>
+      <strong>${monthNames[m]} de ${y}</strong>
+      <button type="button" onclick="vxAgendaCalMove(1)">›</button>
+    </div>
+    <div class="vx-agenda-cal-week"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+    <div class="vx-agenda-cal-grid">${days}</div>`;
+}
+
+function vxSelectAgendaDate(iso){
+  if($('vxAgData')) $('vxAgData').value=iso;
+  if($('vxAgHora')) $('vxAgHora').value='';
+  vxSyncAgendaModalControlLabels();
+  vxCloseAgendaPicker();
+}
+window.vxSelectAgendaDate=vxSelectAgendaDate;
+
+async function vxOpenAgendaTimes(){
+  const data=$('vxAgData')?.value;
+  const profissionalId=$('vxAgProfissional')?.value;
+  if(!data) return toast('Escolha a data primeiro.','warn');
+  if(!profissionalId) return toast('Escolha o profissional antes do horário.','warn');
+
+  const content=vxOpenAgendaPickerBase('Escolha o horário');
+  if(!content) return;
+  content.innerHTML='<div class="vx-agenda-picker-empty">Carregando horários...</div>';
+
+  const empresa=state.empresa||{};
+  const profissional=(state.profissionais||[]).find(x=>String(x.id)===String(profissionalId))||{};
+  const inicio=empresa.horario_inicio||profissional.horario_inicio||'09:00';
+  const fim=empresa.horario_fim||profissional.horario_fim||'18:00';
+  const intervalo=Math.max(5,Number(empresa.intervalo_slots||profissional.intervalo_slots||30));
+
+  const {data:registros,error}=await db.from('agenda_agendamentos')
+    .select('hora,status')
+    .eq('data',data)
+    .eq('profissional_id',profissionalId)
+    .in('status',['Pendente','Confirmado','Reagendado']);
+
+  if(error){
+    content.innerHTML='<div class="vx-agenda-picker-empty">Não foi possível carregar os horários.</div>';
+    return;
+  }
+
+  const ocupados=new Set((registros||[]).map(x=>(x.hora||'').slice(0,5)));
+  const [hi,mi]=inicio.split(':').map(Number);
+  const [hf,mf]=fim.split(':').map(Number);
+  const slots=[];
+  for(let t=hi*60+mi;t<hf*60+mf;t+=intervalo){
+    const h=`${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
+    slots.push(h);
+  }
+
+  const current=$('vxAgHora')?.value||'';
+  content.innerHTML=`<div class="vx-agenda-time-grid">${
+    slots.map(h=>`<button type="button" class="vx-agenda-time-item${current===h?' selected':''}${ocupados.has(h)?' disabled':''}" ${ocupados.has(h)?'disabled':`onclick="vxSelectAgendaTime('${h}')"`}>${h}${ocupados.has(h)?'<small>Ocupado</small>':''}</button>`).join('')
+  }</div>`;
+}
+window.vxOpenAgendaTimes=vxOpenAgendaTimes;
+
+function vxSelectAgendaTime(hora){
+  if($('vxAgHora')) $('vxAgHora').value=hora;
+  vxSyncAgendaModalControlLabels();
+  vxCloseAgendaPicker();
+}
+window.vxSelectAgendaTime=vxSelectAgendaTime;
+
+
 function vxAgendaModalIsMobile(){
   return window.matchMedia('(max-width:768px)').matches;
 }
 
 function vxPopulateAgendaModal(){
-  const cli=$('vxAgCliente'), srv=$('vxAgServico'), pro=$('vxAgProfissional');
-  if(cli){
-    cli.innerHTML='<option value="">Escolha o cliente</option>'+
-      (state.clientes||[]).filter(c=>(c.status||'ativo')==='ativo')
-        .map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
-  }
-  if(srv){
-    srv.innerHTML='<option value="">Escolha o serviço</option>'+
-      (state.servicos||[]).filter(s=>(s.status||'ativo')==='ativo')
-        .map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');
-  }
-  if(pro){
-    pro.innerHTML='<option value="">Escolha o profissional</option>'+
-      (state.profissionais||[]).filter(p=>(p.status||'ativo')==='ativo')
-        .map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
-  }
   const date=$('vxAgData');
+  const status=$('vxAgStatus');
+
   if(date && !date.value){
     const now=new Date();
     const y=now.getFullYear(), m=String(now.getMonth()+1).padStart(2,'0'), d=String(now.getDate()).padStart(2,'0');
     date.value=`${y}-${m}-${d}`;
+    const label=$('vxAgDataLabel');
+    if(label) label.textContent=vxFormatAgendaDate(date.value);
   }
-  const status=$('vxAgStatus');
-  if(status) status.value='Pendente';
+
+  if(status && !status.value) status.value='Pendente';
+  const statusLabel=$('vxAgStatusLabel');
+  if(statusLabel) statusLabel.textContent=status?.value||'Pendente';
+
+  vxSyncAgendaModalControlLabels();
 }
 
 function vxApplyAgendaModalFinalStyle(){
@@ -2474,6 +2680,8 @@ function vxAgendaModalClienteInfo(){
   const id=$('vxAgCliente')?.value;
   const c=(state.clientes||[]).find(x=>String(x.id)===String(id));
   const info=$('vxAgClienteInfo');
+  const label=$('vxAgClienteLabel');
+  if(label) label.textContent=c?.nome||'Escolha o cliente';
   if(!info) return;
   const contact=[c?.telefone,c?.email].filter(Boolean).join(' | ');
   info.textContent=contact||'';
@@ -2488,6 +2696,7 @@ function vxResetAgendaModalForm(){
   if(status) status.value='Pendente';
   const info=$('vxAgClienteInfo');
   if(info) info.textContent='';
+  vxSyncAgendaModalControlLabels();
 }
 
 function vxShowAgendaSuccess(clienteNome){

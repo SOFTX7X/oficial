@@ -920,37 +920,63 @@
           <div class="vx-agenda-modal-body">
             <label class="vx-agenda-modal-field vx-agenda-modal-client">
               <span>Cliente</span>
-              <select id="vxAgCliente"></select>
+              <button type="button" class="vx-agenda-custom-control" id="vxAgClienteBtn" onclick="vxOpenAgendaChoice('cliente')">
+                <span id="vxAgClienteLabel">Escolha o cliente</span><i>⌄</i>
+              </button>
+              <input id="vxAgCliente" type="hidden">
               <small id="vxAgClienteInfo"></small>
             </label>
 
             <label class="vx-agenda-modal-field">
               <span>Serviço</span>
-              <select id="vxAgServico"></select>
+              <button type="button" class="vx-agenda-custom-control" id="vxAgServicoBtn" onclick="vxOpenAgendaChoice('servico')">
+                <span id="vxAgServicoLabel">Escolha o serviço</span><i>⌄</i>
+              </button>
+              <input id="vxAgServico" type="hidden">
             </label>
 
             <label class="vx-agenda-modal-field">
               <span>Profissional</span>
-              <select id="vxAgProfissional"></select>
+              <button type="button" class="vx-agenda-custom-control" id="vxAgProfissionalBtn" onclick="vxOpenAgendaChoice('profissional')">
+                <span id="vxAgProfissionalLabel">Escolha o profissional</span><i>⌄</i>
+              </button>
+              <input id="vxAgProfissional" type="hidden">
             </label>
 
             <label class="vx-agenda-modal-field">
               <span>Data</span>
-              <input id="vxAgData" type="date">
+              <button type="button" class="vx-agenda-custom-control" id="vxAgDataBtn" onclick="vxOpenAgendaCalendar()">
+                <span id="vxAgDataLabel">Escolher data</span><i>⌄</i>
+              </button>
+              <input id="vxAgData" type="hidden">
             </label>
 
             <label class="vx-agenda-modal-field">
               <span>Horário</span>
-              <input id="vxAgHora" type="time">
+              <button type="button" class="vx-agenda-custom-control" id="vxAgHoraBtn" onclick="vxOpenAgendaTimes()">
+                <span id="vxAgHoraLabel">Escolher horário</span><i>⌄</i>
+              </button>
+              <input id="vxAgHora" type="hidden">
             </label>
 
             <label class="vx-agenda-modal-field vx-agenda-modal-status">
               <span>Status</span>
-              <select id="vxAgStatus">
-                <option value="Pendente">Pendente</option>
-                <option value="Confirmado">Confirmado</option>
-              </select>
+              <button type="button" class="vx-agenda-custom-control" id="vxAgStatusBtn" onclick="vxOpenAgendaChoice('status')">
+                <span id="vxAgStatusLabel">Pendente</span><i>⌄</i>
+              </button>
+              <input id="vxAgStatus" type="hidden" value="Pendente">
             </label>
+          </div>
+
+          <div class="vx-agenda-picker-layer" id="vxAgendaPickerLayer" hidden>
+            <button type="button" class="vx-agenda-picker-shade" onclick="vxCloseAgendaPicker()" aria-label="Fechar opções"></button>
+            <section class="vx-agenda-picker-card">
+              <header class="vx-agenda-picker-head">
+                <strong id="vxAgendaPickerTitle">Escolha</strong>
+                <button type="button" onclick="vxCloseAgendaPicker()" aria-label="Fechar">×</button>
+              </header>
+              <div class="vx-agenda-picker-content" id="vxAgendaPickerContent"></div>
+            </section>
           </div>
 
           <button type="button" class="vx-agenda-modal-save" id="vxAgendaModalSave" onclick="vxSalvarAgendamentoModal()">
@@ -1491,7 +1517,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260818-72"></script>
+<script defer src="app.js?v=20260818-80"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>

@@ -1573,3 +1573,263 @@
     display:none!important;
   }
 }
+
+
+/* =============================================================
+   VYXORA ANDROID — PICKERS PREMIUM DO NOVO AGENDAMENTO
+   Somente controles internos; modal aprovado permanece intacto.
+   ============================================================= */
+@media (max-width:768px){
+  #vxAgendaModal .vx-agenda-custom-control{
+    width:100%!important;
+    height:44px!important;
+    min-height:44px!important;
+    box-sizing:border-box!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:8px!important;
+    padding:0 12px!important;
+    border:1px solid rgba(165,105,226,.18)!important;
+    border-radius:0!important;
+    background:#09080b!important;
+    color:#eee8f2!important;
+    text-align:left!important;
+    font:650 8px Geist,Inter,sans-serif!important;
+    box-shadow:none!important;
+  }
+
+  #vxAgendaModal .vx-agenda-custom-control>span{
+    min-width:0!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+
+  #vxAgendaModal .vx-agenda-custom-control>i{
+    flex:0 0 auto!important;
+    color:#d8d0df!important;
+    font-style:normal!important;
+    font-size:12px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-picker-layer{
+    position:fixed!important;
+    inset:0!important;
+    z-index:2147483600!important;
+    display:none!important;
+    place-items:center!important;
+    padding:14px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-picker-layer[hidden]{
+    display:none!important;
+  }
+
+  #vxAgendaModal .vx-agenda-picker-shade{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    border:0!important;
+    background:rgba(4,3,6,.68)!important;
+  }
+
+  #vxAgendaModal .vx-agenda-picker-card{
+    position:relative!important;
+    z-index:1!important;
+    width:min(calc(100vw - 28px),520px)!important;
+    max-height:calc(100dvh - 40px)!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+    border:1px solid rgba(164,101,234,.28)!important;
+    border-radius:0!important;
+    background:#0c0a0f!important;
+    box-shadow:0 20px 54px rgba(0,0,0,.46)!important;
+  }
+
+  #vxAgendaModal .vx-agenda-picker-head{
+    height:46px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    padding:0 12px!important;
+    border-bottom:1px solid rgba(255,255,255,.06)!important;
+  }
+
+  #vxAgendaModal .vx-agenda-picker-head strong{
+    color:#f0eaf4!important;
+    font:800 12px Geist,Inter,sans-serif!important;
+  }
+
+  #vxAgendaModal .vx-agenda-picker-head button{
+    width:30px!important;
+    height:30px!important;
+    display:grid!important;
+    place-items:center!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    border-radius:0!important;
+    background:#09080b!important;
+    color:#a69dac!important;
+    font-size:17px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-picker-content{
+    max-height:calc(100dvh - 100px)!important;
+    overflow:auto!important;
+    padding:10px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-choice-list{
+    display:grid!important;
+    gap:6px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-choice-item{
+    width:100%!important;
+    min-height:52px!important;
+    box-sizing:border-box!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:12px!important;
+    padding:9px 12px!important;
+    border:1px solid rgba(255,255,255,.07)!important;
+    border-radius:0!important;
+    background:#09080b!important;
+    color:#eee8f2!important;
+    text-align:left!important;
+  }
+
+  #vxAgendaModal .vx-agenda-choice-item.selected{
+    border-color:rgba(169,102,240,.48)!important;
+    background:rgba(120,52,182,.14)!important;
+  }
+
+  #vxAgendaModal .vx-agenda-choice-item strong{
+    display:block!important;
+    color:#eee8f2!important;
+    font:750 11px Geist,Inter,sans-serif!important;
+  }
+
+  #vxAgendaModal .vx-agenda-choice-item small{
+    display:block!important;
+    margin-top:3px!important;
+    color:#766e7b!important;
+    font:500 8px Geist,Inter,sans-serif!important;
+  }
+
+  #vxAgendaModal .vx-agenda-choice-item>i{
+    color:#b36ff2!important;
+    font-style:normal!important;
+    font-size:15px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-picker-empty{
+    padding:30px 14px!important;
+    color:#7d7482!important;
+    text-align:center!important;
+    font:600 10px Geist,Inter,sans-serif!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-nav{
+    height:42px!important;
+    display:grid!important;
+    grid-template-columns:38px 1fr 38px!important;
+    align-items:center!important;
+    margin-bottom:8px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-nav button{
+    width:34px!important;
+    height:34px!important;
+    border:1px solid rgba(255,255,255,.07)!important;
+    border-radius:0!important;
+    background:#09080b!important;
+    color:#dcd4e2!important;
+    font-size:20px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-nav strong{
+    text-align:center!important;
+    color:#eee8f2!important;
+    font:800 11px Geist,Inter,sans-serif!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-week,
+  #vxAgendaModal .vx-agenda-cal-grid{
+    display:grid!important;
+    grid-template-columns:repeat(7,1fr)!important;
+    gap:4px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-week{
+    margin-bottom:4px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-week span{
+    height:24px!important;
+    display:grid!important;
+    place-items:center!important;
+    color:#746c79!important;
+    font:700 8px Geist,Inter,sans-serif!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-day,
+  #vxAgendaModal .vx-agenda-cal-empty{
+    aspect-ratio:1/1!important;
+    min-width:0!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-day{
+    display:grid!important;
+    place-items:center!important;
+    border:1px solid transparent!important;
+    border-radius:0!important;
+    background:#09080b!important;
+    color:#dcd5e0!important;
+    font:700 9px Geist,Inter,sans-serif!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-day.selected{
+    border-color:#a864ed!important;
+    background:#7523b7!important;
+    color:#fff!important;
+  }
+
+  #vxAgendaModal .vx-agenda-cal-day.disabled{
+    opacity:.24!important;
+  }
+
+  #vxAgendaModal .vx-agenda-time-grid{
+    display:grid!important;
+    grid-template-columns:repeat(3,1fr)!important;
+    gap:6px!important;
+  }
+
+  #vxAgendaModal .vx-agenda-time-item{
+    min-height:46px!important;
+    display:grid!important;
+    place-items:center!important;
+    border:1px solid rgba(255,255,255,.07)!important;
+    border-radius:0!important;
+    background:#09080b!important;
+    color:#eee8f2!important;
+    font:800 10px Geist,Inter,sans-serif!important;
+  }
+
+  #vxAgendaModal .vx-agenda-time-item.selected{
+    border-color:#a864ed!important;
+    background:#7523b7!important;
+  }
+
+  #vxAgendaModal .vx-agenda-time-item.disabled{
+    opacity:.28!important;
+  }
+
+  #vxAgendaModal .vx-agenda-time-item small{
+    display:block!important;
+    color:#8d8292!important;
+    font-size:6px!important;
+  }
+}
