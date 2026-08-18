@@ -1337,16 +1337,18 @@
 
 
 /* =============================================================
-   VYXORA ANDROID — MODAL AGENDA / SIMPLES FINAL
+   VYXORA ANDROID — MODAL AGENDA / LARGO, QUADRADO, CENTRALIZADO
    ============================================================= */
 @media (max-width:768px){
+
   .vx-agenda-modal{
     position:fixed!important;
     inset:0!important;
     z-index:100080!important;
     display:none!important;
     place-items:center!important;
-    padding:10px!important;
+    box-sizing:border-box!important;
+    padding:0 10px!important;
     background:transparent!important;
   }
 
@@ -1354,109 +1356,122 @@
     display:grid!important;
   }
 
-  /* Agenda continua visível atrás */
+  /* A Agenda continua visível atrás, apenas levemente escurecida. */
   .vx-agenda-modal-backdrop{
     position:absolute!important;
     inset:0!important;
+    z-index:0!important;
+    width:100%!important;
+    height:100%!important;
     border:0!important;
-    background:rgba(7,5,9,.12)!important;
+    background:rgba(5,4,7,.18)!important;
     backdrop-filter:none!important;
     -webkit-backdrop-filter:none!important;
   }
 
+  /* Quase de uma ponta à outra da tela. */
   .vx-agenda-modal-card{
     position:relative!important;
     z-index:1!important;
-    width:250px!important;
-    max-width:calc(100vw - 46px)!important;
+    width:calc(100vw - 20px)!important;
+    max-width:none!important;
     box-sizing:border-box!important;
-    margin:auto!important;
-    padding:0 9px 9px!important;
-    border:1px solid rgba(167,105,232,.22)!important;
+    margin:0 auto!important;
+    padding:0 14px 14px!important;
+    border:1px solid rgba(163,101,232,.24)!important;
     border-radius:0!important;
-    background:#0c0a0f!important;
-    box-shadow:0 12px 28px rgba(0,0,0,.28)!important;
+    background:#0d0b10!important;
+    box-shadow:0 16px 38px rgba(0,0,0,.30)!important;
+    overflow:hidden!important;
   }
 
   .vx-agenda-modal-head{
-    height:28px!important;
-    margin:0 -9px 6px!important;
-    padding:0 7px 0 9px!important;
+    height:44px!important;
+    min-height:44px!important;
+    margin:0 -14px 12px!important;
+    padding:0 12px 0 14px!important;
     display:flex!important;
     align-items:center!important;
     justify-content:space-between!important;
-    border-bottom:1px solid rgba(255,255,255,.045)!important;
-    background:#0c0a0f!important;
+    border-bottom:1px solid rgba(255,255,255,.055)!important;
+    border-radius:0!important;
+    background:#0d0b10!important;
   }
 
   .vx-agenda-modal-head small{
     display:block!important;
-    color:#746d79!important;
-    font-size:4px!important;
+    margin:0 0 2px!important;
+    color:#7d7582!important;
+    font-size:6px!important;
     line-height:1!important;
-    letter-spacing:.12em!important;
+    letter-spacing:.13em!important;
   }
 
   .vx-agenda-modal-head strong{
     display:block!important;
-    margin-top:1px!important;
-    color:#efe9f2!important;
-    font-size:6.8px!important;
+    margin:0!important;
+    color:#f0eaf4!important;
+    font-size:11px!important;
     line-height:1!important;
     font-weight:800!important;
   }
 
   .vx-agenda-modal-head>button{
-    width:18px!important;
-    height:18px!important;
+    width:30px!important;
+    height:30px!important;
     display:grid!important;
     place-items:center!important;
     padding:0!important;
-    border:1px solid rgba(255,255,255,.06)!important;
+    border:1px solid rgba(255,255,255,.07)!important;
     border-radius:0!important;
     background:#09080b!important;
-    color:#8e8496!important;
-    font-size:10px!important;
+    color:#a198a8!important;
+    font-size:16px!important;
+    line-height:1!important;
+    box-shadow:none!important;
   }
 
-  /* Grade menor e centralizada */
+  /* Grade larga e centralizada dentro do modal. */
   .vx-agenda-modal-body{
-    width:88%!important;
+    width:100%!important;
     margin:0 auto!important;
     display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:5px!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    align-items:start!important;
+    justify-items:stretch!important;
+    gap:10px 12px!important;
   }
 
   .vx-agenda-modal-field{
-    min-width:0!important;
     width:100%!important;
+    min-width:0!important;
     display:grid!important;
-    gap:2px!important;
+    gap:5px!important;
     margin:0!important;
   }
 
   .vx-agenda-modal-field>span{
-    color:#8d8592!important;
-    font-size:4.3px!important;
-    font-weight:760!important;
+    color:#918895!important;
+    font-size:7px!important;
     line-height:1!important;
+    font-weight:780!important;
+    letter-spacing:.02em!important;
   }
 
   .vx-agenda-modal-field select,
   .vx-agenda-modal-field input{
     width:100%!important;
-    height:26px!important;
-    min-height:26px!important;
+    height:44px!important;
+    min-height:44px!important;
     box-sizing:border-box!important;
     margin:0!important;
-    padding:0 6px!important;
-    border:1px solid rgba(163,105,223,.14)!important;
+    padding:0 12px!important;
+    border:1px solid rgba(165,105,226,.18)!important;
     border-radius:0!important;
     outline:0!important;
     background:#09080b!important;
     color:#eee8f2!important;
-    font:600 5.1px Geist,Inter,sans-serif!important;
+    font:650 8px Geist,Inter,sans-serif!important;
     box-shadow:none!important;
   }
 
@@ -1466,26 +1481,34 @@
   }
 
   .vx-agenda-modal-client small{
-    min-height:3px!important;
+    display:block!important;
+    min-height:8px!important;
     margin:0!important;
-    color:#5d5662!important;
-    font-size:3.8px!important;
-    line-height:1!important;
+    color:#655d69!important;
+    font-size:5.5px!important;
+    line-height:1.2!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
   }
 
   .vx-agenda-modal-save{
-    width:88%!important;
-    height:27px!important;
-    min-height:27px!important;
+    width:100%!important;
+    height:44px!important;
+    min-height:44px!important;
     display:block!important;
-    margin:6px auto 0!important;
-    padding:0 8px!important;
-    border:1px solid rgba(178,109,242,.23)!important;
+    margin:12px 0 0!important;
+    padding:0 12px!important;
+    border:1px solid rgba(183,113,248,.30)!important;
     border-radius:0!important;
     background:#7823bb!important;
     color:#fff!important;
-    font:800 5.2px Geist,Inter,sans-serif!important;
+    font:800 8px Geist,Inter,sans-serif!important;
     box-shadow:none!important;
+  }
+
+  .vx-agenda-modal-save:disabled{
+    opacity:.5!important;
   }
 
   body.vx-agenda-modal-open{
