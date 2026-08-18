@@ -825,7 +825,7 @@
     <section class="view agenda-v2" id="view-agenda">
       <div class="vx-agenda-mobile-head">
         <div><small>GESTÃO</small><h2>Agenda</h2></div>
-        <button type="button" class="vx-agenda-add" onclick="vxOpenAgendaForm('agendamento')">＋ ADICIONAR</button>
+        <button type="button" class="vx-agenda-add" onclick="vxOpenAgendaModal()">＋ ADICIONAR</button>
       </div>
       
       <div class="vx-agenda-client-screen" id="vxAgendaClientScreen" aria-hidden="true" data-return="agenda">
@@ -905,7 +905,61 @@
         </div>
       </div>
 
-      <div class="agenda-v2-list-panel">
+      
+      <div class="vx-agenda-modal" id="vxAgendaModal" aria-hidden="true">
+        <button type="button" class="vx-agenda-modal-backdrop" onclick="vxCloseAgendaModal()" aria-label="Fechar"></button>
+        <section class="vx-agenda-modal-card" role="dialog" aria-modal="true" aria-labelledby="vxAgendaModalTitle">
+          <header class="vx-agenda-modal-head">
+            <div>
+              <small>NOVO</small>
+              <strong id="vxAgendaModalTitle">Agendamento</strong>
+            </div>
+            <button type="button" onclick="vxCloseAgendaModal()" aria-label="Fechar">×</button>
+          </header>
+
+          <div class="vx-agenda-modal-body">
+            <label class="vx-agenda-modal-field vx-agenda-modal-client">
+              <span>Cliente</span>
+              <select id="vxAgCliente"></select>
+              <small id="vxAgClienteInfo"></small>
+            </label>
+
+            <label class="vx-agenda-modal-field">
+              <span>Serviço</span>
+              <select id="vxAgServico"></select>
+            </label>
+
+            <label class="vx-agenda-modal-field">
+              <span>Profissional</span>
+              <select id="vxAgProfissional"></select>
+            </label>
+
+            <label class="vx-agenda-modal-field">
+              <span>Data</span>
+              <input id="vxAgData" type="date">
+            </label>
+
+            <label class="vx-agenda-modal-field">
+              <span>Horário</span>
+              <input id="vxAgHora" type="time">
+            </label>
+
+            <label class="vx-agenda-modal-field vx-agenda-modal-status">
+              <span>Status</span>
+              <select id="vxAgStatus">
+                <option value="Pendente">Pendente</option>
+                <option value="Confirmado">Confirmado</option>
+              </select>
+            </label>
+          </div>
+
+          <button type="button" class="vx-agenda-modal-save" id="vxAgendaModalSave" onclick="vxSalvarAgendamentoModal()">
+            Salvar agendamento
+          </button>
+        </section>
+      </div>
+
+<div class="agenda-v2-list-panel">
         <div class="agenda-v2-list-head">
           <div>
             <span class="agenda-v2-kicker">VISÃO GERAL</span>
@@ -1428,7 +1482,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260818-01"></script>
+<script defer src="app.js?v=20260818-10"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>

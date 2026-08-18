@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=23';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=30';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2247,6 +2247,7 @@ window.vxAgendaDay = vxAgendaDay;
 window.vxAgendaPickDate = vxAgendaPickDate;
 
 document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('vxAgCliente')?.addEventListener('change',vxAgendaModalClienteInfo);
   vxUpdateAgendaFilterCounts();
 });
 
@@ -2272,6 +2273,123 @@ function vxAgendaClienteSelecionado(id){
   if(summary) summary.hidden=false;
 }
 window.vxAgendaClienteSelecionado=vxAgendaClienteSelecionado;
+
+
+function vxAgendaModalIsMobile(){
+  return window.matchMedia('(max-width:768px)').matches;
+}
+
+function vxPopulateAgendaModal(){
+  const cli=$('vxAgCliente'), srv=$('vxAgServico'), pro=$('vxAgProfissional');
+  if(cli){
+    cli.innerHTML='<option value="">Escolha o cliente</option>'+
+      (state.clientes||[]).filter(c=>(c.status||'ativo')==='ativo')
+        .map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+  }
+  if(srv){
+    srv.innerHTML='<option value="">Escolha o serviço</option>'+
+      (state.servicos||[]).filter(s=>(s.status||'ativo')==='ativo')
+        .map(s=>`<option value="${s.id}">${s.nome}</option>`).join('');
+  }
+  if(pro){
+    pro.innerHTML='<option value="">Escolha o profissional</option>'+
+      (state.profissionais||[]).filter(p=>(p.status||'ativo')==='ativo')
+        .map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
+  }
+  const date=$('vxAgData');
+  if(date && !date.value){
+    const now=new Date();
+    const y=now.getFullYear(), m=String(now.getMonth()+1).padStart(2,'0'), d=String(now.getDate()).padStart(2,'0');
+    date.value=`${y}-${m}-${d}`;
+  }
+  const status=$('vxAgStatus');
+  if(status) status.value='Pendente';
+}
+
+function vxOpenAgendaModal(){
+  if(!vxAgendaModalIsMobile()) return;
+  vxPopulateAgendaModal();
+  const modal=$('vxAgendaModal');
+  if(!modal) return;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.classList.add('vx-agenda-modal-open');
+}
+
+function vxCloseAgendaModal(){
+  const modal=$('vxAgendaModal');
+  if(!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('vx-agenda-modal-open');
+}
+
+function vxAgendaModalClienteInfo(){
+  const id=$('vxAgCliente')?.value;
+  const c=(state.clientes||[]).find(x=>String(x.id)===String(id));
+  const info=$('vxAgClienteInfo');
+  if(!info) return;
+  const contact=[c?.telefone,c?.email].filter(Boolean).join(' | ');
+  info.textContent=contact||'';
+}
+
+async function vxSalvarAgendamentoModal(){
+  if(!vxAgendaModalIsMobile()) return;
+  const clienteId=$('vxAgCliente')?.value;
+  const servicoId=$('vxAgServico')?.value;
+  const profissionalId=$('vxAgProfissional')?.value;
+  const data=$('vxAgData')?.value;
+  const hora=$('vxAgHora')?.value;
+  const status=$('vxAgStatus')?.value||'Pendente';
+
+  if(!clienteId||!servicoId||!profissionalId||!data||!hora){
+    toast('Preencha todos os campos.','err');
+    return;
+  }
+
+  const cliente=(state.clientes||[]).find(c=>String(c.id)===String(clienteId));
+  const serv=(state.servicos||[]).find(s=>String(s.id)===String(servicoId));
+  const prof=(state.profissionais||[]).find(p=>String(p.id)===String(profissionalId));
+  const btn=$('vxAgendaModalSave');
+  if(btn) btn.disabled=true;
+
+  try{
+    const { error }=await db.from('agenda_agendamentos').insert({
+      empresa_id:state.empresa.id,
+      cliente_id:clienteId,
+      servico_id:serv?.id||null,
+      profissional_id:prof?.id||null,
+      cliente_nome:cliente?.nome||'',
+      cliente_telefone:cliente?.telefone||'',
+      servico_nome:serv?.nome||'',
+      profissional_nome:prof?.nome||'',
+      data,
+      hora,
+      status,
+      valor:Number(serv?.preco||0)
+    });
+    if(error){
+      toast('Erro ao salvar: '+error.message,'err');
+      return;
+    }
+
+    await loadAll();
+    vxCloseAgendaModal();
+    showNotif('Agendamento criado!',`${cliente?.nome||'Cliente'} — ${formatDate(data)} às ${hora}.`,'ok');
+
+    ['vxAgCliente','vxAgServico','vxAgProfissional','vxAgHora'].forEach(id=>{
+      const el=$(id); if(el) el.value='';
+    });
+    vxAgendaModalClienteInfo();
+  } finally {
+    if(btn) btn.disabled=false;
+  }
+}
+
+window.vxOpenAgendaModal=vxOpenAgendaModal;
+window.vxCloseAgendaModal=vxCloseAgendaModal;
+window.vxSalvarAgendamentoModal=vxSalvarAgendamentoModal;
+
 
 function setFilter(filter, btn) {
   _agendaFilter = filter;
