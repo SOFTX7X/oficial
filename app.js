@@ -2321,8 +2321,17 @@ function vxApplyAgendaModalFinalStyle(){
 
   // Modal: centralizado de verdade e usando praticamente a tela toda.
   imp(modal,'display','grid');
+  imp(modal,'position','fixed');
+  imp(modal,'inset','0');
+  imp(modal,'width','100vw');
+  imp(modal,'height','100dvh');
+  imp(modal,'min-height','100dvh');
   imp(modal,'place-items','center');
+  imp(modal,'align-items','center');
+  imp(modal,'justify-items','center');
   imp(modal,'padding','0 8px');
+  imp(modal,'margin','0');
+  imp(modal,'transform','none');
   imp(modal,'background','transparent');
 
   // Agenda permanece visível atrás.
@@ -2333,7 +2342,13 @@ function vxApplyAgendaModalFinalStyle(){
   // Caixa principal: larga e 100% quadrada.
   imp(card,'width','calc(100vw - 16px)');
   imp(card,'max-width','none');
+  imp(card,'position','relative');
+  imp(card,'top','auto');
+  imp(card,'right','auto');
+  imp(card,'bottom','auto');
+  imp(card,'left','auto');
   imp(card,'margin','0 auto');
+  imp(card,'transform','none');
   imp(card,'padding','0 14px 14px');
   imp(card,'border-radius','0');
   imp(card,'background','#0d0b10');
