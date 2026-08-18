@@ -1833,3 +1833,289 @@
     font-size:6px!important;
   }
 }
+
+
+/* =============================================================
+   VYXORA ANDROID — CLIENTES NO MESMO RUMO DA AGENDA
+   ============================================================= */
+@media (max-width:768px){
+  #view-clientes{
+    padding:0 10px calc(88px + env(safe-area-inset-bottom,0px))!important;
+    background:transparent!important;
+  }
+
+  #view-clientes .vx-clientes-mobile-head{
+    width:calc(100% + 20px)!important;
+    box-sizing:border-box!important;
+    min-height:50px!important;
+    height:50px!important;
+    margin:0 -10px 10px!important;
+    padding:calc(6px + env(safe-area-inset-top,0px)) 12px 6px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    border:0!important;
+    border-bottom:1px solid rgba(174,114,255,.13)!important;
+    border-radius:0!important;
+    background:linear-gradient(180deg,rgba(18,13,23,.98),rgba(12,10,15,.96))!important;
+  }
+
+  #view-clientes .vx-clientes-mobile-head small{
+    display:block!important;
+    margin:0 0 2px!important;
+    color:#898292!important;
+    font-size:5.4px!important;
+    line-height:1!important;
+    letter-spacing:.14em!important;
+  }
+
+  #view-clientes .vx-clientes-mobile-head h2{
+    margin:0!important;
+    color:#f0eaf4!important;
+    font-size:11px!important;
+    line-height:1!important;
+    font-weight:800!important;
+  }
+
+  #view-clientes .vx-clientes-add{
+    height:28px!important;
+    padding:0 9px!important;
+    border:1px solid rgba(166,104,255,.22)!important;
+    border-radius:0!important;
+    background:rgba(132,72,220,.10)!important;
+    color:#c9a3ff!important;
+    font:800 5.8px Geist,Inter,sans-serif!important;
+    letter-spacing:.04em!important;
+  }
+
+  /* O formulário antigo continua existindo só para o PC. */
+  #view-clientes .vx-clientes-desktop-form{
+    display:none!important;
+  }
+
+  #view-clientes .directory-list-head{
+    margin:10px 1px 8px!important;
+  }
+
+  .vx-clientes-modal{
+    position:fixed!important;
+    inset:0!important;
+    z-index:100090!important;
+    display:none!important;
+    place-items:center!important;
+    width:100vw!important;
+    height:100dvh!important;
+    box-sizing:border-box!important;
+    padding:0 8px!important;
+    margin:0!important;
+    background:#08070d!important;
+  }
+
+  .vx-clientes-modal.open{
+    display:grid!important;
+    pointer-events:auto!important;
+  }
+
+  .vx-clientes-modal-card{
+    width:calc(100vw - 16px)!important;
+    max-width:calc(100vw - 16px)!important;
+    max-height:calc(100dvh - 16px)!important;
+    box-sizing:border-box!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    margin:0 auto!important;
+    padding:0 14px 14px!important;
+    border:1px solid rgba(163,101,232,.24)!important;
+    border-radius:0!important;
+    background:#0d0b10!important;
+    box-shadow:0 14px 32px rgba(0,0,0,.28)!important;
+  }
+
+  .vx-clientes-modal-head{
+    height:44px!important;
+    min-height:44px!important;
+    margin:0 -14px 12px!important;
+    padding:0 12px 0 14px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    border-bottom:1px solid rgba(255,255,255,.055)!important;
+    background:#0d0b10!important;
+  }
+
+  .vx-clientes-modal-head small{
+    display:block!important;
+    margin:0 0 2px!important;
+    color:#7d7582!important;
+    font-size:6px!important;
+    line-height:1!important;
+    letter-spacing:.13em!important;
+  }
+
+  .vx-clientes-modal-head strong{
+    display:block!important;
+    color:#f0eaf4!important;
+    font-size:11px!important;
+    line-height:1!important;
+    font-weight:800!important;
+  }
+
+  .vx-clientes-modal-close{
+    width:30px!important;
+    height:30px!important;
+    display:grid!important;
+    place-items:center!important;
+    padding:0!important;
+    position:relative!important;
+    z-index:2147483647!important;
+    border:1px solid rgba(255,255,255,.07)!important;
+    border-radius:0!important;
+    background:#09080b!important;
+    color:#a198a8!important;
+    font-size:16px!important;
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+  }
+
+  .vx-clientes-modal-body{
+    width:100%!important;
+    margin:0 auto!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+
+  .vx-clientes-modal-field{
+    width:100%!important;
+    display:grid!important;
+    gap:5px!important;
+  }
+
+  .vx-clientes-modal-field>span{
+    color:#918895!important;
+    font-size:7px!important;
+    line-height:1!important;
+    font-weight:780!important;
+  }
+
+  .vx-clientes-modal-field input{
+    width:100%!important;
+    height:48px!important;
+    min-height:48px!important;
+    box-sizing:border-box!important;
+    padding:0 12px!important;
+    border:1px solid rgba(165,105,226,.18)!important;
+    border-radius:0!important;
+    outline:0!important;
+    background:#09080b!important;
+    color:#eee8f2!important;
+    font:650 9px Geist,Inter,sans-serif!important;
+    box-shadow:none!important;
+  }
+
+  .vx-clientes-modal-save{
+    width:100%!important;
+    height:46px!important;
+    min-height:46px!important;
+    display:block!important;
+    margin:12px 0 0!important;
+    border:1px solid rgba(183,113,248,.30)!important;
+    border-radius:0!important;
+    background:#7823bb!important;
+    color:#fff!important;
+    font:800 8px Geist,Inter,sans-serif!important;
+    box-shadow:none!important;
+  }
+
+  .vx-clientes-modal-save:disabled{
+    opacity:.5!important;
+  }
+
+  .vx-clientes-success[hidden],
+  .vx-clientes-modal-body[hidden],
+  .vx-clientes-modal-save[hidden]{
+    display:none!important;
+  }
+
+  .vx-clientes-success{
+    min-height:300px!important;
+    box-sizing:border-box!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:30px 22px 22px!important;
+    text-align:center!important;
+  }
+
+  .vx-clientes-success-icon{
+    width:48px!important;
+    height:48px!important;
+    display:grid!important;
+    place-items:center!important;
+    margin-bottom:15px!important;
+    border:1px solid rgba(163,101,232,.28)!important;
+    border-radius:0!important;
+    background:#0a090c!important;
+    color:#b676f0!important;
+    font-size:22px!important;
+    font-weight:800!important;
+  }
+
+  .vx-clientes-success strong{
+    color:#f0eaf4!important;
+    font-size:15px!important;
+    line-height:1.15!important;
+    font-weight:800!important;
+  }
+
+  .vx-clientes-success p{
+    margin:8px 0 24px!important;
+    color:#8e8693!important;
+    font-size:11px!important;
+    line-height:1.4!important;
+  }
+
+  .vx-clientes-success-actions{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:12px!important;
+  }
+
+  .vx-clientes-success-actions button{
+    height:44px!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    border-radius:0!important;
+    background:#0a090c!important;
+    color:#b9b0bf!important;
+    font:800 10px Geist,Inter,sans-serif!important;
+  }
+
+  .vx-clientes-success-actions button.primary{
+    border-color:rgba(182,112,247,.28)!important;
+    background:#7823bb!important;
+    color:#fff!important;
+  }
+
+  body.vx-clientes-modal-open{
+    overflow:hidden!important;
+  }
+
+  body.vx-clientes-modal-open .vx-float-launcher,
+  body.vx-clientes-modal-open .vx-float-panel{
+    display:none!important;
+  }
+}
+
+@media (min-width:769px){
+  #view-clientes .vx-clientes-mobile-head,
+  .vx-clientes-modal{
+    display:none!important;
+  }
+
+  #view-clientes .vx-clientes-desktop-form{
+    display:block!important;
+  }
+}

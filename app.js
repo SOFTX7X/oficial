@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=80';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=90';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -3013,7 +3013,7 @@ function renderClientes() {
   const el = $('clientesGrid');
   if (!el) return;
   const clientes = state.clientes || [];
-  if (!clientes.length) { el.innerHTML = '<div class="empty-state directory-empty" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente cadastrado.</p><span>Use o formulário acima para criar o primeiro contato.</span></div>'; return; }
+  if (!clientes.length) { el.innerHTML = '<div class="empty-state directory-empty" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente cadastrado.</p><span>Use + ADICIONAR para criar o primeiro contato.</span></div>'; return; }
   el.innerHTML = '';
   clientes.forEach(c => {
     const agts = (state.agendamentos || []).filter(a => a.cliente_nome === c.nome && normStatus(a.status) !== 'Excluído').length;
@@ -3840,6 +3840,194 @@ function selecionarIntervalo(btn) {
 }
 
 function openConfigSection(tab = 'empresa') { setView('config'); setConfigTab(tab); closeMobileMenu(); }
+
+
+function vxClienteModalIsMobile(){
+  return window.matchMedia('(max-width:768px)').matches;
+}
+
+function vxApplyClienteModalStyle(){
+  const modal=$('vxClientesModal');
+  const card=modal?.querySelector('.vx-clientes-modal-card');
+  if(!modal||!card) return;
+  const imp=(el,prop,val)=>el?.style.setProperty(prop,val,'important');
+
+  imp(modal,'display','grid');
+  imp(modal,'position','fixed');
+  imp(modal,'inset','0');
+  imp(modal,'width','100vw');
+  imp(modal,'height','100dvh');
+  imp(modal,'place-items','center');
+  imp(modal,'padding','0 8px');
+  imp(modal,'margin','0');
+  imp(modal,'background','#08070d');
+  imp(modal,'z-index','100090');
+
+  imp(card,'width','calc(100vw - 16px)');
+  imp(card,'max-width','calc(100vw - 16px)');
+  imp(card,'max-height','calc(100dvh - 16px)');
+  imp(card,'box-sizing','border-box');
+  imp(card,'overflow-y','auto');
+  imp(card,'overflow-x','hidden');
+  imp(card,'margin','0 auto');
+  imp(card,'border-radius','0');
+}
+
+function vxResetClienteModal(){
+  if($('vxCliNome')) $('vxCliNome').value='';
+  if($('vxCliTel')) $('vxCliTel').value='';
+  if($('vxCliEmail')) $('vxCliEmail').value='';
+}
+
+function vxOpenClienteModal(){
+  if(!vxClienteModalIsMobile()) return;
+  const modal=$('vxClientesModal');
+  if(!modal) return;
+
+  // Evita cortes por overflow/transform da view Clientes.
+  if(modal.parentElement!==document.body){
+    document.body.appendChild(modal);
+  }
+
+  const body=modal.querySelector('.vx-clientes-modal-body');
+  const save=$('vxClientesModalSave');
+  const success=$('vxClientesSuccess');
+
+  if(success){
+    success.hidden=true;
+    success.style.setProperty('display','none','important');
+  }
+  if(body){
+    body.hidden=false;
+    body.style.setProperty('display','grid','important');
+  }
+  if(save){
+    save.hidden=false;
+    save.style.setProperty('display','block','important');
+  }
+
+  vxApplyClienteModalStyle();
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.classList.add('vx-clientes-modal-open');
+  setTimeout(()=>$('vxCliNome')?.focus(),80);
+}
+window.vxOpenClienteModal=vxOpenClienteModal;
+
+function vxCloseClienteModal(){
+  const modal=$('vxClientesModal');
+  if(!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  modal.style.setProperty('display','none','important');
+  modal.style.setProperty('pointer-events','none','important');
+  document.body.classList.remove('vx-clientes-modal-open');
+}
+window.vxCloseClienteModal=vxCloseClienteModal;
+
+function vxShowClienteSuccess(nome){
+  const modal=$('vxClientesModal');
+  const body=modal?.querySelector('.vx-clientes-modal-body');
+  const save=$('vxClientesModalSave');
+  const success=$('vxClientesSuccess');
+  const text=$('vxClientesSuccessText');
+
+  if(text) text.textContent=(nome||'Cliente')+' salvo com sucesso.';
+  if(body){
+    body.hidden=true;
+    body.style.setProperty('display','none','important');
+  }
+  if(save){
+    save.hidden=true;
+    save.style.setProperty('display','none','important');
+  }
+  if(success){
+    success.hidden=false;
+    success.style.setProperty('display','flex','important');
+  }
+}
+
+function vxNovoClienteAposSucesso(){
+  const modal=$('vxClientesModal');
+  const body=modal?.querySelector('.vx-clientes-modal-body');
+  const save=$('vxClientesModalSave');
+  const success=$('vxClientesSuccess');
+
+  if(success){
+    success.hidden=true;
+    success.style.setProperty('display','none','important');
+  }
+  if(body){
+    body.hidden=false;
+    body.style.setProperty('display','grid','important');
+  }
+  if(save){
+    save.hidden=false;
+    save.style.setProperty('display','block','important');
+  }
+
+  vxResetClienteModal();
+  setTimeout(()=>$('vxCliNome')?.focus(),80);
+}
+window.vxNovoClienteAposSucesso=vxNovoClienteAposSucesso;
+
+async function vxSalvarClienteModal(){
+  if(!vxClienteModalIsMobile()) return;
+
+  const nome=($('vxCliNome')?.value||'').trim();
+  const telefone=($('vxCliTel')?.value||'').trim();
+  const email=($('vxCliEmail')?.value||'').trim();
+  const btn=$('vxClientesModalSave');
+
+  if(!nome) return toast('Digite o nome.','err');
+
+  if(btn) btn.disabled=true;
+  try{
+    const {data:novoCliente,error}=await db.from('agenda_clientes').insert({
+      empresa_id:state.empresa.id,
+      nome,
+      telefone,
+      email,
+      status:'ativo'
+    }).select('*').single();
+
+    if(error){
+      toast('Erro ao salvar: '+error.message,'err');
+      return;
+    }
+
+    // Atualização imediata da lista, antes da sincronização geral.
+    if(novoCliente){
+      const semDuplicar=(state.clientes||[]).filter(c=>String(c.id)!==String(novoCliente.id));
+      state.clientes=[novoCliente,...semDuplicar];
+      renderClientes();
+      renderStats();
+      if(typeof renderDashPremium==='function') renderDashPremium();
+    }
+
+    try{
+      await loadAll();
+    }catch(syncErr){
+      console.warn('Sincronização pós-cliente:',syncErr);
+    }
+
+    vxResetClienteModal();
+    vxShowClienteSuccess(nome);
+  }finally{
+    if(btn) btn.disabled=false;
+  }
+}
+window.vxSalvarClienteModal=vxSalvarClienteModal;
+
+// X mobile robusto.
+document.addEventListener('click',(e)=>{
+  const btn=e.target?.closest?.('.vx-clientes-modal-close');
+  if(!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  vxCloseClienteModal();
+},true);
+
 
 async function salvarCliente() {
   const nome = ($('cliNome')?.value || '').trim();

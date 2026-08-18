@@ -1022,7 +1022,12 @@
 
     <!-- VIEW: CLIENTES -->
     <section class="view premium-directory-view" id="view-clientes">
-      <div class="form-panel directory-form-panel">
+      <div class="vx-clientes-mobile-head">
+        <div><small>GESTÃO</small><h2>Clientes</h2></div>
+        <button type="button" class="vx-clientes-add" onclick="vxOpenClienteModal()">＋ ADICIONAR</button>
+      </div>
+
+      <div class="form-panel directory-form-panel vx-clientes-desktop-form">
         <div class="directory-form-head"><div><div class="form-panel-title">Adicionar cliente</div><div class="directory-form-sub">Informações principais para contato e atendimento.</div></div><span class="directory-form-badge">Novo cadastro</span></div>
         <div class="form-grid directory-form-grid">
           <div class="field"><label>Nome completo</label><input id="cliNome" placeholder="Ex: Maria Oliveira"></div>
@@ -1031,6 +1036,43 @@
           <div class="field directory-submit"><button class="btn btn-primary btn-full directory-add-btn" onclick="salvarCliente()"><span>＋</span> Adicionar cliente</button></div>
         </div>
       </div>
+
+      <div class="vx-clientes-modal" id="vxClientesModal" aria-hidden="true">
+        <section class="vx-clientes-modal-card" role="dialog" aria-modal="true" aria-labelledby="vxClientesModalTitle">
+          <header class="vx-clientes-modal-head">
+            <div><small>NOVO</small><strong id="vxClientesModalTitle">Cliente</strong></div>
+            <button type="button" class="vx-clientes-modal-close" onclick="vxCloseClienteModal()" aria-label="Fechar">×</button>
+          </header>
+
+          <div class="vx-clientes-modal-body">
+            <label class="vx-clientes-modal-field">
+              <span>Nome completo</span>
+              <input id="vxCliNome" autocomplete="name" placeholder="Nome do cliente">
+            </label>
+            <label class="vx-clientes-modal-field">
+              <span>WhatsApp</span>
+              <input id="vxCliTel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000">
+            </label>
+            <label class="vx-clientes-modal-field">
+              <span>E-mail</span>
+              <input id="vxCliEmail" inputmode="email" autocomplete="email" placeholder="cliente@email.com">
+            </label>
+          </div>
+
+          <button type="button" class="vx-clientes-modal-save" id="vxClientesModalSave" onclick="vxSalvarClienteModal()">Adicionar cliente</button>
+
+          <div class="vx-clientes-success" id="vxClientesSuccess" hidden>
+            <div class="vx-clientes-success-icon">✓</div>
+            <strong>Cliente adicionado</strong>
+            <p id="vxClientesSuccessText">Cliente salvo com sucesso.</p>
+            <div class="vx-clientes-success-actions">
+              <button type="button" onclick="vxCloseClienteModal()">Fechar</button>
+              <button type="button" class="primary" onclick="vxNovoClienteAposSucesso()">Adicionar outro</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
       <div class="directory-list-head"><div><strong>Clientes cadastrados</strong><span>Informações, status e resultados</span></div></div>
       <div class="cards-grid directory-cards-grid" id="clientesGrid"></div>
     </section>
@@ -1517,7 +1559,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260818-80"></script>
+<script defer src="app.js?v=20260818-90"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>
