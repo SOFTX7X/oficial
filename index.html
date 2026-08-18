@@ -914,7 +914,7 @@
               <small>NOVO</small>
               <strong id="vxAgendaModalTitle">Agendamento</strong>
             </div>
-            <button type="button" onclick="vxCloseAgendaModal()" aria-label="Fechar">×</button>
+            <button type="button" class="vx-agenda-modal-close" onclick="vxCloseAgendaModal()" aria-label="Fechar">×</button>
           </header>
 
           <div class="vx-agenda-modal-body">
@@ -956,6 +956,15 @@
           <button type="button" class="vx-agenda-modal-save" id="vxAgendaModalSave" onclick="vxSalvarAgendamentoModal()">
             Salvar agendamento
           </button>
+          <div class="vx-agenda-success" id="vxAgendaSuccess" hidden>
+            <div class="vx-agenda-success-icon">✓</div>
+            <strong>Agendamento realizado</strong>
+            <p id="vxAgendaSuccessText">Cliente agendado com sucesso.</p>
+            <div class="vx-agenda-success-actions">
+              <button type="button" onclick="vxCloseAgendaModal()">Fechar</button>
+              <button type="button" class="primary" onclick="vxNovoAgendamentoAposSucesso()">Agendar</button>
+            </div>
+          </div>
         </section>
       </div>
 
@@ -1482,7 +1491,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260818-62"></script>
+<script defer src="app.js?v=20260818-70"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>

@@ -1526,3 +1526,40 @@
     display:none!important;
   }
 }
+
+
+/* VYXORA ANDROID — FUNDO SÓLIDO + X + CONFIRMAÇÃO */
+@media (max-width:768px){
+  .vx-agenda-modal{background:#08070d!important}
+  .vx-agenda-modal-backdrop{background:#08070d!important;pointer-events:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .vx-agenda-modal-card{z-index:2!important}
+  .vx-agenda-modal-close{position:relative!important;z-index:2147483647!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important}
+
+  .vx-agenda-success[hidden]{display:none!important}
+  .vx-agenda-success{
+    min-height:300px;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:30px 22px 22px;
+    text-align:center;
+  }
+  .vx-agenda-success-icon{
+    width:48px;height:48px;display:grid;place-items:center;
+    margin-bottom:15px;border:1px solid rgba(163,101,232,.28);
+    border-radius:0;background:#0a090c;color:#b676f0;
+    font-size:22px;font-weight:800;
+  }
+  .vx-agenda-success strong{color:#f0eaf4;font-size:15px;line-height:1.15;font-weight:800}
+  .vx-agenda-success p{margin:8px 0 24px;color:#8e8693;font-size:11px;line-height:1.4}
+  .vx-agenda-success-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .vx-agenda-success-actions button{
+    height:44px;border:1px solid rgba(255,255,255,.08);border-radius:0;
+    background:#0a090c;color:#b9b0bf;font:800 10px Geist,Inter,sans-serif;
+  }
+  .vx-agenda-success-actions button.primary{
+    border-color:rgba(182,112,247,.28);background:#7823bb;color:#fff;
+  }
+}
