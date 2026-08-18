@@ -1326,14 +1326,29 @@
     letter-spacing:.04em!important;
   }
 
-  /* Modal */
+
+}
+
+@media (min-width:769px){
+  .vx-agenda-modal{
+    display:none!important;
+  }
+}
+
+
+/* =============================================================
+   VYXORA ANDROID — MODAL AGENDA / DEFINIÇÃO ÚNICA
+   ============================================================= */
+@media (max-width:768px){
+
   .vx-agenda-modal{
     position:fixed!important;
     inset:0!important;
     z-index:100080!important;
     display:none!important;
     place-items:center!important;
-    padding:14px!important;
+    padding:10px!important;
+    background:transparent!important;
   }
 
   .vx-agenda-modal.open{
@@ -1347,95 +1362,111 @@
     width:100%!important;
     height:100%!important;
     border:0!important;
-    background:rgba(4,3,6,.74)!important;
-    backdrop-filter:blur(4px)!important;
-    -webkit-backdrop-filter:blur(4px)!important;
+    background:rgba(5,4,7,.24)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
   }
 
   .vx-agenda-modal-card{
     position:relative!important;
     z-index:1!important;
-    width:min(100%,350px)!important;
+    width:min(calc(100vw - 68px),280px)!important;
+    max-height:calc(100dvh - 54px)!important;
     box-sizing:border-box!important;
-    padding:0 12px 12px!important;
-    border:1px solid rgba(255,255,255,.075)!important;
-    border-radius:3px!important;
-    background:linear-gradient(160deg,#111014,#0b090d)!important;
-    box-shadow:0 28px 80px rgba(0,0,0,.5)!important;
+    margin:auto!important;
+    padding:0 8px 8px!important;
+    overflow:hidden!important;
+    border:1px solid rgba(165,103,235,.22)!important;
+    border-radius:1px!important;
+    background:#0d0b10!important;
+    box-shadow:0 14px 36px rgba(0,0,0,.34)!important;
   }
 
   .vx-agenda-modal-head{
-    height:42px!important;
-    margin:0 -12px 10px!important;
-    padding:0 10px!important;
+    height:30px!important;
+    min-height:30px!important;
+    margin:0 -8px 6px!important;
+    padding:0 7px 0 8px!important;
     display:flex!important;
     align-items:center!important;
     justify-content:space-between!important;
-    border-bottom:1px solid rgba(255,255,255,.055)!important;
+    border-bottom:1px solid rgba(255,255,255,.05)!important;
+    background:#0a090c!important;
   }
 
   .vx-agenda-modal-head small{
     display:block!important;
-    color:#736c78!important;
-    font-size:4.8px!important;
+    color:#746d79!important;
+    font-size:4.1px!important;
     line-height:1!important;
-    letter-spacing:.15em!important;
+    letter-spacing:.13em!important;
   }
 
   .vx-agenda-modal-head strong{
     display:block!important;
-    margin-top:2px!important;
-    color:#f0eaf3!important;
-    font-size:9px!important;
+    margin-top:1px!important;
+    color:#eee8f1!important;
+    font-size:7.2px!important;
     line-height:1!important;
     font-weight:800!important;
   }
 
   .vx-agenda-modal-head>button{
-    width:26px!important;
-    height:26px!important;
+    width:20px!important;
+    height:20px!important;
     display:grid!important;
     place-items:center!important;
     padding:0!important;
     border:1px solid rgba(255,255,255,.07)!important;
-    border-radius:3px!important;
-    background:#0c0a0f!important;
-    color:#94899d!important;
-    font-size:15px!important;
+    border-radius:1px!important;
+    background:#09080b!important;
+    color:#8f8598!important;
+    font-size:11px!important;
+    line-height:1!important;
   }
 
   .vx-agenda-modal-body{
+    width:94%!important;
+    margin:0 auto!important;
     display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:8px!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    align-items:start!important;
+    justify-items:stretch!important;
+    gap:5px!important;
   }
 
   .vx-agenda-modal-field{
+    width:100%!important;
     min-width:0!important;
     display:grid!important;
-    gap:4px!important;
+    gap:2px!important;
+    margin:0!important;
   }
 
   .vx-agenda-modal-field>span{
-    color:#8c8491!important;
-    font-size:5.4px!important;
+    color:#89818e!important;
+    font-size:4.5px!important;
+    line-height:1.05!important;
     font-weight:780!important;
-    letter-spacing:.035em!important;
+    letter-spacing:.02em!important;
   }
 
   .vx-agenda-modal-field select,
   .vx-agenda-modal-field input{
     width:100%!important;
-    height:36px!important;
-    min-height:36px!important;
+    height:28px!important;
+    min-height:28px!important;
     box-sizing:border-box!important;
-    padding:0 9px!important;
-    border:1px solid rgba(255,255,255,.075)!important;
-    border-radius:3px!important;
+    margin:0!important;
+    padding:0 6px!important;
+    border:1px solid rgba(160,105,220,.15)!important;
+    border-radius:1px!important;
     outline:0!important;
-    background:#09080c!important;
-    color:#eee8f2!important;
-    font:600 6.8px Geist,Inter,sans-serif!important;
+    background:#09080b!important;
+    color:#ece6f0!important;
+    font:600 5.5px Geist,Inter,sans-serif!important;
+    line-height:28px!important;
+    box-shadow:none!important;
   }
 
   .vx-agenda-modal-client,
@@ -1444,25 +1475,30 @@
   }
 
   .vx-agenda-modal-client small{
-    min-height:9px!important;
-    color:#655e69!important;
-    font-size:5px!important;
-    line-height:1.2!important;
+    display:block!important;
+    min-height:4px!important;
+    margin:0!important;
+    color:#5f5864!important;
+    font-size:4px!important;
+    line-height:1!important;
     overflow:hidden!important;
     text-overflow:ellipsis!important;
     white-space:nowrap!important;
   }
 
   .vx-agenda-modal-save{
-    width:100%!important;
-    height:36px!important;
-    margin-top:10px!important;
-    border:1px solid rgba(178,111,244,.28)!important;
-    border-radius:3px!important;
-    background:linear-gradient(90deg,#8526d4,#7223b3)!important;
+    width:94%!important;
+    height:29px!important;
+    min-height:29px!important;
+    margin:6px auto 0!important;
+    display:block!important;
+    padding:0 8px!important;
+    border:1px solid rgba(178,110,242,.25)!important;
+    border-radius:1px!important;
+    background:linear-gradient(90deg,#8127cc,#6920a7)!important;
     color:#fff!important;
-    font:800 6.7px Geist,Inter,sans-serif!important;
-    box-shadow:0 10px 28px rgba(100,31,163,.15)!important;
+    font:800 5.6px Geist,Inter,sans-serif!important;
+    box-shadow:0 6px 16px rgba(91,28,143,.12)!important;
   }
 
   .vx-agenda-modal-save:disabled{
@@ -1482,122 +1518,5 @@
 @media (min-width:769px){
   .vx-agenda-modal{
     display:none!important;
-  }
-}
-
-
-/* =============================================================
-   VYXORA ANDROID — MODAL AGENDA COMPACTO / QUADRADO
-   Somente acabamento visual. Nenhuma alteração de lógica.
-   ============================================================= */
-@media (max-width:768px){
-  .vx-agenda-modal{
-    place-items:center!important;
-    padding:12px!important;
-    background:transparent!important;
-  }
-
-  .vx-agenda-modal-backdrop{
-    background:rgba(5,4,7,.42)!important;
-    backdrop-filter:blur(1.5px)!important;
-    -webkit-backdrop-filter:blur(1.5px)!important;
-  }
-
-  .vx-agenda-modal-card{
-    width:min(calc(100vw - 36px),332px)!important;
-    max-height:calc(100dvh - 44px)!important;
-    margin:auto!important;
-    padding:0 10px 10px!important;
-    border:1px solid rgba(173,111,255,.18)!important;
-    border-radius:2px!important;
-    background:rgba(14,11,17,.97)!important;
-    box-shadow:0 18px 48px rgba(0,0,0,.38)!important;
-    overflow:hidden!important;
-  }
-
-  .vx-agenda-modal-head{
-    height:36px!important;
-    min-height:36px!important;
-    margin:0 -10px 8px!important;
-    padding:0 8px 0 10px!important;
-    border-bottom:1px solid rgba(255,255,255,.055)!important;
-    background:rgba(10,8,12,.72)!important;
-  }
-
-  .vx-agenda-modal-head small{
-    font-size:4.5px!important;
-    letter-spacing:.14em!important;
-  }
-
-  .vx-agenda-modal-head strong{
-    margin-top:1px!important;
-    font-size:8px!important;
-  }
-
-  .vx-agenda-modal-head>button{
-    width:23px!important;
-    height:23px!important;
-    border-radius:2px!important;
-    font-size:13px!important;
-  }
-
-  .vx-agenda-modal-body{
-    width:100%!important;
-    margin:0 auto!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-    align-items:start!important;
-    justify-items:stretch!important;
-    gap:7px 7px!important;
-  }
-
-  .vx-agenda-modal-field{
-    width:100%!important;
-    min-width:0!important;
-    gap:3px!important;
-    margin:0!important;
-  }
-
-  .vx-agenda-modal-field>span{
-    font-size:5px!important;
-    line-height:1.1!important;
-  }
-
-  .vx-agenda-modal-field select,
-  .vx-agenda-modal-field input{
-    width:100%!important;
-    height:34px!important;
-    min-height:34px!important;
-    padding:0 8px!important;
-    border:1px solid rgba(172,115,241,.16)!important;
-    border-radius:2px!important;
-    background:#0b090d!important;
-    font-size:6.2px!important;
-    line-height:34px!important;
-    box-shadow:none!important;
-  }
-
-  .vx-agenda-modal-client,
-  .vx-agenda-modal-status{
-    grid-column:1 / -1!important;
-  }
-
-  .vx-agenda-modal-client small{
-    min-height:6px!important;
-    margin:0!important;
-    font-size:4.5px!important;
-  }
-
-  .vx-agenda-modal-save{
-    width:100%!important;
-    height:34px!important;
-    min-height:34px!important;
-    margin:8px 0 0!important;
-    padding:0 10px!important;
-    border:1px solid rgba(183,116,255,.28)!important;
-    border-radius:2px!important;
-    background:linear-gradient(90deg,rgba(135,38,215,.96),rgba(108,31,171,.96))!important;
-    font-size:6.2px!important;
-    box-shadow:0 8px 20px rgba(92,28,147,.13)!important;
   }
 }
