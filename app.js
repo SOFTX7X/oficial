@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=70';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=71';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2425,9 +2425,18 @@ function vxOpenAgendaModal(){
   const success=$('vxAgendaSuccess');
   const formBody=modal.querySelector('.vx-agenda-modal-body');
   const saveBtn=$('vxAgendaModalSave');
-  if(success) success.hidden=true;
-  if(formBody) formBody.hidden=false;
-  if(saveBtn) saveBtn.hidden=false;
+  if(success){
+    success.hidden=true;
+    success.style.setProperty('display','none','important');
+  }
+  if(formBody){
+    formBody.hidden=false;
+    formBody.style.setProperty('display','grid','important');
+  }
+  if(saveBtn){
+    saveBtn.hidden=false;
+    saveBtn.style.setProperty('display','block','important');
+  }
 
   modal.style.removeProperty('display');
   modal.style.removeProperty('pointer-events');
@@ -2489,9 +2498,21 @@ function vxShowAgendaSuccess(clienteNome){
   const text=$('vxAgendaSuccessText');
 
   if(text) text.textContent=(clienteNome||'Cliente')+' agendado com sucesso.';
-  if(body) body.hidden=true;
-  if(save) save.hidden=true;
-  if(success) success.hidden=false;
+
+  // O CSS do formulário usa display:grid!important.
+  // Por isso o atributo hidden sozinho não era suficiente.
+  if(body){
+    body.hidden=true;
+    body.style.setProperty('display','none','important');
+  }
+  if(save){
+    save.hidden=true;
+    save.style.setProperty('display','none','important');
+  }
+  if(success){
+    success.hidden=false;
+    success.style.setProperty('display','flex','important');
+  }
 }
 
 function vxNovoAgendamentoAposSucesso(){
@@ -2500,9 +2521,18 @@ function vxNovoAgendamentoAposSucesso(){
   const save=$('vxAgendaModalSave');
   const success=$('vxAgendaSuccess');
 
-  if(success) success.hidden=true;
-  if(body) body.hidden=false;
-  if(save) save.hidden=false;
+  if(success){
+    success.hidden=true;
+    success.style.setProperty('display','none','important');
+  }
+  if(body){
+    body.hidden=false;
+    body.style.setProperty('display','grid','important');
+  }
+  if(save){
+    save.hidden=false;
+    save.style.setProperty('display','block','important');
+  }
 
   vxResetAgendaModalForm();
   vxPopulateAgendaModal();
@@ -2531,7 +2561,7 @@ async function vxSalvarAgendamentoModal(){
   if(btn) btn.disabled=true;
 
   try{
-    const { error }=await db.from('agenda_agendamentos').insert({
+    const { data:novoAgendamento, error }=await db.from('agenda_agendamentos').insert({
       empresa_id:state.empresa.id,
       cliente_id:clienteId,
       servico_id:serv?.id||null,
@@ -2544,13 +2574,36 @@ async function vxSalvarAgendamentoModal(){
       hora,
       status,
       valor:Number(serv?.preco||0)
-    });
+    }).select('*').single();
     if(error){
       toast('Erro ao salvar: '+error.message,'err');
       return;
     }
 
-    await loadAll();
+    // Atualiza imediatamente o estado local, sem depender do ciclo completo de loadAll().
+    if(novoAgendamento){
+      const semDuplicar=(state.agendamentos||[]).filter(a=>String(a.id)!==String(novoAgendamento.id));
+      state.agendamentos=ordenarAgendamentosRecentes([novoAgendamento,...semDuplicar]);
+
+      // Atualiza exatamente as duas áreas afetadas pelo novo agendamento.
+      renderTimeline();
+      renderClientes();
+
+      // Mantém contadores/resumos coerentes.
+      renderStats();
+      renderDashList();
+      renderCalendar();
+      if(typeof vxUpdateAgendaFilterCounts==='function') vxUpdateAgendaFilterCounts();
+    }
+
+    // Sincronização completa em seguida; se outro renderer falhar,
+    // Agenda e Clientes já terão sido atualizados acima.
+    try{
+      await loadAll();
+    }catch(syncErr){
+      console.warn('Sincronização pós-agendamento:',syncErr);
+    }
+
     vxResetAgendaModalForm();
     vxShowAgendaSuccess(cliente?.nome||'Cliente');
   } finally {

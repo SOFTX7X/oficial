@@ -1563,3 +1563,13 @@
     border-color:rgba(182,112,247,.28);background:#7823bb;color:#fff;
   }
 }
+
+
+/* VYXORA — correção de visibilidade da confirmação de agendamento */
+@media (max-width:768px){
+  #vxAgendaModal .vx-agenda-modal-body[hidden],
+  #vxAgendaModal .vx-agenda-modal-save[hidden],
+  #vxAgendaModal .vx-agenda-success[hidden]{
+    display:none!important;
+  }
+}
