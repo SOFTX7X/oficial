@@ -2306,11 +2306,90 @@ function vxPopulateAgendaModal(){
   if(status) status.value='Pendente';
 }
 
+function vxApplyAgendaModalFinalStyle(){
+  const modal=$('vxAgendaModal');
+  const card=modal?.querySelector('.vx-agenda-modal-card');
+  const backdrop=modal?.querySelector('.vx-agenda-modal-backdrop');
+  const head=modal?.querySelector('.vx-agenda-modal-head');
+  const closeBtn=head?.querySelector('button');
+  const body=modal?.querySelector('.vx-agenda-modal-body');
+  const save=$('vxAgendaModalSave');
+
+  if(!modal||!card||!body) return;
+
+  const imp=(el,prop,val)=>el?.style.setProperty(prop,val,'important');
+
+  // Modal: centralizado de verdade e usando praticamente a tela toda.
+  imp(modal,'display','grid');
+  imp(modal,'place-items','center');
+  imp(modal,'padding','0 8px');
+  imp(modal,'background','transparent');
+
+  // Agenda permanece visível atrás.
+  imp(backdrop,'background','rgba(5,4,7,.12)');
+  imp(backdrop,'backdrop-filter','none');
+  imp(backdrop,'-webkit-backdrop-filter','none');
+
+  // Caixa principal: larga e 100% quadrada.
+  imp(card,'width','calc(100vw - 16px)');
+  imp(card,'max-width','none');
+  imp(card,'margin','0 auto');
+  imp(card,'padding','0 14px 14px');
+  imp(card,'border-radius','0');
+  imp(card,'background','#0d0b10');
+  imp(card,'border','1px solid rgba(163,101,232,.24)');
+  imp(card,'box-shadow','0 14px 32px rgba(0,0,0,.28)');
+
+  // Cabeçalho.
+  imp(head,'height','44px');
+  imp(head,'min-height','44px');
+  imp(head,'margin','0 -14px 12px');
+  imp(head,'padding','0 12px 0 14px');
+  imp(head,'border-radius','0');
+  imp(head,'background','#0d0b10');
+
+  imp(closeBtn,'width','30px');
+  imp(closeBtn,'height','30px');
+  imp(closeBtn,'border-radius','0');
+
+  // Grade interna centralizada e usando toda a largura útil.
+  imp(body,'width','100%');
+  imp(body,'margin','0 auto');
+  imp(body,'grid-template-columns','minmax(0,1fr) minmax(0,1fr)');
+  imp(body,'gap','10px 12px');
+
+  modal.querySelectorAll('.vx-agenda-modal-field').forEach(field=>{
+    imp(field,'width','100%');
+    imp(field,'margin','0');
+  });
+
+  modal.querySelectorAll('.vx-agenda-modal-field select, .vx-agenda-modal-field input').forEach(input=>{
+    imp(input,'width','100%');
+    imp(input,'height','44px');
+    imp(input,'min-height','44px');
+    imp(input,'padding','0 12px');
+    imp(input,'border-radius','0');
+    imp(input,'background','#09080b');
+  });
+
+  modal.querySelectorAll('.vx-agenda-modal-client, .vx-agenda-modal-status').forEach(field=>{
+    imp(field,'grid-column','1 / -1');
+  });
+
+  imp(save,'width','100%');
+  imp(save,'height','44px');
+  imp(save,'min-height','44px');
+  imp(save,'margin','12px 0 0');
+  imp(save,'border-radius','0');
+  imp(save,'box-shadow','none');
+}
+
 function vxOpenAgendaModal(){
   if(!vxAgendaModalIsMobile()) return;
   vxPopulateAgendaModal();
   const modal=$('vxAgendaModal');
   if(!modal) return;
+  vxApplyAgendaModalFinalStyle();
   modal.classList.add('open');
   modal.setAttribute('aria-hidden','false');
   document.body.classList.add('vx-agenda-modal-open');
@@ -2386,9 +2465,17 @@ async function vxSalvarAgendamentoModal(){
   }
 }
 
+window.vxApplyAgendaModalFinalStyle=vxApplyAgendaModalFinalStyle;
 window.vxOpenAgendaModal=vxOpenAgendaModal;
 window.vxCloseAgendaModal=vxCloseAgendaModal;
 window.vxSalvarAgendamentoModal=vxSalvarAgendamentoModal;
+
+window.addEventListener('resize',()=>{
+  if(document.getElementById('vxAgendaModal')?.classList.contains('open')){
+    vxApplyAgendaModalFinalStyle();
+  }
+});
+
 
 
 function setFilter(filter, btn) {
