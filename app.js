@@ -2429,6 +2429,9 @@ function vxOpenAgendaModal(){
   if(formBody) formBody.hidden=false;
   if(saveBtn) saveBtn.hidden=false;
 
+  modal.style.removeProperty('display');
+  modal.style.removeProperty('pointer-events');
+
   vxApplyAgendaModalFinalStyle();
   modal.classList.add('open');
   modal.setAttribute('aria-hidden','false');
@@ -2445,10 +2448,16 @@ document.addEventListener('click',(e)=>{
 },true);
 
 function vxCloseAgendaModal(){
-  const modal=$('vxAgendaModal');
+  const modal=document.getElementById('vxAgendaModal');
   if(!modal) return;
+
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden','true');
+
+  // Força o fechamento visual imediatamente.
+  modal.style.setProperty('display','none','important');
+  modal.style.setProperty('pointer-events','none','important');
+
   document.body.classList.remove('vx-agenda-modal-open');
 }
 
@@ -5617,3 +5626,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true, capture: true });
 })();
+
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const closeBtn=document.querySelector('#vxAgendaModal .vx-agenda-modal-close');
+  if(closeBtn){
+    const forceClose=(e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      vxCloseAgendaModal();
+    };
+    closeBtn.addEventListener('click',forceClose,{passive:false});
+    closeBtn.addEventListener('touchend',forceClose,{passive:false});
+    closeBtn.addEventListener('pointerup',forceClose,{passive:false});
+  }
+});
+
