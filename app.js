@@ -2326,6 +2326,8 @@ function vxApplyAgendaModalFinalStyle(){
   imp(modal,'width','100vw');
   imp(modal,'height','100dvh');
   imp(modal,'min-height','100dvh');
+  imp(modal,'max-width','100vw');
+  imp(modal,'overflow','visible');
   imp(modal,'place-items','center');
   imp(modal,'align-items','center');
   imp(modal,'justify-items','center');
@@ -2341,7 +2343,11 @@ function vxApplyAgendaModalFinalStyle(){
 
   // Caixa principal: larga e 100% quadrada.
   imp(card,'width','calc(100vw - 16px)');
-  imp(card,'max-width','none');
+  imp(card,'max-width','calc(100vw - 16px)');
+  imp(card,'max-height','calc(100dvh - 16px)');
+  imp(card,'box-sizing','border-box');
+  imp(card,'overflow-y','auto');
+  imp(card,'overflow-x','hidden');
   imp(card,'position','relative');
   imp(card,'top','auto');
   imp(card,'right','auto');
@@ -2404,6 +2410,13 @@ function vxOpenAgendaModal(){
   vxPopulateAgendaModal();
   const modal=$('vxAgendaModal');
   if(!modal) return;
+
+  // IMPORTANTE: tira o modal de dentro da Agenda antes de abrir.
+  // Isso evita qualquer corte causado por overflow/transform dos containers da tela.
+  if(modal.parentElement !== document.body){
+    document.body.appendChild(modal);
+  }
+
   vxApplyAgendaModalFinalStyle();
   modal.classList.add('open');
   modal.setAttribute('aria-hidden','false');
