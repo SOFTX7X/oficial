@@ -2119,3 +2119,137 @@
     display:block!important;
   }
 }
+
+
+/* =============================================================
+   VYXORA ANDROID — CLIENTES / CABEÇALHO IGUAL À AGENDA
+   ============================================================= */
+@media (max-width:768px){
+
+  /* Clientes usa somente o cabeçalho próprio compacto, como a Agenda. */
+  #view-clientes > .vx-mobile-view-head{
+    display:none!important;
+  }
+
+  #view-clientes{
+    padding-top:0!important;
+  }
+
+  #view-clientes .vx-clientes-mobile-head{
+    min-height:42px!important;
+    height:42px!important;
+    margin:0 -10px 6px!important;
+    padding:5px 10px!important;
+    border-radius:0!important;
+  }
+
+  #view-clientes .vx-clientes-mobile-head small{
+    margin:0!important;
+    font-size:5px!important;
+    line-height:1!important;
+  }
+
+  #view-clientes .vx-clientes-mobile-head h2{
+    margin-top:2px!important;
+    font-size:12px!important;
+    line-height:1!important;
+  }
+
+  #view-clientes .vx-clientes-add{
+    height:27px!important;
+    padding:0 8px!important;
+    border-radius:3px!important;
+    font-size:5.8px!important;
+  }
+
+  #view-clientes .directory-list-head{
+    margin-top:8px!important;
+  }
+}
+
+
+/* =============================================================
+   VYXORA ANDROID — CLIENTES 100% QUADRADO
+   ============================================================= */
+@media (max-width:768px){
+
+  /* Cabeçalho */
+  #view-clientes .vx-clientes-mobile-head,
+  #view-clientes .vx-clientes-add{
+    border-radius:0!important;
+  }
+
+  /* Lista e cards */
+  #view-clientes .premium-record-card,
+  #view-clientes .client-card{
+    border-radius:0!important;
+    overflow:visible!important;
+  }
+
+  /* Avatar */
+  #view-clientes .record-avatar,
+  #view-clientes .cc-av{
+    border-radius:0!important;
+  }
+
+  /* Status */
+  #view-clientes .record-status,
+  #view-clientes .badge,
+  #view-clientes .badge-green,
+  #view-clientes .badge-gray{
+    border-radius:0!important;
+  }
+
+  /* Menu de três pontos */
+  #view-clientes .action-menu-btn,
+  #view-clientes .record-menu-btn,
+  #view-clientes .menu-dots,
+  #view-clientes .kebab-btn,
+  #view-clientes button[class*="menu"],
+  #view-clientes button[aria-label*="menu" i]{
+    border-radius:0!important;
+  }
+
+  /* Bloco telefone/e-mail */
+  #view-clientes .record-contact-list,
+  #view-clientes .record-contact,
+  #view-clientes .record-contact>span,
+  #view-clientes .record-contact-list>div{
+    border-radius:0!important;
+  }
+
+  /* Métricas */
+  #view-clientes .record-stats,
+  #view-clientes .cc-stats,
+  #view-clientes .cc-stat,
+  #view-clientes .record-stats>div{
+    border-radius:0!important;
+  }
+
+  /* Qualquer superfície interna dos cards */
+  #view-clientes .premium-record-card *,
+  #view-clientes .client-card *{
+    --vx-client-radius:0px;
+  }
+
+  /* Impede regras antigas genéricas de arredondarem os elementos */
+  #view-clientes .premium-record-card,
+  #view-clientes .premium-record-card > *,
+  #view-clientes .premium-record-card > * > *,
+  #view-clientes .client-card,
+  #view-clientes .client-card > *,
+  #view-clientes .client-card > * > *{
+    border-radius:0!important;
+  }
+
+  /* Modal de cliente também permanece totalmente quadrado */
+  .vx-clientes-modal-card,
+  .vx-clientes-modal-head,
+  .vx-clientes-modal-close,
+  .vx-clientes-modal-field input,
+  .vx-clientes-modal-save,
+  .vx-clientes-success-icon,
+  .vx-clientes-success-actions button{
+    border-radius:0!important;
+  }
+}
