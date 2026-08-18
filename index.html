@@ -864,7 +864,7 @@
         </div>
 
         <div class="agenda-v2-grid">
-          <div class="field agenda-v2-client">
+          <div class="field agenda-v2-client agenda-client-mobile">
             <label><span>01</span> Cliente</label>
             <select id="agClienteSelect" onchange="vxAgendaClienteSelecionado(this.value)">
               <option value="">Escolha o cliente</option>
@@ -876,23 +876,32 @@
               <span id="vxAgendaClientSummaryContact"></span>
             </div>
           </div>
-          <div class="field agenda-v2-service"><label><span>02</span> Serviço</label><select id="agServico"></select></div>
-          <div class="field agenda-v2-pro"><label><span>03</span> Profissional</label><select id="agProfissional"></select></div>
+          <div class="field agenda-v2-client agenda-client-desktop">
+            <label><span>01</span> Cliente</label>
+            <input id="agClienteDesktop" placeholder="Nome do cliente" autocomplete="name">
+          </div>
+          <div class="field agenda-v2-phone agenda-client-desktop">
+            <label><span>02</span> Telefone</label>
+            <input id="agTelefoneDesktop" placeholder="WhatsApp" inputmode="tel" autocomplete="tel">
+          </div>
+          </div>
+          <div class="field agenda-v2-service"><label><span class="agenda-num-mobile">02</span><span class="agenda-num-desktop">03</span> Serviço</label><select id="agServico"></select></div>
+          <div class="field agenda-v2-pro"><label><span class="agenda-num-mobile">03</span><span class="agenda-num-desktop">04</span> Profissional</label><select id="agProfissional"></select></div>
           <div class="field agenda-v2-date">
-            <label><span>04</span> Data</label>
+            <label><span class="agenda-num-mobile">04</span><span class="agenda-num-desktop">05</span> Data</label>
             <button type="button" class="pub-picker-btn agenda-picker-btn" id="agDataBtn" onclick="abrirCalendarioAgendaInterna()">
               <span id="agDataLabel">Escolher data</span><span class="picker-chevron" aria-hidden="true">⌄</span>
             </button>
             <input id="agData" type="hidden">
           </div>
           <div class="field agenda-v2-time">
-            <label><span>05</span> Hora</label>
+            <label><span class="agenda-num-mobile">05</span><span class="agenda-num-desktop">06</span> Hora</label>
             <button type="button" class="pub-picker-btn agenda-picker-btn" id="agHoraBtn" onclick="abrirHorariosAgendaInterna()">
               <span id="agHoraLabel">Escolher horário</span><span class="picker-chevron" aria-hidden="true">⌄</span>
             </button>
             <input id="agHora" type="hidden">
           </div>
-          <div class="field agenda-v2-status"><label><span>06</span> Status</label><select id="agStatus"><option>Confirmado</option><option>Pendente</option></select></div>
+          <div class="field agenda-v2-status"><label><span class="agenda-num-mobile">06</span><span class="agenda-num-desktop">07</span> Status</label><select id="agStatus"><option>Confirmado</option><option>Pendente</option></select></div>
           <div class="field agenda-v2-submit"><button class="btn btn-primary btn-full agenda-v2-save" id="agendaBtnSalvar" onclick="salvarAgendamento()"><span aria-hidden="true">＋</span> Salvar agendamento</button></div>
         </div>
       </div>
@@ -1420,7 +1429,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260817-92"></script>
+<script defer src="app.js?v=20260818-01"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>

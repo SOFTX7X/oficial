@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=22';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=23';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2169,6 +2169,7 @@ function vxAgendaPickDate(){ const p=document.getElementById('vxAgendaDatePicker
 function vxOpenAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet'); if(!s)return; s.classList.add('open');s.setAttribute('aria-hidden','false'); }
 function vxCloseAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet'); if(!s)return; s.classList.remove('open');s.setAttribute('aria-hidden','true'); }
 function vxOpenAgendaForm(type){
+  if(!vxIsMobileAgenda()) return;
   vxCloseAgendaAdd();
   if(type==='agendamento'){ document.getElementById('view-agenda')?.classList.add('vx-form-open'); setTimeout(()=>document.getElementById('agCliente')?.focus(),180); return; }
   if(type==='cliente'){
@@ -2179,6 +2180,7 @@ function vxOpenAgendaForm(type){
 }
 function vxCloseAgendaForm(){ document.getElementById('view-agenda')?.classList.remove('vx-form-open'); }
 function vxOpenAgendaClient(returnTo='agenda'){
+  if(!vxIsMobileAgenda()) return;
   const screen=document.getElementById('vxAgendaClientScreen');
   if(!screen) return;
   screen.dataset.return=returnTo;
@@ -3332,13 +3334,19 @@ async function salvarAgendamento() {
   if (botao) botao.disabled = true;
 
   try {
-    const clienteId = $('agClienteSelect')?.value;
-    const agCli = $('agCliente')?.value?.trim();
+    const mobileAgenda = vxIsMobileAgenda();
+    let clienteId = mobileAgenda ? ($('agClienteSelect')?.value || null) : null;
+    const agCli = mobileAgenda
+      ? ($('agCliente')?.value || '').trim()
+      : ($('agClienteDesktop')?.value || '').trim();
+    const agTel = mobileAgenda
+      ? ($('agTelefone')?.value || '').trim()
+      : ($('agTelefoneDesktop')?.value || '').trim();
     const agSvc = $('agServico')?.value;
     const agProf = $('agProfissional')?.value;
     const agData = $('agData')?.value;
     const agHora = $('agHora')?.value;
-    if (!clienteId || !agCli || !agSvc || !agProf || !agData || !agHora) {
+    if (!agCli || !agSvc || !agProf || !agData || !agHora || (mobileAgenda && !clienteId)) {
       toast('Preencha todos os campos.', 'err');
       return;
     }
@@ -3346,13 +3354,28 @@ async function salvarAgendamento() {
     const serv = (state.servicos || []).find(s => s.id === agSvc);
     const prof = (state.profissionais || []).find(p => p.id === agProf);
 
+    // Desktop preserva o fluxo antigo: cria o cliente informado junto do agendamento.
+    if (!mobileAgenda) {
+      try {
+        const { data: cli } = await db.from('agenda_clientes').insert({
+          empresa_id: state.empresa.id,
+          nome: agCli,
+          telefone: agTel,
+          status: 'ativo'
+        }).select('*').single();
+        if (cli) clienteId = cli.id;
+      } catch (e) {
+        console.warn('Não foi possível criar o cliente automaticamente:', e);
+      }
+    }
+
     const { error } = await db.from('agenda_agendamentos').insert({
       empresa_id: state.empresa.id,
       cliente_id: clienteId,
       servico_id: serv?.id || null,
       profissional_id: prof?.id || null,
       cliente_nome: agCli,
-      cliente_telefone: ($('agTelefone')?.value || '').trim(),
+      cliente_telefone: agTel,
       servico_nome: serv?.nome || '',
       profissional_nome: prof?.nome || '',
       data: agData,
@@ -3369,6 +3392,8 @@ async function salvarAgendamento() {
     if ($('agClienteSelect')) $('agClienteSelect').value = '';
     if ($('agCliente')) $('agCliente').value = '';
     if ($('agTelefone')) $('agTelefone').value = '';
+    if ($('agClienteDesktop')) $('agClienteDesktop').value = '';
+    if ($('agTelefoneDesktop')) $('agTelefoneDesktop').value = '';
     if ($('vxAgendaClientSummary')) $('vxAgendaClientSummary').hidden = true;
     if ($('agServico')) $('agServico').value = '';
     if ($('agProfissional')) $('agProfissional').value = '';
