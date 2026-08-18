@@ -2171,7 +2171,7 @@ function vxCloseAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet')
 function vxOpenAgendaForm(type){
   if(!vxIsMobileAgenda()) return;
   vxCloseAgendaAdd();
-  if(type==='agendamento'){ document.getElementById('view-agenda')?.classList.add('vx-form-open'); setTimeout(()=>document.getElementById('agCliente')?.focus(),180); return; }
+  if(type==='agendamento'){ document.getElementById('view-agenda')?.classList.add('vx-form-open'); setTimeout(()=>document.getElementById('agClienteSelect')?.focus(),180); return; }
   if(type==='cliente'){
     if(typeof setView==='function') { setView('clientes'); return; }
     if(typeof showView==='function') { showView('clientes'); return; }
@@ -3335,6 +3335,7 @@ async function salvarAgendamento() {
 
   try {
     const mobileAgenda = vxIsMobileAgenda();
+
     let clienteId = mobileAgenda ? ($('agClienteSelect')?.value || null) : null;
     const agCli = mobileAgenda
       ? ($('agCliente')?.value || '').trim()
@@ -3342,10 +3343,12 @@ async function salvarAgendamento() {
     const agTel = mobileAgenda
       ? ($('agTelefone')?.value || '').trim()
       : ($('agTelefoneDesktop')?.value || '').trim();
+
     const agSvc = $('agServico')?.value;
     const agProf = $('agProfissional')?.value;
     const agData = $('agData')?.value;
     const agHora = $('agHora')?.value;
+
     if (!agCli || !agSvc || !agProf || !agData || !agHora || (mobileAgenda && !clienteId)) {
       toast('Preencha todos os campos.', 'err');
       return;
@@ -3354,7 +3357,7 @@ async function salvarAgendamento() {
     const serv = (state.servicos || []).find(s => s.id === agSvc);
     const prof = (state.profissionais || []).find(p => p.id === agProf);
 
-    // Desktop preserva o fluxo antigo: cria o cliente informado junto do agendamento.
+    // Desktop mantém o fluxo original do sistema.
     if (!mobileAgenda) {
       try {
         const { data: cli } = await db.from('agenda_clientes').insert({

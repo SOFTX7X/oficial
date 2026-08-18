@@ -1203,4 +1203,72 @@
   body.vx-agenda-client-open{overflow:hidden!important;overscroll-behavior:none!important}
   body.vx-agenda-client-open .vx-float-launcher,body.vx-agenda-client-open .vx-float-panel,body.vx-agenda-client-open .vx-menu-backdrop{display:none!important}
 }
-\n\n/* =============================================================\n   VYXORA — ISOLAMENTO AGENDA DESKTOP x ANDROID\n   ============================================================= */\n/* Mobile-only overlays must never render by default. */\n.vx-agenda-client-screen{display:none;}\n\n@media (min-width:769px){\n  #view-agenda .vx-agenda-mobile-head,\n  #view-agenda .vx-agenda-form-mobile-head,\n  #view-agenda .agenda-client-mobile,\n  #view-agenda .vx-agenda-client-screen{display:none!important;}\n\n  #view-agenda .agenda-client-desktop{display:block!important;}\n  #view-agenda .agenda-num-mobile{display:none!important;}\n  #view-agenda .agenda-num-desktop{display:inline!important;}\n}\n\n@media (max-width:768px){\n  #view-agenda .agenda-client-desktop{display:none!important;}\n  #view-agenda .agenda-client-mobile{display:block!important;}\n  #view-agenda .agenda-num-desktop{display:none!important;}\n  #view-agenda .agenda-num-mobile{display:inline!important;}\n}\n
+
+
+/* =============================================================
+   VYXORA — CORREÇÃO EXCLUSIVA DO DESKTOP
+   Mobile permanece com seu fluxo atual.
+   ============================================================= */
+
+/* O overlay mobile nunca pode aparecer sem a media query mobile. */
+.vx-agenda-client-screen{
+  display:none;
+}
+
+@media (min-width:769px){
+  /* Componentes Android completamente fora do desktop. */
+  #view-agenda .vx-agenda-mobile-head,
+  #view-agenda .vx-agenda-form-mobile-head,
+  #view-agenda .agenda-client-mobile,
+  #view-agenda .vx-agenda-client-screen{
+    display:none!important;
+  }
+
+  /* Fluxo original do PC. */
+  #view-agenda .agenda-client-desktop{
+    display:block!important;
+  }
+
+  #view-agenda .agenda-num-mobile{
+    display:none!important;
+  }
+
+  #view-agenda .agenda-num-desktop{
+    display:inline!important;
+  }
+
+  /* Impede regras mobile antigas de transformar a Agenda em overlay no PC. */
+  #view-agenda.vx-form-open>.agenda-v2-form{
+    position:static!important;
+    inset:auto!important;
+    width:auto!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    display:block!important;
+    padding:0!important;
+    background:transparent!important;
+  }
+
+  #view-agenda.vx-form-open>.agenda-v2-list-panel{
+    visibility:visible!important;
+  }
+}
+
+@media (max-width:768px){
+  #view-agenda .agenda-client-desktop{
+    display:none!important;
+  }
+
+  #view-agenda .agenda-client-mobile{
+    display:block!important;
+  }
+
+  #view-agenda .agenda-num-desktop{
+    display:none!important;
+  }
+
+  #view-agenda .agenda-num-mobile{
+    display:inline!important;
+  }
+}
