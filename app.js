@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=94';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=95';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2530,7 +2530,7 @@ function vxApplyAgendaModalFinalStyle(){
   imp(modal,'position','fixed');
   imp(modal,'inset','0');
   imp(modal,'width','100vw');
-  imp(modal,'height','100dvh');
+  imp(modal,'height','var(--vx-clientes-viewport-h, 100dvh)');
   imp(modal,'min-height','100dvh');
   imp(modal,'max-width','100vw');
   imp(modal,'overflow','visible');
@@ -2551,9 +2551,9 @@ function vxApplyAgendaModalFinalStyle(){
   // Caixa principal: larga e 100% quadrada.
   imp(card,'width','calc(100vw - 16px)');
   imp(card,'max-width','calc(100vw - 16px)');
-  imp(card,'max-height','calc(100dvh - 16px)');
+  imp(card,'max-height','calc(var(--vx-clientes-viewport-h, 100dvh) - 16px)');
   imp(card,'box-sizing','border-box');
-  imp(card,'overflow-y','auto');
+  imp(card,'overflow-y','hidden');
   imp(card,'overflow-x','hidden');
   imp(card,'position','relative');
   imp(card,'top','auto');
@@ -3891,6 +3891,13 @@ function vxOpenClienteModal(){
   const modal=$('vxClientesModal');
   if(!modal) return;
 
+  // Guarda a altura da tela ANTES do teclado abrir.
+  // Assim o teclado não redimensiona nem cria rolagem no modal.
+  const viewportH = window.innerHeight;
+  document.documentElement.style.setProperty('--vx-clientes-viewport-h', `${viewportH}px`);
+  document.body.style.setProperty('overflow','hidden','important');
+  document.body.style.setProperty('overscroll-behavior','none','important');
+
   // Evita cortes por overflow/transform da view Clientes.
   if(modal.parentElement!==document.body){
     document.body.appendChild(modal);
@@ -3929,6 +3936,9 @@ function vxCloseClienteModal(){
   modal.style.setProperty('display','none','important');
   modal.style.setProperty('pointer-events','none','important');
   document.body.classList.remove('vx-clientes-modal-open');
+  document.body.style.removeProperty('overflow');
+  document.body.style.removeProperty('overscroll-behavior');
+  document.documentElement.style.removeProperty('--vx-clientes-viewport-h');
 }
 window.vxCloseClienteModal=vxCloseClienteModal;
 

@@ -2276,3 +2276,28 @@
     background-clip:padding-box!important;
   }
 }
+
+
+/* VYXORA ANDROID — CLIENTE / SEM ROLAGEM AO ABRIR TECLADO */
+@media (max-width:768px){
+  html:has(body.vx-clientes-modal-open),
+  body.vx-clientes-modal-open{
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+    touch-action:manipulation!important;
+  }
+
+  body.vx-clientes-modal-open .vx-clientes-modal{
+    height:var(--vx-clientes-viewport-h,100dvh)!important;
+    min-height:var(--vx-clientes-viewport-h,100dvh)!important;
+    max-height:var(--vx-clientes-viewport-h,100dvh)!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+
+  body.vx-clientes-modal-open .vx-clientes-modal-card{
+    max-height:calc(var(--vx-clientes-viewport-h,100dvh) - 16px)!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+}
