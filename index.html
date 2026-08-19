@@ -53,6 +53,53 @@
 <script defer src="calendar.js?v=20260804-13"></script>
 <link rel="stylesheet" href="financeiro-cobrancas.css?v=20260810-4">
 <link rel="stylesheet" href="dashboard-pc.css?v=20260815-01">
+
+<style id="vx-servicos-final-fix">
+@media (max-width:768px){
+  /* SERVIÇOS = padrão compacto já usado nas outras telas */
+  #view-servicos .vx-servicos-mobile-head{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    width:100%!important;height:118px!important;min-height:118px!important;
+    margin:0 0 34px!important;padding:22px 4px!important;box-sizing:border-box!important;
+    background:linear-gradient(180deg,rgba(23,13,31,.96),rgba(8,7,12,.96))!important;
+    border:0!important;border-bottom:1px solid rgba(168,85,247,.22)!important;border-radius:0!important
+  }
+  #view-servicos .vx-servicos-mobile-head small{font-size:15px!important;line-height:1!important;letter-spacing:.08em!important;margin:0 0 4px!important}
+  #view-servicos .vx-servicos-mobile-head h2{font-size:23px!important;line-height:1!important;margin:0!important;font-weight:800!important}
+  #view-servicos .vx-servicos-add{
+    width:auto!important;height:56px!important;min-height:56px!important;min-width:153px!important;
+    padding:0 18px!important;font-size:16px!important;line-height:1!important;border-radius:0!important
+  }
+
+  .vx-servicos-modal{padding:16px!important}
+  .vx-servicos-modal-card{
+    width:100%!important;max-width:none!important;height:auto!important;max-height:calc(100dvh - 32px)!important;
+    margin:0!important;border-radius:0!important
+  }
+  .vx-servicos-modal-head{min-height:88px!important;padding:14px 24px 14px 29px!important}
+  .vx-servicos-modal-head small{font-size:16px!important;line-height:1.15!important}
+  .vx-servicos-modal-head strong{font-size:23px!important;line-height:1.1!important}
+  .vx-servicos-modal-close{width:60px!important;height:60px!important;border-radius:0!important;font-size:29px!important}
+
+  .vx-servicos-modal-body{padding:21px 29px 0!important}
+  .vx-servicos-modal-field{margin:0 0 17px!important}
+  .vx-servicos-modal-field>span{font-size:16px!important;margin:0 0 9px!important}
+  .vx-servicos-modal-field input{
+    width:100%!important;height:78px!important;min-height:78px!important;
+    padding:0 20px!important;box-sizing:border-box!important;
+    border:2px solid #29212e!important;border-radius:0!important;
+    font-size:18px!important;font-weight:700!important
+  }
+  .vx-servicos-modal-save{
+    width:calc(100% - 58px)!important;height:90px!important;min-height:90px!important;
+    margin:7px 29px 29px!important;border-radius:0!important;font-size:17px!important
+  }
+
+  /* elimina arredondamento que ainda aparecia nos elementos de Serviços */
+  #view-servicos *, .vx-servicos-modal *{border-radius:0!important}
+}
+</style>
+
 </head>
 <body class="vx-booting">
 <div class="vyxora-loader vx-unified-loader" id="vyxoraLoader" role="status" aria-live="polite" aria-label="Carregando VyXora Agendas">
@@ -1589,7 +1636,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260819-08"></script>
+<script defer src="app.js?v=20260819-09"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>
