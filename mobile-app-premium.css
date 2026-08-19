@@ -2265,3 +2265,14 @@
     border-radius:0!important;
   }
 }
+
+/* VYXORA FIX REAL — inputs do modal Cliente totalmente quadrados */
+@media (max-width:768px){
+  #vxClientesModal #vxCliNome,
+  #vxClientesModal #vxCliTel,
+  #vxClientesModal #vxCliEmail{
+    border-radius:0!important;
+    -webkit-border-radius:0!important;
+    background-clip:padding-box!important;
+  }
+}

@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=92';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=94';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -2564,6 +2564,13 @@ function vxApplyAgendaModalFinalStyle(){
   imp(card,'transform','none');
   imp(card,'padding','0 14px 14px');
   imp(card,'border-radius','0');
+
+  /* Campos reais do modal Cliente: força formato totalmente quadrado. */
+  ['vxCliNome','vxCliTel','vxCliEmail'].forEach(id=>{
+    const input=$(id);
+    imp(input,'border-radius','0');
+    imp(input,'-webkit-border-radius','0');
+  });
   imp(card,'background','#0d0b10');
   imp(card,'border','1px solid rgba(163,101,232,.24)');
   imp(card,'box-shadow','0 14px 32px rgba(0,0,0,.28)');
