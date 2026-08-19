@@ -2253,3 +2253,15 @@
     border-radius:0!important;
   }
 }
+
+/* VYXORA ANDROID — CAMPOS DO MODAL CLIENTE 100% QUADRADOS */
+@media (max-width:768px){
+  .vx-clientes-modal-card input,
+  .vx-clientes-modal-card input[type="text"],
+  .vx-clientes-modal-card input[type="tel"],
+  .vx-clientes-modal-card input[type="email"],
+  .vx-clientes-modal-field,
+  .vx-clientes-modal-field input{
+    border-radius:0!important;
+  }
+}
