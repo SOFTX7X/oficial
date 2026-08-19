@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=98';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=99';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -3899,18 +3899,23 @@ function vxResetClienteModalKeyboardPosition(){
 function vxAjustarClienteModalTeclado(){
   const modal=$('vxClientesModal');
   const card=modal?.querySelector('.vx-clientes-modal-card');
-  const active=document.activeElement;
+  const email=$('vxCliEmail');
 
   if(!modal||!card||!modal.classList.contains('open')) return;
-  if(!active || !modal.contains(active) || !active.matches('input,textarea,select')) return;
 
-  // Zera antes de medir para nunca acumular deslocamento.
+  // SOMENTE o campo E-mail pode deslocar o modal.
+  if(document.activeElement!==email){
+    card.style.setProperty('transition','transform .18s ease','important');
+    card.style.setProperty('transform','translateY(0)','important');
+    return;
+  }
+
+  // Sempre mede a partir da posição normal.
   card.style.setProperty('transition','none','important');
   card.style.setProperty('transform','translateY(0)','important');
 
-  // Dá tempo para o teclado terminar de abrir.
   setTimeout(()=>{
-    if(!modal.classList.contains('open')) return;
+    if(!modal.classList.contains('open') || document.activeElement!==email) return;
 
     const vv=window.visualViewport;
     const saveBtn=$('vxClientesModalSave');
@@ -3923,14 +3928,11 @@ function vxAjustarClienteModalTeclado(){
       const btnRect=saveBtn.getBoundingClientRect();
       shift=Math.max(0,(btnRect.bottom+12)-visibleBottom);
     }else{
-      // Fallback estável para WebViews sem visualViewport.
-      if(active.id==='vxCliEmail') shift=170;
-      else if(active.id==='vxCliTel') shift=110;
-      else shift=60;
+      shift=150;
     }
 
-    // Limite para evitar o modal fugir demais da tela.
-    shift=Math.min(shift,220);
+    // Evita deslocamento exagerado.
+    shift=Math.min(shift,180);
 
     card.style.setProperty('transition','transform .18s ease','important');
     card.style.setProperty(
@@ -3938,7 +3940,7 @@ function vxAjustarClienteModalTeclado(){
       shift>0 ? `translateY(-${Math.ceil(shift)}px)` : 'translateY(0)',
       'important'
     );
-  },240);
+  },220);
 }
 window.vxAjustarClienteModalTeclado=vxAjustarClienteModalTeclado;
 
@@ -6174,24 +6176,36 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 
 
-// Modal Cliente: ajuste simples e estável ao abrir o teclado.
-// Sem listeners contínuos de resize/scroll para evitar travamento no Android.
+
+
+
+// Modal Cliente: somente o E-mail desloca o card para cima.
 document.addEventListener('focusin',(e)=>{
-  if(!e.target?.closest?.('#vxClientesModal')) return;
-  setTimeout(vxAjustarClienteModalTeclado,40);
+  const modal=$('vxClientesModal');
+  const card=modal?.querySelector('.vx-clientes-modal-card');
+  if(!modal||!card) return;
+
+  if(e.target?.id==='vxCliEmail'){
+    setTimeout(vxAjustarClienteModalTeclado,60);
+    return;
+  }
+
+  // Nome e WhatsApp ficam sempre na posição normal.
+  if(e.target?.id==='vxCliNome' || e.target?.id==='vxCliTel'){
+    card.style.setProperty('transition','transform .18s ease','important');
+    card.style.setProperty('transform','translateY(0)','important');
+  }
 });
 
 document.addEventListener('focusout',(e)=>{
-  if(!e.target?.closest?.('#vxClientesModal')) return;
+  if(e.target?.id!=='vxCliEmail') return;
   setTimeout(()=>{
     const modal=$('vxClientesModal');
     const card=modal?.querySelector('.vx-clientes-modal-card');
-    const active=document.activeElement;
-
-    if(card && (!active || !modal?.contains(active))){
+    if(card){
       card.style.setProperty('transition','transform .18s ease','important');
       card.style.setProperty('transform','translateY(0)','important');
     }
-  },180);
+  },120);
 });
 
