@@ -1079,12 +1079,12 @@
 
     <!-- VIEW: SERVIÇOS -->
     <section class="view premium-directory-view" id="view-servicos">
-      <div class="vx-servicos-mobile-head vx-clientes-mobile-head">
+      <div class="vx-servicos-mobile-head">
         <div><small>GESTÃO</small><h2>Serviços</h2></div>
-        <button type="button" class="vx-servicos-add vx-clientes-add" onclick="vxOpenServicoModal()">＋ ADICIONAR</button>
+        <button type="button" class="vx-servicos-add" onclick="vxOpenServicoModal()">＋ ADICIONAR</button>
       </div>
 
-      <div class="form-panel directory-form-panel vx-servicos-desktop-form vx-clientes-desktop-form">
+      <div class="form-panel directory-form-panel vx-servicos-desktop-form">
         <div class="directory-form-head"><div><div class="form-panel-title">Adicionar serviço</div><div class="directory-form-sub">Configure um serviço pronto para receber agendamentos.</div></div><span class="directory-form-badge">Novo serviço</span></div>
         <div class="form-grid directory-form-grid">
           <div class="field"><label>Nome do serviço</label><input id="srvNome" placeholder="Ex: Corte premium"></div>
@@ -1094,23 +1094,23 @@
         </div>
       </div>
 
-      <div class="vx-servicos-modal vx-clientes-modal" id="vxServicosModal" aria-hidden="true">
-        <section class="vx-servicos-modal-card vx-clientes-modal-card" role="dialog" aria-modal="true" aria-labelledby="vxServicosModalTitle">
-          <header class="vx-servicos-modal-head vx-clientes-modal-head">
+      <div class="vx-servicos-modal" id="vxServicosModal" aria-hidden="true">
+        <section class="vx-servicos-modal-card" role="dialog" aria-modal="true" aria-labelledby="vxServicosModalTitle">
+          <header class="vx-servicos-modal-head">
             <div><small>NOVO</small><strong id="vxServicosModalTitle">Serviço</strong></div>
-            <button type="button" class="vx-servicos-modal-close vx-clientes-modal-close" onclick="vxCloseServicoModal()" aria-label="Fechar">×</button>
+            <button type="button" class="vx-servicos-modal-close" onclick="vxCloseServicoModal()" aria-label="Fechar">×</button>
           </header>
-          <div class="vx-servicos-modal-body vx-clientes-modal-body">
-            <label class="vx-servicos-modal-field vx-clientes-modal-field"><span>Nome do serviço</span><input id="vxSrvNome" placeholder="Nome do serviço"></label>
-            <label class="vx-servicos-modal-field vx-clientes-modal-field"><span>Preço (R$)</span><input id="vxSrvPreco" type="number" inputmode="decimal" placeholder="80"></label>
-            <label class="vx-servicos-modal-field vx-clientes-modal-field"><span>Duração (min)</span><input id="vxSrvDur" type="number" inputmode="numeric" placeholder="60"></label>
+          <div class="vx-servicos-modal-body">
+            <label class="vx-servicos-modal-field"><span>Nome do serviço</span><input id="vxSrvNome" placeholder="Nome do serviço"></label>
+            <label class="vx-servicos-modal-field"><span>Preço (R$)</span><input id="vxSrvPreco" type="number" inputmode="decimal" placeholder="80"></label>
+            <label class="vx-servicos-modal-field"><span>Duração (min)</span><input id="vxSrvDur" type="number" inputmode="numeric" placeholder="60"></label>
           </div>
-          <button type="button" class="vx-servicos-modal-save vx-clientes-modal-save" id="vxServicosModalSave" onclick="vxSalvarServicoModal()">Adicionar serviço</button>
-          <div class="vx-servicos-success vx-clientes-success" id="vxServicosSuccess" hidden>
-            <div class="vx-servicos-success-icon vx-clientes-success-icon">✓</div>
+          <button type="button" class="vx-servicos-modal-save" id="vxServicosModalSave" onclick="vxSalvarServicoModal()">Adicionar serviço</button>
+          <div class="vx-servicos-success" id="vxServicosSuccess" hidden>
+            <div class="vx-servicos-success-icon">✓</div>
             <strong>Serviço adicionado</strong>
             <p id="vxServicosSuccessText">Serviço salvo com sucesso.</p>
-            <div class="vx-servicos-success-actions vx-clientes-success-actions">
+            <div class="vx-servicos-success-actions">
               <button type="button" onclick="vxCloseServicoModal()">Fechar</button>
               <button type="button" class="primary" onclick="vxNovoServicoAposSucesso()">Adicionar outro</button>
             </div>
@@ -1589,7 +1589,7 @@ try { localStorage.removeItem('vyxora-tema'); } catch (e) {}
 </script>
 <script defer src="financeiro-cobrancas.js?v=20260810-4"></script>
 
-<script defer src="app.js?v=20260819-REAL-SERVICOS-1"></script>
+<script defer src="app.js?v=20260819-SERVICOS-MOBILE-ONLY-1"></script>
 <script defer src="dashboard-pc.js?v=20260815-01"></script>
 </body>
 </html>

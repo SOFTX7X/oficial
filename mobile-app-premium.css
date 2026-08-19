@@ -2311,73 +2311,73 @@
 
 /* VYXORA MOBILE — SERVIÇOS NO MESMO PADRÃO DE AGENDA/CLIENTES */
 @media (max-width:768px){
-  #view-servicos .vx-servicos-disabled-disabled-mobile-head{
+  #view-servicos .vx-servicos-mobile-head{
     display:flex!important;align-items:center!important;justify-content:space-between!important;
     width:100%!important;min-height:118px!important;padding:22px 4px!important;margin:0 0 34px!important;
     border:0!important;border-bottom:1px solid rgba(168,85,247,.22)!important;border-radius:0!important;
     background:linear-gradient(180deg,rgba(23,13,31,.96),rgba(8,7,12,.96))!important;box-sizing:border-box!important;
   }
-  #view-servicos .vx-servicos-disabled-disabled-mobile-head small{display:block!important;color:#918995!important;font-size:15px!important;letter-spacing:.08em!important;margin-bottom:2px!important}
-  #view-servicos .vx-servicos-disabled-disabled-mobile-head h2{margin:0!important;font-size:23px!important;line-height:1!important;color:#f3eef7!important}
-  #view-servicos .vx-servicos-disabled-disabled-add{
+  #view-servicos .vx-servicos-mobile-head small{display:block!important;color:#918995!important;font-size:15px!important;letter-spacing:.08em!important;margin-bottom:2px!important}
+  #view-servicos .vx-servicos-mobile-head h2{margin:0!important;font-size:23px!important;line-height:1!important;color:#f3eef7!important}
+  #view-servicos .vx-servicos-add{
     min-height:56px!important;padding:0 20px!important;border:1px solid rgba(168,85,247,.38)!important;border-radius:0!important;
     background:rgba(74,31,105,.18)!important;color:#c89af8!important;font-weight:800!important;font-size:16px!important;
   }
-  #view-servicos .vx-servicos-disabled-disabled-desktop-form{display:none!important}
+  #view-servicos .vx-servicos-desktop-form{display:none!important}
   #view-servicos .premium-record-card,#view-servicos .service-info{border-radius:0!important}
 
-  .vx-servicos-disabled-modal{
+  .vx-servicos-modal{
     position:fixed!important;inset:0!important;z-index:2147483000!important;display:none!important;
     align-items:center!important;justify-content:center!important;padding:16px!important;box-sizing:border-box!important;
     background:#07060b!important;overflow:hidden!important;
   }
-  .vx-servicos-disabled-modal.open{display:flex!important}
-  .vx-servicos-disabled-modal-card{
+  .vx-servicos-modal.open{display:flex!important}
+  .vx-servicos-modal-card{
     width:100%!important;max-width:none!important;margin:0!important;border:1px solid rgba(168,85,247,.32)!important;border-radius:0!important;
     background:#0b090e!important;box-shadow:0 20px 55px rgba(0,0,0,.42)!important;overflow:hidden!important;
   }
-  .vx-servicos-disabled-modal-head{
+  .vx-servicos-modal-head{
     display:flex!important;align-items:center!important;justify-content:space-between!important;padding:18px 28px!important;
     border-bottom:1px solid rgba(255,255,255,.08)!important;border-radius:0!important;
   }
-  .vx-servicos-disabled-modal-head small{display:block!important;color:#918995!important;font-size:16px!important;letter-spacing:.08em!important}
-  .vx-servicos-disabled-modal-head strong{display:block!important;color:#f5f1f7!important;font-size:23px!important}
-  .vx-servicos-disabled-modal-close{
+  .vx-servicos-modal-head small{display:block!important;color:#918995!important;font-size:16px!important;letter-spacing:.08em!important}
+  .vx-servicos-modal-head strong{display:block!important;color:#f5f1f7!important;font-size:23px!important}
+  .vx-servicos-modal-close{
     width:60px!important;height:60px!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:0!important;
     background:#09090b!important;color:#aaa2b1!important;font-size:30px!important;cursor:pointer!important;
   }
-  .vx-servicos-disabled-modal-body{padding:24px 28px 0!important}
-  .vx-servicos-disabled-modal-field{display:block!important;margin:0 0 18px!important}
-  .vx-servicos-disabled-modal-field>span{display:block!important;margin-bottom:9px!important;color:#aaa1ae!important;font-weight:700!important;font-size:16px!important}
-  .vx-servicos-disabled-modal-field input{
+  .vx-servicos-modal-body{padding:24px 28px 0!important}
+  .vx-servicos-modal-field{display:block!important;margin:0 0 18px!important}
+  .vx-servicos-modal-field>span{display:block!important;margin-bottom:9px!important;color:#aaa1ae!important;font-weight:700!important;font-size:16px!important}
+  .vx-servicos-modal-field input{
     display:block!important;width:100%!important;height:78px!important;padding:0 20px!important;box-sizing:border-box!important;
     border:2px solid #29212e!important;border-radius:0!important;background:#08070b!important;color:#f4eff7!important;
     font-size:18px!important;font-weight:700!important;outline:none!important;
   }
-  .vx-servicos-disabled-modal-field input:focus{border-color:#7c3aed!important}
-  .vx-servicos-disabled-modal-save{
+  .vx-servicos-modal-field input:focus{border-color:#7c3aed!important}
+  .vx-servicos-modal-save{
     display:block!important;width:calc(100% - 56px)!important;height:88px!important;margin:6px 28px 28px!important;border:1px solid #9c4cff!important;
     border-radius:0!important;background:linear-gradient(90deg,#7e22ce,#8b25d0)!important;color:#fff!important;font-size:17px!important;font-weight:800!important;
   }
-  .vx-servicos-disabled-modal-body[hidden],.vx-servicos-disabled-modal-save[hidden],.vx-servicos-disabled-success[hidden]{display:none!important}
-  .vx-servicos-disabled-success{padding:48px 28px 56px!important;text-align:center!important}
-  .vx-servicos-disabled-success-icon{
+  .vx-servicos-modal-body[hidden],.vx-servicos-modal-save[hidden],.vx-servicos-success[hidden]{display:none!important}
+  .vx-servicos-success{padding:48px 28px 56px!important;text-align:center!important}
+  .vx-servicos-success-icon{
     display:grid!important;place-items:center!important;width:92px!important;height:92px!important;margin:0 auto 28px!important;
     border:1px solid rgba(168,85,247,.45)!important;border-radius:0!important;color:#b05cff!important;font-size:58px!important;
   }
-  .vx-servicos-disabled-success strong{display:block!important;color:#f5f1f7!important;font-size:28px!important;margin-bottom:12px!important}
-  .vx-servicos-disabled-success p{margin:0 0 42px!important;color:#9d949f!important;font-size:18px!important}
-  .vx-servicos-disabled-success-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:24px!important}
-  .vx-servicos-disabled-success-actions button{
+  .vx-servicos-success strong{display:block!important;color:#f5f1f7!important;font-size:28px!important;margin-bottom:12px!important}
+  .vx-servicos-success p{margin:0 0 42px!important;color:#9d949f!important;font-size:18px!important}
+  .vx-servicos-success-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:24px!important}
+  .vx-servicos-success-actions button{
     min-height:86px!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:0!important;background:#09090b!important;
     color:#bbb2c0!important;font-size:18px!important;font-weight:800!important;
   }
-  .vx-servicos-disabled-success-actions button.primary{background:#7e22ce!important;border-color:#9c4cff!important;color:#fff!important}
-  html:has(body.vx-servicos-disabled-modal-open),body.vx-servicos-disabled-modal-open{overflow:hidden!important;overscroll-behavior:none!important}
-  body.vx-servicos-disabled-modal-open .vx-float-launcher,body.vx-servicos-disabled-modal-open .vx-float-panel{display:none!important}
+  .vx-servicos-success-actions button.primary{background:#7e22ce!important;border-color:#9c4cff!important;color:#fff!important}
+  html:has(body.vx-servicos-modal-open),body.vx-servicos-modal-open{overflow:hidden!important;overscroll-behavior:none!important}
+  body.vx-servicos-modal-open .vx-float-launcher,body.vx-servicos-modal-open .vx-float-panel{display:none!important}
 }
 @media (min-width:769px){
-  #view-servicos .vx-servicos-disabled-disabled-mobile-head,.vx-servicos-disabled-modal{display:none!important}
+  #view-servicos .vx-servicos-mobile-head,.vx-servicos-modal{display:none!important}
 }
 
 
@@ -2388,7 +2388,7 @@
 @media (max-width:768px){
 
   /* Cabeçalho: mesmas proporções compactas das demais seções */
-  #view-servicos .vx-servicos-disabled-disabled-mobile-head{
+  #view-servicos .vx-servicos-mobile-head{
     width:100%!important;
     min-height:0!important;
     height:auto!important;
@@ -2403,20 +2403,20 @@
     border-radius:0!important;
     background:linear-gradient(180deg,rgba(23,13,31,.96),rgba(8,7,12,.96))!important;
   }
-  #view-servicos .vx-servicos-disabled-disabled-mobile-head small{
+  #view-servicos .vx-servicos-mobile-head small{
     margin:0 0 3px!important;
     font-size:15px!important;
     line-height:1.1!important;
     letter-spacing:.08em!important;
     font-weight:500!important;
   }
-  #view-servicos .vx-servicos-disabled-disabled-mobile-head h2{
+  #view-servicos .vx-servicos-mobile-head h2{
     margin:0!important;
     font-size:23px!important;
     line-height:1.05!important;
     font-weight:800!important;
   }
-  #view-servicos .vx-servicos-disabled-disabled-add{
+  #view-servicos .vx-servicos-add{
     width:auto!important;
     min-width:154px!important;
     height:56px!important;
@@ -2428,7 +2428,7 @@
   }
 
   /* Modal: mesma largura usada no Cliente: 16px de cada lado */
-  .vx-servicos-disabled-modal{
+  .vx-servicos-modal{
     inset:0!important;
     width:100%!important;
     height:100%!important;
@@ -2440,10 +2440,10 @@
     overflow:hidden!important;
     background:#07060b!important;
   }
-  .vx-servicos-disabled-modal.open{
+  .vx-servicos-modal.open{
     display:flex!important;
   }
-  .vx-servicos-disabled-modal-card{
+  .vx-servicos-modal-card{
     position:relative!important;
     width:100%!important;
     max-width:none!important;
@@ -2459,24 +2459,24 @@
   }
 
   /* Cabeçalho do modal = Cliente */
-  .vx-servicos-disabled-modal-head{
+  .vx-servicos-modal-head{
     min-height:88px!important;
     padding:14px 24px 14px 29px!important;
     box-sizing:border-box!important;
   }
-  .vx-servicos-disabled-modal-head small{
+  .vx-servicos-modal-head small{
     margin:0!important;
     font-size:16px!important;
     line-height:1.15!important;
     font-weight:400!important;
   }
-  .vx-servicos-disabled-modal-head strong{
+  .vx-servicos-modal-head strong{
     margin:1px 0 0!important;
     font-size:23px!important;
     line-height:1.1!important;
     font-weight:800!important;
   }
-  .vx-servicos-disabled-modal-close{
+  .vx-servicos-modal-close{
     width:60px!important;
     height:60px!important;
     min-width:60px!important;
@@ -2488,20 +2488,20 @@
   }
 
   /* Corpo: mesmas margens e campos do Cliente */
-  .vx-servicos-disabled-modal-body{
+  .vx-servicos-modal-body{
     padding:21px 29px 0!important;
     box-sizing:border-box!important;
   }
-  .vx-servicos-disabled-modal-field{
+  .vx-servicos-modal-field{
     margin:0 0 17px!important;
   }
-  .vx-servicos-disabled-modal-field>span{
+  .vx-servicos-modal-field>span{
     margin:0 0 9px!important;
     font-size:16px!important;
     line-height:1.2!important;
     font-weight:700!important;
   }
-  .vx-servicos-disabled-modal-field input{
+  .vx-servicos-modal-field input{
     width:100%!important;
     height:78px!important;
     min-height:78px!important;
@@ -2515,7 +2515,7 @@
   }
 
   /* Botão exatamente na mesma largura interna dos campos */
-  .vx-servicos-disabled-modal-save{
+  .vx-servicos-modal-save{
     width:calc(100% - 58px)!important;
     height:90px!important;
     min-height:90px!important;
@@ -2540,12 +2540,266 @@
   }
 }
 
-/* SERVIÇOS: visual herdado diretamente do padrão aprovado de CLIENTES */
+
+/* ============================================================
+   VYXORA — SERVIÇOS MOBILE ONLY
+   Desktop permanece 100% intacto.
+   ============================================================ */
 @media (max-width:768px){
-  #view-servicos .vx-clientes-mobile-head{display:flex!important}
-  #view-servicos .vx-clientes-desktop-form{display:none!important}
-  #vxServicosModal.vx-clientes-modal.open{display:flex!important}
-  #vxServicosModal .vx-clientes-modal-body[hidden],
-  #vxServicosModal .vx-clientes-modal-save[hidden],
-  #vxServicosModal .vx-clientes-success[hidden]{display:none!important}
+
+  /* esconde somente no mobile o cabeçalho grande antigo já injetado pelo sistema */
+  #view-servicos > .vx-mobile-view-head{
+    display:none!important;
+  }
+
+  /* formulário original continua existindo, mas só some no mobile */
+  #view-servicos > .directory-form-panel{
+    display:none!important;
+  }
+
+  #view-servicos{
+    padding-top:0!important;
+  }
+
+  /* mesmo cabeçalho compacto das outras telas mobile */
+  #view-servicos .vx-servicos-mobile-head{
+    min-height:42px!important;
+    height:42px!important;
+    margin:0 -10px 6px!important;
+    padding:5px 10px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    border:0!important;
+    border-bottom:1px solid rgba(174,114,255,.13)!important;
+    border-radius:0!important;
+    background:linear-gradient(180deg,rgba(18,13,23,.98),rgba(12,10,15,.96))!important;
+    box-sizing:content-box!important;
+  }
+  #view-servicos .vx-servicos-mobile-head small{
+    display:block!important;
+    margin:0!important;
+    color:#777080!important;
+    font-size:5px!important;
+    line-height:1!important;
+    letter-spacing:.18em!important;
+  }
+  #view-servicos .vx-servicos-mobile-head h2{
+    margin:2px 0 0!important;
+    color:#f3edf7!important;
+    font-size:12px!important;
+    line-height:1!important;
+    font-weight:800!important;
+  }
+  #view-servicos .vx-servicos-add{
+    height:27px!important;
+    min-height:27px!important;
+    padding:0 8px!important;
+    border:1px solid rgba(166,104,255,.25)!important;
+    border-radius:0!important;
+    background:rgba(132,72,220,.12)!important;
+    color:#c9a3ff!important;
+    font:800 5.8px Geist,Inter,sans-serif!important;
+    letter-spacing:.06em!important;
+  }
+
+  /* modal mobile no mesmo padrão visual do Cliente */
+  .vx-servicos-modal{
+    position:fixed!important;
+    inset:0!important;
+    z-index:100090!important;
+    display:none!important;
+    place-items:center!important;
+    width:100vw!important;
+    height:100dvh!important;
+    box-sizing:border-box!important;
+    padding:0 8px!important;
+    margin:0!important;
+    background:#08070d!important;
+    overflow:hidden!important;
+  }
+  .vx-servicos-modal.open{
+    display:grid!important;
+  }
+  .vx-servicos-modal-card{
+    width:calc(100vw - 16px)!important;
+    max-width:calc(100vw - 16px)!important;
+    max-height:calc(100dvh - 16px)!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+    margin:0 auto!important;
+    padding:0 14px 14px!important;
+    border:1px solid rgba(163,101,232,.24)!important;
+    border-radius:0!important;
+    background:#0d0b10!important;
+    box-shadow:0 14px 32px rgba(0,0,0,.28)!important;
+  }
+  .vx-servicos-modal-head{
+    height:44px!important;
+    min-height:44px!important;
+    margin:0 -14px 12px!important;
+    padding:0 12px 0 14px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    border-bottom:1px solid rgba(255,255,255,.055)!important;
+    border-radius:0!important;
+  }
+  .vx-servicos-modal-head small{
+    display:block!important;
+    margin:0 0 2px!important;
+    color:#7d7582!important;
+    font-size:6px!important;
+    line-height:1!important;
+    letter-spacing:.13em!important;
+  }
+  .vx-servicos-modal-head strong{
+    display:block!important;
+    color:#f0eaf4!important;
+    font-size:11px!important;
+    line-height:1!important;
+    font-weight:800!important;
+  }
+  .vx-servicos-modal-close{
+    width:30px!important;
+    height:30px!important;
+    min-width:30px!important;
+    min-height:30px!important;
+    padding:0!important;
+    display:grid!important;
+    place-items:center!important;
+    border:1px solid rgba(255,255,255,.07)!important;
+    border-radius:0!important;
+    background:#09080b!important;
+    color:#a198a8!important;
+    font-size:16px!important;
+  }
+  .vx-servicos-modal-body{
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+  .vx-servicos-modal-field{
+    width:100%!important;
+    display:grid!important;
+    gap:5px!important;
+    margin:0!important;
+  }
+  .vx-servicos-modal-field>span{
+    color:#918895!important;
+    font-size:7px!important;
+    line-height:1!important;
+    font-weight:780!important;
+  }
+  .vx-servicos-modal-field input{
+    width:100%!important;
+    height:48px!important;
+    min-height:48px!important;
+    box-sizing:border-box!important;
+    padding:0 12px!important;
+    border:1px solid rgba(165,105,226,.18)!important;
+    border-radius:0!important;
+    outline:0!important;
+    background:#09080b!important;
+    color:#eee8f2!important;
+    font:650 9px Geist,Inter,sans-serif!important;
+    box-shadow:none!important;
+  }
+  .vx-servicos-modal-save{
+    width:100%!important;
+    height:46px!important;
+    min-height:46px!important;
+    display:block!important;
+    margin:12px 0 0!important;
+    border:1px solid rgba(183,113,248,.30)!important;
+    border-radius:0!important;
+    background:#7823bb!important;
+    color:#fff!important;
+    font:800 8px Geist,Inter,sans-serif!important;
+  }
+
+  .vx-servicos-modal-body[hidden],
+  .vx-servicos-modal-save[hidden],
+  .vx-servicos-success[hidden]{
+    display:none!important;
+  }
+
+  .vx-servicos-success{
+    min-height:300px!important;
+    box-sizing:border-box!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:30px 22px 22px!important;
+    text-align:center!important;
+  }
+  .vx-servicos-success-icon{
+    width:48px!important;
+    height:48px!important;
+    display:grid!important;
+    place-items:center!important;
+    margin-bottom:15px!important;
+    border:1px solid rgba(163,101,232,.28)!important;
+    border-radius:0!important;
+    background:#0a090c!important;
+    color:#b676f0!important;
+    font-size:22px!important;
+    font-weight:800!important;
+  }
+  .vx-servicos-success strong{
+    color:#f0eaf4!important;
+    font-size:15px!important;
+    font-weight:800!important;
+  }
+  .vx-servicos-success p{
+    margin:8px 0 24px!important;
+    color:#8e8693!important;
+    font-size:11px!important;
+  }
+  .vx-servicos-success-actions{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:12px!important;
+  }
+  .vx-servicos-success-actions button{
+    height:44px!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    border-radius:0!important;
+    background:#0a090c!important;
+    color:#b9b0bf!important;
+    font:800 10px Geist,Inter,sans-serif!important;
+  }
+  .vx-servicos-success-actions button.primary{
+    border-color:rgba(182,112,247,.28)!important;
+    background:#7823bb!important;
+    color:#fff!important;
+  }
+
+  /* cards da tela Serviços ficam quadrados só no mobile */
+  #view-servicos .premium-record-card,
+  #view-servicos .premium-record-card *,
+  #view-servicos .directory-card,
+  #view-servicos .directory-card *{
+    border-radius:0!important;
+  }
+
+  body.vx-servicos-modal-open{
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+}
+
+/* GARANTIA DE DESKTOP:
+   nenhum elemento mobile de Serviços aparece acima de 768px. */
+@media (min-width:769px){
+  #view-servicos .vx-servicos-mobile-head,
+  .vx-servicos-modal{
+    display:none!important;
+  }
 }
