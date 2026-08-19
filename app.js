@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=99';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=100';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -4122,6 +4122,80 @@ async function salvarCliente() {
   if ($('cliEmail')) $('cliEmail').value = '';
   await loadAll(); showNotif('Cliente adicionado', nome + ' salvo com sucesso.', 'ok');
 }
+
+
+function vxResetServicoModal(){
+  const body=$('vxServicosModal')?.querySelector('.vx-servicos-modal-body');
+  const save=$('vxServicosModalSave');
+  const success=$('vxServicosSuccess');
+  if(body) body.hidden=false;
+  if(save){ save.hidden=false; save.disabled=false; }
+  if(success) success.hidden=true;
+  if($('vxSrvNome')) $('vxSrvNome').value='';
+  if($('vxSrvPreco')) $('vxSrvPreco').value='';
+  if($('vxSrvDur')) $('vxSrvDur').value='';
+}
+function vxOpenServicoModal(){
+  const modal=$('vxServicosModal');
+  if(!modal) return;
+  vxResetServicoModal();
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.classList.add('vx-servicos-modal-open');
+}
+function vxCloseServicoModal(){
+  const modal=$('vxServicosModal');
+  if(!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('vx-servicos-modal-open');
+  vxResetServicoModal();
+}
+function vxShowServicoSuccess(nome){
+  const body=$('vxServicosModal')?.querySelector('.vx-servicos-modal-body');
+  const save=$('vxServicosModalSave');
+  const success=$('vxServicosSuccess');
+  if(body) body.hidden=true;
+  if(save) save.hidden=true;
+  if(success) success.hidden=false;
+  if($('vxServicosSuccessText')) $('vxServicosSuccessText').textContent=`${nome} salvo com sucesso.`;
+}
+function vxNovoServicoAposSucesso(){
+  vxResetServicoModal();
+  $('vxSrvNome')?.focus();
+}
+async function vxSalvarServicoModal(){
+  const nome=($('vxSrvNome')?.value||'').trim();
+  if(!nome) return toast('Digite o nome.','err');
+  const btn=$('vxServicosModalSave');
+  if(btn) btn.disabled=true;
+  try{
+    const {error}=await db.from('agenda_servicos').insert({
+      empresa_id:state.empresa.id,
+      nome,
+      preco:Number($('vxSrvPreco')?.value||0),
+      duracao_minutos:Number($('vxSrvDur')?.value||60),
+      status:'ativo'
+    });
+    if(error) return toast('Erro ao salvar: '+error.message,'err');
+    await loadAll();
+    renderServicos();
+    renderStats();
+    if(typeof renderDashPremium==='function') renderDashPremium();
+    vxShowServicoSuccess(nome);
+  }finally{
+    if(btn) btn.disabled=false;
+  }
+}
+window.vxOpenServicoModal=vxOpenServicoModal;
+window.vxCloseServicoModal=vxCloseServicoModal;
+window.vxSalvarServicoModal=vxSalvarServicoModal;
+window.vxNovoServicoAposSucesso=vxNovoServicoAposSucesso;
+document.addEventListener('click',(e)=>{
+  const btn=e.target?.closest?.('.vx-servicos-modal-close');
+  if(!btn) return;
+  e.preventDefault(); e.stopPropagation(); vxCloseServicoModal();
+},true);
 
 async function salvarServico() {
   const nome = ($('srvNome')?.value || '').trim();

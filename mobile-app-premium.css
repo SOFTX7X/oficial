@@ -2308,3 +2308,74 @@
     will-change:transform!important;
   }
 }
+
+/* VYXORA MOBILE — SERVIÇOS NO MESMO PADRÃO DE AGENDA/CLIENTES */
+@media (max-width:768px){
+  #view-servicos .vx-servicos-mobile-head{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    width:100%!important;min-height:118px!important;padding:22px 4px!important;margin:0 0 34px!important;
+    border:0!important;border-bottom:1px solid rgba(168,85,247,.22)!important;border-radius:0!important;
+    background:linear-gradient(180deg,rgba(23,13,31,.96),rgba(8,7,12,.96))!important;box-sizing:border-box!important;
+  }
+  #view-servicos .vx-servicos-mobile-head small{display:block!important;color:#918995!important;font-size:15px!important;letter-spacing:.08em!important;margin-bottom:2px!important}
+  #view-servicos .vx-servicos-mobile-head h2{margin:0!important;font-size:23px!important;line-height:1!important;color:#f3eef7!important}
+  #view-servicos .vx-servicos-add{
+    min-height:56px!important;padding:0 20px!important;border:1px solid rgba(168,85,247,.38)!important;border-radius:0!important;
+    background:rgba(74,31,105,.18)!important;color:#c89af8!important;font-weight:800!important;font-size:16px!important;
+  }
+  #view-servicos .vx-servicos-desktop-form{display:none!important}
+  #view-servicos .premium-record-card,#view-servicos .service-info{border-radius:0!important}
+
+  .vx-servicos-modal{
+    position:fixed!important;inset:0!important;z-index:2147483000!important;display:none!important;
+    align-items:center!important;justify-content:center!important;padding:16px!important;box-sizing:border-box!important;
+    background:#07060b!important;overflow:hidden!important;
+  }
+  .vx-servicos-modal.open{display:flex!important}
+  .vx-servicos-modal-card{
+    width:100%!important;max-width:none!important;margin:0!important;border:1px solid rgba(168,85,247,.32)!important;border-radius:0!important;
+    background:#0b090e!important;box-shadow:0 20px 55px rgba(0,0,0,.42)!important;overflow:hidden!important;
+  }
+  .vx-servicos-modal-head{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;padding:18px 28px!important;
+    border-bottom:1px solid rgba(255,255,255,.08)!important;border-radius:0!important;
+  }
+  .vx-servicos-modal-head small{display:block!important;color:#918995!important;font-size:16px!important;letter-spacing:.08em!important}
+  .vx-servicos-modal-head strong{display:block!important;color:#f5f1f7!important;font-size:23px!important}
+  .vx-servicos-modal-close{
+    width:60px!important;height:60px!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:0!important;
+    background:#09090b!important;color:#aaa2b1!important;font-size:30px!important;cursor:pointer!important;
+  }
+  .vx-servicos-modal-body{padding:24px 28px 0!important}
+  .vx-servicos-modal-field{display:block!important;margin:0 0 18px!important}
+  .vx-servicos-modal-field>span{display:block!important;margin-bottom:9px!important;color:#aaa1ae!important;font-weight:700!important;font-size:16px!important}
+  .vx-servicos-modal-field input{
+    display:block!important;width:100%!important;height:78px!important;padding:0 20px!important;box-sizing:border-box!important;
+    border:2px solid #29212e!important;border-radius:0!important;background:#08070b!important;color:#f4eff7!important;
+    font-size:18px!important;font-weight:700!important;outline:none!important;
+  }
+  .vx-servicos-modal-field input:focus{border-color:#7c3aed!important}
+  .vx-servicos-modal-save{
+    display:block!important;width:calc(100% - 56px)!important;height:88px!important;margin:6px 28px 28px!important;border:1px solid #9c4cff!important;
+    border-radius:0!important;background:linear-gradient(90deg,#7e22ce,#8b25d0)!important;color:#fff!important;font-size:17px!important;font-weight:800!important;
+  }
+  .vx-servicos-modal-body[hidden],.vx-servicos-modal-save[hidden],.vx-servicos-success[hidden]{display:none!important}
+  .vx-servicos-success{padding:48px 28px 56px!important;text-align:center!important}
+  .vx-servicos-success-icon{
+    display:grid!important;place-items:center!important;width:92px!important;height:92px!important;margin:0 auto 28px!important;
+    border:1px solid rgba(168,85,247,.45)!important;border-radius:0!important;color:#b05cff!important;font-size:58px!important;
+  }
+  .vx-servicos-success strong{display:block!important;color:#f5f1f7!important;font-size:28px!important;margin-bottom:12px!important}
+  .vx-servicos-success p{margin:0 0 42px!important;color:#9d949f!important;font-size:18px!important}
+  .vx-servicos-success-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:24px!important}
+  .vx-servicos-success-actions button{
+    min-height:86px!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:0!important;background:#09090b!important;
+    color:#bbb2c0!important;font-size:18px!important;font-weight:800!important;
+  }
+  .vx-servicos-success-actions button.primary{background:#7e22ce!important;border-color:#9c4cff!important;color:#fff!important}
+  html:has(body.vx-servicos-modal-open),body.vx-servicos-modal-open{overflow:hidden!important;overscroll-behavior:none!important}
+  body.vx-servicos-modal-open .vx-float-launcher,body.vx-servicos-modal-open .vx-float-panel{display:none!important}
+}
+@media (min-width:769px){
+  #view-servicos .vx-servicos-mobile-head,.vx-servicos-modal{display:none!important}
+}
