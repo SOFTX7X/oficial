@@ -62,7 +62,7 @@ vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
 document.head.appendChild(vxMobileDashboardStyles);
 const vxMobilePremiumStyles = document.createElement('link');
 vxMobilePremiumStyles.rel = 'stylesheet';
-vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=95';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=96';
 document.head.appendChild(vxMobilePremiumStyles);
 const vxMobileDashboardScript = document.createElement('script');
 vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
@@ -3886,6 +3886,54 @@ function vxResetClienteModal(){
   if($('vxCliEmail')) $('vxCliEmail').value='';
 }
 
+
+let _vxClienteKeyboardRAF=0;
+
+function vxResetClienteModalKeyboardPosition(){
+  const card=document.querySelector('#vxClientesModal .vx-clientes-modal-card');
+  if(!card) return;
+  card.style.removeProperty('transform');
+  card.style.removeProperty('transition');
+}
+
+function vxAjustarClienteModalTeclado(){
+  cancelAnimationFrame(_vxClienteKeyboardRAF);
+  _vxClienteKeyboardRAF=requestAnimationFrame(()=>{
+    const modal=$('vxClientesModal');
+    const card=modal?.querySelector('.vx-clientes-modal-card');
+    if(!modal||!card||!modal.classList.contains('open')) return;
+
+    const vv=window.visualViewport;
+    const active=document.activeElement;
+    const isField=active && modal.contains(active) &&
+      active.matches('input, textarea, select, [contenteditable="true"]');
+
+    if(!vv || !isField){
+      vxResetClienteModalKeyboardPosition();
+      return;
+    }
+
+    const visibleTop=vv.offsetTop||0;
+    const visibleBottom=visibleTop+vv.height;
+    const fieldRect=active.getBoundingClientRect();
+    const cardRect=card.getBoundingClientRect();
+    const safeBottom=18;
+    const safeTop=12;
+
+    let shift=0;
+    if(fieldRect.bottom + safeBottom > visibleBottom){
+      shift=(fieldRect.bottom + safeBottom)-visibleBottom;
+    }
+
+    const maxShift=Math.max(0, cardRect.top-(visibleTop+safeTop));
+    shift=Math.min(shift,maxShift);
+
+    card.style.setProperty('transition','transform .18s ease','important');
+    card.style.setProperty('transform',shift>0?`translateY(-${Math.ceil(shift)}px)`:'translateY(0)','important');
+  });
+}
+window.vxAjustarClienteModalTeclado=vxAjustarClienteModalTeclado;
+
 function vxOpenClienteModal(){
   if(!vxClienteModalIsMobile()) return;
   const modal=$('vxClientesModal');
@@ -3924,7 +3972,11 @@ function vxOpenClienteModal(){
   modal.classList.add('open');
   modal.setAttribute('aria-hidden','false');
   document.body.classList.add('vx-clientes-modal-open');
-  setTimeout(()=>$('vxCliNome')?.focus(),80);
+  vxResetClienteModalKeyboardPosition();
+  setTimeout(()=>{
+    $('vxCliNome')?.focus();
+    vxAjustarClienteModalTeclado();
+  },80);
 }
 window.vxOpenClienteModal=vxOpenClienteModal;
 
@@ -3939,6 +3991,7 @@ function vxCloseClienteModal(){
   document.body.style.removeProperty('overflow');
   document.body.style.removeProperty('overscroll-behavior');
   document.documentElement.style.removeProperty('--vx-clientes-viewport-h');
+  vxResetClienteModalKeyboardPosition();
 }
 window.vxCloseClienteModal=vxCloseClienteModal;
 
@@ -6107,5 +6160,27 @@ document.addEventListener('DOMContentLoaded',()=>{
     closeBtn.addEventListener('touchend',forceClose,{passive:false});
     closeBtn.addEventListener('pointerup',forceClose,{passive:false});
   }
+});
+
+
+
+// Modal Cliente: mantém o campo ativo acima do teclado sem liberar rolagem.
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',vxAjustarClienteModalTeclado);
+  window.visualViewport.addEventListener('scroll',vxAjustarClienteModalTeclado);
+}
+document.addEventListener('focusin',(e)=>{
+  if(e.target?.closest?.('#vxClientesModal')){
+    setTimeout(vxAjustarClienteModalTeclado,60);
+  }
+});
+document.addEventListener('focusout',(e)=>{
+  if(!e.target?.closest?.('#vxClientesModal')) return;
+  setTimeout(()=>{
+    const modal=$('vxClientesModal');
+    const active=document.activeElement;
+    if(!modal?.contains(active)) vxResetClienteModalKeyboardPosition();
+    else vxAjustarClienteModalTeclado();
+  },120);
 });
 

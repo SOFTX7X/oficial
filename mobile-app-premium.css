@@ -2301,3 +2301,10 @@
     overscroll-behavior:none!important;
   }
 }
+
+/* VYXORA ANDROID — CLIENTE / SOBE ACIMA DO TECLADO */
+@media (max-width:768px){
+  body.vx-clientes-modal-open .vx-clientes-modal-card{
+    will-change:transform!important;
+  }
+}
