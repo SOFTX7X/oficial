@@ -2379,3 +2379,163 @@
 @media (min-width:769px){
   #view-servicos .vx-servicos-mobile-head,.vx-servicos-modal{display:none!important}
 }
+
+
+/* ============================================================
+   VYXORA — SERVIÇOS / MESMO TAMANHO E PROPORÇÃO DO CLIENTE
+   Correção visual final mobile.
+   ============================================================ */
+@media (max-width:768px){
+
+  /* Cabeçalho: mesmas proporções compactas das demais seções */
+  #view-servicos .vx-servicos-mobile-head{
+    width:100%!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:0 0 24px!important;
+    padding:20px 4px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    box-sizing:border-box!important;
+    border:0!important;
+    border-bottom:1px solid rgba(168,85,247,.22)!important;
+    border-radius:0!important;
+    background:linear-gradient(180deg,rgba(23,13,31,.96),rgba(8,7,12,.96))!important;
+  }
+  #view-servicos .vx-servicos-mobile-head small{
+    margin:0 0 3px!important;
+    font-size:15px!important;
+    line-height:1.1!important;
+    letter-spacing:.08em!important;
+    font-weight:500!important;
+  }
+  #view-servicos .vx-servicos-mobile-head h2{
+    margin:0!important;
+    font-size:23px!important;
+    line-height:1.05!important;
+    font-weight:800!important;
+  }
+  #view-servicos .vx-servicos-add{
+    width:auto!important;
+    min-width:154px!important;
+    height:56px!important;
+    min-height:56px!important;
+    padding:0 18px!important;
+    font-size:16px!important;
+    line-height:1!important;
+    border-radius:0!important;
+  }
+
+  /* Modal: mesma largura usada no Cliente: 16px de cada lado */
+  .vx-servicos-modal{
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    padding:16px!important;
+    display:none!important;
+    align-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+    background:#07060b!important;
+  }
+  .vx-servicos-modal.open{
+    display:flex!important;
+  }
+  .vx-servicos-modal-card{
+    position:relative!important;
+    width:100%!important;
+    max-width:none!important;
+    height:auto!important;
+    max-height:calc(100dvh - 32px)!important;
+    margin:0!important;
+    padding:0!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+    border:1px solid rgba(168,85,247,.32)!important;
+    border-radius:0!important;
+    background:#0b090e!important;
+  }
+
+  /* Cabeçalho do modal = Cliente */
+  .vx-servicos-modal-head{
+    min-height:88px!important;
+    padding:14px 24px 14px 29px!important;
+    box-sizing:border-box!important;
+  }
+  .vx-servicos-modal-head small{
+    margin:0!important;
+    font-size:16px!important;
+    line-height:1.15!important;
+    font-weight:400!important;
+  }
+  .vx-servicos-modal-head strong{
+    margin:1px 0 0!important;
+    font-size:23px!important;
+    line-height:1.1!important;
+    font-weight:800!important;
+  }
+  .vx-servicos-modal-close{
+    width:60px!important;
+    height:60px!important;
+    min-width:60px!important;
+    min-height:60px!important;
+    padding:0!important;
+    border-radius:0!important;
+    font-size:29px!important;
+    line-height:1!important;
+  }
+
+  /* Corpo: mesmas margens e campos do Cliente */
+  .vx-servicos-modal-body{
+    padding:21px 29px 0!important;
+    box-sizing:border-box!important;
+  }
+  .vx-servicos-modal-field{
+    margin:0 0 17px!important;
+  }
+  .vx-servicos-modal-field>span{
+    margin:0 0 9px!important;
+    font-size:16px!important;
+    line-height:1.2!important;
+    font-weight:700!important;
+  }
+  .vx-servicos-modal-field input{
+    width:100%!important;
+    height:78px!important;
+    min-height:78px!important;
+    padding:0 20px!important;
+    box-sizing:border-box!important;
+    border:2px solid #29212e!important;
+    border-radius:0!important;
+    font-size:18px!important;
+    line-height:1!important;
+    font-weight:700!important;
+  }
+
+  /* Botão exatamente na mesma largura interna dos campos */
+  .vx-servicos-modal-save{
+    width:calc(100% - 58px)!important;
+    height:90px!important;
+    min-height:90px!important;
+    margin:7px 29px 29px!important;
+    padding:0 16px!important;
+    box-sizing:border-box!important;
+    border-radius:0!important;
+    font-size:17px!important;
+    line-height:1!important;
+    font-weight:800!important;
+  }
+
+  /* Catálogo/cards continuam quadrados */
+  #view-servicos .directory-list-head{
+    margin-top:0!important;
+  }
+  #view-servicos .premium-record-card,
+  #view-servicos .service-info,
+  #view-servicos .directory-card,
+  #view-servicos .card{
+    border-radius:0!important;
+  }
+}
