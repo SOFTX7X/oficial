@@ -3898,6 +3898,7 @@ function vxResetClienteModalKeyboardPosition(){
 
 function vxAjustarClienteModalTeclado(){
   cancelAnimationFrame(_vxClienteKeyboardRAF);
+
   _vxClienteKeyboardRAF=requestAnimationFrame(()=>{
     const modal=$('vxClientesModal');
     const card=modal?.querySelector('.vx-clientes-modal-card');
@@ -3913,23 +3914,30 @@ function vxAjustarClienteModalTeclado(){
       return;
     }
 
-    const visibleTop=vv.offsetTop||0;
-    const visibleBottom=visibleTop+vv.height;
-    const fieldRect=active.getBoundingClientRect();
-    const cardRect=card.getBoundingClientRect();
-    const safeBottom=18;
-    const safeTop=12;
+    card.style.setProperty('transition','none','important');
+    card.style.setProperty('transform','translateY(0)','important');
 
-    let shift=0;
-    if(fieldRect.bottom + safeBottom > visibleBottom){
-      shift=(fieldRect.bottom + safeBottom)-visibleBottom;
-    }
+    requestAnimationFrame(()=>{
+      if(!modal.classList.contains('open')) return;
 
-    const maxShift=Math.max(0, cardRect.top-(visibleTop+safeTop));
-    shift=Math.min(shift,maxShift);
+      const visibleTop=vv.offsetTop||0;
+      const visibleBottom=visibleTop+vv.height;
 
-    card.style.setProperty('transition','transform .18s ease','important');
-    card.style.setProperty('transform',shift>0?`translateY(-${Math.ceil(shift)}px)`:'translateY(0)','important');
+      const saveBtn=$('vxClientesModalSave');
+      const success=$('vxClientesSuccess');
+      const targetEl=(success && !success.hidden) ? success : (saveBtn || card);
+      const targetRect=targetEl.getBoundingClientRect();
+
+      const safeBottom=14;
+      const shift=Math.max(0,(targetRect.bottom+safeBottom)-visibleBottom);
+
+      card.style.setProperty('transition','transform .18s ease','important');
+      card.style.setProperty(
+        'transform',
+        shift>0 ? `translateY(-${Math.ceil(shift)}px)` : 'translateY(0)',
+        'important'
+      );
+    });
   });
 }
 window.vxAjustarClienteModalTeclado=vxAjustarClienteModalTeclado;
