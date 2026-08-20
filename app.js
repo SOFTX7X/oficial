@@ -4136,9 +4136,20 @@ function vxResetServicoModal(){
   if($('vxSrvDur')) $('vxSrvDur').value='';
 }
 function vxOpenServicoModal(){
+  if(!window.matchMedia('(max-width:768px)').matches) return;
+
   const modal=$('vxServicosModal');
   if(!modal) return;
+
+  if(modal.parentElement!==document.body){
+    document.body.appendChild(modal);
+  }
+
   vxResetServicoModal();
+
+  modal.style.removeProperty('display');
+  modal.style.removeProperty('pointer-events');
+
   modal.classList.add('open');
   modal.setAttribute('aria-hidden','false');
   document.body.classList.add('vx-servicos-modal-open');
