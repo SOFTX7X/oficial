@@ -2941,16 +2941,22 @@
     background:linear-gradient(180deg,rgba(18,13,23,.98),rgba(12,10,15,.96))!important;
     box-shadow:0 8px 24px rgba(0,0,0,.12)!important;
   }
+  body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head > div {
+    min-height:27px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+  }
   body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head small {
-    margin:0 0 1px!important;
+    margin:0 0 2px!important;
     color:#898292!important;
-    font-size:6.5px!important;
-    line-height:1.05!important;
+    font-size:7px!important;
+    line-height:1!important;
     letter-spacing:.04em!important;
   }
   body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head h1 {
-    font-size:8.5px!important;
-    line-height:1.15!important;
+    font-size:10.5px!important;
+    line-height:1.1!important;
     font-weight:700!important;
     letter-spacing:0!important;
   }
