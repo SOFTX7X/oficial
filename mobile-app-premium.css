@@ -661,6 +661,7 @@
   .vx-agenda-add-grid span{display:block;margin-top:10px;font-size:7px;font-weight:800;letter-spacing:.04em}
   .vx-agenda-add-grid small{display:block;margin-top:3px;color:#625b68;font-size:5.7px}
 }
+
 @media (min-width:769px){
   .vx-agenda-mobile-head,.vx-agenda-datebar,.vx-agenda-date-picker,.vx-agenda-add-sheet,.vx-agenda-form-mobile-head{display:none!important}
 }
@@ -2901,5 +2902,62 @@
   body.vx-servicos-modal-open{
     overflow:hidden!important;
     overscroll-behavior:none!important;
+  }
+}
+
+/* ============================================================
+   VYXORA ANDROID — ESTRUTURA 100% QUADRADA
+   Esta é a trava final do arquivo. Mantém todas as medidas e
+   não alcança o painel desktop.
+   ============================================================ */
+@media (max-width:768px){
+  html body.vx-android-dashboard.vx-android-dashboard #dashboardView *,
+  html body.vx-android-dashboard.vx-android-dashboard #dashboardView *::before,
+  html body.vx-android-dashboard.vx-android-dashboard #dashboardView *::after,
+  body.vx-android-dashboard > .vx-float-launcher,
+  body.vx-android-dashboard > .vx-float-launcher::before,
+  body.vx-android-dashboard > .vx-float-launcher::after,
+  body.vx-android-dashboard > .vx-float-panel,
+  body.vx-android-dashboard > .vx-float-panel *,
+  body.vx-android-dashboard > .vx-menu-backdrop,
+  body.vx-android-dashboard > .modal-overlay .modal,
+  body.vx-android-dashboard > .edit-overlay .edit-modal,
+  body.vx-android-dashboard > .vx-charge-overlay .vx-charge-modal,
+  body.vx-android-dashboard > .vx-doc-overlay .vx-doc-shell {
+    border-radius:0!important;
+  }
+
+  /* Mesma altura, respiro e superfície plana do cabeçalho do Dashboard. */
+  body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head {
+    min-height:66px!important;
+    margin:0 -10px 8px!important;
+    padding:calc(13px + env(safe-area-inset-top,0px)) 15px 9px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head small {
+    margin-bottom:2px!important;
+    color:#898292!important;
+    font-size:8px!important;
+    letter-spacing:.04em!important;
+  }
+  body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head h1 {
+    font-size:11px!important;
+    font-weight:700!important;
+    letter-spacing:0!important;
+  }
+  body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head p {
+    display:none!important;
+  }
+  body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head .vx-mobile-view-mark {
+    width:31px!important;
+    height:31px!important;
+    flex-basis:31px!important;
+    border-color:#29242f!important;
+    background:#121016!important;
+    color:#c9c2d0!important;
+    box-shadow:none!important;
   }
 }
