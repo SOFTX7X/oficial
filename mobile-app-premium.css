@@ -2927,24 +2927,30 @@
     border-radius:0!important;
   }
 
-  /* Mesma altura, respiro e superfície plana do cabeçalho do Dashboard. */
+  /* Cabeçalho das seções: mesmas medidas e superfície do Dashboard. */
   body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head {
-    min-height:66px!important;
-    margin:0 -10px 8px!important;
-    padding:calc(13px + env(safe-area-inset-top,0px)) 15px 9px!important;
+    width:auto!important;
+    box-sizing:border-box!important;
+    min-height:50px!important;
+    margin:-10px -10px 8px!important;
+    padding:calc(6px + env(safe-area-inset-top,0px)) 12px 6px!important;
+    gap:10px!important;
     border:0!important;
+    border-bottom:1px solid rgba(174,114,255,.13)!important;
     border-radius:0!important;
-    background:transparent!important;
-    box-shadow:none!important;
+    background:linear-gradient(180deg,rgba(18,13,23,.98),rgba(12,10,15,.96))!important;
+    box-shadow:0 8px 24px rgba(0,0,0,.12)!important;
   }
   body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head small {
-    margin-bottom:2px!important;
+    margin:0 0 1px!important;
     color:#898292!important;
-    font-size:8px!important;
+    font-size:6.5px!important;
+    line-height:1.05!important;
     letter-spacing:.04em!important;
   }
   body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head h1 {
-    font-size:11px!important;
+    font-size:8.5px!important;
+    line-height:1.15!important;
     font-weight:700!important;
     letter-spacing:0!important;
   }
@@ -2952,9 +2958,9 @@
     display:none!important;
   }
   body.vx-android-dashboard .view:not(#view-dashboard) > .vx-mobile-view-head .vx-mobile-view-mark {
-    width:31px!important;
-    height:31px!important;
-    flex-basis:31px!important;
+    width:27px!important;
+    height:27px!important;
+    flex-basis:27px!important;
     border-color:#29242f!important;
     background:#121016!important;
     color:#c9c2d0!important;
