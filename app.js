@@ -1,5231 +1,6295 @@
-const form = document.querySelector('#downloadForm');
-const input = document.querySelector('#mediaUrl');
-const note = document.querySelector('#formNote');
-const clearButton = document.querySelector('#clearButton');
-const youtubeSearchForm = document.querySelector('#youtubeSearchForm');
-const youtubeSearchInput = document.querySelector('#youtubeSearchInput');
-const youtubeSearchNote = document.querySelector('#youtubeSearchNote');
-const youtubeSearchState = document.querySelector('#youtubeSearchState');
-const youtubeSearchResults = document.querySelector('#youtubeSearchResults');
-const pinterestForm = document.querySelector('#pinterestForm');
-const pinterestInput = document.querySelector('#pinterestProfile');
-const pinterestNote = document.querySelector('#pinterestFormNote');
-const pinterestClearButton = document.querySelector('#pinterestClearButton');
-const mp3Form = document.querySelector('#mp3Form');
-const mp3Input = document.querySelector('#mp3Url');
-const mp3Note = document.querySelector('#mp3FormNote');
-const mp3ClearButton = document.querySelector('#mp3ClearButton');
-const musicForm = document.querySelector('#musicForm');
-const musicInput = document.querySelector('#musicUrl');
-const musicNote = document.querySelector('#musicFormNote');
-const musicClearButton = document.querySelector('#musicClearButton');
-const thumbnailForm = document.querySelector('#thumbnailForm');
-const thumbnailInput = document.querySelector('#thumbnailUrl');
-const thumbnailNote = document.querySelector('#thumbnailFormNote');
-const thumbnailClearButton = document.querySelector('#thumbnailClearButton');
-const avatarForm = document.querySelector('#avatarForm');
-const avatarInput = document.querySelector('#avatarProfile');
-const avatarNote = document.querySelector('#avatarFormNote');
-const avatarClearButton = document.querySelector('#avatarClearButton');
-const mediaTab = document.querySelector('#mediaTab');
-const youtubeSearchTab = document.querySelector('#youtubeSearchTab');
-const pinterestTab = document.querySelector('#pinterestTab');
-const mp3Tab = document.querySelector('#mp3Tab');
-const musicTab = document.querySelector('#musicTab');
-const thumbnailTab = document.querySelector('#thumbnailTab');
-const avatarTab = document.querySelector('#avatarTab');
-const photosPdfTab = document.querySelector('#photosPdfTab');
-const createTab = document.querySelector('#createTab');
-const mediaToolPanel = document.querySelector('#mediaToolPanel');
-const youtubeSearchToolPanel = document.querySelector('#youtubeSearchToolPanel');
-const pinterestToolPanel = document.querySelector('#pinterestToolPanel');
-const mp3ToolPanel = document.querySelector('#mp3ToolPanel');
-const musicToolPanel = document.querySelector('#musicToolPanel');
-const thumbnailToolPanel = document.querySelector('#thumbnailToolPanel');
-const avatarToolPanel = document.querySelector('#avatarToolPanel');
-const photosPdfToolPanel = document.querySelector('#photosPdfToolPanel');
-const createToolPanel = document.querySelector('#createToolPanel');
-const homeAppPromo = document.querySelector('#homeAppPromo');
-
-function isOfficialSoftAndroidApp() {
-  // Recurso exclusivo do WebApp oficial: somente a ponte nativa SoftAndroid
-  // libera a Pesquisa YouTube. Navegadores comuns, inclusive no Android,
-  // não recebem essa interface.
-  try {
-    return typeof window !== 'undefined' && Boolean(window.SoftAndroid);
-  } catch (_) {
-    return false;
-  }
-}
-
-const resultScreen = document.querySelector('#resultScreen');
-const resultBack = document.querySelector('#resultBack');
-const resultLoading = document.querySelector('#resultLoading');
-const resultLoadingText = document.querySelector('#resultLoadingText');
-const resultLoadingHint = resultLoading?.querySelector('small');
-const resultError = document.querySelector('#resultError');
-const resultErrorTitle = document.querySelector('#resultErrorTitle');
-const resultErrorText = document.querySelector('#resultErrorText');
-const result = document.querySelector('#result');
-const resultStage = document.querySelector('.result-stage');
-const preview = document.querySelector('#resultPreview');
-const downloadLink = document.querySelector('#downloadLink');
-const carouselItems = document.querySelector('#carouselItems');
-const downloadStatus = document.querySelector('#downloadStatus');
-const downloadScreen = document.querySelector('#downloadScreen');
-const downloadProgressBack = document.querySelector('#downloadProgressBack');
-const downloadProgressTitle = document.querySelector('#downloadProgressTitle');
-const downloadProgressSummary = document.querySelector('#downloadProgressSummary');
-const downloadProgressSource = document.querySelector('#downloadProgressSource');
-const downloadProgressCover = document.querySelector('#downloadProgressCover');
-const downloadProgressContentTitle = document.querySelector('#downloadProgressContentTitle');
-const downloadProgressContentMeta = document.querySelector('#downloadProgressContentMeta');
-const downloadProgressList = document.querySelector('#downloadProgressList');
-const downloadProgressCancel = document.querySelector('#downloadProgressCancel');
-const mobileMenuToggle = document.querySelector('#mobileMenuToggle');
-const mobileMenu = document.querySelector('#sideNav');
-const sidebarBackdrop = document.querySelector('#sidebarBackdrop');
-const themeToggles = document.querySelectorAll('[data-theme-toggle]');
-const themeLabels = document.querySelectorAll('[data-theme-label]');
-const historyOpenButtons = document.querySelectorAll('[data-open-history]');
-const historyCountBadges = document.querySelectorAll('[data-history-count]');
-const historyScreen = document.querySelector('#historyScreen');
-const historyBack = document.querySelector('#historyBack');
-const historyEnabled = document.querySelector('#historyEnabled');
-const historyClear = document.querySelector('#historyClear');
-const historyPrivacy = document.querySelector('#historyPrivacy');
-const historyFeedback = document.querySelector('#historyFeedback');
-const historyEmpty = document.querySelector('#historyEmpty');
-const historyList = document.querySelector('#historyList');
-const appViews = [...document.querySelectorAll('[data-app-view]')];
-const viewLinks = [...document.querySelectorAll('[data-view-target]')];
-const siteNotice = document.querySelector('.site-notice');
-
-const DEFAULT_NOTE = 'Analisa fotos e vídeos públicos das plataformas acima e prepara o arquivo automaticamente para download.';
-const DEFAULT_PINTEREST_NOTE = 'Busca somente as mídias públicas da área CRIADOS do perfil informado.';
-const DEFAULT_MP3_NOTE = 'Converte vídeos públicos compatíveis das plataformas acima para MP3 em 192 kbps.';
-const DEFAULT_MUSIC_NOTE = 'Compatível com YouTube, SoundCloud, Bandcamp, Audius, BandLab e links diretos de áudio.';
-const DEFAULT_THUMBNAIL_NOTE = 'Disponível para YouTube, Twitch, Kick e Dailymotion.';
-const DEFAULT_AVATAR_NOTE = 'Não precisa de login. Informe um @ ou link de perfil do Instagram.';
-const THUMBNAIL_SOURCES = new Set(['youtube', 'twitch', 'kick', 'dailymotion']);
-const MUSIC_SOURCES = new Set(['soundcloud', 'bandcamp', 'audius', 'bandlab']);
-
-const DIRECT_MEDIA_EXTENSIONS = new Set(['mp4', 'webm', 'mov', 'm4v', 'jpg', 'jpeg', 'png', 'webp', 'gif', 'avif']);
-const DIRECT_VIDEO_EXTENSIONS = new Set(['mp4', 'webm', 'mov', 'm4v']);
-const DIRECT_AUDIO_EXTENSIONS = new Set(['mp3', 'm4a', 'wav', 'ogg', 'opus', 'aac']);
-const PLATFORM_RULES = [
-  { source: 'instagram', label: 'Instagram', hosts: ['instagram.com', 'instagr.am'] },
-  { source: 'tiktok', label: 'TikTok', hosts: ['tiktok.com'] },
-  { source: 'facebook', label: 'Facebook', hosts: ['facebook.com', 'fb.watch', 'fb.com'] },
-  { source: 'youtube', label: 'YouTube', hosts: ['youtube.com', 'youtube-nocookie.com', 'youtu.be'] },
-  { source: 'bilibili', label: 'Bilibili', hosts: ['bilibili.com', 'b23.tv'] },
-  { source: 'twitter', label: 'X', hosts: ['x.com', 'twitter.com'] },
-  { source: 'pinterest', label: 'Pinterest', hosts: ['pinterest.com', 'pin.it'] },
-  { source: 'kwai', label: 'Kwai', hosts: ['kwai.com', 'kwai-video.com', 'kw.ai'] },
-  { source: 'dailymotion', label: 'Dailymotion', hosts: ['dailymotion.com', 'dai.ly'] },
-  { source: 'linkedin', label: 'LinkedIn', hosts: ['linkedin.com', 'lnkd.in'] },
-  { source: 'twitch', label: 'Twitch', hosts: ['twitch.tv'] },
-  { source: 'kick', label: 'Kick', hosts: ['kick.com'] },
-  { source: 'soundcloud', label: 'SoundCloud', hosts: ['soundcloud.com'] },
-  { source: 'bandcamp', label: 'Bandcamp', hosts: ['bandcamp.com'] },
-  { source: 'audius', label: 'Audius', hosts: ['audius.co'] },
-  { source: 'bandlab', label: 'BandLab', hosts: ['bandlab.com'] },
-];
-const MEDIA_SOURCES = new Set(['instagram', 'tiktok', 'facebook', 'youtube', 'bilibili', 'twitter', 'pinterest', 'kwai', 'dailymotion', 'linkedin', 'twitch', 'kick']);
-const MP3_VIDEO_SOURCES = new Set(MEDIA_SOURCES);
-const MUSIC_TOOL_SOURCES = new Set(['youtube', 'soundcloud', 'bandcamp', 'audius', 'bandlab']);
-const THUMBNAIL_TOOL_SOURCES = new Set(['youtube', 'twitch', 'kick', 'dailymotion']);
-
-const WORKER_MEDIA_HOST = 'api.forgeaioficial.online';
-const HISTORY_DB_NAME = 'soft-downloaders-local';
-const HISTORY_DB_VERSION = 1;
-const HISTORY_MAX_ITEMS = 30;
-const ANALYSIS_CACHE_TTL_MS = 4 * 60 * 1000;
-const ANALYSIS_CACHE_MAX_ITEMS = 24;
-const ANALYSIS_REQUEST_TIMEOUT_MS = 48 * 1000;
-const LONG_YOUTUBE_VIDEO_SECONDS = 60 * 60;
-const analysisCache = new Map();
-let activeResultItems = [];
-let activeRequest = { tool: 'media', url: '' };
-let historyReplayPending = null;
-let historyDbPromise = null;
-let historyEnabledCache = true;
-let historyClearConfirmTimer = null;
-let historyGroupView = null;
-let historyGroupReturnScroll = 0;
-let activeDownloadSession = null;
-
-function installFooterSocialLinks() {
-  const footer = document.querySelector('body > footer');
-  if (!footer || footer.querySelector('.footer-socials')) return;
-
-  const socials = document.createElement('div');
-  socials.className = 'footer-socials';
-  socials.setAttribute('aria-label', 'Redes sociais oficiais');
-  socials.innerHTML = `
-    <a href="https://www.instagram.com/codenoficial/" target="_blank" rel="noopener noreferrer" aria-label="Instagram CODEN OFICIAL">Instagram <strong>@codenoficial</strong></a>
-    <span aria-hidden="true">•</span>
-    <a href="https://www.tiktok.com/@codenoficialbr" target="_blank" rel="noopener noreferrer" aria-label="TikTok CODEN OFICIAL">TikTok <strong>@codenoficialbr</strong></a>
-  `;
-  footer.appendChild(socials);
-}
-
-installFooterSocialLinks();
-
-function cloneAnalysisPayload(value) {
-  if (typeof structuredClone === 'function') {
-    try { return structuredClone(value); } catch (_) {}
-  }
-  return JSON.parse(JSON.stringify(value));
-}
-
-function canonicalAnalysisKey(rawUrl, mode = 'media') {
-  try {
-    const url = new URL(String(rawUrl || '').trim());
-    url.hash = '';
-    url.hostname = normalizeHost(url.hostname);
-    const removable = new Set([
-      'fbclid', 'gclid', 'igsh', 'igshid', 'si', 'feature', 'share_id',
-      'sender_device', 'is_from_webapp', '_r', '_t', 'utm_source', 'utm_medium',
-      'utm_campaign', 'utm_term', 'utm_content', 'utm_name', 'stkn',
-    ]);
-    [...url.searchParams.keys()].forEach((key) => {
-      const lower = key.toLowerCase();
-      if (lower.startsWith('utm_') || removable.has(lower)) url.searchParams.delete(key);
-    });
-    url.searchParams.sort();
-    if (url.pathname.length > 1) url.pathname = url.pathname.replace(/\/+$/, '');
-    return `${mode}:${url.toString()}`;
-  } catch (_) {
-    return `${mode}:${String(rawUrl || '').trim()}`;
-  }
-}
-
-function pruneAnalysisCache() {
-  const now = Date.now();
-  for (const [key, entry] of analysisCache) {
-    if (!entry || entry.expires <= now) analysisCache.delete(key);
-  }
-  while (analysisCache.size > ANALYSIS_CACHE_MAX_ITEMS) {
-    analysisCache.delete(analysisCache.keys().next().value);
-  }
-}
-
-function getCachedAnalysis(rawUrl, mode = 'media') {
-  pruneAnalysisCache();
-  const key = canonicalAnalysisKey(rawUrl, mode);
-  const entry = analysisCache.get(key);
-  if (!entry || entry.expires <= Date.now()) {
-    analysisCache.delete(key);
-    return null;
-  }
-  // Renova a ordem LRU sem prolongar o prazo de validade dos proxy_ids.
-  analysisCache.delete(key);
-  analysisCache.set(key, entry);
-  return cloneAnalysisPayload(entry.data);
-}
-
-function setCachedAnalysis(rawUrl, mode, data) {
-  if (!data || data.status !== 'ready') return;
-  const key = canonicalAnalysisKey(rawUrl, mode);
-  analysisCache.set(key, {
-    expires: Date.now() + ANALYSIS_CACHE_TTL_MS,
-    data: cloneAnalysisPayload(data),
-  });
-  pruneAnalysisCache();
-}
-
-function invalidateCachedAnalysis(rawUrl, mode = 'media') {
-  if (!rawUrl) return;
-  analysisCache.delete(canonicalAnalysisKey(rawUrl, mode));
-}
-
-async function postAnalysisJson(path, payload, fallbackMessage) {
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), ANALYSIS_REQUEST_TIMEOUT_MS);
-  try {
-    const response = await fetch(path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      cache: 'no-store',
-      signal: controller.signal,
-    });
-    let data = {};
-    try { data = await response.json(); } catch (_) {}
-    if (!response.ok) throw new Error(data.error || fallbackMessage);
-    return data;
-  } catch (error) {
-    if (error?.name === 'AbortError') {
-      throw new Error('A análise demorou mais que o esperado. Tente novamente em instantes.');
-    }
-    throw error;
-  } finally {
-    window.clearTimeout(timeout);
-  }
-}
-
-async function requestExtraction(rawUrl, mode = 'media', fallbackMessage = 'Não foi possível analisar o link.') {
-  const cached = getCachedAnalysis(rawUrl, mode);
-  if (cached) return { data: cached, cached: true };
-  const data = await postAnalysisJson('/api/worker', { url: rawUrl, mode }, fallbackMessage);
-  setCachedAnalysis(rawUrl, mode, data);
-  return { data, cached: false };
-}
-
-async function requestDirectResolution(rawUrl, fallbackMessage = 'Não foi possível analisar o link.') {
-  return postAnalysisJson('/api/resolve', { url: rawUrl }, fallbackMessage);
-}
-
-function analysisLoadingCopy(validation, action = 'mídia') {
-  const label = validation?.label || 'Link';
-  return {
-    title: `${label} reconhecido.`,
-    detail: `Buscando ${action}, capa, título e informações disponíveis…`,
-  };
-}
-
-function hasWorkerProxy(data) {
-  if (!data || !['tiktok', 'youtube', 'bilibili'].includes(data.source)) return true;
-  if (data.proxy_id) return true;
-  const items = Array.isArray(data.items) ? data.items : [];
-  return items.length > 0 && items.every((item) => item && item.proxy_id);
-}
-
-const yearElement = document.querySelector('#year');
-if (yearElement) yearElement.textContent = new Date().getFullYear();
-
-function openHistoryDatabase() {
-  if (historyDbPromise) return historyDbPromise;
-  if (!('indexedDB' in window)) return Promise.reject(new Error('IndexedDB indisponível.'));
-
-  historyDbPromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open(HISTORY_DB_NAME, HISTORY_DB_VERSION);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains('downloads')) {
-        db.createObjectStore('downloads', { keyPath: 'id' });
-      }
-      if (!db.objectStoreNames.contains('settings')) {
-        db.createObjectStore('settings', { keyPath: 'key' });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error || new Error('Não foi possível abrir o histórico.'));
-  });
-  return historyDbPromise;
-}
-
-function idbRequest(request) {
-  return new Promise((resolve, reject) => {
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error || new Error('Falha ao acessar o histórico.'));
-  });
-}
-
-async function historyGetAll() {
-  const db = await openHistoryDatabase();
-  const store = db.transaction('downloads', 'readonly').objectStore('downloads');
-  const items = await idbRequest(store.getAll());
-  return items
-    .filter((item) => item?.tool !== 'album' && item?.mode !== 'album')
-    .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
-}
-
-async function historyPut(entry) {
-  const db = await openHistoryDatabase();
-  const store = db.transaction('downloads', 'readwrite').objectStore('downloads');
-  await idbRequest(store.put(entry));
-}
-
-async function historyDelete(id) {
-  const db = await openHistoryDatabase();
-  const store = db.transaction('downloads', 'readwrite').objectStore('downloads');
-  await idbRequest(store.delete(id));
-}
-
-async function historyClearAll() {
-  const db = await openHistoryDatabase();
-  const store = db.transaction('downloads', 'readwrite').objectStore('downloads');
-  await idbRequest(store.clear());
-}
-
-async function historyGetEnabled() {
-  const db = await openHistoryDatabase();
-  const store = db.transaction('settings', 'readonly').objectStore('settings');
-  const setting = await idbRequest(store.get('enabled'));
-  return setting ? setting.value !== false : true;
-}
-
-async function historySetEnabled(enabled) {
-  const db = await openHistoryDatabase();
-  const store = db.transaction('settings', 'readwrite').objectStore('settings');
-  await idbRequest(store.put({ key: 'enabled', value: Boolean(enabled) }));
-  historyEnabledCache = Boolean(enabled);
-}
-
-function historyEntryMatches(a, b) {
-  const aIsGroup = Array.isArray(a?.items) && a.items.length > 1;
-  const bIsGroup = Array.isArray(b?.items) && b.items.length > 1;
-  if (aIsGroup && bIsGroup) {
-    return a.originalUrl === b.originalUrl && a.tool === b.tool;
-  }
-  return a.originalUrl === b.originalUrl &&
-    a.tool === b.tool &&
-    a.mode === b.mode &&
-    Number(a.itemIndex ?? -1) === Number(b.itemIndex ?? -1) &&
-    String(a.filename || '') === String(b.filename || '');
-}
-
-async function rememberHistoryEntry(entry) {
-  if (!entry || !entry.originalUrl) return;
-  try {
-    historyEnabledCache = await historyGetEnabled();
-    if (!historyEnabledCache) return;
-    const current = await historyGetAll();
-    const duplicate = current.find((item) => historyEntryMatches(item, entry));
-    const saved = {
-      ...entry,
-      id: duplicate?.id || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-      createdAt: Date.now(),
-    };
-    await historyPut(saved);
-
-    const refreshed = await historyGetAll();
-    const overflow = refreshed.slice(HISTORY_MAX_ITEMS);
-    await Promise.all(overflow.map((item) => historyDelete(item.id)));
-    await refreshHistoryCount();
-  } catch (_) {
-    // O download continua normalmente mesmo se o navegador bloquear o histórico local.
-  }
-}
-
-function platformLabelForSource(source) {
-  const match = PLATFORM_RULES.find((rule) => rule.source === source);
-  return match?.label || (source === 'direct' ? 'Link direto' : 'Mídia');
-}
-
-function historyTypeLabel(entry) {
-  if (Array.isArray(entry?.items) && entry.items.length > 1) return `${entry.items.length} arquivos`;
-  if (entry.mode === 'all') return `${entry.count || 0} arquivos`;
-  if (entry.tool === 'thumbnail' || entry.mode === 'thumbnail') return 'Thumbnail';
-  if (entry.tool === 'avatar' || entry.mode === 'avatar') return 'Avatar';
-  if (entry.tool === 'mp3') return 'MP3';
-  if (entry.tool === 'music') return entry.mode === 'mp3' ? 'Música • MP3' : 'Música';
-  if (entry.mediaType === 'video') return 'Vídeo';
-  if (entry.mediaType === 'image') return 'Foto';
-  if (entry.mediaType === 'audio') return 'Áudio';
-  return 'Arquivo';
-}
-
-function historyIconLabel(entry) {
-  if (Array.isArray(entry?.items) && entry.items.length > 1) return 'LOTE';
-  if (entry.mode === 'all') return 'LOTE';
-  if (entry.tool === 'thumbnail' || entry.mode === 'thumbnail') return 'CAPA';
-  if (entry.tool === 'avatar' || entry.mode === 'avatar') return 'AVT';
-  if (entry.tool === 'mp3') return 'MP3';
-  if (entry.tool === 'music') return 'MÚS';
-  if (entry.mediaType === 'video') return 'VÍD';
-  if (entry.mediaType === 'image') return 'FOTO';
-  if (entry.mediaType === 'audio') return 'AUD';
-  return 'ARQ';
-}
-
-function formatHistoryDate(timestamp) {
-  try {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
-    }).format(new Date(timestamp));
-  } catch {
-    return '';
-  }
-}
-
-
-function historySnapshotForItem(data, index = 0) {
-  const source = data?.source || 'direct';
-  const mediaType = mediaTypeForDownload(data);
-  const filename = data?.filename || `soft-download-${index + 1}`;
-  const fallbackTitle = String(filename).replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
-  return {
-    itemIndex: index,
-    title: data?.title || fallbackTitle || `Mídia ${index + 1}`,
-    artist: data?.artist || data?.uploader || data?.author || data?.channel || data?.creator || data?.username || '',
-    thumbnail: data?.thumbnail || (mediaType === 'image' ? data?.url : '') || '',
-    source,
-    mediaType,
-    filename,
-  };
-}
-
-function buildHistoryEntry(data, options = {}) {
-  const source = data?.source || 'direct';
-  const mediaType = mediaTypeForDownload(data);
-  const filename = options.filename || data?.filename || 'soft-download';
-  const fallbackTitle = String(filename).replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim();
-  const author = data?.artist || data?.uploader || data?.author || data?.channel || data?.creator || data?.username || '';
-  const thumbnail = data?.thumbnail || (mediaType === 'image' ? data?.url : '') || '';
-  return {
-    originalUrl: activeRequest.url,
-    tool: activeRequest.tool,
-    mode: options.mode || downloadLink.dataset.mode || 'single',
-    itemIndex: Number.isInteger(options.itemIndex) ? options.itemIndex : -1,
-    count: Number(options.count || 0),
-    items: Array.isArray(options.items) ? options.items : undefined,
-    title: data?.title || fallbackTitle || `Conteúdo do ${platformLabelForSource(source)}`,
-    artist: author,
-    thumbnail,
-    source,
-    mediaType,
-    filename,
-  };
-}
-
-async function refreshHistoryCount() {
-  try {
-    const items = await historyGetAll();
-    historyCountBadges.forEach((badge) => {
-      badge.textContent = String(items.length);
-      badge.hidden = items.length === 0;
-    });
-  } catch (_) {
-    historyCountBadges.forEach((badge) => { badge.hidden = true; });
-  }
-}
-
-function showHistoryFeedback(message, isError = false) {
-  if (!historyFeedback) return;
-  historyFeedback.hidden = !message;
-  historyFeedback.textContent = message || '';
-  historyFeedback.classList.toggle('is-error', isError);
-}
-
-function closeHistoryGroup(restoreScroll = true) {
-  if (historyGroupView) {
-    historyGroupView.remove();
-    historyGroupView = null;
-  }
-  historyScreen?.classList.remove('has-group-open');
-  if (restoreScroll && historyScreen) {
-    historyScreen.scrollTop = historyGroupReturnScroll;
-  }
-}
-
-function openHistoryGroup(entry) {
-  const storedItems = Array.isArray(entry?.items) ? entry.items : [];
-  if (!storedItems.length || !historyScreen) {
-    showHistoryFeedback('Este registro antigo não possui as mídias salvas. Baixe o carrossel novamente para visualizar os arquivos aqui.', true);
-    return;
-  }
-
-  closeHistoryGroup(false);
-  historyGroupReturnScroll = historyScreen.scrollTop;
-  const panel = document.createElement('section');
-  panel.className = 'history-group-view';
-  panel.setAttribute('role', 'region');
-  panel.setAttribute('aria-label', `${storedItems.length} arquivos do histórico`);
-
-  const shell = document.createElement('div');
-  shell.className = 'history-group-shell';
-
-  const header = document.createElement('div');
-  header.className = 'history-group-header';
-
-  const back = document.createElement('button');
-  back.type = 'button';
-  back.className = 'history-group-back';
-  back.textContent = '← Voltar';
-  back.addEventListener('click', () => closeHistoryGroup());
-
-  const heading = document.createElement('div');
-  heading.className = 'history-group-heading';
-  const title = document.createElement('strong');
-  title.textContent = entry.title || 'Publicação';
-  const count = document.createElement('span');
-  count.textContent = `${storedItems.length} arquivos`;
-  heading.append(title, count);
-  header.append(back, heading);
-
-  const grid = document.createElement('div');
-  grid.className = 'carousel-grid history-group-grid';
-
-  storedItems.forEach((item, index) => {
-    const tile = document.createElement('article');
-    tile.className = 'carousel-tile history-group-tile';
-
-    const mediaFrame = document.createElement('div');
-    mediaFrame.className = 'carousel-media-frame';
-
-    const thumbnail = String(item.thumbnail || '').trim();
-    if (thumbnail) {
-      const image = document.createElement('img');
-      image.src = thumbnail;
-      image.alt = item.title ? `Prévia de ${item.title}` : `Mídia ${index + 1}`;
-      image.loading = 'lazy';
-      image.addEventListener('error', () => {
-        const fallback = document.createElement('div');
-        fallback.className = 'history-item-fallback';
-        fallback.textContent = historyIconLabel({ ...entry, ...item });
-        image.replaceWith(fallback);
-      }, { once: true });
-      mediaFrame.append(image);
-    } else {
-      const fallback = document.createElement('div');
-      fallback.className = 'history-item-fallback';
-      fallback.textContent = historyIconLabel({ ...entry, ...item });
-      mediaFrame.append(fallback);
-    }
-    tile.append(mediaFrame);
-
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'tile-download';
-    button.textContent = '↓';
-    button.title = `Baixar mídia ${index + 1} novamente`;
-    button.setAttribute('aria-label', `Baixar mídia ${index + 1} novamente`);
-    button.addEventListener('click', () => replayHistoryEntry({
-      ...entry,
-      mode: 'carousel-item',
-      itemIndex: Number.isInteger(item.itemIndex) ? item.itemIndex : index,
-      filename: item.filename || entry.filename,
-    }));
-
-    tile.append(button);
-    grid.append(tile);
-  });
-
-  const all = document.createElement('button');
-  all.type = 'button';
-  all.className = 'history-group-all';
-  all.textContent = 'BAIXAR TODOS NOVAMENTE';
-  all.addEventListener('click', () => replayHistoryEntry({ ...entry, mode: 'all' }));
-
-  shell.append(header, grid, all);
-  panel.append(shell);
-  historyScreen.append(panel);
-  historyGroupView = panel;
-  historyScreen.classList.add('has-group-open');
-  historyScreen.scrollTop = 0;
-  requestAnimationFrame(() => back.focus({ preventScroll: true }));
-}
-
-async function renderHistory() {
-  if (!historyList || !historyEmpty) return;
-  historyList.replaceChildren();
-  try {
-    historyEnabledCache = await historyGetEnabled();
-    if (historyEnabled) historyEnabled.checked = historyEnabledCache;
-    if (historyPrivacy) {
-      historyPrivacy.textContent = historyEnabledCache
-        ? 'Nada é enviado para servidor, conta ou banco de dados online. Limpar os dados do site/aplicativo também remove este histórico.'
-        : 'Histórico desativado. Novos downloads não serão salvos neste dispositivo.';
-    }
-
-    const items = await historyGetAll();
-    historyEmpty.hidden = items.length !== 0;
-
-    items.forEach((entry) => {
-      const card = document.createElement('article');
-      card.className = 'history-item';
-
-      // Usa o mesmo bloco quadrado do carrossel já existente no SOFT.
-      const media = document.createElement('div');
-      media.className = 'history-item-media carousel-tile';
-
-      const addFallback = () => {
-        media.replaceChildren();
-        const fallback = document.createElement('div');
-        fallback.className = 'history-item-fallback';
-        fallback.textContent = historyIconLabel(entry);
-        media.append(fallback);
-      };
-
-      const thumbnail = String(entry.thumbnail || '').trim();
-      if (thumbnail) {
-        const image = document.createElement('img');
-        image.src = thumbnail;
-        image.alt = entry.title ? `Capa de ${entry.title}` : 'Capa do download';
-        image.loading = 'lazy';
-        image.addEventListener('error', addFallback, { once: true });
-        media.append(image);
-      } else {
-        addFallback();
-      }
-
-      const copy = document.createElement('div');
-      copy.className = 'history-item-copy';
-
-      const title = document.createElement('strong');
-      title.className = 'history-item-title';
-      title.textContent = entry.title || 'Download';
-      copy.append(title);
-
-      if (entry.artist) {
-        const author = document.createElement('span');
-        author.className = 'history-item-author';
-        author.textContent = entry.artist;
-        copy.append(author);
-      }
-
-      const meta = document.createElement('div');
-      meta.className = 'history-item-meta';
-      const metadata = [
-        platformLabelForSource(entry.source),
-        historyTypeLabel(entry),
-      ];
-      metadata.filter(Boolean).forEach((value) => {
-        const span = document.createElement('span');
-        span.textContent = value;
-        meta.append(span);
-      });
-      copy.append(meta);
-
-      const date = document.createElement('span');
-      date.className = 'history-item-date';
-      date.textContent = formatHistoryDate(entry.createdAt);
-      copy.append(date);
-
-      const actions = document.createElement('div');
-      actions.className = 'history-item-actions';
-
-      const again = document.createElement('button');
-      again.type = 'button';
-      again.className = 'history-action';
-      if (Array.isArray(entry.items) && entry.items.length > 1) {
-        again.textContent = `VER ${entry.items.length} ARQUIVOS`;
-        again.addEventListener('click', () => openHistoryGroup(entry));
-      } else {
-        again.textContent = 'BAIXAR NOVAMENTE';
-        again.addEventListener('click', () => replayHistoryEntry(entry));
-      }
-
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.className = 'history-delete';
-      remove.textContent = 'EXCLUIR';
-      remove.setAttribute('aria-label', `Excluir ${entry.title || 'download'} do histórico`);
-      remove.addEventListener('click', async () => {
-        remove.disabled = true;
-        try {
-          await historyDelete(entry.id);
-          await renderHistory();
-          await refreshHistoryCount();
-          showHistoryFeedback('Item excluído do histórico.');
-        } catch (_) {
-          remove.disabled = false;
-          showHistoryFeedback('Não foi possível excluir este item.', true);
-        }
-      });
-
-      actions.append(again, remove);
-      card.append(media, copy, actions);
-      historyList.append(card);
-    });
-  } catch (_) {
-    historyEmpty.hidden = true;
-    if (historyEnabled) historyEnabled.disabled = true;
-    if (historyClear) historyClear.disabled = true;
-    showHistoryFeedback('O histórico local não está disponível neste navegador.', true);
-  }
-}
-
-function closeMobileMenu() {
-  if (!mobileMenu || !mobileMenuToggle) return;
-  mobileMenu.classList.remove('is-open');
-  if (sidebarBackdrop) sidebarBackdrop.hidden = true;
-  mobileMenuToggle.setAttribute('aria-expanded', 'false');
-  mobileMenuToggle.setAttribute('aria-label', 'Abrir menu');
-}
-
-function currentTheme() {
-  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
-}
-
-function applyTheme(theme, persist = true) {
-  const next = theme === 'light' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = next;
-  themeToggles.forEach((button) => {
-    button.setAttribute('aria-label', next === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro');
-    button.classList.toggle('is-light-theme', next === 'light');
-  });
-  themeLabels.forEach((label) => {
-    label.textContent = next === 'dark' ? 'Tema claro' : 'Tema escuro';
-  });
-  if (persist) {
-    try { localStorage.setItem('soft-theme', next); } catch (_) {}
-  }
-}
-
-applyTheme(currentTheme(), false);
-themeToggles.forEach((button) => {
-  button.addEventListener('click', (event) => {
-    event.stopPropagation();
-    applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
-  });
-});
-
-function openHistoryScreen() {
-  closeMobileMenu();
-  historyReturnHash = activeSectionHash === '#historico' ? '#midias' : activeSectionHash;
-  historyScreen.hidden = false;
-  document.body.classList.add('history-screen-open');
-  setSectionHash('#historico');
-  showHistoryFeedback('');
-  renderHistory();
-  requestAnimationFrame(() => historyBack?.focus({ preventScroll: true }));
-}
-
-function closeHistoryScreen() {
-  const wasOpen = Boolean(historyScreen && !historyScreen.hidden);
-  closeHistoryGroup();
-  historyScreen.hidden = true;
-  document.body.classList.remove('history-screen-open');
-  if (wasOpen) setSectionHash(historyReturnHash || '#midias');
-  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-}
-
-function historyFormForTool(tool) {
-  if (tool === 'pinterest') return { form: pinterestForm, input: pinterestInput, note: pinterestNote, defaultNote: DEFAULT_PINTEREST_NOTE, sync: syncPinterestClearButton };
-  if (tool === 'mp3') return { form: mp3Form, input: mp3Input, note: mp3Note, defaultNote: DEFAULT_MP3_NOTE, sync: syncMp3ClearButton };
-  if (tool === 'music') return { form: musicForm, input: musicInput, note: musicNote, defaultNote: DEFAULT_MUSIC_NOTE, sync: syncMusicClearButton };
-  if (tool === 'thumbnail') return { form: thumbnailForm, input: thumbnailInput, note: thumbnailNote, defaultNote: DEFAULT_THUMBNAIL_NOTE, sync: syncThumbnailClearButton };
-  if (tool === 'avatar') return { form: avatarForm, input: avatarInput, note: avatarNote, defaultNote: DEFAULT_AVATAR_NOTE, sync: syncAvatarClearButton };
-  return { form, input, note, defaultNote: DEFAULT_NOTE, sync: syncClearButton };
-}
-
-function replayHistoryEntry(entry) {
-  if (!entry?.originalUrl) return;
-  const tool = ['media', 'pinterest', 'mp3', 'music', 'thumbnail', 'avatar'].includes(entry.tool) ? entry.tool : 'media';
-  const target = historyFormForTool(tool);
-  historyReplayPending = entry;
-  closeHistoryScreen();
-  setActiveTool(tool);
-  target.input.value = entry.originalUrl;
-  target.sync();
-  updateLiveValidation(target.input, target.note, target.defaultNote, tool);
-  window.scrollTo({ top: 0, behavior: 'auto' });
-  window.setTimeout(() => target.form.requestSubmit(), 120);
-}
-
-function maybeReplayHistoryDownload() {
-  const pending = historyReplayPending;
-  if (!pending || pending.originalUrl !== activeRequest.url || pending.tool !== activeRequest.tool) return;
-  historyReplayPending = null;
-
-  window.setTimeout(() => {
-    if (pending.mode === 'all') {
-      downloadAllMedia(activeResultItems, downloadLink);
-      return;
-    }
-    if (pending.mode === 'carousel-item') {
-      const index = Math.max(0, Number(pending.itemIndex || 0));
-      const item = activeResultItems[index] || activeResultItems[0];
-      if (!item) return;
-      const mediaUrl = proxyMediaUrl(item.url, item.source, item.proxy_id, true);
-      const groupSnapshots = activeResultItems.map((media, itemIndex) => historySnapshotForItem(media, itemIndex));
-      downloadMedia(mediaUrl, item.filename || pending.filename || 'soft-download', downloadLink,
-        buildHistoryEntry(item, {
-          mode: 'carousel-item',
-          itemIndex: index,
-          filename: item.filename,
-          count: groupSnapshots.length,
-          items: groupSnapshots.length > 1 ? groupSnapshots : pending.items,
-        }));
-      return;
-    }
-
-    downloadLink.click();
-  }, 220);
-}
-
-if (mobileMenuToggle && mobileMenu) {
-  mobileMenuToggle.addEventListener('click', (event) => {
-    event.stopPropagation();
-    const willOpen = !mobileMenu.classList.contains('is-open');
-    mobileMenu.classList.toggle('is-open', willOpen);
-    if (sidebarBackdrop) sidebarBackdrop.hidden = !willOpen;
-    mobileMenuToggle.setAttribute('aria-expanded', String(willOpen));
-    mobileMenuToggle.setAttribute('aria-label', willOpen ? 'Fechar menu' : 'Abrir menu');
-  });
-  mobileMenu.addEventListener('click', (event) => event.stopPropagation());
-  mobileMenu.querySelectorAll('a[data-sidebar-close]').forEach((link) => link.addEventListener('click', closeMobileMenu));
-  sidebarBackdrop?.addEventListener('click', closeMobileMenu);
-}
-
-historyOpenButtons.forEach((button) => button.addEventListener('click', openHistoryScreen));
-historyBack?.addEventListener('click', closeHistoryScreen);
-
-historyEnabled?.addEventListener('change', async () => {
-  try {
-    await historySetEnabled(historyEnabled.checked);
-    if (historyPrivacy) {
-      historyPrivacy.textContent = historyEnabled.checked
-        ? 'Nada é enviado para servidor, conta ou banco de dados online. Limpar os dados do site/aplicativo também remove este histórico.'
-        : 'Histórico desativado. Novos downloads não serão salvos neste dispositivo.';
-    }
-    showHistoryFeedback(historyEnabled.checked
-      ? 'Histórico ativado neste dispositivo.'
-      : 'Histórico desativado. Os itens existentes continuam aqui até você excluí-los.');
-  } catch (_) {
-    historyEnabled.checked = historyEnabledCache;
-    showHistoryFeedback('Não foi possível alterar esta configuração.', true);
-  }
-});
-
-historyClear?.addEventListener('click', async () => {
-  if (!historyClear.classList.contains('is-confirming')) {
-    historyClear.classList.add('is-confirming');
-    historyClear.textContent = 'Confirmar limpeza';
-    clearTimeout(historyClearConfirmTimer);
-    historyClearConfirmTimer = window.setTimeout(() => {
-      historyClear.classList.remove('is-confirming');
-      historyClear.textContent = 'Limpar histórico';
-    }, 4500);
-    return;
-  }
-
-  clearTimeout(historyClearConfirmTimer);
-  historyClear.disabled = true;
-  try {
-    await historyClearAll();
-    historyClear.classList.remove('is-confirming');
-    historyClear.textContent = 'Limpar histórico';
-    await renderHistory();
-    await refreshHistoryCount();
-    showHistoryFeedback('Histórico apagado deste dispositivo.');
-  } catch (_) {
-    showHistoryFeedback('Não foi possível limpar o histórico.', true);
-  } finally {
-    historyClear.disabled = false;
-  }
-});
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && historyGroupView) {
-    closeHistoryGroup();
-    return;
-  }
-  if (event.key === 'Escape' && historyScreen && !historyScreen.hidden) closeHistoryScreen();
-  if (event.key === 'Escape' && mobileMenu?.classList.contains('is-open')) closeMobileMenu();
-});
-
-(async () => {
-  try {
-    historyEnabledCache = await historyGetEnabled();
-    if (historyEnabled) historyEnabled.checked = historyEnabledCache;
-    await refreshHistoryCount();
-  } catch (_) {
-    historyCountBadges.forEach((badge) => { badge.hidden = true; });
-  }
-})();
-
-function normalizeHost(hostname) {
-  return String(hostname || '').toLowerCase().replace(/^www\./, '');
-}
-
-function matchPlatform(hostname) {
-  const host = normalizeHost(hostname);
-  return PLATFORM_RULES.find(({ hosts }) =>
-    hosts.some((candidate) => host === candidate || host.endsWith(`.${candidate}`))
-  ) || null;
-}
-
-function directExtension(url) {
-  const filename = String(url?.pathname || '').split('/').pop() || '';
-  const dot = filename.lastIndexOf('.');
-  return dot >= 0 ? filename.slice(dot + 1).toLowerCase() : '';
-}
-
-function normalizeInstagramProfileInput(rawValue) {
-  const raw = String(rawValue || '').trim();
-  if (!raw) return { empty: true, valid: false };
-
-  const usernamePattern = /^[A-Za-z0-9._]{1,30}$/;
-  const reserved = new Set(['p', 'reel', 'reels', 'stories', 'explore', 'accounts', 'direct', 'about', 'developer', 'privacy', 'legal']);
-  let username = '';
-
-  if (raw.startsWith('@')) {
-    username = raw.slice(1).trim();
-  } else if (usernamePattern.test(raw)) {
-    username = raw;
-  } else {
-    let value = raw;
-    if (/^(?:www\.)?instagram\.com\//i.test(value)) value = `https://${value}`;
-    let url;
-    try {
-      url = new URL(value);
-    } catch {
-      return {
-        valid: false,
-        title: 'PERFIL INVÁLIDO',
-        message: 'Digite @usuario ou cole um link de perfil do Instagram.',
-      };
-    }
-    const host = normalizeHost(url.hostname);
-    if (!(host === 'instagram.com' || host.endsWith('.instagram.com'))) {
-      return {
-        valid: false,
-        title: 'PERFIL NÃO COMPATÍVEL',
-        message: 'A opção Avatar está disponível somente para perfis do Instagram.',
-      };
-    }
-    const parts = url.pathname.split('/').filter(Boolean);
-    if (parts.length !== 1) {
-      return {
-        valid: false,
-        title: 'LINK DE PERFIL NECESSÁRIO',
-        message: 'Cole o link do perfil, não o link de uma publicação, Reel ou Story.',
-      };
-    }
-    username = parts[0];
-  }
-
-  username = String(username || '').replace(/^@+/, '').trim();
-  if (!usernamePattern.test(username) || reserved.has(username.toLowerCase())) {
-    return {
-      valid: false,
-      title: 'PERFIL INVÁLIDO',
-      message: 'Informe um @ válido do Instagram ou o link direto do perfil.',
-    };
-  }
-
-  return {
-    valid: true,
-    source: 'instagram',
-    label: `@${username}`,
-    username,
-    url: `https://www.instagram.com/${username}/`,
-  };
-}
-
-
-function normalizePinterestProfileInput(rawValue) {
-  const raw = String(rawValue || '').trim();
-  if (!raw) return { empty: true, valid: false };
-
-  let username = '';
-
-  if (raw.includes('://')) {
-    let url;
-    try {
-      url = new URL(raw);
-    } catch {
-      return {
-        valid: false,
-        title: 'PERFIL INVÁLIDO',
-        message: 'Informe um usuário, @ ou link válido do perfil do Pinterest.',
-      };
-    }
-
-    const host = normalizeHost(url.hostname);
-    if (host !== 'pinterest.com' && !host.endsWith('.pinterest.com')) {
-      return {
-        valid: false,
-        title: 'PERFIL DO PINTEREST NECESSÁRIO',
-        message: 'Use um usuário ou link de perfil do Pinterest.',
-      };
-    }
-
-    const parts = url.pathname.split('/').filter(Boolean);
-    const reserved = new Set(['pin', 'ideas', 'search', 'today', 'explore', 'business', 'settings', 'login', 'signup']);
-    username = String(parts[0] || '').replace(/^@+/, '').trim();
-
-    if (
-      !username ||
-      reserved.has(username.toLowerCase()) ||
-      (parts.length > 1 && !['_created', 'created'].includes(String(parts[1] || '').toLowerCase()))
-    ) {
-      return {
-        valid: false,
-        title: 'LINK DE PERFIL NECESSÁRIO',
-        message: 'Use o perfil do Pinterest ou a área CRIADOS, não um Pin ou pasta.',
-      };
-    }
-  } else {
-    username = raw.replace(/^@+/, '').trim();
-  }
-
-  if (!/^[A-Za-z0-9._-]{1,80}$/.test(username)) {
-    return {
-      valid: false,
-      title: 'PERFIL INVÁLIDO',
-      message: 'Informe um usuário válido do Pinterest.',
-    };
-  }
-
-  return {
-    valid: true,
-    source: 'pinterest',
-    label: `Pinterest @${username}`,
-    username,
-    kind: 'pinterest-profile',
-    url: `https://www.pinterest.com/${username}/_created/`,
-  };
-}
-
-function validateUrlForTool(rawValue, tool) {
-  const value = String(rawValue || '').trim();
-  if (!value) return { empty: true, valid: false };
-
-  if (tool === 'avatar') return normalizeInstagramProfileInput(value);
-  if (tool === 'pinterest') return normalizePinterestProfileInput(value);
-
-  let url;
-  try {
-    url = new URL(value);
-  } catch {
-    return {
-      valid: false,
-      title: 'LINK INVÁLIDO',
-      message: 'Insira um link completo, começando com http:// ou https://.',
-    };
-  }
-
-  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
-    return {
-      valid: false,
-      title: 'LINK INVÁLIDO',
-      message: 'Use um link público http:// ou https://, sem usuário ou senha no endereço.',
-    };
-  }
-
-  const platform = matchPlatform(url.hostname);
-
-  const extension = directExtension(url);
-  const isDirectMedia = DIRECT_MEDIA_EXTENSIONS.has(extension);
-  const isDirectVideo = DIRECT_VIDEO_EXTENSIONS.has(extension);
-  const isDirectAudio = DIRECT_AUDIO_EXTENSIONS.has(extension);
-
-  if (!platform && !isDirectMedia && !isDirectAudio) {
-    return {
-      valid: false,
-      title: 'PLATAFORMA NÃO COMPATÍVEL',
-      message: 'Este site ainda não é compatível com o SOFT Downloaders.',
-    };
-  }
-
-  if (platform?.source === 'kick' && !url.pathname.toLowerCase().includes('/clips/')) {
-    return {
-      valid: false,
-      title: 'LINK DA KICK NÃO COMPATÍVEL',
-      message: 'No momento, a Kick é compatível somente com Clips públicos.',
-    };
-  }
-
-  if (tool === 'media') {
-    if (platform && ['soundcloud', 'bandcamp', 'audius', 'bandlab'].includes(platform.source)) {
-      return {
-        valid: false,
-        title: 'USE A OPÇÃO MÚSICAS',
-        message: `Este link é do ${platform.label}. Abra Músicas para analisar esse conteúdo.`,
-      };
-    }
-    if (!platform && isDirectAudio) {
-      return {
-        valid: false,
-        title: 'USE A OPÇÃO MÚSICAS',
-        message: 'Este link aponta para um arquivo de áudio. Abra Músicas para continuar.',
-      };
-    }
-    if (platform && !MEDIA_SOURCES.has(platform.source)) {
-      return {
-        valid: false,
-        title: 'PLATAFORMA NÃO COMPATÍVEL',
-        message: 'Esta plataforma não está disponível na área Mídias.',
-      };
-    }
-  }
-
-  if (tool === 'mp3') {
-    if (platform && ['soundcloud', 'bandcamp', 'audius', 'bandlab'].includes(platform.source)) {
-      return {
-        valid: false,
-        title: 'USE A OPÇÃO MÚSICAS',
-        message: `Este link é do ${platform.label}. Abra Músicas para baixar o áudio.`,
-      };
-    }
-    if (!platform && !isDirectVideo) {
-      return {
-        valid: false,
-        title: 'LINK DE VÍDEO NECESSÁRIO',
-        message: 'Vídeo para MP3 aceita links de vídeo compatíveis ou arquivos diretos de vídeo.',
-      };
-    }
-    if (platform && !MP3_VIDEO_SOURCES.has(platform.source)) {
-      return {
-        valid: false,
-        title: 'PLATAFORMA NÃO COMPATÍVEL',
-        message: 'Esta plataforma não está disponível em Vídeo para MP3.',
-      };
-    }
-  }
-
-  if (tool === 'music') {
-    if (!platform && !isDirectAudio) {
-      return {
-        valid: false,
-        title: 'LINK DE MÚSICA NÃO COMPATÍVEL',
-        message: 'Use YouTube, SoundCloud, Bandcamp, Audius, BandLab ou um link direto de áudio.',
-      };
-    }
-    if (platform && !MUSIC_TOOL_SOURCES.has(platform.source)) {
-      return {
-        valid: false,
-        title: 'PLATAFORMA NÃO COMPATÍVEL',
-        message: 'Esta plataforma não está disponível na área Músicas.',
-      };
-    }
-  }
-
-  if (tool === 'thumbnail') {
-    if (!platform || !THUMBNAIL_TOOL_SOURCES.has(platform.source)) {
-      return {
-        valid: false,
-        title: 'THUMBNAIL NÃO COMPATÍVEL',
-        message: 'Baixar Thumbnail está disponível somente para YouTube, Twitch, Kick e Dailymotion.',
-      };
-    }
-  }
-
-  return {
-    valid: true,
-    source: platform?.source || 'direct',
-    label: platform?.label || 'link direto',
-  };
-}
-
-function updateLiveValidation(inputElement, noteElement, defaultMessage, tool) {
-  const validation = validateUrlForTool(inputElement.value, tool);
-  if (validation.empty) {
-    if (tool === 'media') closeYoutubeWebViewMenu();
-    noteElement.hidden = false;
-    noteElement.className = 'form-note';
-    noteElement.textContent = defaultMessage;
-    return validation;
-  }
-  if (!validation.valid) {
-    if (tool === 'media') closeYoutubeWebViewMenu();
-    noteElement.hidden = false;
-    noteElement.className = 'form-note error';
-    noteElement.textContent = `${validation.title}: ${validation.message}`;
-    return validation;
-  }
-  if (tool === 'media') closeYoutubeWebViewMenu();
-  noteElement.className = 'form-note success';
-  noteElement.textContent = tool === 'avatar'
-    ? `Perfil reconhecido (${validation.label}). Pronto para buscar o avatar.`
-    : validation.kind === 'pinterest-profile'
-      ? `Perfil reconhecido (${validation.label}). Serão buscados somente os Pins criados.`
-      : `Link reconhecido (${validation.label}). Pronto para analisar.`;
-  return validation;
-}
-
-function validateBeforeSubmit(inputElement, noteElement, defaultMessage, tool) {
-  const validation = updateLiveValidation(inputElement, noteElement, defaultMessage, tool);
-  if (validation.empty) {
-    noteElement.className = 'form-note error';
-    noteElement.textContent = tool === 'avatar'
-      ? 'PERFIL AUSENTE: Digite um @ ou cole o link do perfil para continuar.'
-      : 'LINK AUSENTE: Cole um link para continuar.';
-    return null;
-  }
-  return validation.valid ? validation : null;
-}
-
-function classifyResultError(message) {
-  const original = String(message || '').trim();
-  const normalized = original.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const contentProcessingError = {
-    title: 'NÃO FOI POSSÍVEL PROCESSAR',
-    message: 'Verifique se o link está correto e se o conteúdo está público e acessível. Restrições da plataforma, como login obrigatório, limite de idade, conteúdo privado ou indisponível, podem impedir o processamento.',
-  };
-
-  if (!original || normalized.includes('failed to fetch') || normalized.includes('networkerror') || normalized.includes('load failed')) {
-    return {
-      title: 'SERVIÇO INDISPONÍVEL',
-      message: 'Não foi possível conectar ao serviço de processamento. Verifique sua conexão e tente novamente em instantes.',
-    };
-  }
-  if (normalized.includes('link valido') || normalized.includes('link publico http') || normalized.includes('endereco nao pode')) {
-    return { title: 'LINK INVÁLIDO', message: original };
-  }
-  if (normalized.includes('nao e compativel') || normalized.includes('nao parece ser') || normalized.includes('somente com clips') || normalized.includes('plataforma compativel')) {
-    return { title: 'CONTEÚDO NÃO COMPATÍVEL', message: original };
-  }
-  if (normalized.includes('expirou') || normalized.includes('analise a publicacao novamente') || normalized.includes('analise o video novamente')) {
-    return { title: 'LINK EXPIRADO', message: original };
-  }
-  if (normalized.includes('tente novamente em instantes')) {
-    return { title: 'FALHA TEMPORÁRIA', message: original };
-  }
-  if (
-    normalized.includes('confirme se a publicacao e publica') ||
-    normalized.includes('confirme se ela e publica') ||
-    normalized.includes('exige autentic') ||
-    normalized.includes('exigir login') ||
-    normalized.includes('conteudo privado') ||
-    normalized.includes('publicacao privada') ||
-    normalized.includes('restricao de idade') ||
-    normalized.includes('limite de idade')
-  ) {
-    return contentProcessingError;
-  }
-  if (normalized.includes('nao encontramos') || normalized.includes('nao disponibilizou')) {
-    return { title: 'MÍDIA NÃO ENCONTRADA', message: original };
-  }
-  if (normalized.includes('preparar') || normalized.includes('gerar o mp3') || normalized.includes('conversao')) {
-    return { title: 'FALHA AO PREPARAR O ARQUIVO', message: original };
-  }
-  if (normalized.includes('nao foi possivel ler') || normalized.includes('nao foi possivel analisar') || normalized.includes('nao foi possivel processar') || normalized.includes('agora')) {
-    return contentProcessingError;
-  }
-  return { title: 'NÃO FOI POSSÍVEL CONCLUIR', message: original || 'Ocorreu um erro inesperado. Tente novamente.' };
-}
-
-function syncClearButton() {
-  if (clearButton) clearButton.hidden = !input.value.trim();
-}
-
-function syncPinterestClearButton() {
-  if (pinterestClearButton) pinterestClearButton.hidden = !pinterestInput.value.trim();
-}
-
-function syncMp3ClearButton() {
-  if (mp3ClearButton) mp3ClearButton.hidden = !mp3Input.value.trim();
-}
-
-function syncMusicClearButton() {
-  if (musicClearButton) musicClearButton.hidden = !musicInput.value.trim();
-}
-
-function syncThumbnailClearButton() {
-  if (thumbnailClearButton) thumbnailClearButton.hidden = !thumbnailInput.value.trim();
-}
-
-function syncAvatarClearButton() {
-  if (avatarClearButton) avatarClearButton.hidden = !avatarInput.value.trim();
-}
-
-const TOOL_SECTION_HASH = {
-  media: '#midias',
-  youtubeSearch: '#pesquisar-youtube',
-  pinterest: '#pinterest-massa',
-  mp3: '#video-para-mp3',
-  music: '#musicas',
-  thumbnail: '#thumbnail',
-  avatar: '#avatar',
-  photosPdf: '#fotos-para-pdf',
-  create: '#criar',
-};
-
-const VIEW_SECTION_HASH = {
-  how: '#como-funciona',
-  compatibility: '#compatibilidade',
-  app: '#aplicativo',
-  help: '#ajuda',
-  info: '#informacoes-importantes',
-};
-
-let activeSectionHash = '#midias';
-let historyReturnHash = '#midias';
-
-function setSectionHash(hash) {
-  if (!hash || !hash.startsWith('#')) return;
-  activeSectionHash = hash;
-  if (window.location.hash !== hash) {
-    window.history.replaceState(null, '', hash);
-  }
-}
-
-function showAppView(view = 'tool') {
-  const target = view || 'tool';
-  if (target !== 'tool') {
-    document.body.classList.remove('create-chat-active');
-    document.body.classList.remove('photos-pdf-active');
-  }
-  appViews.forEach((section) => {
-    section.hidden = section.dataset.appView !== target;
-  });
-  if (siteNotice) siteNotice.hidden = target !== 'tool';
-  viewLinks.forEach((link) => {
-    link.classList.toggle('is-active', link.dataset.viewTarget === target && target !== 'tool');
-  });
-  if (target !== 'tool') {
-    [mediaTab, youtubeSearchTab, pinterestTab, mp3Tab, musicTab, thumbnailTab, avatarTab, photosPdfTab, createTab].forEach((tab) => tab?.classList.remove('is-active'));
-  }
-  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-}
-
-function setActiveTool(tool) {
-  // A Pesquisa YouTube existe somente dentro do WebApp oficial.
-  // Se algum navegador tentar abrir a ferramenta diretamente, volta para Mídias.
-  if (tool === 'youtubeSearch' && !isOfficialSoftAndroidApp()) tool = 'media';
-
-  showAppView('tool');
-  const useMedia = tool === 'media';
-  const useYoutubeSearch = tool === 'youtubeSearch';
-  const usePinterest = tool === 'pinterest';
-  const useMp3 = tool === 'mp3';
-  const useMusic = tool === 'music';
-  const useThumbnail = tool === 'thumbnail';
-  const useAvatar = tool === 'avatar';
-  const usePhotosPdf = tool === 'photosPdf';
-  const useCreate = tool === 'create';
-  document.body.classList.toggle('create-chat-active', useCreate);
-  document.body.classList.toggle('photos-pdf-active', usePhotosPdf);
-  // O aviso vermelho fala especificamente sobre links públicos.
-  // Exibe somente nas ferramentas cujo fluxo principal depende de um link.
-  const showLinkNotice = useMedia || useMp3 || useMusic || useThumbnail;
-  if (siteNotice) siteNotice.hidden = !showLinkNotice;
-  mediaTab.classList.toggle('is-active', useMedia);
-  youtubeSearchTab.classList.toggle('is-active', useYoutubeSearch);
-  pinterestTab.classList.toggle('is-active', usePinterest);
-  mp3Tab.classList.toggle('is-active', useMp3);
-  musicTab.classList.toggle('is-active', useMusic);
-  thumbnailTab.classList.toggle('is-active', useThumbnail);
-  avatarTab.classList.toggle('is-active', useAvatar);
-  photosPdfTab.classList.toggle('is-active', usePhotosPdf);
-  createTab.classList.toggle('is-active', useCreate);
-  mediaTab.setAttribute('aria-selected', String(useMedia));
-  youtubeSearchTab.setAttribute('aria-selected', String(useYoutubeSearch));
-  pinterestTab.setAttribute('aria-selected', String(usePinterest));
-  mp3Tab.setAttribute('aria-selected', String(useMp3));
-  musicTab.setAttribute('aria-selected', String(useMusic));
-  thumbnailTab.setAttribute('aria-selected', String(useThumbnail));
-  avatarTab.setAttribute('aria-selected', String(useAvatar));
-  photosPdfTab.setAttribute('aria-selected', String(usePhotosPdf));
-  createTab.setAttribute('aria-selected', String(useCreate));
-  mediaToolPanel.hidden = !useMedia;
-  youtubeSearchToolPanel.hidden = !useYoutubeSearch;
-  pinterestToolPanel.hidden = !usePinterest;
-  mp3ToolPanel.hidden = !useMp3;
-  musicToolPanel.hidden = !useMusic;
-  thumbnailToolPanel.hidden = !useThumbnail;
-  avatarToolPanel.hidden = !useAvatar;
-  photosPdfToolPanel.hidden = !usePhotosPdf;
-  createToolPanel.hidden = !useCreate;
-  setSectionHash(TOOL_SECTION_HASH[tool] || '#midias');
-  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-}
-
-function activateToolFromMenu(tool) {
-  setActiveTool(tool);
-  closeMobileMenu();
-  window.scrollTo({ top: 0, behavior: 'auto' });
-}
-
-// Pesquisa YouTube: mostra o item do menu somente no WebApp oficial.
-// Usamos a ponte SoftAndroid em vez de tamanho de tela/UA para não liberar
-// o recurso no Chrome, Edge ou outro navegador móvel.
-if (youtubeSearchTab) {
-  const youtubeSearchAvailable = isOfficialSoftAndroidApp();
-  youtubeSearchTab.hidden = !youtubeSearchAvailable;
-  youtubeSearchTab.style.display = youtubeSearchAvailable ? '' : 'none';
-}
-if (!isOfficialSoftAndroidApp() && youtubeSearchToolPanel) {
-  youtubeSearchToolPanel.hidden = true;
-}
-
-// O convite para instalar o app existe somente no site.
-// Dentro do WebApp oficial ele desaparece por completo.
-if (homeAppPromo) {
-  homeAppPromo.hidden = isOfficialSoftAndroidApp();
-}
-
-mediaTab.addEventListener('click', () => activateToolFromMenu('media'));
-youtubeSearchTab?.addEventListener('click', () => activateToolFromMenu('youtubeSearch'));
-pinterestTab.addEventListener('click', () => activateToolFromMenu('pinterest'));
-mp3Tab.addEventListener('click', () => activateToolFromMenu('mp3'));
-musicTab.addEventListener('click', () => activateToolFromMenu('music'));
-thumbnailTab.addEventListener('click', () => activateToolFromMenu('thumbnail'));
-avatarTab.addEventListener('click', () => activateToolFromMenu('avatar'));
-photosPdfTab.addEventListener('click', () => activateToolFromMenu('photosPdf'));
-createTab.addEventListener('click', () => activateToolFromMenu('create'));
-
-viewLinks.forEach((link) => {
-  link.addEventListener('click', (event) => {
-    event.preventDefault();
-    const view = link.dataset.viewTarget || 'tool';
-    const tool = link.dataset.toolTarget;
-    if (view === 'tool' && tool) {
-      setActiveTool(tool);
-    } else {
-      showAppView(view);
-      setSectionHash(VIEW_SECTION_HASH[view] || '#midias');
-    }
-    closeMobileMenu();
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  });
-});
-
-input.addEventListener('input', () => {
-  syncClearButton();
-  updateLiveValidation(input, note, DEFAULT_NOTE, 'media');
-});
-pinterestInput.addEventListener('input', () => {
-  syncPinterestClearButton();
-  updateLiveValidation(pinterestInput, pinterestNote, DEFAULT_PINTEREST_NOTE, 'pinterest');
-});
-mp3Input.addEventListener('input', () => {
-  syncMp3ClearButton();
-  updateLiveValidation(mp3Input, mp3Note, DEFAULT_MP3_NOTE, 'mp3');
-});
-musicInput.addEventListener('input', () => {
-  syncMusicClearButton();
-  updateLiveValidation(musicInput, musicNote, DEFAULT_MUSIC_NOTE, 'music');
-});
-thumbnailInput.addEventListener('input', () => {
-  syncThumbnailClearButton();
-  updateLiveValidation(thumbnailInput, thumbnailNote, DEFAULT_THUMBNAIL_NOTE, 'thumbnail');
-});
-avatarInput.addEventListener('input', () => {
-  syncAvatarClearButton();
-  updateLiveValidation(avatarInput, avatarNote, DEFAULT_AVATAR_NOTE, 'avatar');
-});
-
-document.querySelector('#pasteButton').addEventListener('click', async () => {
-  try {
-    input.value = await navigator.clipboard.readText();
-    syncClearButton();
-    updateLiveValidation(input, note, DEFAULT_NOTE, 'media');
-    input.focus();
-  } catch {
-    input.focus();
-  }
-});
-
-document.querySelector('#pinterestPasteButton').addEventListener('click', async () => {
-  try {
-    pinterestInput.value = await navigator.clipboard.readText();
-    syncPinterestClearButton();
-    updateLiveValidation(pinterestInput, pinterestNote, DEFAULT_PINTEREST_NOTE, 'pinterest');
-    pinterestInput.focus();
-  } catch {
-    pinterestInput.focus();
-  }
-});
-
-document.querySelector('#mp3PasteButton').addEventListener('click', async () => {
-  try {
-    mp3Input.value = await navigator.clipboard.readText();
-    syncMp3ClearButton();
-    updateLiveValidation(mp3Input, mp3Note, DEFAULT_MP3_NOTE, 'mp3');
-    mp3Input.focus();
-  } catch {
-    mp3Input.focus();
-  }
-});
-
-document.querySelector('#musicPasteButton').addEventListener('click', async () => {
-  try {
-    musicInput.value = await navigator.clipboard.readText();
-    syncMusicClearButton();
-    updateLiveValidation(musicInput, musicNote, DEFAULT_MUSIC_NOTE, 'music');
-    musicInput.focus();
-  } catch {
-    musicInput.focus();
-  }
-});
-
-document.querySelector('#thumbnailPasteButton').addEventListener('click', async () => {
-  try {
-    thumbnailInput.value = await navigator.clipboard.readText();
-    syncThumbnailClearButton();
-    updateLiveValidation(thumbnailInput, thumbnailNote, DEFAULT_THUMBNAIL_NOTE, 'thumbnail');
-    thumbnailInput.focus();
-  } catch {
-    thumbnailInput.focus();
-  }
-});
-
-document.querySelector('#avatarPasteButton').addEventListener('click', async () => {
-  try {
-    avatarInput.value = await navigator.clipboard.readText();
-    syncAvatarClearButton();
-    updateLiveValidation(avatarInput, avatarNote, DEFAULT_AVATAR_NOTE, 'avatar');
-    avatarInput.focus();
-  } catch {
-    avatarInput.focus();
-  }
-});
-
-if (clearButton) {
-  clearButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    input.value = '';
-    syncClearButton();
-    updateLiveValidation(input, note, DEFAULT_NOTE, 'media');
-    input.blur();
-    clearButton.blur();
-  });
-}
-
-if (pinterestClearButton) {
-  pinterestClearButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    pinterestInput.value = '';
-    syncPinterestClearButton();
-    updateLiveValidation(pinterestInput, pinterestNote, DEFAULT_PINTEREST_NOTE, 'pinterest');
-    pinterestInput.blur();
-    pinterestClearButton.blur();
-  });
-}
-
-if (mp3ClearButton) {
-  mp3ClearButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    mp3Input.value = '';
-    syncMp3ClearButton();
-    updateLiveValidation(mp3Input, mp3Note, DEFAULT_MP3_NOTE, 'mp3');
-    mp3Input.blur();
-    mp3ClearButton.blur();
-  });
-}
-
-if (musicClearButton) {
-  musicClearButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    musicInput.value = '';
-    syncMusicClearButton();
-    updateLiveValidation(musicInput, musicNote, DEFAULT_MUSIC_NOTE, 'music');
-    musicInput.blur();
-    musicClearButton.blur();
-  });
-}
-
-if (thumbnailClearButton) {
-  thumbnailClearButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    thumbnailInput.value = '';
-    syncThumbnailClearButton();
-    updateLiveValidation(thumbnailInput, thumbnailNote, DEFAULT_THUMBNAIL_NOTE, 'thumbnail');
-    thumbnailInput.blur();
-    thumbnailClearButton.blur();
-  });
-}
-
-if (avatarClearButton) {
-  avatarClearButton.addEventListener('click', (event) => {
-    event.preventDefault();
-    avatarInput.value = '';
-    syncAvatarClearButton();
-    updateLiveValidation(avatarInput, avatarNote, DEFAULT_AVATAR_NOTE, 'avatar');
-    avatarInput.blur();
-    avatarClearButton.blur();
-  });
-}
-
-syncClearButton();
-syncPinterestClearButton();
-syncMp3ClearButton();
-syncMusicClearButton();
-syncThumbnailClearButton();
-syncAvatarClearButton();
-
-resultBack.addEventListener('click', closeResultScreen);
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && !resultScreen.hidden) closeResultScreen();
-});
-
-function isMusicContent(data) {
-  return Boolean(data) && (
-    MUSIC_SOURCES.has(data.source) ||
-    (data.source === 'direct' && data.type === 'audio')
-  );
-}
-
-function isMusicToolContent(data) {
-  return isMusicContent(data) || Boolean(data && data.source === 'youtube');
-}
-
-downloadLink.addEventListener('click', async (event) => {
-  event.preventDefault();
-
-  // O atalho rápido do YouTube vale SOMENTE para o download normal de vídeo.
-  // Ferramentas que transformam o arquivo (MP3/Thumbnail) precisam respeitar
-  // o endpoint específico preparado para elas.
-  const activeItem = activeResultItems[0] || null;
-  const downloadMode = downloadLink.dataset.mode || 'single';
-
-  // No WebApp Android, a análise do YouTube é permitida normalmente.
-  // O aviso aparece somente quando o usuário realmente pede o download.
-  if (
-    downloadMode === 'single' &&
-    activeItem?.source === 'youtube' &&
-    (activeItem?.youtube_direct_url || activeItem?.proxy_id) &&
-    isAndroidWebView()
-  ) {
-    // A URL GoogleVideo já vem pronta da análise. /youtube-direct fica apenas
-    // como fallback para resultados antigos/sem itag 18 pré-resolvido.
-    const directUrl = activeItem.youtube_direct_url || youtubeDirectPlayerUrl(activeItem.proxy_id);
-    const filename = activeItem.filename || downloadLink.dataset.filename || 'youtube-video.mp4';
-
-    try {
-      if (window.SoftAndroid && typeof window.SoftAndroid.startDirectDownload === 'function') {
-        window.SoftAndroid.startDirectDownload(directUrl, filename, 'video/mp4');
-        rememberHistoryEntry(buildHistoryEntry(activeItem, { mode: 'single', filename }));
-        return;
-      }
-    } catch (_) {}
-
-    // Versões atuais do app baixam diretamente pela ponte nativa.
-    // Sem a ponte de download, não exibimos mais o fluxo antigo de navegador/modal.
-    return;
-  }
-
-  if (
-    downloadMode === 'single' &&
-    activeItem?.source === 'youtube' &&
-    (activeItem?.youtube_direct_url || activeItem?.proxy_id) &&
-    !isAndroidWebView()
-  ) {
-    // Normalmente abre GoogleVideo direto, sem exibir/aguardar a rota do Worker.
-    const directPlayerUrl = activeItem.youtube_direct_url || youtubeDirectPlayerUrl(activeItem.proxy_id);
-
-    // Abre exatamente uma guia para o player direto do GoogleVideo.
-    // Não verificamos o retorno de window.open com noopener porque alguns
-    // navegadores retornam null mesmo quando a guia foi aberta, o que antes
-    // causava um segundo redirecionamento na guia do SOFT Downloaders.
-    const directLink = document.createElement('a');
-    directLink.href = directPlayerUrl;
-    directLink.target = '_blank';
-    directLink.rel = 'noopener noreferrer';
-    document.body.appendChild(directLink);
-    directLink.click();
-    directLink.remove();
-
-    rememberHistoryEntry(buildHistoryEntry(activeItem, {
-      mode: 'single',
-      filename: activeItem.filename || downloadLink.dataset.filename || 'youtube-video.mp4',
-    }));
-    return;
-  }
-
-  if (downloadMode === 'all') {
-    await downloadAllMedia(activeResultItems, downloadLink);
-    return;
-  }
-
-  if (downloadLink.dataset.mediaUrl) {
-    const item = activeResultItems[0] || null;
-    const historyEntry = buildHistoryEntry(item, {
-      mode: downloadMode,
-      filename: downloadLink.dataset.filename,
-    });
-    await downloadMedia(downloadLink.dataset.mediaUrl, downloadLink.dataset.filename, downloadLink, historyEntry);
-  }
-});
-
-function setYoutubeSearchState(message = '', kind = '') {
-  if (!youtubeSearchState) return;
-  youtubeSearchState.textContent = message;
-  youtubeSearchState.className = `youtube-search-state${kind ? ` is-${kind}` : ''}`;
-  youtubeSearchState.hidden = !message;
-}
-
-function youtubeSearchPickVideo(data) {
-  const items = Array.isArray(data?.items) && data.items.length ? data.items : [data];
-  return items.find((entry) => entry?.source === 'youtube' && mediaTypeForDownload(entry) === 'video' && entry?.proxy_id)
-    || items.find((entry) => mediaTypeForDownload(entry) === 'video' && entry?.proxy_id)
-    || null;
-}
-
-function startInlineAttachment(url) {
-  if (!url) return;
-  const frame = document.createElement('iframe');
-  frame.hidden = true;
-  frame.setAttribute('aria-hidden', 'true');
-  frame.src = url;
-  document.body.append(frame);
-  window.setTimeout(() => frame.remove(), 60000);
-}
-
-async function downloadYoutubeSearchVideo(item, button) {
-  const url = String(item?.url || '').trim();
-  if (!url || !button) return;
-
-  const cover = button.closest('.youtube-search-cover');
-  const processing = cover?.querySelector('.youtube-search-processing');
-
-  button.disabled = true;
-  button.classList.add('is-loading');
-  button.setAttribute('aria-label', 'Processando vídeo');
-  if (processing) {
-    processing.hidden = false;
-    processing.setAttribute('aria-hidden', 'false');
-  }
-  cover?.classList.add('is-processing');
-  setYoutubeSearchState('', '');
-
-  try {
-    const extraction = await requestExtraction(url, 'media', 'Não foi possível preparar este vídeo.');
-    const data = extraction.data;
-    if (data?.status !== 'ready') throw new Error(data?.message || 'Este vídeo ainda não está disponível para download.');
-
-    const video = youtubeSearchPickVideo(data);
-    if (!video) throw new Error('Não encontramos uma versão disponível deste vídeo.');
-
-    const filename = video.filename || `${String(item?.title || 'youtube-video').trim() || 'youtube-video'}.mp4`;
-    const directUrl = video.youtube_direct_url || youtubeDirectPlayerUrl(video.proxy_id);
-
-    if (isAndroidWebView()) {
-      try {
-        if (window.SoftAndroid && typeof window.SoftAndroid.startDirectDownload === 'function') {
-          window.SoftAndroid.startDirectDownload(directUrl, filename, 'video/mp4');
-          rememberHistoryEntry(buildHistoryEntry(video, { mode: 'single', filename }));
-          setYoutubeSearchState('Download do vídeo iniciado.', 'success');
-          window.setTimeout(() => setYoutubeSearchState('', ''), 1800);
-          return;
-        }
-      } catch (_) {}
-    }
-
-    // Site: permanece na Pesquisa YouTube enquanto prepara. Quando a URL
-    // direta do GoogleVideo estiver pronta, abre somente a guia do arquivo.
-    // Não navega para a tela de Baixar Mídias e não cria etapa intermediária.
-    const directLink = document.createElement('a');
-    directLink.href = directUrl;
-    directLink.target = '_blank';
-    directLink.rel = 'noopener noreferrer';
-    directLink.setAttribute('aria-hidden', 'true');
-    document.body.append(directLink);
-    directLink.click();
-    directLink.remove();
-    rememberHistoryEntry(buildHistoryEntry(video, { mode: 'single', filename }));
-    setYoutubeSearchState('Download do vídeo iniciado.', 'success');
-    window.setTimeout(() => setYoutubeSearchState('', ''), 1800);
-  } catch (error) {
-    setYoutubeSearchState(error?.message || 'Não foi possível iniciar o download.', 'error');
-  } finally {
-    if (processing) {
-      processing.hidden = true;
-      processing.setAttribute('aria-hidden', 'true');
-    }
-    cover?.classList.remove('is-processing');
-    button.disabled = false;
-    button.classList.remove('is-loading');
-    button.setAttribute('aria-label', 'Baixar vídeo');
-  }
-}
-
-function renderYoutubeSearchResults(items = []) {
-  if (!youtubeSearchResults) return;
-  youtubeSearchResults.replaceChildren();
-
-  if (!items.length) {
-    setYoutubeSearchState('Nenhum vídeo encontrado para esta pesquisa.', 'empty');
-    return;
-  }
-
-  const fragment = document.createDocumentFragment();
-  items.forEach((item) => {
-    const url = String(item?.url || '').trim();
-    if (!url) return;
-
-    const card = document.createElement('article');
-    card.className = 'youtube-search-item';
-
-    const cover = document.createElement('div');
-    cover.className = 'youtube-search-cover';
-
-    const img = document.createElement('img');
-    img.src = String(item?.thumbnail || '');
-    img.alt = String(item?.title || 'Vídeo do YouTube');
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    cover.appendChild(img);
-
-    const downloadToggle = document.createElement('button');
-    downloadToggle.type = 'button';
-    downloadToggle.className = 'youtube-search-download-icon';
-    downloadToggle.setAttribute('aria-label', 'Baixar vídeo');
-    downloadToggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    downloadToggle.addEventListener('click', (event) => {
-      event.stopPropagation();
-      downloadYoutubeSearchVideo(item, downloadToggle);
-    });
-    cover.appendChild(downloadToggle);
-
-    const processing = document.createElement('div');
-    processing.className = 'youtube-search-processing';
-    processing.hidden = true;
-    processing.setAttribute('aria-hidden', 'true');
-    processing.innerHTML = '<span class="youtube-search-processing-spinner" aria-hidden="true"></span><span class="youtube-search-processing-text">PROCESSANDO</span>';
-    cover.appendChild(processing);
-
-    const body = document.createElement('div');
-    body.className = 'youtube-search-body';
-
-    const title = document.createElement('strong');
-    title.className = 'youtube-search-title';
-    title.textContent = String(item?.title || 'Vídeo do YouTube');
-
-    const channelRow = document.createElement('div');
-    channelRow.className = 'youtube-search-channel';
-    const avatar = document.createElement('img');
-    avatar.className = 'youtube-search-channel-avatar';
-    avatar.src = String(item?.channel_avatar || '');
-    avatar.alt = '';
-    avatar.loading = 'lazy';
-    avatar.decoding = 'async';
-    if (!avatar.src) avatar.hidden = true;
-    const channelName = document.createElement('span');
-    channelName.textContent = String(item?.channel || 'YouTube');
-    channelRow.append(avatar, channelName);
-
-    body.append(title, channelRow);
-    card.append(cover, body);
-    fragment.appendChild(card);
-  });
-
-  youtubeSearchResults.appendChild(fragment);
-}
-
-async function runYoutubeSearch(term) {
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 15000);
-  try {
-    const response = await fetch(`https://${WORKER_MEDIA_HOST}/youtube-search?q=${encodeURIComponent(term)}`, {
-      method: 'GET',
-      cache: 'no-store',
-      signal: controller.signal,
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data?.error || 'Não foi possível pesquisar no YouTube.');
-    return Array.isArray(data?.results) ? data.results : [];
-  } finally {
-    window.clearTimeout(timeout);
-  }
-}
-
-if (youtubeSearchForm) {
-  youtubeSearchForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const term = String(youtubeSearchInput?.value || '').trim();
-    if (term.length < 2) {
-      setYoutubeSearchState('Digite pelo menos 2 caracteres para pesquisar.', 'error');
-      youtubeSearchInput?.focus();
-      return;
-    }
-
-    youtubeSearchInput?.blur();
-    youtubeSearchResults?.replaceChildren();
-    setYoutubeSearchState('Pesquisando no YouTube...', 'loading');
-
-    try {
-      const items = await runYoutubeSearch(term);
-      setYoutubeSearchState('', '');
-      renderYoutubeSearchResults(items);
-    } catch (error) {
-      const message = error?.name === 'AbortError'
-        ? 'A pesquisa demorou demais. Tente novamente.'
-        : (error?.message || 'Não foi possível pesquisar no YouTube.');
-      setYoutubeSearchState(message, 'error');
-    } finally {
-    }
-  });
-}
-
-form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const validation = validateBeforeSubmit(input, note, DEFAULT_NOTE, 'media');
-  if (!validation) return;
-  const rawUrl = validation.url || input.value.trim();
-
-  activeRequest = { tool: 'media', url: rawUrl };
-  input.blur();
-  const loading = analysisLoadingCopy(validation, 'todas as mídias');
-  openResultScreen(loading.title, loading.detail);
-  note.className = 'form-note';
-  note.textContent = DEFAULT_NOTE;
-
-  let data;
-  try {
-    const extraction = await requestExtraction(rawUrl, 'media', 'Não foi possível extrair a mídia.');
-    data = extraction.data;
-    if (extraction.cached) setResultLoading('Resultado recente encontrado.', 'Abrindo a análise já preparada…');
-  } catch (error) {
-    return showResultError(error.message || 'Não foi possível analisar o link.');
-  }
-
-  if (isMusicContent(data)) {
-    return showResultError('Este link é de música ou áudio. Use a opção Músicas.');
-  }
-  if (data.status !== 'ready') {
-    return showResultError(data.message || 'Este link ainda não é compatível.');
-  }
-  if (!hasWorkerProxy(data)) {
-    return showResultError('Não foi possível preparar este vídeo agora. Tente analisar novamente.');
-  }
-
-  const items = Array.isArray(data.items) && data.items.length ? data.items : [data];
-  const isCarousel = items.length > 1;
-  activeResultItems = items;
-
-  result.classList.toggle('is-carousel', isCarousel);
-  resultStage.classList.toggle('carousel-mode', isCarousel);
-  if (isCarousel) renderCarousel(items);
-  else {
-    renderMedia(items[0]);
-    maybeShowLongYoutubeWarning(items[0]);
-  }
-  resultLoading.hidden = true;
-  resultError.hidden = true;
-  result.hidden = false;
-  maybeReplayHistoryDownload();
-});
-
-pinterestForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const validation = validateBeforeSubmit(
-    pinterestInput,
-    pinterestNote,
-    DEFAULT_PINTEREST_NOTE,
-    'pinterest'
-  );
-  if (!validation) return;
-
-  const profileUrl = validation.url;
-  activeRequest = { tool: 'pinterest', url: profileUrl };
-  pinterestInput.blur();
-
-  openResultScreen(
-    `${validation.label} reconhecido.`,
-    'Buscando as mídias públicas da área CRIADOS…'
-  );
-  pinterestNote.className = 'form-note';
-  pinterestNote.textContent = DEFAULT_PINTEREST_NOTE;
-
-  let data;
-  try {
-    const extraction = await requestExtraction(
-      profileUrl,
-      'media',
-      'Não foi possível ler os Criados deste perfil.'
-    );
-    data = extraction.data;
-    if (extraction.cached) {
-      setResultLoading('Resultado recente encontrado.', 'Abrindo as mídias já analisadas…');
-    }
-  } catch (error) {
-    return showResultError(error.message || 'Não foi possível analisar este perfil.');
-  }
-
-  if (data.status !== 'ready') {
-    return showResultError(data.message || 'Não foi possível ler os Criados deste perfil.');
-  }
-  if (!hasWorkerProxy(data)) {
-    return showResultError('Não foi possível preparar as mídias deste perfil agora. Tente novamente.');
-  }
-
-  const items = Array.isArray(data.items) && data.items.length ? data.items : [data];
-  const isCarousel = items.length > 1;
-  activeResultItems = items;
-
-  result.classList.toggle('is-carousel', isCarousel);
-  resultStage.classList.toggle('carousel-mode', isCarousel);
-
-  if (isCarousel) renderCarousel(items);
-  else renderMedia(items[0]);
-
-  resultLoading.hidden = true;
-  resultError.hidden = true;
-  result.hidden = false;
-  maybeReplayHistoryDownload();
-});
-
-mp3Form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const rawUrl = mp3Input.value.trim();
-  const validation = validateBeforeSubmit(mp3Input, mp3Note, DEFAULT_MP3_NOTE, 'mp3');
-  if (!validation) return;
-
-  activeRequest = { tool: 'mp3', url: rawUrl };
-  mp3Input.blur();
-  const loading = analysisLoadingCopy(validation, 'o vídeo');
-  openResultScreen(loading.title, 'Lendo o vídeo sem converter ou baixar o arquivo inteiro…');
-  mp3Note.className = 'form-note';
-  mp3Note.textContent = DEFAULT_MP3_NOTE;
-
-  let data;
-  try {
-    const extraction = await requestExtraction(rawUrl, 'media', 'Não foi possível preparar o vídeo.');
-    data = extraction.data;
-    if (extraction.cached) setResultLoading('Resultado recente encontrado.', 'Preparando as opções de MP3…');
-  } catch (error) {
-    return showResultError(error.message || 'Não foi possível preparar o vídeo.');
-  }
-
-  if (data.status !== 'ready') {
-    return showResultError(data.message || 'Este vídeo ainda não é compatível com a conversão para MP3.');
-  }
-
-  const items = Array.isArray(data.items) && data.items.length ? data.items : [data];
-  const video = items.find((item) => mediaTypeForDownload(item) === 'video' && item.proxy_id);
-  if (!video) {
-    return showResultError('Não encontramos um vídeo com áudio disponível neste link.');
-  }
-
-  activeResultItems = [video];
-  renderMp3Result(video);
-  resultLoading.hidden = true;
-  resultError.hidden = true;
-  result.hidden = false;
-  maybeReplayHistoryDownload();
-});
-
-musicForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const rawUrl = musicInput.value.trim();
-  const validation = validateBeforeSubmit(musicInput, musicNote, DEFAULT_MUSIC_NOTE, 'music');
-  if (!validation) return;
-
-  activeRequest = { tool: 'music', url: rawUrl };
-  musicInput.blur();
-  const loading = analysisLoadingCopy(validation, 'a faixa');
-  openResultScreen(loading.title, loading.detail);
-  musicNote.className = 'form-note';
-  musicNote.textContent = DEFAULT_MUSIC_NOTE;
-
-  let data;
-  try {
-    const extraction = await requestExtraction(rawUrl, 'media', 'Não foi possível extrair a música.');
-    data = extraction.data;
-    if (extraction.cached) setResultLoading('Resultado recente encontrado.', 'Abrindo a faixa já analisada…');
-  } catch (error) {
-    return showResultError(error.message || 'Não foi possível analisar o link.');
-  }
-
-  if (!isMusicToolContent(data)) {
-    return showResultError('Esta área aceita YouTube, SoundCloud, Bandcamp, Audius, BandLab e links diretos de áudio.');
-  }
-  if (data.status !== 'ready') {
-    return showResultError(data.message || 'Esta música ainda não é compatível.');
-  }
-
-  const items = Array.isArray(data.items) && data.items.length ? data.items : [data];
-
-  if (data.source === 'youtube' || items.some((item) => item?.source === 'youtube')) {
-    if (!hasWorkerProxy(data)) {
-      return showResultError('Não foi possível preparar esta música do YouTube agora. Tente analisar novamente.');
-    }
-
-    const youtubeVideo = items.find(
-      (item) => item?.source === 'youtube' && mediaTypeForDownload(item) === 'video' && item.proxy_id
-    );
-
-    if (!youtubeVideo) {
-      return showResultError('Não encontramos o áudio deste vídeo do YouTube.');
-    }
-
-    activeResultItems = [youtubeVideo];
-    renderMp3Result(youtubeVideo, true);
-    downloadLink.textContent = 'BAIXAR MÚSICA';
-    resultLoading.hidden = true;
-    resultError.hidden = true;
-    result.hidden = false;
-    maybeReplayHistoryDownload();
-    return;
-  }
-
-  const audio = items.find((item) => mediaTypeForDownload(item) === 'audio');
-  if (!audio) {
-    return showResultError('Não encontramos uma faixa de áudio disponível neste link.');
-  }
-
-  activeResultItems = [audio];
-  renderMusicResult(audio);
-  resultLoading.hidden = true;
-  resultError.hidden = true;
-  result.hidden = false;
-  maybeReplayHistoryDownload();
-});
-
-thumbnailForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const rawUrl = thumbnailInput.value.trim();
-  const validation = validateBeforeSubmit(thumbnailInput, thumbnailNote, DEFAULT_THUMBNAIL_NOTE, 'thumbnail');
-  if (!validation) return;
-
-  activeRequest = { tool: 'thumbnail', url: rawUrl };
-  thumbnailInput.blur();
-  openResultScreen(`${validation.label} reconhecido.`, 'Buscando a maior thumbnail disponível…');
-  thumbnailNote.className = 'form-note';
-  thumbnailNote.textContent = DEFAULT_THUMBNAIL_NOTE;
-
-  let data;
-  try {
-    const extraction = await requestExtraction(rawUrl, 'media', 'Não foi possível buscar a thumbnail.');
-    data = extraction.data;
-    if (extraction.cached) setResultLoading('Resultado recente encontrado.', 'Abrindo a thumbnail já analisada…');
-  } catch (error) {
-    return showResultError(error.message || 'Não foi possível buscar a thumbnail.');
-  }
-
-  if (data.status !== 'ready' || !THUMBNAIL_SOURCES.has(data.source)) {
-    return showResultError(data.message || 'Não foi possível obter a thumbnail deste link.');
-  }
-
-  const items = Array.isArray(data.items) && data.items.length ? data.items : [data];
-  const item = items.find((value) => value && value.thumbnail && value.proxy_id) ||
-    (data.thumbnail && data.proxy_id ? data : null);
-  if (!item) {
-    return showResultError('Este conteúdo não disponibilizou uma thumbnail para download.');
-  }
-
-  activeResultItems = [item];
-  renderThumbnailResult(item);
-  resultLoading.hidden = true;
-  resultError.hidden = true;
-  result.hidden = false;
-  maybeReplayHistoryDownload();
-});
-
-avatarForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const validation = updateLiveValidation(avatarInput, avatarNote, DEFAULT_AVATAR_NOTE, 'avatar');
-  if (validation.empty) {
-    avatarNote.className = 'form-note error';
-    avatarNote.textContent = 'PERFIL AUSENTE: Digite um @ ou cole o link do perfil para continuar.';
-    return;
-  }
-  if (!validation.valid) return;
-
-  const profileUrl = validation.url;
-  activeRequest = { tool: 'avatar', url: profileUrl };
-  avatarInput.blur();
-  openResultScreen(`Perfil ${validation.label} reconhecido.`, 'Buscando a maior foto de perfil pública disponível…');
-  avatarNote.className = 'form-note';
-  avatarNote.textContent = DEFAULT_AVATAR_NOTE;
-
-  let data;
-  try {
-    const extraction = await requestExtraction(profileUrl, 'avatar', 'Não foi possível buscar o avatar.');
-    data = extraction.data;
-    if (extraction.cached) setResultLoading('Resultado recente encontrado.', 'Abrindo o avatar já analisado…');
-  } catch (error) {
-    return showResultError(error.message || 'Não foi possível buscar o avatar.');
-  }
-
-  const items = Array.isArray(data.items) && data.items.length ? data.items : [data];
-  const item = items.find((value) => value && value.type === 'image' && value.proxy_id) ||
-    (data.type === 'image' && data.proxy_id ? data : null);
-  if (!item) {
-    return showResultError('Não foi possível encontrar a foto de perfil deste Instagram agora.');
-  }
-
-  activeResultItems = [item];
-  renderAvatarResult(item);
-  resultLoading.hidden = true;
-  resultError.hidden = true;
-  result.hidden = false;
-  maybeReplayHistoryDownload();
-});
-
-function openResultScreen(message, detail = 'Isso pode levar alguns segundos.') {
-  resetResult();
-  resultScreen.hidden = false;
-  document.body.classList.add('result-screen-open');
-  setResultLoading(message, detail);
-  requestAnimationFrame(() => resultBack.focus({ preventScroll: true }));
-}
-
-function closeResultScreen() {
-  resultScreen.hidden = true;
-  document.body.classList.remove('result-screen-open');
-  resetResult();
-  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-}
-
-
-function resetResult() {
-  result.hidden = true;
-  result.classList.remove('is-carousel', 'is-mp3', 'is-thumbnail', 'is-avatar');
-  resultStage.classList.remove('carousel-mode');
-  resultLoading.hidden = true;
-  resultError.hidden = true;
-  preview.replaceChildren();
-  delete preview.dataset.type;
-  preview.style.removeProperty('width');
-  preview.style.removeProperty('height');
-  preview.style.removeProperty('background');
-  preview.style.removeProperty('overflow');
-  carouselItems.replaceChildren();
-  carouselItems.hidden = true;
-  activeResultItems = [];
-  downloadLink.hidden = true;
-  downloadLink.href = '#';
-  downloadLink.textContent = 'BAIXAR ARQUIVO';
-  delete downloadLink.dataset.mode;
-  delete downloadLink.dataset.mediaUrl;
-  delete downloadLink.dataset.filename;
-  if (downloadStatus) {
-    downloadStatus.hidden = true;
-    downloadStatus.textContent = '';
-    downloadStatus.classList.remove('is-error');
-  }
-}
-
-function setResultLoading(message, detail = 'Isso pode levar alguns segundos.') {
-  result.hidden = true;
-  resultError.hidden = true;
-  resultLoading.hidden = false;
-  resultLoadingText.textContent = message;
-  if (resultLoadingHint) resultLoadingHint.textContent = detail;
-}
-
-function showResultError(message) {
-  historyReplayPending = null;
-  const friendly = classifyResultError(message);
-  result.hidden = true;
-  resultLoading.hidden = true;
-  resultError.hidden = false;
-  if (resultErrorTitle) resultErrorTitle.textContent = friendly.title;
-  resultErrorText.textContent = friendly.message;
-}
-
-function formatAudioTime(seconds) {
-  const value = Number.isFinite(Number(seconds)) ? Math.max(0, Number(seconds)) : 0;
-  const minutes = Math.floor(value / 60);
-  const secs = Math.floor(value % 60);
-  return `${minutes}:${String(secs).padStart(2, '0')}`;
-}
-
-function createAudioPreview(data) {
-  const card = document.createElement('article');
-  card.className = 'audio-preview-card';
-
-  const cover = document.createElement('div');
-  cover.className = 'audio-cover';
-
-  if (data.thumbnail) {
-    const image = document.createElement('img');
-    image.src = lightweightPreviewImageUrl(data) || data.thumbnail;
-    image.alt = '';
-    image.addEventListener('error', () => {
-      image.remove();
-      cover.classList.add('is-fallback');
-      cover.setAttribute('aria-label', 'Capa indisponível');
-    });
-    cover.append(image);
-  } else {
-    cover.classList.add('is-fallback');
-    cover.setAttribute('aria-label', 'Capa indisponível');
-  }
-
-  const details = document.createElement('div');
-  details.className = 'audio-details';
-
-  const title = document.createElement('strong');
-  title.className = 'audio-title';
-  title.textContent = data.track_title || data.title || 'Áudio';
-
-  const artist = document.createElement('span');
-  artist.className = 'audio-artist';
-  const audioSourceNames = {
-    youtube: 'YouTube',
-    soundcloud: 'SoundCloud',
-    bandcamp: 'Bandcamp',
-    audius: 'Audius',
-    bandlab: 'BandLab',
-  };
-  artist.textContent = data.artist || audioSourceNames[data.source] || 'Áudio';
-
-  const player = document.createElement('div');
-  player.className = 'audio-player';
-
-  const playButton = document.createElement('button');
-  playButton.type = 'button';
-  playButton.className = 'audio-play';
-  playButton.setAttribute('aria-label', 'Reproduzir áudio');
-  playButton.textContent = '▶';
-
-  const timeline = document.createElement('div');
-  timeline.className = 'audio-timeline';
-
-  const progress = document.createElement('input');
-  progress.className = 'audio-progress';
-  progress.type = 'range';
-  progress.min = '0';
-  progress.max = '1000';
-  progress.value = '0';
-  progress.step = '1';
-  progress.setAttribute('aria-label', 'Progresso do áudio');
-
-  const timeRow = document.createElement('div');
-  timeRow.className = 'audio-time-row';
-  const currentTime = document.createElement('span');
-  currentTime.textContent = '0:00';
-  const durationTime = document.createElement('span');
-  durationTime.textContent = data.duration ? formatAudioTime(data.duration) : '--:--';
-  timeRow.append(currentTime, durationTime);
-  timeline.append(progress, timeRow);
-  player.append(playButton, timeline);
-  details.append(title, artist, player);
-
-  const audio = document.createElement('audio');
-  audio.src = proxyMediaUrl(data.url, data.source, data.proxy_id, false);
-  audio.preload = 'metadata';
-  audio.className = 'audio-engine';
-  audio.setAttribute('aria-hidden', 'true');
-
-  const syncPlayer = () => {
-    const duration = Number.isFinite(audio.duration) && audio.duration > 0
-      ? audio.duration
-      : Number(data.duration || 0);
-    if (duration > 0) {
-      const ratio = Math.min(1, Math.max(0, audio.currentTime / duration));
-      progress.value = String(Math.round(ratio * 1000));
-      durationTime.textContent = formatAudioTime(duration);
-    }
-    currentTime.textContent = formatAudioTime(audio.currentTime);
-  };
-
-  playButton.addEventListener('click', async () => {
-    if (audio.paused) {
-      try {
-        await audio.play();
-      } catch (_) {
-        return;
-      }
-    } else {
-      audio.pause();
-    }
-  });
-
-  progress.addEventListener('input', () => {
-    const duration = Number.isFinite(audio.duration) && audio.duration > 0
-      ? audio.duration
-      : Number(data.duration || 0);
-    if (duration > 0) {
-      audio.currentTime = (Number(progress.value) / 1000) * duration;
-      syncPlayer();
-    }
-  });
-
-  audio.addEventListener('play', () => {
-    playButton.textContent = '❚❚';
-    playButton.setAttribute('aria-label', 'Pausar áudio');
-  });
-  audio.addEventListener('pause', () => {
-    playButton.textContent = '▶';
-    playButton.setAttribute('aria-label', 'Reproduzir áudio');
-  });
-  audio.addEventListener('ended', () => {
-    playButton.textContent = '▶';
-    progress.value = '0';
-    currentTime.textContent = '0:00';
-  });
-  audio.addEventListener('loadedmetadata', syncPlayer);
-  audio.addEventListener('durationchange', syncPlayer);
-  audio.addEventListener('timeupdate', syncPlayer);
-  audio.addEventListener('error', () => {
-    playButton.disabled = true;
-    playButton.textContent = '▶';
-    artist.textContent = 'Prévia de áudio indisponível';
-  });
-
-  card.append(cover, details, audio);
-  return card;
-}
-
-
-function createPreview(data) {
-  // Comportamento de prévia restaurado: a mídia é aberta diretamente pelo
-  // proxy já existente, sem trocar a URL da imagem no navegador.
-  if (data.type === 'audio') return createAudioPreview(data);
-
-  const element = document.createElement(data.type === 'image' ? 'img' : 'video');
-  element.src = proxyMediaUrl(data.url, data.source, data.proxy_id, false);
-
-  if (data.type === 'image') {
-    element.alt = '';
-    element.addEventListener('error', () => showPreviewFallback(data, element));
-  } else if (data.type === 'video') {
-    element.autoplay = true;
-    element.muted = true;
-    element.loop = true;
-    element.playsInline = true;
-    element.controls = false;
-    element.removeAttribute('controls');
-    element.preload = 'metadata';
-    element.disablePictureInPicture = true;
-    element.disableRemotePlayback = true;
-    if (data.thumbnail) element.poster = data.thumbnail;
-    element.setAttribute('controlsList', 'nodownload noremoteplayback nofullscreen');
-    element.addEventListener('error', () => showPreviewFallback(data, element));
-    element.addEventListener('canplay', () => {
-      element.play().catch(() => {});
-    }, { once: true });
-  }
-
-  return element;
-}
-
-function showPreviewFallback(data, element) {
-  if (!element.isConnected) return;
-  if (data.thumbnail && data.type === 'video') {
-    const image = document.createElement('img');
-    image.src = data.thumbnail;
-    image.alt = '';
-    image.addEventListener('error', () => image.replaceWith(createPreviewUnavailable()));
-    element.replaceWith(image);
-    return;
-  }
-  element.replaceWith(createPreviewUnavailable());
-}
-
-function createPreviewUnavailable() {
-  const fallback = document.createElement('div');
-  fallback.className = 'preview-unavailable';
-  fallback.textContent = 'Prévia indisponível';
-  return fallback;
-}
-
-
-
-function maybeShowLongYoutubeWarning(data) {
-  // YouTube usa fluxo direto para googlevideo.com no site.
-  // O aviso/instrução fica concentrado no menu do resultado, sem status menor abaixo.
-  if (data?.source === 'youtube') {
-    if (downloadStatus) {
-      downloadStatus.hidden = true;
-      downloadStatus.textContent = '';
-      downloadStatus.classList.remove('is-error');
-    }
-    return;
-  }
-}
-
-function renderMedia(data) {
-  preview.dataset.type = data.type || 'media';
-  preview.replaceChildren(createPreview(data));
-  carouselItems.hidden = true;
-  carouselItems.replaceChildren();
-  downloadLink.hidden = false;
-  downloadLink.href = '#';
-  downloadLink.textContent = downloadLabelForMedia(data);
-  downloadLink.dataset.mode = 'single';
-  downloadLink.dataset.filename = data.filename || 'soft-download';
-
-  if (data?.source === 'youtube') {
-    downloadLink.textContent = 'BAIXAR VÍDEO';
-  }
-
-  downloadLink.dataset.mediaUrl = proxyMediaUrl(
-    data.url, data.source, data.proxy_id, true
-  );
-}
-
-function renderMusicResult(data) {
-  renderMedia(data);
-  downloadLink.textContent = 'BAIXAR MÚSICA';
-  downloadLink.dataset.mode = 'music';
-}
-
-function renderMp3Result(data, showThumbnail = false) {
-  result.classList.add('is-mp3');
-  result.classList.remove('is-carousel');
-  resultStage.classList.remove('carousel-mode');
-  preview.dataset.type = 'mp3';
-  carouselItems.hidden = true;
-  carouselItems.replaceChildren();
-
-  const card = document.createElement('article');
-  card.className = 'mp3-audio-card';
-
-  if (showThumbnail) {
-    const cover = document.createElement('div');
-    cover.className = 'audio-cover';
-
-    const image = document.createElement('img');
-    image.src = data.proxy_id
-      ? proxyThumbnailUrl(data.proxy_id)
-      : (data.thumbnail || '');
-    image.alt = data.title ? `Capa de ${data.title}` : 'Capa da música';
-
-    image.addEventListener('error', () => {
-      image.remove();
-      cover.classList.add('is-fallback');
-    });
-
-    if (image.src) {
-      cover.append(image);
-    } else {
-      cover.classList.add('is-fallback');
-    }
-
-    card.append(cover);
-    card.style.gap = '14px';
-  }
-
-  const details = document.createElement('div');
-  details.className = 'audio-details mp3-audio-details';
-
-  const title = document.createElement('strong');
-  title.className = 'audio-title';
-  title.textContent = data.title || 'Áudio do vídeo';
-
-  const format = document.createElement('span');
-  format.className = 'audio-artist';
-  format.textContent = 'MP3 • 192 kbps';
-
-  const player = document.createElement('div');
-  player.className = 'audio-player';
-
-  const playButton = document.createElement('button');
-  playButton.type = 'button';
-  playButton.className = 'audio-play';
-  playButton.setAttribute('aria-label', 'Reproduzir áudio');
-  playButton.textContent = '▶';
-
-  const timeline = document.createElement('div');
-  timeline.className = 'audio-timeline';
-
-  const progress = document.createElement('input');
-  progress.className = 'audio-progress';
-  progress.type = 'range';
-  progress.min = '0';
-  progress.max = '1000';
-  progress.value = '0';
-  progress.step = '1';
-  progress.setAttribute('aria-label', 'Progresso do áudio');
-
-  const timeRow = document.createElement('div');
-  timeRow.className = 'audio-time-row';
-  const currentTime = document.createElement('span');
-  currentTime.textContent = '0:00';
-  const durationTime = document.createElement('span');
-  durationTime.textContent = data.duration ? formatAudioTime(data.duration) : '--:--';
-  timeRow.append(currentTime, durationTime);
-  timeline.append(progress, timeRow);
-  player.append(playButton, timeline);
-  details.append(title, format, player);
-
-  const audio = document.createElement('audio');
-  audio.src = proxyMp3PreviewUrl(data.proxy_id);
-  audio.preload = 'metadata';
-  audio.className = 'audio-engine';
-  audio.setAttribute('aria-hidden', 'true');
-
-  const syncPlayer = () => {
-    const duration = Number.isFinite(audio.duration) && audio.duration > 0
-      ? audio.duration
-      : Number(data.duration || 0);
-    if (duration > 0) {
-      const ratio = Math.min(1, Math.max(0, audio.currentTime / duration));
-      progress.value = String(Math.round(ratio * 1000));
-      durationTime.textContent = formatAudioTime(duration);
-    }
-    currentTime.textContent = formatAudioTime(audio.currentTime);
-  };
-
-  playButton.addEventListener('click', async () => {
-    if (audio.paused) {
-      try {
-        await audio.play();
-      } catch (_) {
-        return;
-      }
-    } else {
-      audio.pause();
-    }
-  });
-
-  progress.addEventListener('input', () => {
-    const duration = Number.isFinite(audio.duration) && audio.duration > 0
-      ? audio.duration
-      : Number(data.duration || 0);
-    if (duration > 0 && Number.isFinite(audio.duration)) {
-      audio.currentTime = (Number(progress.value) / 1000) * duration;
-      syncPlayer();
-    }
-  });
-
-  audio.addEventListener('play', () => {
-    playButton.textContent = '❚❚';
-    playButton.setAttribute('aria-label', 'Pausar áudio');
-  });
-  audio.addEventListener('pause', () => {
-    playButton.textContent = '▶';
-    playButton.setAttribute('aria-label', 'Reproduzir áudio');
-  });
-  audio.addEventListener('ended', () => {
-    playButton.textContent = '▶';
-    progress.value = '0';
-    currentTime.textContent = '0:00';
-  });
-  audio.addEventListener('loadedmetadata', syncPlayer);
-  audio.addEventListener('durationchange', syncPlayer);
-  audio.addEventListener('timeupdate', syncPlayer);
-  audio.addEventListener('error', () => {
-    playButton.disabled = true;
-    playButton.textContent = '▶';
-    format.textContent = 'Prévia de áudio indisponível';
-  });
-
-  card.append(details, audio);
-  preview.replaceChildren(card);
-
-  const mp3Filename = String(data.filename || 'soft-download.mp4').replace(/\.[^.]+$/, '') + '.mp3';
-  downloadLink.hidden = false;
-  downloadLink.href = '#';
-  downloadLink.textContent = 'BAIXAR MP3';
-  downloadLink.dataset.mode = 'mp3';
-  downloadLink.dataset.mediaUrl = proxyMp3Url(data.proxy_id);
-  downloadLink.dataset.filename = mp3Filename;
-}
-
-function renderThumbnailResult(data) {
-  result.classList.add('is-thumbnail');
-  result.classList.remove('is-carousel', 'is-mp3');
-  resultStage.classList.remove('carousel-mode');
-  preview.dataset.type = 'thumbnail';
-  carouselItems.hidden = true;
-  carouselItems.replaceChildren();
-
-  const image = document.createElement('img');
-  image.src = data.thumbnail;
-  image.alt = data.title ? `Thumbnail de ${data.title}` : 'Thumbnail do vídeo';
-  image.addEventListener('error', () => image.replaceWith(createPreviewUnavailable()));
-  preview.replaceChildren(image);
-
-  const thumbnailFilename = thumbnailFilenameFor(data);
-  downloadLink.hidden = false;
-  downloadLink.href = '#';
-  downloadLink.textContent = 'BAIXAR THUMBNAIL';
-  downloadLink.dataset.mode = 'thumbnail';
-  downloadLink.dataset.mediaUrl = proxyThumbnailUrl(data.proxy_id, true);
-  downloadLink.dataset.filename = thumbnailFilename;
-}
-
-function thumbnailFilenameFor(data) {
-  const source = String(data.source || 'video').replace(/[^a-z0-9_-]+/gi, '-');
-  const base = String(data.filename || `${source}-thumbnail`)
-    .replace(/\.[^.]+$/, '')
-    .replace(/[^a-z0-9 _-]+/gi, '')
-    .trim() || `${source}-thumbnail`;
-  return `${base}-thumbnail.jpg`;
-}
-
-function renderAvatarResult(data) {
-  result.classList.add('is-avatar');
-  result.classList.remove('is-carousel', 'is-mp3', 'is-thumbnail');
-  resultStage.classList.remove('carousel-mode');
-  carouselItems.hidden = true;
-  carouselItems.replaceChildren();
-
-  const card = document.createElement('div');
-  card.className = 'avatar-result-card';
-
-  const frame = document.createElement('div');
-  frame.className = 'result-preview';
-  frame.dataset.type = 'avatar';
-  const image = document.createElement('img');
-  image.src = proxyMediaUrl(data.url, data.source, data.proxy_id, false);
-  image.alt = data.username ? `Avatar de @${data.username}` : 'Avatar do Instagram';
-  image.addEventListener('error', () => image.replaceWith(createPreviewUnavailable()));
-  frame.append(image);
-
-  const copy = document.createElement('div');
-  copy.className = 'avatar-result-copy';
-  const username = document.createElement('strong');
-  username.textContent = data.username ? `@${data.username}` : 'Instagram';
-  copy.append(username);
-  if (data.full_name) {
-    const fullName = document.createElement('span');
-    fullName.textContent = data.full_name;
-    copy.append(fullName);
-  }
-
-  card.append(frame, copy);
-  delete preview.dataset.type;
-  preview.replaceChildren(card);
-  preview.style.width = 'auto';
-  preview.style.height = 'auto';
-  preview.style.background = 'transparent';
-  preview.style.overflow = 'visible';
-
-  downloadLink.hidden = false;
-  downloadLink.href = '#';
-  downloadLink.textContent = 'BAIXAR AVATAR';
-  downloadLink.dataset.mode = 'avatar';
-  downloadLink.dataset.mediaUrl = proxyMediaUrl(data.url, data.source, data.proxy_id, true);
-  downloadLink.dataset.filename = data.filename || `instagram-${data.username || 'avatar'}-avatar.jpg`;
-}
-
-function renderCarousel(items) {
-  delete preview.dataset.type;
-  preview.replaceChildren();
-  carouselItems.hidden = true;
-  carouselItems.replaceChildren();
-
-  const grid = document.createElement('div');
-  grid.className = 'carousel-grid';
-  const groupSnapshots = items.map((item, index) => historySnapshotForItem(item, index));
-
-  items.forEach((item, index) => {
-    const tile = document.createElement('article');
-    tile.className = 'carousel-tile';
-
-    // Mantém a área da mídia com tamanho real mesmo em WebViews Android
-    // que apresentam falhas com `aspect-ratio` em elementos de grid.
-    const mediaFrame = document.createElement('div');
-    mediaFrame.className = 'carousel-media-frame';
-    const mediaElement = createPreview(item);
-    if (mediaElement instanceof HTMLImageElement && index >= 8) {
-      mediaElement.loading = 'lazy';
-    }
-    mediaFrame.append(mediaElement);
-    tile.append(mediaFrame);
-
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'tile-download';
-    button.textContent = '↓';
-    button.title = `Baixar mídia ${index + 1}`;
-    button.setAttribute('aria-label', `Baixar mídia ${index + 1}`);
-    button.addEventListener('click', () => downloadMedia(
-      proxyMediaUrl(item.url, item.source, item.proxy_id, true),
-      item.filename || 'soft-download',
-      button,
-      buildHistoryEntry(item, {
-        mode: 'carousel-item',
-        itemIndex: index,
-        filename: item.filename,
-        count: groupSnapshots.length,
-        items: groupSnapshots,
-      }),
-    ));
-
-    tile.append(button);
-    grid.append(tile);
-  });
-
-  preview.append(grid);
-
-  downloadLink.hidden = false;
-  downloadLink.href = '#';
-  downloadLink.textContent = 'BAIXAR TODOS';
-  downloadLink.dataset.mode = 'all';
-  delete downloadLink.dataset.mediaUrl;
-  delete downloadLink.dataset.filename;
-}
-
-function mediaTypeForDownload(data) {
-  if (!data) return 'media';
-
-  // TikTok e YouTube são sempre tratados como vídeo; a imagem mostrada na
-  // prévia é apenas a capa e não deve mudar o texto do botão.
-  if (data.source === 'tiktok' || data.source === 'youtube') return 'video';
-
-  const filename = String(data.filename || '').toLowerCase();
-  const url = String(data.url || '').toLowerCase();
-
-  if (/\.(mp4|webm|mov|m4v)(?:$|[?#])/.test(filename) || /mime_type=video/.test(url)) return 'video';
-  if (/\.(mp3|m4a|aac|wav|ogg|opus)(?:$|[?#])/.test(filename)) return 'audio';
-  if (/\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/.test(filename)) return 'image';
-
-  if (data.type === 'video' || data.type === 'audio' || data.type === 'image') return data.type;
-  return 'media';
-}
-
-function downloadLabelForMedia(data) {
-  const type = mediaTypeForDownload(data);
-  if (type === 'image') return 'BAIXAR FOTO';
-  if (type === 'video') return 'BAIXAR VÍDEO';
-  if (type === 'audio') return 'BAIXAR ÁUDIO';
-  return 'BAIXAR ARQUIVO';
-}
-
-function createDownloadProgressId() {
-  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-  const bytes = new Uint8Array(18);
-  if (window.crypto?.getRandomValues) window.crypto.getRandomValues(bytes);
-  else bytes.forEach((_, index) => { bytes[index] = Math.floor(Math.random() * 256); });
-  return Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
-}
-
-function isWorkerMediaUrl(mediaUrl) {
-  try {
-    const parsed = new URL(mediaUrl, window.location.href);
-    return parsed.hostname === WORKER_MEDIA_HOST && (parsed.pathname === '/media' || parsed.pathname === '/pdf');
-  } catch {
-    return false;
-  }
-}
-
-function mediaUrlWithProgress(mediaUrl, progressId) {
-  const parsed = new URL(mediaUrl, window.location.href);
-  parsed.searchParams.set('progress', progressId);
-  return parsed.toString();
-}
-
-function downloadProgressItemLabel(media, index, total) {
-  const type = mediaTypeForDownload(media);
-  const base = type === 'video' ? 'VÍDEO' : type === 'image' ? 'FOTO' : type === 'audio' ? 'ÁUDIO' : 'ARQUIVO';
-  return total > 1 ? `${base} ${index + 1}` : base;
-}
-
-function closeDownloadProgressScreen() {
-  if (!downloadScreen) return;
-  downloadScreen.hidden = true;
-  document.body.classList.remove('download-screen-open');
-  activeDownloadSession = null;
-}
-
-function hasPendingDownloadTransfers(session = activeDownloadSession) {
-  return Boolean(session?.transfers?.some((transfer) => !transfer.done));
-}
-
-function returnDownloadProgressToHome() {
-  closeDownloadProgressScreen();
-  closeResultScreen();
-  closeHistoryScreen?.();
-  setActiveTool('media');
-  setSectionHash('#midias');
-  const home = document.querySelector('#inicio');
-  if (home) home.scrollIntoView({ behavior: 'auto', block: 'start' });
-  else window.scrollTo({ top: 0, behavior: 'auto' });
-}
-
-async function requestWorkerDownloadCancel(progressId) {
-  if (!progressId) return;
-  try {
-    await fetch(`https://${WORKER_MEDIA_HOST}/cancel?id=${encodeURIComponent(progressId)}`, {
-      method: 'POST',
-      cache: 'no-store',
-      keepalive: true,
-    });
-  } catch {
-    // O navegador também tem a conexão de mídia interrompida localmente.
-    // Se o aviso ao worker falhar, o fechamento do request ainda encerra o fluxo.
-  }
-}
-
-function stopBrowserDownloadRequest(transfer) {
-  transfer.abortController?.abort();
-  transfer.abortController = null;
-
-  if (transfer.frame) {
-    try { transfer.frame.src = 'about:blank'; } catch {}
-    transfer.frame.remove();
-    transfer.frame = null;
-  }
-}
-
-function cancelDownloadTransfer(transfer) {
-  if (!transfer || transfer.done) return;
-  transfer.cancelRequested = true;
-  stopBrowserDownloadRequest(transfer);
-  if (transfer.progressId) void requestWorkerDownloadCancel(transfer.progressId);
-  setDownloadTransferState(transfer, 'cancelled');
-}
-
-function cancelActiveDownloadSession({ returnHome = false } = {}) {
-  const session = activeDownloadSession;
-  if (session) {
-    session.cancelRequested = true;
-    session.transfers.forEach(cancelDownloadTransfer);
-    updateDownloadOverall(session);
-  }
-  if (returnHome) returnDownloadProgressToHome();
-}
-
-downloadProgressBack?.addEventListener('click', () => {
-  if (hasPendingDownloadTransfers()) {
-    cancelActiveDownloadSession({ returnHome: true });
-    return;
-  }
-  returnDownloadProgressToHome();
-});
-
-downloadProgressCancel?.addEventListener('click', () => {
-  if (!hasPendingDownloadTransfers()) return;
-  downloadProgressCancel.disabled = true;
-  cancelActiveDownloadSession();
-});
-
-function createDownloadTransfer(media, mediaUrl, filename, index, total) {
-  return {
-    media,
-    mediaUrl,
-    fallbackMediaUrl: '',
-    filename: filename || media?.filename || `soft-download-${index + 1}`,
-    index,
-    total,
-    label: downloadProgressItemLabel(media, index, total),
-    status: 'preparing',
-    progressPercent: 0,
-    progressKnown: false,
-    progressId: '',
-    frame: null,
-    abortController: null,
-    cancelRequested: false,
-    cancelled: false,
-    done: false,
-    failed: false,
-  };
-}
-
-function transferProgressValue(transfer) {
-  if (transfer.done && !transfer.cancelled) return 100;
-  if (transfer.progressKnown && Number.isFinite(transfer.progressPercent)) {
-    return Math.max(0, Math.min(100, transfer.progressPercent));
-  }
-  return 0;
-}
-
-function updateDownloadOverall(session) {
-  if (!session || activeDownloadSession !== session) return;
-
-  const completed = session.transfers.filter((item) => item.done && !item.failed && !item.cancelled).length;
-  const failed = session.transfers.filter((item) => item.failed).length;
-  const cancelled = session.transfers.filter((item) => item.cancelled).length;
-  const finished = completed + failed + cancelled;
-  const total = session.transfers.length;
-  const hasKnownProgress = session.transfers.some((item) => item.progressKnown || item.done);
-  const overallPercent = total > 0
-    ? session.transfers.reduce((sum, item) => sum + transferProgressValue(item), 0) / total
-    : 0;
-  const safePercent = Math.max(0, Math.min(100, Math.round(overallPercent)));
-
-  if (session.overallPercentElement) {
-    session.overallPercentElement.textContent = hasKnownProgress || finished === total ? `${safePercent}%` : '';
-  }
-  if (session.overallFillElement) {
-    session.overallFillElement.style.width = `${safePercent}%`;
-  }
-  session.overallTrackElement?.classList.toggle(
-    'is-indeterminate',
-    finished < total && !hasKnownProgress,
-  );
-
-  if (downloadProgressCancel) {
-    downloadProgressCancel.hidden = finished >= total;
-    downloadProgressCancel.disabled = finished >= total || Boolean(session.cancelRequested);
-  }
-
-  if (finished < total) {
-    downloadProgressTitle.textContent = total === 1 ? 'Baixando arquivo' : 'Baixando publicação';
-    downloadProgressSummary.textContent = total === 1
-      ? 'Aguarde enquanto o arquivo é transferido para o navegador.'
-      : `${completed} de ${total} arquivos transferidos.`;
-
-    if (session.overallStatusElement) {
-      if (total === 1) {
-        const transfer = session.transfers[0];
-        if (transfer.status === 'finalizing') session.overallStatusElement.textContent = 'FINALIZANDO...';
-        else if (transfer.status === 'downloading') session.overallStatusElement.textContent = 'BAIXANDO...';
-        else session.overallStatusElement.textContent = 'PREPARANDO...';
-      } else {
-        session.overallStatusElement.textContent = completed > 0
-          ? `BAIXANDO... ${completed} DE ${total} TRANSFERIDOS`
-          : 'BAIXANDO...';
-      }
-    }
-    return;
-  }
-
-  session.overallTrackElement?.classList.remove('is-indeterminate');
-
-  if (cancelled > 0) {
-    session.overallRow?.classList.remove('is-complete', 'is-error');
-    session.overallRow?.classList.add('is-cancelled');
-    if (cancelled === total) {
-      downloadProgressTitle.textContent = 'Download cancelado';
-      downloadProgressSummary.textContent = total === 1
-        ? 'A transferência foi interrompida.'
-        : 'As transferências foram interrompidas.';
-      session.overallStatusElement.textContent = 'CANCELADO';
-    } else {
-      downloadProgressTitle.textContent = 'Download interrompido';
-      downloadProgressSummary.textContent = `${completed} de ${total} arquivos foram enviados ao navegador. ${cancelled} cancelado${cancelled > 1 ? 's' : ''}.`;
-      session.overallStatusElement.textContent = 'INTERROMPIDO';
-    }
-  } else if (failed === 0) {
-    if (session.overallPercentElement) session.overallPercentElement.textContent = '100%';
-    if (session.overallFillElement) session.overallFillElement.style.width = '100%';
-    downloadProgressTitle.textContent = 'Transferência concluída';
-    downloadProgressSummary.textContent = total === 1
-      ? 'O arquivo foi enviado ao navegador.'
-      : `${total} arquivos foram enviados ao navegador.`;
-    session.overallStatusElement.textContent = 'ENVIADO ✓';
-    session.overallRow?.classList.add('is-complete');
-  } else if (completed > 0) {
-    if (session.overallPercentElement) session.overallPercentElement.textContent = '100%';
-    if (session.overallFillElement) session.overallFillElement.style.width = '100%';
-    downloadProgressTitle.textContent = 'Transferência parcial';
-    downloadProgressSummary.textContent = `${completed} de ${total} arquivos foram enviados ao navegador. ${failed} não puderam ser transferidos.`;
-    session.overallStatusElement.textContent = `${failed} ARQUIVO${failed > 1 ? 'S' : ''} COM ERRO`;
-    session.overallRow?.classList.add('is-error');
-  } else {
-    if (session.overallPercentElement) session.overallPercentElement.textContent = '100%';
-    if (session.overallFillElement) session.overallFillElement.style.width = '100%';
-    downloadProgressTitle.textContent = 'Não foi possível baixar';
-    downloadProgressSummary.textContent = total === 1
-      ? (session.transfers[0]?.error || 'O arquivo não pôde ser transferido.')
-      : 'Nenhum arquivo pôde ser transferido.';
-    session.overallStatusElement.textContent = 'ERRO NO DOWNLOAD';
-    session.overallRow?.classList.add('is-error');
-  }
-
-  downloadProgressBack.disabled = false;
-  downloadProgressBack.classList.remove('is-pending');
-  downloadProgressBack.removeAttribute('aria-hidden');
-}
-
-function setDownloadTransferState(transfer, status, options = {}) {
-  const { percent = null, error = '' } = options;
-  transfer.status = status;
-  if (error) transfer.error = String(error);
-
-  if (status === 'preparing') {
-    transfer.progressPercent = 0;
-    transfer.progressKnown = false;
-  } else if (status === 'downloading') {
-    if (percent === null) {
-      transfer.progressKnown = false;
-    } else {
-      transfer.progressKnown = true;
-      transfer.progressPercent = Math.max(0, Math.min(100, Number(percent) || 0));
-    }
-  } else if (status === 'finalizing') {
-    transfer.progressKnown = true;
-    transfer.progressPercent = 100;
-  } else if (status === 'complete') {
-    transfer.progressKnown = true;
-    transfer.progressPercent = 100;
-    transfer.done = true;
-  } else if (status === 'cancelled') {
-    transfer.done = true;
-    transfer.cancelled = true;
-    transfer.failed = false;
-    transfer.status = 'cancelled';
-  } else if (status === 'error') {
-    if (transfer.cancelRequested || transfer.cancelled) {
-      transfer.done = true;
-      transfer.cancelled = true;
-      transfer.failed = false;
-      transfer.status = 'cancelled';
-    } else {
-      transfer.progressKnown = true;
-      transfer.progressPercent = 100;
-      transfer.done = true;
-      transfer.failed = true;
-    }
-  }
-
-  updateDownloadOverall(activeDownloadSession);
-}
-
-function openDownloadProgressScreen(transfers) {
-  if (!downloadScreen || !downloadProgressList) return null;
-  const session = { transfers, startedAt: Date.now(), cancelRequested: false };
-  activeDownloadSession = session;
-
-  downloadProgressList.replaceChildren();
-  downloadProgressBack.textContent = '← Voltar';
-  downloadProgressBack.setAttribute('aria-label', 'Voltar para a tela inicial');
-  downloadProgressBack.disabled = false;
-  downloadProgressBack.classList.remove('is-pending');
-  downloadProgressBack.removeAttribute('aria-hidden');
-  if (downloadProgressCancel) {
-    downloadProgressCancel.hidden = false;
-    downloadProgressCancel.disabled = false;
-  }
-  downloadProgressTitle.textContent = transfers.length > 1 ? 'Baixando publicação' : 'Baixando arquivo';
-  downloadProgressSummary.textContent = transfers.length > 1
-    ? `0 de ${transfers.length} arquivos transferidos.`
-    : 'Aguarde enquanto o arquivo é transferido para o navegador.';
-
-  const first = transfers[0]?.media || null;
-  const cover = String(first?.thumbnail || (mediaTypeForDownload(first) === 'image' ? first?.url : '') || '').trim();
-
-  // Limpa imediatamente qualquer prévia da transferência anterior.
-  // O elemento <img> só volta a aparecer depois que a nova imagem terminou de carregar.
-  downloadProgressSource.hidden = true;
-  downloadProgressSource.classList.remove('has-cover');
-  downloadProgressCover.hidden = true;
-  downloadProgressCover.alt = '';
-  downloadProgressCover.removeAttribute('src');
-
-  if (cover) {
-    const previewImage = new Image();
-    const previewSession = session;
-
-    previewImage.onload = () => {
-      if (activeDownloadSession !== previewSession) return;
-      downloadProgressCover.src = cover;
-      downloadProgressCover.alt = 'Prévia da mídia';
-      downloadProgressCover.hidden = false;
-      downloadProgressSource.classList.add('has-cover');
-      downloadProgressSource.hidden = false;
-    };
-
-    previewImage.onerror = () => {
-      if (activeDownloadSession !== previewSession) return;
-      downloadProgressCover.removeAttribute('src');
-      downloadProgressCover.hidden = true;
-      downloadProgressSource.classList.remove('has-cover');
-      downloadProgressSource.hidden = true;
-    };
-
-    previewImage.src = cover;
-  }
-
-  downloadProgressContentTitle.textContent = '';
-  downloadProgressContentMeta.textContent = '';
-
-  const row = document.createElement('article');
-  row.className = 'download-progress-item download-progress-overall';
-
-  const top = document.createElement('div');
-  top.className = 'download-progress-item-top';
-  const copy = document.createElement('div');
-  copy.className = 'download-progress-item-copy';
-  const label = document.createElement('strong');
-  label.textContent = transfers.length > 1 ? 'PROGRESSO GERAL' : transfers[0].label;
-  const status = document.createElement('span');
-  status.textContent = 'PREPARANDO...';
-  copy.append(label, status);
-  const percent = document.createElement('strong');
-  percent.className = 'download-progress-percent';
-  percent.textContent = '';
-  top.append(copy, percent);
-
-  const track = document.createElement('div');
-  track.className = 'download-progress-track is-indeterminate';
-  const fill = document.createElement('span');
-  track.append(fill);
-  row.append(top, track);
-  downloadProgressList.append(row);
-
-  session.overallRow = row;
-  session.overallStatusElement = status;
-  session.overallPercentElement = percent;
-  session.overallFillElement = fill;
-  session.overallTrackElement = track;
-
-  downloadScreen.hidden = false;
-  downloadScreen.scrollTop = 0;
-  document.body.classList.add('download-screen-open');
-  updateDownloadOverall(session);
-  return session;
-}
-
-function wait(milliseconds) {
-  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
-}
-
-async function pollWorkerDownloadProgress(progressId, transfer) {
-  const deadline = Date.now() + (2 * 60 * 60 * 1000);
-  let consecutiveErrors = 0;
-
-  while (Date.now() < deadline) {
-    if (transfer.cancelRequested || transfer.cancelled) return;
-    try {
-      const response = await fetch(`https://${WORKER_MEDIA_HOST}/progress?id=${encodeURIComponent(progressId)}`, {
-        cache: 'no-store',
-      });
-      const data = await response.json();
-      consecutiveErrors = 0;
-      if (transfer.cancelRequested || transfer.cancelled) return;
-
-      if (data.status === 'cancelled') {
-        setDownloadTransferState(transfer, 'cancelled');
-        return;
-      }
-
-      if (data.status === 'error') {
-        // O fechamento da conexão e o finish() do Worker podem acontecer com poucos
-        // milissegundos de diferença. Confirma uma vez antes de mostrar erro para
-        // não transformar um download já entregue em falha visual no PC/mobile.
-        await wait(450);
-        const confirmResponse = await fetch(`https://${WORKER_MEDIA_HOST}/progress?id=${encodeURIComponent(progressId)}`, {
-          cache: 'no-store',
-        });
-        const confirmed = await confirmResponse.json();
-        if (confirmed.status === 'complete') {
-          setDownloadTransferState(transfer, 'finalizing', { percent: 100 });
-          if (!transfer.cancelRequested) setDownloadTransferState(transfer, 'complete', { percent: 100 });
-          return;
-        }
-        if (confirmed.status !== 'error') {
-          consecutiveErrors = 0;
-          continue;
-        }
-        const terminalError = new Error(confirmed.error || data.error || 'A transferência foi interrompida.');
-        terminalError.workerTerminal = true;
-        throw terminalError;
-      }
-
-      if (data.status === 'complete') {
-        setDownloadTransferState(transfer, 'finalizing', { percent: 100 });
-        if (!transfer.cancelRequested) setDownloadTransferState(transfer, 'complete', { percent: 100 });
-        return;
-      }
-
-      if (data.status === 'downloading') {
-        const total = Number(data.total || 0);
-        const sent = Number(data.sent || 0);
-        const percent = total > 0 ? Math.min(100, (sent / total) * 100) : null;
-        if (percent !== null && percent >= 100) {
-          setDownloadTransferState(transfer, 'finalizing', { percent: 100 });
-        } else {
-          setDownloadTransferState(transfer, 'downloading', { percent });
-        }
-      } else {
-        setDownloadTransferState(transfer, 'preparing');
-      }
-    } catch (error) {
-      if (transfer.cancelRequested || transfer.cancelled) return;
-      if (error?.workerTerminal) throw error;
-      consecutiveErrors += 1;
-      if (consecutiveErrors >= 8) throw error;
-    }
-
-    await wait(300);
-  }
-  throw new Error('O download demorou mais que o esperado.');
-}
-
-async function runWorkerTrackedDownload(transfer) {
-  const progressId = createDownloadProgressId();
-  transfer.progressId = progressId;
-  const trackedUrl = mediaUrlWithProgress(transfer.mediaUrl, progressId);
-  const frame = document.createElement('iframe');
-  frame.hidden = true;
-  frame.setAttribute('aria-hidden', 'true');
-  transfer.frame = frame;
-  frame.src = trackedUrl;
-  document.body.append(frame);
-
-  try {
-    await pollWorkerDownloadProgress(progressId, transfer);
-  } finally {
-    if (transfer.frame === frame) transfer.frame = null;
-    window.setTimeout(() => frame.remove(), 250);
-  }
-}
-
-async function runFetchTrackedDownload(transfer) {
-  setDownloadTransferState(transfer, 'preparing');
-  const controller = new AbortController();
-  transfer.abortController = controller;
-
-  try {
-    const response = await fetch(transfer.mediaUrl, { signal: controller.signal });
-    if (!response.ok) {
-      const directRoute = String(transfer.mediaUrl || '').startsWith('/api/direct-download?');
-      if (directRoute && response.status === 409 && transfer.fallbackMediaUrl) {
-        const fallbackError = new Error('DOWNLOAD_DIRECT_FALLBACK');
-        fallbackError.directFallback = true;
-        throw fallbackError;
-      }
-      throw new Error('Arquivo indisponível. Analise o link novamente.');
-    }
-
-    const total = Number(response.headers.get('Content-Length') || 0);
-    const reader = response.body?.getReader?.();
-    if (!reader) {
-      setDownloadTransferState(transfer, 'downloading', { percent: null });
-      const file = await response.blob();
-      if (transfer.cancelRequested) return;
-      setDownloadTransferState(transfer, 'finalizing', { percent: 100 });
-      const objectUrl = URL.createObjectURL(file);
-      const trigger = document.createElement('a');
-      trigger.href = objectUrl;
-      trigger.download = transfer.filename;
-      document.body.append(trigger);
-      trigger.click();
-      trigger.remove();
-      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
-      if (!transfer.cancelRequested) setDownloadTransferState(transfer, 'complete', { percent: 100 });
-      return;
-    }
-
-    const chunks = [];
-    let received = 0;
-    setDownloadTransferState(transfer, 'downloading', { percent: total > 0 ? 0 : null });
-    while (true) {
-      if (transfer.cancelRequested) {
-        await reader.cancel().catch(() => {});
-        return;
-      }
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (!value) continue;
-      chunks.push(value);
-      received += value.byteLength;
-      setDownloadTransferState(transfer, 'downloading', {
-        percent: total > 0 ? Math.min(100, (received / total) * 100) : null,
-      });
-    }
-
-    if (transfer.cancelRequested) return;
-    setDownloadTransferState(transfer, 'finalizing', { percent: 100 });
-    const file = new Blob(chunks, { type: response.headers.get('Content-Type') || 'application/octet-stream' });
-    const objectUrl = URL.createObjectURL(file);
-    const trigger = document.createElement('a');
-    trigger.href = objectUrl;
-    trigger.download = transfer.filename;
-    document.body.append(trigger);
-    trigger.click();
-    trigger.remove();
-    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
-    if (!transfer.cancelRequested) setDownloadTransferState(transfer, 'complete', { percent: 100 });
-  } finally {
-    if (transfer.abortController === controller) transfer.abortController = null;
-  }
-}
-
-async function runTrackedDownload(transfer) {
-  if (transfer.cancelRequested || transfer.cancelled) return false;
-  try {
-    if (isWorkerMediaUrl(transfer.mediaUrl)) await runWorkerTrackedDownload(transfer);
-    else await runFetchTrackedDownload(transfer);
-    return !transfer.cancelled && !transfer.cancelRequested && !transfer.failed;
-  } catch (error) {
-    if (error?.directFallback && transfer.fallbackMediaUrl && !transfer.cancelRequested) {
-      transfer.mediaUrl = transfer.fallbackMediaUrl;
-      transfer.fallbackMediaUrl = '';
-      setDownloadTransferState(transfer, 'preparing');
-      try {
-        if (isWorkerMediaUrl(transfer.mediaUrl)) await runWorkerTrackedDownload(transfer);
-        else await runFetchTrackedDownload(transfer);
-        return !transfer.cancelled && !transfer.cancelRequested && !transfer.failed;
-      } catch (fallbackError) {
-        error = fallbackError;
-      }
-    }
-    if (transfer.cancelRequested || transfer.cancelled || error?.name === 'AbortError') {
-      setDownloadTransferState(transfer, 'cancelled');
-      return false;
-    }
-    const message = error?.message || 'Falha na transferência';
-    const normalized = String(message).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    if (normalized.includes('expirou') || normalized.includes('analise a publicacao novamente') || normalized.includes('analise o video novamente')) {
-      invalidateCachedAnalysis(activeRequest.url, activeRequest.tool === 'avatar' ? 'avatar' : 'media');
-    }
-    setDownloadTransferState(transfer, 'error', { error: message });
-    return false;
-  }
-}
-
-
-function absoluteDownloadUrl(url) {
-  const value = String(url || '').trim();
-  if (!value) return '';
-  try {
-    return new URL(value, window.location.origin).href;
-  } catch (_) {
-    return value;
-  }
-}
-
-function nativeDownloadMimeType(item) {
-  const type = mediaTypeForDownload(item);
-  if (type === 'video') return 'video/mp4';
-  if (type === 'image') return 'image/jpeg';
-  if (type === 'audio') return 'audio/mpeg';
-  return 'application/octet-stream';
-}
-
-function canUseNativeDownloadBridge() {
-  try {
-    return isAndroidWebView()
-      && Boolean(window.SoftAndroid)
-      && typeof window.SoftAndroid.startDirectDownload === 'function';
-  } catch (_) {
-    return false;
-  }
-}
-
-async function downloadAllMedia(items, button) {
-  if (!Array.isArray(items) || items.length < 2) return;
-
-  const originalLabel = button.textContent;
-  button.disabled = true;
-  button.textContent = 'BAIXANDO…';
-  hideDownloadStatus();
-
-  const transfers = items.map((item, itemIndex) => {
-    const filename = item.filename || `soft-download-${itemIndex + 1}`;
-    const fallbackMediaUrl = proxyMediaUrl(item.url, item.source, item.proxy_id, true);
-    const directMediaUrl = item.proxy_id ? directCdnDownloadUrl(item.proxy_id, filename) : '';
-    const transfer = createDownloadTransfer(
-      item, directMediaUrl || fallbackMediaUrl, filename, itemIndex, items.length
-    );
-    transfer.fallbackMediaUrl = directMediaUrl ? fallbackMediaUrl : '';
-    return transfer;
-  }).filter((transfer) => Boolean(transfer.mediaUrl));
-
-  if (!transfers.length) {
-    button.disabled = false;
-    button.textContent = originalLabel;
-    showDownloadStatus('Não foi possível preparar os arquivos.', true);
-    return;
-  }
-
-  // WebApp Android: entrega cada arquivo diretamente ao serviço nativo.
-  // Isso permite Pinterest em massa sem depender de Blob/downloads múltiplos
-  // do WebView. Mantemos exatamente as mesmas URLs rápidas já usadas no site.
-  if (canUseNativeDownloadBridge()) {
-    const session = openDownloadProgressScreen(transfers);
-    const downloadedItems = [];
-
-    try {
-      for (const transfer of transfers) {
-        if (transfer.cancelRequested || transfer.cancelled) continue;
-
-        try {
-          const targetUrl = absoluteDownloadUrl(transfer.mediaUrl);
-          if (!/^https?:\/\//i.test(targetUrl)) throw new Error('URL de download inválida.');
-
-          window.SoftAndroid.startDirectDownload(
-            targetUrl,
-            transfer.filename,
-            nativeDownloadMimeType(transfer.media)
-          );
-
-          setDownloadTransferState(transfer, 'complete', { percent: 100 });
-          downloadedItems.push(historySnapshotForItem(transfer.media, transfer.index));
-        } catch (error) {
-          setDownloadTransferState(transfer, 'error', {
-            error: error?.message || 'Não foi possível iniciar este arquivo no aplicativo.'
-          });
-        }
-
-        // Espaçamento curto para o Android registrar cada download separadamente.
-        await wait(350);
-      }
-
-      if (downloadedItems.length) {
-        const firstItem = items[0] || null;
-        rememberHistoryEntry(buildHistoryEntry(firstItem, {
-          mode: 'all',
-          count: downloadedItems.length,
-          items: downloadedItems,
-          filename: `${downloadedItems.length}-arquivos`,
-        }));
-      }
-    } finally {
-      button.disabled = false;
-      button.textContent = originalLabel;
-      updateDownloadOverall(session);
-    }
-    return;
-  }
-
-  const session = openDownloadProgressScreen(transfers);
-  const tasks = [];
-  try {
-    for (const transfer of transfers) {
-      tasks.push(runTrackedDownload(transfer));
-      // Mantém o espaçamento já usado pelo SOFT para múltiplos downloads,
-      // evitando que o navegador receba todas as requisições no mesmo instante.
-      await wait(650);
-    }
-
-    const results = await Promise.all(tasks);
-    const downloadedItems = transfers
-      .filter((_, index) => results[index])
-      .map((transfer) => historySnapshotForItem(transfer.media, transfer.index));
-
-    if (downloadedItems.length) {
-      const firstItem = items[0] || null;
-      rememberHistoryEntry(buildHistoryEntry(firstItem, {
-        mode: 'all',
-        count: downloadedItems.length,
-        items: downloadedItems,
-        filename: `${downloadedItems.length}-arquivos`,
-      }));
-    }
-  } finally {
-    button.disabled = false;
-    button.textContent = originalLabel;
-    updateDownloadOverall(session);
-  }
-}
-
-async function downloadMedia(mediaUrl, filename, button, historyEntry = null) {
-  const originalLabel = button?.textContent;
-  const item = historyEntry
-    ? { ...historyEntry, filename: filename || historyEntry.filename }
-    : (activeResultItems[0] || { filename });
-  const fallbackMediaUrl = mediaUrl;
-  const mode = historyEntry?.mode || button?.dataset?.mode || 'single';
-
-  // MP3 e Thumbnail são arquivos gerados pelo Worker. Nesses modos jamais
-  // substituímos a URL específica pelo CDN do arquivo original (vídeo).
-  // Nos downloads normais a otimização direta continua exatamente como antes.
-  const generatedMode = mode === 'mp3' || mode === 'thumbnail';
-  const directMediaUrl = !generatedMode && item?.proxy_id
-    ? directCdnDownloadUrl(item.proxy_id, filename || item.filename)
-    : '';
-
-  const transfer = createDownloadTransfer(item, directMediaUrl || fallbackMediaUrl, filename, 0, 1);
-  transfer.fallbackMediaUrl = directMediaUrl ? fallbackMediaUrl : '';
-
-  if (button) {
-    button.disabled = true;
-    button.textContent = 'BAIXANDO…';
-  }
-  hideDownloadStatus();
-  const session = openDownloadProgressScreen([transfer]);
-
-  try {
-    const success = await runTrackedDownload(transfer);
-    if (success) rememberHistoryEntry(historyEntry);
-  } finally {
-    if (button) {
-      button.disabled = false;
-      button.textContent = originalLabel;
-    }
-    updateDownloadOverall(session);
-  }
-}
-
-function showDownloadStatus(message, isError = false) {
-  if (!downloadStatus) return;
-  downloadStatus.hidden = false;
-  downloadStatus.textContent = message;
-  downloadStatus.classList.toggle('is-error', isError);
-}
-
-function hideDownloadStatus() {
-  if (!downloadStatus) return;
-  downloadStatus.hidden = true;
-  downloadStatus.textContent = '';
-  downloadStatus.classList.remove('is-error');
-}
-
-function showFormError(message) {
-  note.className = 'form-note error';
-  note.textContent = message;
-}
-
-function showMp3FormError(message) {
-  mp3Note.className = 'form-note error';
-  mp3Note.textContent = message;
-}
-
-function showMusicFormError(message) {
-  musicNote.className = 'form-note error';
-  musicNote.textContent = message;
-}
-
-function showThumbnailFormError(message) {
-  thumbnailNote.className = 'form-note error';
-  thumbnailNote.textContent = message;
-}
-
-function proxyThumbnailUrl(proxyId, download = false) {
-  if (!proxyId) return '';
-  const suffix = download ? '&dl=1' : '';
-  return `https://${WORKER_MEDIA_HOST}/media?id=${encodeURIComponent(proxyId)}&thumb=1${suffix}`;
-}
-
-function proxyMp3Url(proxyId) {
-  if (!proxyId) return '';
-  return `https://${WORKER_MEDIA_HOST}/media?id=${encodeURIComponent(proxyId)}&mp3=1&dl=1`;
-}
-
-function proxyMp3PreviewUrl(proxyId) {
-  if (!proxyId) return '';
-  return `https://${WORKER_MEDIA_HOST}/media?id=${encodeURIComponent(proxyId)}&mp3=1`;
-}
-
-function proxyMediaUrl(url, source, proxyId, download = false) {
-  const suffix = download ? '&dl=1' : '';
-  if (proxyId) return `https://${WORKER_MEDIA_HOST}/media?id=${encodeURIComponent(proxyId)}${suffix}`;
-  if (!source || source === 'direct') return url;
-  if (source === 'tiktok' || source === 'youtube' || source === 'bilibili') return '';
-  return `https://${WORKER_MEDIA_HOST}/media?url=${encodeURIComponent(url)}${suffix}`;
-}
-
-function youtubeDirectPlayerUrl(proxyId) {
-  const params = new URLSearchParams({ id: String(proxyId || '') });
-  return `https://${WORKER_MEDIA_HOST}/youtube-direct?${params.toString()}`;
-}
-
-function directCdnDownloadUrl(proxyId, filename) {
-  if (!proxyId) return '';
-  const params = new URLSearchParams({ id: proxyId });
-  if (filename) params.set('filename', filename);
-  return `/api/direct-download?${params.toString()}`;
-}
-
-
-// Ao abrir/recarregar o site, sempre começa na tela principal MÍDIAS.
-// O hash antigo da sessão é substituído por #midias.
-(() => {
-  showAppView('tool');
-  setActiveTool('media');
-  setSectionHash('#midias');
-})();
-
-
-// =========================================================
-// SOFT CRIAR — assistente guiado, sem IA e sem servidor.
-// =========================================================
-const createFlow = document.querySelector('#createFlow');
-const createMessages = document.querySelector('#createMessages');
-const createOptions = document.querySelector('#createOptions');
-const createComposer = document.querySelector('#createComposer');
-const createChat = document.querySelector('.create-chat');
-const createShell = document.querySelector('.create-shell');
-const createAnswerWrap = document.querySelector('#createAnswerWrap');
-const createSendButton = document.querySelector('#createSendButton');
-const createResetButton = document.querySelector('#createResetButton');
-const createPreviewCard = document.querySelector('#createPreviewCard');
-const createPreviewType = document.querySelector('#createPreviewType');
-const createDocumentPreview = document.querySelector('#createDocumentPreview');
-const createCopyButton = document.querySelector('#createCopyButton');
-const createWhatsappButton = document.querySelector('#createWhatsappButton');
-const createPrintButton = document.querySelector('#createPrintButton');
-let createPreparedPdf = null;
-let createPdfPreparePromise = null;
-let createPdfPrepareVersion = 0;
-
-
-// Mobile: mantém o composer acima do teclado virtual, como em apps de conversa.
-// 100vh/100dvh sozinho não acompanha de forma consistente o teclado em todos os browsers.
-let createViewportFrame = 0;
-let createViewportTimers = [];
-
-function createIsMobileViewport() {
-  return window.matchMedia?.('(max-width: 900px)')?.matches ?? (window.innerWidth <= 900);
-}
-
-function createHasFocusedEditor() {
-  const active = document.activeElement;
-  return Boolean(active && createComposer?.contains(active) && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName) && !active.disabled);
-}
-
-function createScrollConversationToBottom() {
-  if (!createFlow) return;
-  createFlow.scrollTop = createFlow.scrollHeight;
-}
-
-function clearCreateViewportTimers() {
-  createViewportTimers.forEach((timer) => clearTimeout(timer));
-  createViewportTimers = [];
-}
-
-function syncCreateMobileViewport({ keepBottom = false } = {}) {
-  if (!createChat || !createShell || !createIsMobileViewport() || !document.body.classList.contains('create-chat-active')) {
-    document.body.classList.remove('create-keyboard-open');
-    document.documentElement.style.removeProperty('--create-mobile-chat-height');
-    return;
-  }
-
-  const viewport = window.visualViewport;
-  if (!viewport) return;
-
-  cancelAnimationFrame(createViewportFrame);
-  createViewportFrame = requestAnimationFrame(() => {
-    const focused = createHasFocusedEditor();
-    document.body.classList.toggle('create-keyboard-open', focused);
-
-    // getBoundingClientRect() usa o viewport de layout; offsetTop informa quanto o
-    // viewport visual foi deslocado pelo browser/teclado. O resultado é a altura
-    // realmente disponível entre o topo do chat e o topo do teclado.
-    const rect = createChat.getBoundingClientRect();
-    const visualTop = Number(viewport.offsetTop || 0);
-    const topInsideVisualViewport = Math.max(0, rect.top - visualTop);
-    const available = Math.max(240, Math.floor(viewport.height - topInsideVisualViewport));
-    document.documentElement.style.setProperty('--create-mobile-chat-height', `${available}px`);
-
-    if (focused || keepBottom) createScrollConversationToBottom();
-  });
-}
-
-function settleCreateMobileKeyboard() {
-  clearCreateViewportTimers();
-  syncCreateMobileViewport({ keepBottom: true });
-  // Android/Samsung/iOS animam o teclado; recalculamos durante e após a animação.
-  [60, 180, 320].forEach((delay) => {
-    createViewportTimers.push(setTimeout(() => syncCreateMobileViewport({ keepBottom: true }), delay));
-  });
-}
-
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', () => syncCreateMobileViewport({ keepBottom: createHasFocusedEditor() }), { passive: true });
-  window.visualViewport.addEventListener('scroll', () => syncCreateMobileViewport({ keepBottom: createHasFocusedEditor() }), { passive: true });
-}
-window.addEventListener('resize', () => syncCreateMobileViewport({ keepBottom: createHasFocusedEditor() }), { passive: true });
-window.addEventListener('orientationchange', () => {
-  clearCreateViewportTimers();
-  createViewportTimers.push(setTimeout(() => syncCreateMobileViewport({ keepBottom: true }), 180));
-}, { passive: true });
-
-document.addEventListener('focusin', (event) => {
-  if (!createComposer?.contains(event.target)) return;
-  settleCreateMobileKeyboard();
-});
-
-document.addEventListener('focusout', (event) => {
-  if (!createComposer?.contains(event.target)) return;
-  clearCreateViewportTimers();
-  createViewportTimers.push(setTimeout(() => {
-    syncCreateMobileViewport({ keepBottom: false });
-    if (!createHasFocusedEditor()) document.body.classList.remove('create-keyboard-open');
-  }, 180));
-});
-
-const CREATE_TYPES = {
-  receipt: {
-    title: 'RECIBO',
-    intro: 'Certo. Vamos criar um recibo completo e pronto para impressão.',
-    fields: [
-      { key: 'receiver', label: 'Quem recebeu o pagamento?', placeholder: 'Nome completo ou razão social' },
-      { key: 'receiverDoc', kind: 'documentId', label: 'Informe o CPF ou CNPJ de quem recebeu.', placeholder: 'CPF ou CNPJ' },
-      { key: 'receiverAddress', kind: 'address', label: 'Deseja incluir o endereço de quem recebeu?', addressLabel: 'recebedor', optional: true },
-      { key: 'payer', label: 'Quem realizou o pagamento?', placeholder: 'Nome completo ou razão social' },
-      { key: 'payerDoc', kind: 'documentId', label: 'Informe o CPF ou CNPJ de quem pagou.', placeholder: 'CPF ou CNPJ' },
-      { key: 'amount', kind: 'currency', inputMode: 'decimal', label: 'Qual foi o valor recebido?', placeholder: 'Ex.: 1.200,00' },
-      { key: 'reason', label: 'O pagamento foi referente a quê?', placeholder: 'Ex.: Instalação de ar-condicionado' },
-      { key: 'method', label: 'Como o pagamento foi realizado?', placeholder: 'Digite ou escolha uma opção', options: ['Pix', 'Dinheiro', 'Cartão de débito', 'Cartão de crédito', 'Transferência', 'Boleto'] },
-      { key: 'paymentRef', label: 'Existe alguma referência, pedido, contrato ou identificação do pagamento?', placeholder: 'Ex.: Pedido 1042', optional: true },
-      { key: 'place', kind: 'place', label: 'Em qual cidade/UF o recibo será emitido?', placeholder: 'Ex.: Manaus/AM' },
-      { key: 'issueDate', kind: 'date', label: 'Qual é a data de emissão?', placeholder: 'Selecione ou informe a data' },
-      { key: 'signatureName', kind: 'signatureName', label: 'Qual nome deve aparecer na assinatura?', placeholder: 'Nome de quem assina' },
-      { key: 'signatureStyle', kind: 'signatureStyle', label: 'Escolha o estilo da assinatura.' }
-    ]
+// ═══════════════════════════════════════════════════════════════
+// GERENCIADOR ÚNICO DE ROLAGEM
+// Evita que um modal libere a rolagem enquanto outro ainda está aberto.
+// Não usa position: fixed, top ou scrollTo, reduzindo saltos no Android.
+// ═══════════════════════════════════════════════════════════════
+const VYXORA_SCROLL = {
+  legacyCount: 0,
+  tokens: new Set(),
+
+  apply() {
+    const locked = this.legacyCount > 0 || this.tokens.size > 0;
+    document.documentElement.classList.toggle('vyxora-safe-layer-open', locked);
+    document.body.classList.toggle('vyxora-safe-layer-open', locked);
   },
-  budget: {
-    title: 'ORÇAMENTO',
-    intro: 'Certo. Vamos montar um orçamento completo, com identificação, itens e condições.',
-    fields: [
-      { key: 'provider', label: 'Quem está emitindo o orçamento?', placeholder: 'Profissional ou empresa' },
-      { key: 'providerDoc', kind: 'documentId', label: 'Informe o CPF ou CNPJ do emitente.', placeholder: 'CPF ou CNPJ' },
-      { key: 'providerAddress', kind: 'address', label: 'Agora vamos localizar o endereço do emitente.', addressLabel: 'emitente', optional: false },
-      { key: 'contact', label: 'Qual contato comercial deve aparecer no orçamento?', placeholder: 'Telefone, WhatsApp ou e-mail' },
-      { key: 'client', label: 'Para quem é o orçamento?', placeholder: 'Nome do cliente ou empresa' },
-      { key: 'clientDoc', kind: 'documentId', label: 'Informe o CPF ou CNPJ do cliente.', placeholder: 'CPF ou CNPJ' },
-      { key: 'clientAddress', kind: 'address', label: 'Deseja incluir o endereço do cliente?', addressLabel: 'cliente', optional: true },
-      { key: 'items', kind: 'budgetItems', label: 'Agora vamos adicionar os itens do orçamento.' },
-      { key: 'deadline', label: 'Qual é o prazo previsto para execução ou entrega?', placeholder: 'Ex.: até 5 dias úteis' },
-      { key: 'validity', label: 'Por quanto tempo este orçamento será válido?', placeholder: 'Ex.: 7 dias' },
-      { key: 'paymentTerms', label: 'Quais são as condições de pagamento?', placeholder: 'Ex.: 50% na aprovação e 50% na entrega' },
-      { key: 'note', label: 'Deseja acrescentar alguma observação?', placeholder: 'Observações adicionais', multiline: true, optional: true },
-      { key: 'place', kind: 'place', label: 'Em qual cidade/UF o orçamento será emitido?', placeholder: 'Ex.: Manaus/AM' },
-      { key: 'issueDate', kind: 'date', label: 'Qual é a data de emissão?', placeholder: 'Selecione ou informe a data' },
-      { key: 'signatureName', kind: 'signatureName', label: 'Qual nome deve aparecer na assinatura?', placeholder: 'Nome de quem assina' },
-      { key: 'signatureStyle', kind: 'signatureStyle', label: 'Escolha o estilo da assinatura.' }
-    ]
+
+  lock(token = null) {
+    if (token) this.tokens.add(String(token));
+    else this.legacyCount += 1;
+    this.apply();
   },
-  declaration: {
-    title: 'DECLARAÇÃO',
-    intro: 'Certo. Vamos preparar uma declaração completa e bem identificada.',
-    fields: [
-      { key: 'name', label: 'Quem está fazendo a declaração?', placeholder: 'Nome completo' },
-      { key: 'document', kind: 'documentId', label: 'Informe o CPF ou CNPJ do declarante.', placeholder: 'CPF ou CNPJ' },
-      { key: 'rg', label: 'Deseja incluir RG ou outro documento de identificação?', placeholder: 'RG ou outro documento', optional: true },
-      { key: 'address', kind: 'address', label: 'Agora vamos localizar o endereço do declarante.', addressLabel: 'declarante', optional: false },
-      { key: 'statement', label: 'Escreva o texto completo da declaração exatamente como deseja que apareça no documento.', placeholder: 'Digite a declaração completa com suas próprias palavras', multiline: true },
-      { key: 'purpose', label: 'Escreva a finalidade exatamente como deseja que apareça no documento.', placeholder: 'Ex.: Comprovação da prestação e conclusão dos serviços realizados.', multiline: true },
-      { key: 'place', kind: 'place', label: 'Em qual cidade/UF a declaração será emitida?', placeholder: 'Ex.: Manaus/AM' },
-      { key: 'issueDate', kind: 'date', label: 'Qual é a data da declaração?', placeholder: 'Selecione ou informe a data' },
-      { key: 'signatureName', kind: 'signatureName', label: 'Qual nome deve aparecer na assinatura?', placeholder: 'Nome de quem assina' },
-      { key: 'signatureStyle', kind: 'signatureStyle', label: 'Escolha o estilo da assinatura.' }
-    ]
+
+  unlock(token = null) {
+    if (token) this.tokens.delete(String(token));
+    else this.legacyCount = Math.max(0, this.legacyCount - 1);
+    this.apply();
   },
-  prices: {
-    title: 'LISTA DE PREÇOS',
-    intro: 'Certo. Vamos organizar uma lista de preços com identificação e informações comerciais.',
-    fields: [
-      { key: 'name', label: 'Qual nome, marca ou empresa deve aparecer?', placeholder: 'Nome da marca ou negócio' },
-      { key: 'document', kind: 'documentId', label: 'Informe o CPF ou CNPJ do responsável ou empresa.', placeholder: 'CPF ou CNPJ' },
-      { key: 'contact', label: 'Qual contato deve aparecer na lista de preços?', placeholder: 'Telefone, WhatsApp ou e-mail' },
-      { key: 'address', kind: 'address', label: 'Deseja incluir um endereço comercial?', addressLabel: 'estabelecimento', optional: true },
-      { key: 'items', kind: 'priceItems', label: 'Agora vamos adicionar os produtos ou serviços da lista de preços.' },
-      { key: 'validity', label: 'Qual é a validade ou período destes preços?', placeholder: 'Ex.: válidos até 31/12/2026' },
-      { key: 'note', label: 'Quer adicionar uma observação?', placeholder: 'Ex.: Valores sujeitos a alteração', multiline: true, optional: true },
-      { key: 'place', kind: 'place', label: 'Em qual cidade/UF esta lista foi emitida?', placeholder: 'Ex.: Manaus/AM' },
-      { key: 'issueDate', kind: 'date', label: 'Qual é a data de emissão?', placeholder: 'Selecione ou informe a data' }
-    ]
+
+  reset() {
+    this.legacyCount = 0;
+    this.tokens.clear();
+    this.apply();
   },
-  proof: {
-    title: 'COMPROVANTE',
-    intro: 'Certo. Vamos criar um comprovante completo e formal.',
-    fields: [
-      { key: 'issuer', label: 'Quem está emitindo o comprovante?', placeholder: 'Pessoa ou empresa' },
-      { key: 'issuerDoc', kind: 'documentId', label: 'Informe o CPF ou CNPJ do emitente.', placeholder: 'CPF ou CNPJ' },
-      { key: 'issuerAddress', kind: 'address', label: 'Deseja incluir o endereço do emitente?', addressLabel: 'emitente', optional: true },
-      { key: 'recipient', label: 'Para quem o comprovante será emitido?', placeholder: 'Pessoa ou empresa' },
-      { key: 'recipientDoc', kind: 'documentId', label: 'Informe o CPF ou CNPJ do destinatário.', placeholder: 'CPF ou CNPJ' },
-      { key: 'subject', label: 'Escreva exatamente o que este comprovante deve registrar.', placeholder: 'Digite o registro completo com suas próprias palavras', multiline: true },
-      { key: 'amount', kind: 'currency', inputMode: 'decimal', label: 'Existe algum valor relacionado?', placeholder: 'Ex.: 500,00', optional: true },
-      { key: 'method', label: 'Existe forma de pagamento relacionada?', placeholder: 'Digite ou escolha uma opção', options: ['Pix', 'Dinheiro', 'Cartão de débito', 'Cartão de crédito', 'Transferência', 'Boleto'], optional: true },
-      { key: 'reference', label: 'Existe código, pedido, contrato ou outra referência?', placeholder: 'Ex.: Pedido 1042', optional: true },
-      { key: 'place', kind: 'place', label: 'Em qual cidade/UF o comprovante será emitido?', placeholder: 'Ex.: Manaus/AM' },
-      { key: 'issueDate', kind: 'date', label: 'Qual é a data de emissão?', placeholder: 'Selecione ou informe a data' },
-      { key: 'signatureName', kind: 'signatureName', label: 'Qual nome deve aparecer na assinatura?', placeholder: 'Nome de quem assina' },
-      { key: 'signatureStyle', kind: 'signatureStyle', label: 'Escolha o estilo da assinatura.' }
-    ]
-  },
-  label: {
-    title: 'ETIQUETA',
-    intro: 'Certo. Vamos montar uma etiqueta de envio completa, com endereço validado por CEP ou pesquisa.',
-    fields: [
-      { key: 'recipient', label: 'Qual é o nome do destinatário?', placeholder: 'Nome completo ou empresa' },
-      { key: 'recipientDoc', kind: 'documentId', label: 'Deseja incluir CPF ou CNPJ do destinatário?', placeholder: 'CPF ou CNPJ', optional: true },
-      { key: 'recipientPhone', label: 'Deseja incluir telefone do destinatário?', placeholder: 'Telefone ou WhatsApp', optional: true },
-      { key: 'recipientAddress', kind: 'address', label: 'Agora vamos localizar o endereço do destinatário.', addressLabel: 'destinatário', optional: false },
-      { key: 'sender', label: 'Qual é o nome do remetente?', placeholder: 'Nome completo ou empresa' },
-      { key: 'senderDoc', kind: 'documentId', label: 'Deseja incluir CPF ou CNPJ do remetente?', placeholder: 'CPF ou CNPJ', optional: true },
-      { key: 'senderPhone', label: 'Deseja incluir telefone do remetente?', placeholder: 'Telefone ou WhatsApp', optional: true },
-      { key: 'senderAddress', kind: 'address', label: 'Agora vamos localizar o endereço do remetente.', addressLabel: 'remetente', optional: false },
-      { key: 'note', label: 'Deseja adicionar alguma observação de envio?', placeholder: 'Ex.: FRÁGIL', optional: true }
-    ]
+
+  isLocked() {
+    return this.legacyCount > 0 || this.tokens.size > 0;
   }
 };
 
-let createState = {
-  type: null,
-  step: 0,
-  answers: {},
-  finalText: '',
-  addressFlow: null,
-  itemFlow: null
+window.VYXORA_SCROLL = VYXORA_SCROLL;
+const VYXORA_MOBILE_DIRECT_BOOT = window.matchMedia('(max-width: 768px)').matches;
+// Loader único para desktop e Android. No Android ele fica visível por menos tempo.
+VYXORA_SCROLL.lock('loader');
+
+const VYXORA_SAFE_LAYER = {
+  lock() { VYXORA_SCROLL.lock(); },
+  unlock() { VYXORA_SCROLL.unlock(); }
 };
 
-function createEscape(value = '') {
-  return String(value).replace(/[&<>"']/g, (char) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[char]));
+function lockSecondScreen() {
+  VYXORA_SAFE_LAYER.lock();
 }
 
-function addCreateMessage(text, who = 'bot') {
-  if (!createMessages) return;
-  const message = document.createElement('div');
-  message.className = `create-message ${who}`;
-  message.textContent = text;
-  createMessages.appendChild(message);
-  requestAnimationFrame(() => {
-    if (createFlow) createFlow.scrollTop = createFlow.scrollHeight;
-  });
+function unlockSecondScreen() {
+  VYXORA_SAFE_LAYER.unlock();
 }
 
-function createQuickOptionLabel(option) {
-  return typeof option === 'string' ? option : String(option?.label || option?.value || '');
-}
-function createQuickOptionValue(option) {
-  return typeof option === 'string' ? option : String(option?.value ?? option?.label ?? '');
-}
-function clearCreateInlineOptions() {
-  createMessages?.querySelectorAll('.create-inline-keyboard').forEach((keyboard) => keyboard.remove());
-}
-function renderCreateInlineOptions(options = []) {
-  if (!createMessages || !options.length) return;
-  clearCreateInlineOptions();
-  const keyboard = document.createElement('div');
-  keyboard.className = 'create-inline-keyboard';
-  options.forEach((option) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'create-inline-option';
-    button.dataset.createQuickValue = createQuickOptionValue(option);
-    button.dataset.createQuickLabel = createQuickOptionLabel(option);
-    button.textContent = createQuickOptionLabel(option);
-    if (option && typeof option === 'object' && option.signatureFont) {
-      button.style.fontFamily = option.signatureFont;
-      button.style.fontSize = '20px';
-      button.style.fontWeight = option.signatureWeight || '400';
-      button.style.fontStyle = option.signatureItalic ? 'italic' : 'normal';
-      button.style.letterSpacing = option.signatureSpacing || '0';
-      button.style.paddingTop = '10px';
-      button.style.paddingBottom = '10px';
-    }
-    keyboard.appendChild(button);
-  });
-  createMessages.appendChild(keyboard);
-  requestAnimationFrame(() => {
-    if (createFlow) createFlow.scrollTop = createFlow.scrollHeight;
-  });
-}
-function setCreateInput(field) {
-  if (!createAnswerWrap || !createComposer) return;
-  createAnswerWrap.innerHTML = '';
-  createComposer.classList.remove('create-options-only');
-  const options = [...(field.options || [])];
-  if (field.optional && !options.some(option => createQuickOptionValue(option) === '-')) options.push({ label: 'NÃO INFORMAR', value: '-' });
-  renderCreateInlineOptions(options);
+// Dashboard exclusivo do WebApp Android. Carregado como camada isolada para
+// não alterar o layout e o comportamento do painel desktop.
+const vxMobileDashboardStyles = document.createElement('link');
+vxMobileDashboardStyles.rel = 'stylesheet';
+vxMobileDashboardStyles.href = 'mobile-dashboard-v2.css?v=20';
+document.head.appendChild(vxMobileDashboardStyles);
+const vxMobilePremiumStyles = document.createElement('link');
+vxMobilePremiumStyles.rel = 'stylesheet';
+vxMobilePremiumStyles.href = 'mobile-app-premium.css?v=20260828-SQUARE-ANDROID-4';
+document.head.appendChild(vxMobilePremiumStyles);
+const vxMobileDashboardScript = document.createElement('script');
+vxMobileDashboardScript.src = 'mobile-dashboard-v2.js?v=20';
+vxMobileDashboardScript.defer = true;
+document.head.appendChild(vxMobileDashboardScript);
 
-  if (field.onlyOptions) {
-    createComposer.hidden = true;
-    if (createSendButton) createSendButton.disabled = true;
-    return;
-  }
-
-  const useTextarea = field.multiline || !field.inputType || field.inputType === 'text';
-  const control = document.createElement(useTextarea ? 'textarea' : 'input');
-  if (!useTextarea) control.type = field.inputType || 'text';
-  control.placeholder = field.placeholder || 'Digite aqui...';
-  control.autocomplete = field.autocomplete || 'off';
-  if (field.inputMode) control.inputMode = field.inputMode;
-  if (field.maxlength) control.maxLength = field.maxlength;
-  control.id = 'createAnswer';
-  control.name = 'createAnswer';
-  if (useTextarea) {
-    control.rows = 1;
-    control.classList.add('create-auto-grow');
-    const resizeComposerField = () => {
-      control.style.height = 'auto';
-      const maxHeight = 132;
-      const nextHeight = Math.max(40, Math.min(control.scrollHeight, maxHeight));
-      control.style.height = `${nextHeight}px`;
-      control.style.overflowY = control.scrollHeight > maxHeight ? 'auto' : 'hidden';
-    };
-    control.addEventListener('input', resizeComposerField);
-    control.addEventListener('keydown', (event) => {
-      if (event.isComposing || event.key !== 'Enter') return;
-      if (event.shiftKey) {
-        // Shift + Enter mantém a quebra de linha, como WhatsApp/Telegram.
-        requestAnimationFrame(resizeComposerField);
-        return;
-      }
-      event.preventDefault();
-      createComposer.requestSubmit();
-    });
-    requestAnimationFrame(resizeComposerField);
-  }
-  createAnswerWrap.appendChild(control);
-  createComposer.hidden = false;
-  if (createSendButton) createSendButton.disabled = false;
-  requestAnimationFrame(() => {
-    syncCreateMobileViewport({ keepBottom: true });
-    // No PC, mantém a digitação contínua entre uma pergunta e outra.
-    // No mobile, não abre o teclado automaticamente.
-    if (!createIsMobileViewport() && !control.disabled) {
-      try { control.focus({ preventScroll: true }); } catch { control.focus(); }
-    }
-  });
-}
-function setCreateComposerIdle(message = 'Escolha uma opção acima') {
-  if (!createAnswerWrap || !createComposer) return;
-  createAnswerWrap.innerHTML = '';
-  createComposer.classList.remove('create-options-only');
-  const control = document.createElement('input');
-  control.id = 'createAnswer';
-  control.type = 'text';
-  control.placeholder = message;
-  control.disabled = true;
-  createAnswerWrap.appendChild(control);
-  createComposer.hidden = false;
-  if (createSendButton) createSendButton.disabled = true;
-}
-function createTodayIsoValue() {
-  const now = new Date();
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
-}
-function createAddressLocationSuggestions() {
-  const seen = new Set();
-  const suggestions = [];
-  Object.values(createState.answers || {}).forEach((value) => {
-    if (!value || typeof value !== 'object' || !value.city || !value.uf) return;
-    const label = `${value.city}/${value.uf}`;
-    const key = label.toLocaleLowerCase('pt-BR');
-    if (!seen.has(key)) {
-      seen.add(key);
-      suggestions.push({ label: `USAR ${label.toLocaleUpperCase('pt-BR')}`, value: label });
-    }
-  });
-  return suggestions;
-}
-function createDefaultSignatureName() {
-  const a = createState.answers || {};
-  if (createState.type === 'receipt') return createNaturalName(a.receiver || '');
-  if (createState.type === 'budget') return createNaturalName(a.provider || '');
-  if (createState.type === 'declaration') return createNaturalName(a.name || '');
-  if (createState.type === 'proof') return createNaturalName(a.issuer || '');
-  return '';
-}
-
-const CREATE_SIGNATURE_STYLES = {
-  classic: {
-    label: 'CLÁSSICA',
-    font: '"Brush Script MT", "Segoe Script", cursive',
-    canvasFont: '72px "Brush Script MT", "Segoe Script", cursive',
-    weight: '400', italic: false
-  },
-  elegant: {
-    label: 'ELEGANTE',
-    font: 'Georgia, "Times New Roman", serif',
-    canvasFont: 'italic 68px Georgia, "Times New Roman", serif',
-    weight: '400', italic: true
-  },
-  modern: {
-    label: 'MODERNA',
-    font: '"Segoe Print", "Comic Sans MS", cursive',
-    canvasFont: '62px "Segoe Print", "Comic Sans MS", cursive',
-    weight: '400', italic: false
-  },
-  formal: {
-    label: 'FORMAL',
-    font: 'Georgia, "Times New Roman", serif',
-    canvasFont: 'italic 700 58px Georgia, "Times New Roman", serif',
-    weight: '700', italic: true
-  }
+// ── STATE ──
+let state = {
+  user: null, empresa: null, perfil: null,
+  categorias: [], clientes: [], servicos: [],
+  profissionais: [], agendamentos: [], pagamentos: [], cobrancas: [],
+  pubEmpresa: null, pubServico: null, pubProfissional: null,
+  pubDiasFechados: []
 };
+window.state = state;
 
-function createSignatureStyleOptions(name) {
-  const sample = createNaturalName(name || '') || 'Sua assinatura';
-  return Object.entries(CREATE_SIGNATURE_STYLES).map(([value, style]) => ({
-    label: sample,
-    value,
-    signatureFont: style.font,
-    signatureWeight: style.weight,
-    signatureItalic: style.italic,
-    signatureSpacing: value === 'modern' ? '0.2px' : '0'
-  }));
+let _agendaFilter = 'todos';
+let _confirmCb = null;
+let _editSaveCb = null;
+let _recusaId = null;
+let _recusaMotivo = null;
+let _reagendarId = null;
+let _openMenu = null;
+let _openMenuBtn = null;
+let autoSyncTimer = null;
+let lastIds = new Set();
+let realtimeChannel = null;
+let _fotoEditor = null;
+
+// ── UTILS ──
+function $(id) { return document.getElementById(id); }
+
+function setText(id, v) {
+  const el = $(id);
+  if (el) el.textContent = v;
 }
 
-function createSignaturePreviewMarkup(name, role) {
-  const key = createState.answers?.signatureStyle || 'classic';
-  const style = CREATE_SIGNATURE_STYLES[key] || CREATE_SIGNATURE_STYLES.classic;
-  const signedName = createNaturalName(createState.answers?.signatureName || name || '');
-  const css = `font-family:${style.font};font-size:24px;font-weight:${style.weight};font-style:${style.italic ? 'italic' : 'normal'};line-height:1.05;`;
-  return `<div class="doc-signature"><span></span><b style="${css}">${createEscape(signedName)}</b><small>${createEscape(String(role || '').toUpperCase())}</small></div>`;
+function ajustarFonteCampo(campo) {
+  if (!campo || !campo.matches('input, select') || campo.type === 'hidden') return;
+  const texto = campo.tagName === 'SELECT'
+    ? (campo.options[campo.selectedIndex]?.text || '')
+    : (campo.value || campo.placeholder || '');
+  const tamanho = texto.length > 34 ? 11 : texto.length > 25 ? 12 : texto.length > 18 ? 13 : 14;
+  campo.style.fontSize = tamanho + 'px';
+  campo.title = texto;
 }
 
-function isValidCreateCpf(value = '') {
-  const digits = String(value).replace(/\D/g, '');
-  if (!/^\d{11}$/.test(digits) || /^(\d)\1+$/.test(digits)) return false;
-  let sum = 0;
-  for (let i = 0; i < 9; i += 1) sum += Number(digits[i]) * (10 - i);
-  let d1 = (sum * 10) % 11; if (d1 === 10) d1 = 0;
-  if (d1 !== Number(digits[9])) return false;
-  sum = 0;
-  for (let i = 0; i < 10; i += 1) sum += Number(digits[i]) * (11 - i);
-  let d2 = (sum * 10) % 11; if (d2 === 10) d2 = 0;
-  return d2 === Number(digits[10]);
+function ajustarFontesCampos(container = document) {
+  container.querySelectorAll('input:not([type="hidden"]), select').forEach(ajustarFonteCampo);
 }
 
-function isValidCreateCnpj(value = '') {
-  const digits = String(value).replace(/\D/g, '');
-  if (!/^\d{14}$/.test(digits) || /^(\d)\1+$/.test(digits)) return false;
-  const calc = (base, weights) => {
-    const sum = base.split('').reduce((acc, n, i) => acc + Number(n) * weights[i], 0);
-    const r = sum % 11;
-    return r < 2 ? 0 : 11 - r;
+function escapeHtml(valor) {
+  return String(valor || '').replace(/[&<>"']/g, caractere => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  })[caractere]);
+}
+
+function normalizarUrl(valor, base = '') {
+  const texto = String(valor || '').trim();
+  if (!texto) return '';
+  if (base && !/^https?:\/\//i.test(texto)) {
+    return base + texto.replace(/^@/, '').replace(/^\/+/, '');
+  }
+  return /^https?:\/\//i.test(texto) ? texto : 'https://' + texto;
+}
+
+function aplicarImagemFundo(elemento, url) {
+  if (!elemento) return;
+  elemento.style.backgroundImage = url ? `url("${String(url).replace(/"/g, '%22')}")` : '';
+}
+
+function renderAvatarPainel() {
+  const avatar = $('sideAvatar');
+  if (!avatar || !state.empresa) return;
+  const foto = state.empresa.foto_perfil_url || '';
+  aplicarImagemFundo(avatar, foto);
+  const enquadramento = getEnquadramentoFoto('perfil');
+  aplicarEnquadramentoFoto(avatar, enquadramento.x, enquadramento.y, enquadramento.zoom);
+  avatar.textContent = foto ? '' : initial(state.empresa.nome);
+  const avatarTopo = $('topbarAvatar');
+  if (avatarTopo) {
+    aplicarImagemFundo(avatarTopo, foto);
+    aplicarEnquadramentoFoto(avatarTopo, enquadramento.x, enquadramento.y, enquadramento.zoom);
+    avatarTopo.textContent = foto ? '' : initial(state.empresa.nome);
+  }
+}
+
+function renderPreviewImagem(id, url) {
+  const preview = $(id);
+  if (!preview) return;
+  aplicarImagemFundo(preview, url);
+  preview.innerHTML = url ? '' : '<span>+</span>';
+}
+
+function aplicarEnquadramentoFoto(elemento, x = 50, y = 50, zoom = 100) {
+  if (!elemento) return;
+  elemento.style.backgroundPosition = `${Number(x) || 50}% ${Number(y) || 50}%`;
+  elemento.style.backgroundSize = `${Math.max(40, Number(zoom) || 100)}%`;
+  elemento.style.backgroundRepeat = 'no-repeat';
+}
+
+function getEnquadramentoFoto(tipo, empresa = state.empresa || {}) {
+  const prefixo = tipo === 'perfil' ? 'foto_perfil' : 'foto_publica';
+  return {
+    x: Number(empresa[`${prefixo}_x`] ?? 50),
+    y: Number(empresa[`${prefixo}_y`] ?? 50),
+    zoom: Number(empresa[`${prefixo}_zoom`] ?? 100)
   };
-  const d1 = calc(digits.slice(0, 12), [5,4,3,2,9,8,7,6,5,4,3,2]);
-  const d2 = calc(digits.slice(0, 12) + d1, [6,5,4,3,2,9,8,7,6,5,4,3,2]);
-  return d1 === Number(digits[12]) && d2 === Number(digits[13]);
 }
 
-function isValidCreateDocumentId(value = '') {
-  const digits = String(value).replace(/\D/g, '');
-  return digits.length === 11 ? isValidCreateCpf(digits) : digits.length === 14 ? isValidCreateCnpj(digits) : false;
+function money(v) {
+  return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-
-function createItemFlowPrompt(flow) {
-  const isBudget = flow.mode === 'budget';
-  if (flow.stage === 'description') {
-    addCreateMessage(isBudget ? 'Qual é o produto ou serviço?' : 'Qual é o nome do produto ou serviço?', 'bot');
-    setCreateInput({ placeholder: isBudget ? 'Ex.: Instalação de ar-condicionado' : 'Ex.: Corte de cabelo' });
-    return;
-  }
-  if (flow.stage === 'quantity') {
-    addCreateMessage('Qual é a quantidade?', 'bot');
-    setCreateInput({ placeholder: 'Ex.: 1', inputMode: 'decimal' });
-    return;
-  }
-  if (flow.stage === 'unitPrice') {
-    addCreateMessage('Qual é o valor unitário?', 'bot');
-    setCreateInput({ placeholder: 'Ex.: 350,00', inputMode: 'decimal' });
-    return;
-  }
-  if (flow.stage === 'detail') {
-    addCreateMessage('Deseja informar unidade, tamanho ou algum detalhe deste item?', 'bot');
-    setCreateInput({ placeholder: 'Ex.: unidade, 500 ml, tamanho M', optional: true });
-    return;
-  }
-  if (flow.stage === 'price') {
-    addCreateMessage('Qual é o preço deste item?', 'bot');
-    setCreateInput({ placeholder: 'Ex.: 35,00', inputMode: 'decimal' });
-    return;
-  }
-  if (flow.stage === 'more') {
-    addCreateMessage(flow.items.length === 1 ? 'Item adicionado. Deseja incluir mais um?' : `${flow.items.length} itens adicionados. Deseja incluir outro?`, 'bot');
-    setCreateInput({ onlyOptions: true, options: [
-      { label: 'ADICIONAR OUTRO', value: 'add' },
-      { label: 'FINALIZAR ITENS', value: 'finish' }
-    ] });
-  }
+function slugify(s) {
+  return (s || '').toString()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '').substring(0, 60);
 }
 
-function startCreateItemFlow(field) {
-  const mode = field.kind === 'budgetItems' ? 'budget' : 'prices';
-  createState.itemFlow = { field, mode, stage: 'description', current: {}, items: [] };
-  addCreateMessage(field.label, 'bot');
-  createItemFlowPrompt(createState.itemFlow);
+function dataLocalISO(data = new Date()) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
 }
 
-function finishCreateItemFlow() {
-  const flow = createState.itemFlow;
-  if (!flow) return;
-  createState.answers[flow.field.key] = flow.items.slice();
-  createState.itemFlow = null;
-  createState.step += 1;
-  askCreateField();
+function hojeISO() { return dataLocalISO(); }
+function mesPrefixo() { return hojeISO().slice(0, 7); }
+
+function dataConclusaoISO(agendamento) {
+  if (!agendamento?.concluido_em) return agendamento?.data || '';
+  const data = new Date(agendamento.concluido_em);
+  return Number.isNaN(data.getTime()) ? (agendamento.data || '') : dataLocalISO(data);
 }
 
-function addCurrentCreateItem(flow) {
-  if (flow.mode === 'budget') {
-    const quantity = Number(String(flow.current.quantity || '1').replace(',', '.')) || 1;
-    const unitNumber = parseCreateCurrencyNumber(flow.current.unitPrice);
-    if (unitNumber === null || unitNumber < 0) return false;
-    flow.items.push({
-      description: createNaturalSentence(flow.current.description),
-      quantityLabel: String(flow.current.quantity || '1'),
-      quantity,
-      unitPrice: formatCreateCurrency(String(unitNumber)),
-      unitNumber,
-      totalNumber: quantity * unitNumber,
-      total: formatCreateCurrency(String(quantity * unitNumber))
-    });
-  } else {
-    const priceNumber = parseCreateCurrencyNumber(flow.current.price);
-    if (priceNumber === null || priceNumber < 0) return false;
-    flow.items.push({
-      name: createNaturalSentence(flow.current.description),
-      detail: createNaturalSentence(flow.current.detail || ''),
-      price: formatCreateCurrency(String(priceNumber)),
-      priceNumber
-    });
+function ordenarAgendamentosRecentes(agendamentos) {
+  return [...(agendamentos || [])].sort((a, b) => {
+    const dataA = Date.parse(a.criado_em || '') || 0;
+    const dataB = Date.parse(b.criado_em || '') || 0;
+    return dataB - dataA;
+  });
+}
+
+function ordenarAtendimentosAgendados(agendamentos) {
+  return [...(agendamentos || [])].sort((a, b) => {
+    const dataA = `${a.data || ''}T${a.hora || '00:00'}`;
+    const dataB = `${b.data || ''}T${b.hora || '00:00'}`;
+    return dataA.localeCompare(dataB);
+  });
+}
+
+function publicUrl(slug) {
+  return location.origin + location.pathname + '#agendar/' + slug;
+}
+
+function initial(name) { return (name || '?').trim().substring(0, 1).toUpperCase(); }
+
+function formatDate(d) {
+  if (!d) return '—';
+  const [y, m, dd] = d.split('-');
+  return `${dd}/${m}/${y}`;
+}
+
+function buildWaLink(tel, msg) {
+  const n = (tel || '').replace(/\D/g, '');
+  if (!n) return null;
+  const f = n.startsWith('55') ? n : '55' + n;
+  const params = '?phone=' + f + '&text=' + encodeURIComponent(msg || '');
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  return isMobile ? 'whatsapp://send' + params : 'https://web.whatsapp.com/send' + params;
+}
+
+function reservarJanelaWhatsapp(tel) {
+  if (!(tel || '').replace(/\D/g, '')) return null;
+  if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return null;
+  const janela = window.open('about:blank', '_blank');
+  if (janela) {
+    janela.document.title = 'Abrindo WhatsApp...';
+    janela.opener = null;
   }
-  flow.current = {};
-  flow.stage = 'more';
+  return janela;
+}
+
+function abrirLinkWhatsapp(tel, msg, janelaReservada = null) {
+  const link = buildWaLink(tel, msg);
+  if (!link) return false;
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = link;
+    return true;
+  }
+  if (janelaReservada && !janelaReservada.closed) {
+    janelaReservada.location.replace(link);
+    return true;
+  }
+  const janela = window.open(link, '_blank', 'noopener');
+  if (!janela) window.location.href = link;
   return true;
 }
 
-async function handleCreateItemSubmission(rawValue, displayValue = '') {
-  const flow = createState.itemFlow;
-  if (!flow) return;
-  const value = normalCreateValue(rawValue);
-  const display = displayValue || value || 'Não informar';
+const MENSAGENS_WHATSAPP_PADRAO = {
+  confirmacao: `Olá, [CLIENTE]!
 
-  if (flow.stage === 'more') {
-    addCreateMessage(display, 'user');
-    if (value === 'add') {
-      flow.stage = 'description';
-      createItemFlowPrompt(flow);
-    } else {
-      finishCreateItemFlow();
-    }
-    return;
-  }
+Seu agendamento na [EMPRESA] foi confirmado.
 
-  if (flow.stage === 'description') {
-    if (!value || value === '-') return;
-    flow.current.description = value;
-    addCreateMessage(display, 'user');
-    flow.stage = flow.mode === 'budget' ? 'quantity' : 'detail';
-    createItemFlowPrompt(flow);
-    return;
-  }
+Serviço: [SERVICO]
+Profissional: [PROFISSIONAL]
+Data: [DATA]
+Horário: [HORARIO]
 
-  if (flow.stage === 'quantity') {
-    const quantity = Number(String(value).replace(',', '.'));
-    if (!Number.isFinite(quantity) || quantity <= 0) {
-      addCreateMessage('Informe uma quantidade maior que zero.', 'bot');
-      createItemFlowPrompt(flow);
-      return;
-    }
-    flow.current.quantity = String(value);
-    addCreateMessage(display, 'user');
-    flow.stage = 'unitPrice';
-    createItemFlowPrompt(flow);
-    return;
-  }
+Esperamos por você!`,
+  recusa: `Olá, [CLIENTE].
 
-  if (flow.stage === 'unitPrice') {
-    const number = parseCreateCurrencyNumber(value);
-    if (number === null || number < 0) {
-      addCreateMessage('Informe um valor válido, por exemplo 350,00.', 'bot');
-      createItemFlowPrompt(flow);
-      return;
-    }
-    flow.current.unitPrice = value;
-    addCreateMessage(formatCreateCurrency(String(number)), 'user');
-    if (!addCurrentCreateItem(flow)) return;
-    createItemFlowPrompt(flow);
-    return;
-  }
+Não conseguimos confirmar seu agendamento na [EMPRESA].
 
-  if (flow.stage === 'detail') {
-    flow.current.detail = value === '-' ? '' : value;
-    addCreateMessage(value === '-' ? 'Não informar' : display, 'user');
-    flow.stage = 'price';
-    createItemFlowPrompt(flow);
-    return;
-  }
+Serviço: [SERVICO]
+Profissional: [PROFISSIONAL]
+Data solicitada: [DATA] às [HORARIO]
+Motivo: [MOTIVO]
 
-  if (flow.stage === 'price') {
-    const number = parseCreateCurrencyNumber(value);
-    if (number === null || number < 0) {
-      addCreateMessage('Informe um preço válido, por exemplo 35,00.', 'bot');
-      createItemFlowPrompt(flow);
-      return;
-    }
-    flow.current.price = value;
-    addCreateMessage(formatCreateCurrency(String(number)), 'user');
-    if (!addCurrentCreateItem(flow)) return;
-    createItemFlowPrompt(flow);
-  }
-}
+Você pode escolher um novo horário aqui:
+[LINK]`,
+  reagendamento: `Olá, [CLIENTE]!
 
-function askCreateField() {
-  const config = CREATE_TYPES[createState.type];
-  if (!config) return;
-  if (createState.step >= config.fields.length) { finishCreateDocument(); return; }
-  const field = config.fields[createState.step];
-  if (field.kind === 'address') { startCreateAddressFlow(field); return; }
-  if (field.kind === 'budgetItems' || field.kind === 'priceItems') { startCreateItemFlow(field); return; }
-  let inputField = { ...field };
-  if (field.kind === 'date') inputField = { ...inputField, inputType: 'date', options: [{ label: 'HOJE', value: createTodayIsoValue() }] };
-  if (field.kind === 'place') inputField = { ...inputField, options: createAddressLocationSuggestions() };
-  if (field.kind === 'documentId') inputField = { ...inputField, inputMode: 'numeric', maxlength: 18 };
-  if (field.kind === 'signatureName') {
-    const suggested = createDefaultSignatureName();
-    if (suggested) inputField.options = [{ label: `USAR ${suggested.toLocaleUpperCase('pt-BR')}`, value: suggested }];
-  }
-  if (field.kind === 'signatureStyle') {
-    const signatureName = createState.answers.signatureName || createDefaultSignatureName();
-    addCreateMessage(`${field.label}
-Toque no seu nome no estilo que preferir.`, 'bot');
-    setCreateInput({ onlyOptions: true, options: createSignatureStyleOptions(signatureName) });
-    return;
-  }
-  addCreateMessage(field.label, 'bot');
-  setCreateInput(inputField);
-}
-function startCreateFlow(type) {
-  const config = CREATE_TYPES[type];
-  if (!config) return;
-  createState = { type, step: 0, answers: {}, finalText: '', addressFlow: null, itemFlow: null };
-  createOptions?.querySelectorAll('.create-option').forEach((button) => button.classList.toggle('is-selected', button.dataset.createType === type));
-  if (createMessages) createMessages.innerHTML = '';
-  if (createPreviewCard) createPreviewCard.hidden = true;
-  if (createOptions) createOptions.hidden = true;
-  if (createResetButton) createResetButton.hidden = false;
-  addCreateMessage(config.title, 'user');
-  addCreateMessage(config.intro, 'bot');
-  askCreateField();
-  requestAnimationFrame(() => syncCreateMobileViewport({ keepBottom: true }));
-}
+Seu agendamento na [EMPRESA] foi reagendado com sucesso.
 
-function normalCreateValue(value) {
-  const clean = String(value || '').trim();
-  return clean === '-' ? '' : clean;
-}
+Serviço: [SERVICO]
+Profissional: [PROFISSIONAL]
+Nova data: [NOVA_DATA]
+Novo horário: [NOVO_HORARIO]
 
+Até breve!`,
+  contato: `Olá, [CLIENTE]!
 
-function formatCreateDocumentId(value = '') {
-  const clean = String(value || '').trim();
-  if (!clean) return '';
-  const digits = clean.replace(/\D/g, '');
-  if (digits.length === 11) return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  if (digits.length === 14) return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-  return clean;
-}
-function normalizeCreateCep(value = '') {
-  const digits = String(value || '').replace(/\D/g, '');
-  return digits.length === 8 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : '';
-}
-function normalizeCreateAddress(data = {}) {
-  return {
-    cep: normalizeCreateCep(data.cep || data.zipcode || ''),
-    street: String(data.logradouro || data.street || '').trim(),
-    neighborhood: String(data.bairro || data.neighborhood || '').trim(),
-    city: String(data.localidade || data.city || '').trim(),
-    uf: String(data.uf || data.state || '').trim().toLocaleUpperCase('pt-BR'),
-    number: String(data.number || '').trim(),
-    complement: String(data.complement || '').trim()
+Estamos entrando em contato sobre seu agendamento na [EMPRESA].
+
+Serviço: [SERVICO]
+Profissional: [PROFISSIONAL]
+Data: [DATA]
+Horário: [HORARIO]`
+};
+
+const MARCADORES_OBRIGATORIOS = {
+  confirmacao: ['[CLIENTE]', '[SERVICO]', '[PROFISSIONAL]', '[DATA]', '[HORARIO]'],
+  recusa: ['[CLIENTE]', '[SERVICO]', '[PROFISSIONAL]', '[DATA]', '[HORARIO]', '[MOTIVO]', '[LINK]'],
+  reagendamento: ['[CLIENTE]', '[SERVICO]', '[PROFISSIONAL]', '[NOVA_DATA]', '[NOVO_HORARIO]'],
+  contato: ['[CLIENTE]', '[SERVICO]', '[PROFISSIONAL]', '[DATA]', '[HORARIO]']
+};
+
+function getMensagensWhatsapp() {
+  const mensagens = { ...MENSAGENS_WHATSAPP_PADRAO, ...(state.empresa?.mensagens_whatsapp || {}) };
+  const antigos = {
+    nome: '[CLIENTE]', empresa: '[EMPRESA]', servico: '[SERVICO]',
+    profissional: '[PROFISSIONAL]', data: '[DATA]', hora: '[HORARIO]',
+    motivo: '[MOTIVO]', link: '[LINK]', nova_data: '[NOVA_DATA]', nova_hora: '[NOVO_HORARIO]'
   };
+  Object.keys(mensagens).forEach(tipo => {
+    mensagens[tipo] = (mensagens[tipo] || '').replace(/\{([a-z_]+)\}/g, (_, chave) => antigos[chave] || `{${chave}}`);
+  });
+  return mensagens;
 }
-function formatCreateAddress(address, multiline = true) {
-  if (!address || typeof address !== 'object') return '';
-  const first = [address.street, address.number ? `nº ${address.number}` : ''].filter(Boolean).join(', ');
-  const second = [address.complement, address.neighborhood].filter(Boolean).join(' — ');
-  const third = [address.city && address.uf ? `${address.city}/${address.uf}` : address.city || address.uf, address.cep ? `CEP ${address.cep}` : ''].filter(Boolean).join(' — ');
-  return [first, second, third].filter(Boolean).join(multiline ? '\n' : ' · ');
+
+function montarMensagemWhatsapp(tipo, ag, extras = {}) {
+  const templates = getMensagensWhatsapp();
+  const valores = {
+    CLIENTE: ag?.cliente_nome || 'Cliente',
+    EMPRESA: state.empresa?.nome || 'nossa empresa',
+    SERVICO: ag?.servico_nome || 'Não informado',
+    PROFISSIONAL: ag?.profissional_nome || 'Não informado',
+    DATA: formatDate(ag?.data),
+    HORARIO: ag?.hora || 'Não informado',
+    MOTIVO: extras.motivo || 'Não informado',
+    LINK: extras.link || (state.empresa?.slug ? publicUrl(state.empresa.slug) : ''),
+    NOVA_DATA: extras.novaData ? formatDate(extras.novaData) : formatDate(ag?.data),
+    NOVO_HORARIO: extras.novaHora || ag?.hora || 'Não informado'
+  };
+  return (templates[tipo] || '').replace(/\[([A-Z_]+)\]/g, (_, chave) => valores[chave] ?? `[${chave}]`);
 }
-async function fetchCreateJson(url, timeout = 6500) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
-  try {
-    const response = await fetch(url, { headers: { Accept: 'application/json' }, signal: controller.signal });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } finally { clearTimeout(timer); }
+
+function normStatus(s) {
+  const r = (s || 'pendente').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (r === 'confirmado' || r === 'confirmada') return 'Confirmado';
+  if (r === 'pendente') return 'Pendente';
+  if (r === 'concluido' || r === 'concluida') return 'Concluído';
+  if (r === 'recusado' || r === 'recusada' || r === 'cancelado') return 'Recusado';
+  if (r === 'reagendado' || r === 'reagendada') return 'Reagendado';
+  if (r === 'excluido' || r === 'excluida') return 'Excluído';
+  return s || 'Pendente';
 }
-async function lookupCreateCep(value) {
-  const digits = String(value || '').replace(/\D/g, '');
-  if (digits.length !== 8) throw new Error('CEP_INVALIDO');
-  try {
-    const via = await fetchCreateJson(`https://viacep.com.br/ws/${digits}/json/`);
-    if (!via?.erro) return normalizeCreateAddress(via);
-  } catch {}
-  try {
-    const brasil = await fetchCreateJson(`https://brasilapi.com.br/api/cep/v2/${digits}`);
-    if (brasil?.cep) return normalizeCreateAddress(brasil);
-  } catch {}
-  throw new Error('CEP_NAO_ENCONTRADO');
+
+function badgeClass(s) {
+  const n = normStatus(s);
+  const m = {
+    Confirmado: 'badge-green', Pendente: 'badge-yellow',
+    'Concluído': 'badge-blue', Recusado: 'badge-red',
+    Reagendado: 'badge-purple', 'Excluído': 'badge-gray'
+  };
+  return m[n] || 'badge-gray';
 }
-async function searchCreateAddress({ uf, city, street, neighborhood = '' }) {
-  const state = String(uf || '').trim().toLocaleUpperCase('pt-BR');
-  const locality = String(city || '').trim();
-  const road = String(street || '').trim();
-  if (!/^[A-Z]{2}$/.test(state) || locality.length < 3 || road.length < 3) throw new Error('BUSCA_INVALIDA');
-  const url = `https://viacep.com.br/ws/${encodeURIComponent(state)}/${encodeURIComponent(locality)}/${encodeURIComponent(road)}/json/`;
-  const data = await fetchCreateJson(url);
-  const list = Array.isArray(data) ? data.map(normalizeCreateAddress).filter(item => item.city && item.uf) : [];
-  const hint = String(neighborhood || '').trim().toLocaleLowerCase('pt-BR');
-  const filtered = hint ? list.filter(item => item.neighborhood.toLocaleLowerCase('pt-BR').includes(hint)) : list;
-  return (filtered.length ? filtered : list).slice(0, 8);
-}
-function createAddressOptionLabel(address) {
-  return [address.street || 'Logradouro não informado', address.neighborhood, `${address.city}/${address.uf}`, address.cep].filter(Boolean).join(' — ');
-}
-function renderCreateAddressStage() {
-  const flow = createState.addressFlow;
-  if (!flow) return;
-  const role = flow.field.addressLabel || 'endereço';
-  if (flow.stage === 'mode') {
-    addCreateMessage(`Como você quer localizar o endereço do ${role}?`, 'bot');
-    const options = [{ label: 'USAR CEP', value: 'cep' }, { label: 'PROCURAR ENDEREÇO', value: 'search' }];
-    if (flow.field.optional) options.push({ label: 'NÃO INFORMAR', value: 'skip' });
-    setCreateInput({ onlyOptions: true, options }); return;
-  }
-  if (flow.stage === 'cep') { addCreateMessage('Digite o CEP com 8 números. Vou preencher rua, bairro, cidade e UF automaticamente.', 'bot'); setCreateInput({ placeholder: 'Ex.: 69036-110', inputMode: 'numeric' }); return; }
-  if (flow.stage === 'confirm') { addCreateMessage(`Encontrei:\n${formatCreateAddress(flow.data)}\n\nConfirme se este é o endereço correto.`, 'bot'); setCreateInput({ onlyOptions: true, options: [{ label: 'ESTÁ CORRETO', value: 'yes' }, { label: 'PROCURAR OUTRO', value: 'again' }] }); return; }
-  if (flow.stage === 'searchUf') { addCreateMessage('Informe a UF com duas letras.', 'bot'); setCreateInput({ placeholder: 'Ex.: AM', maxlength: 2 }); return; }
-  if (flow.stage === 'searchCity') { addCreateMessage('Qual é a cidade?', 'bot'); setCreateInput({ placeholder: 'Ex.: Manaus' }); return; }
-  if (flow.stage === 'searchNeighborhood') { addCreateMessage('Qual é o bairro? Se não souber, escolha NÃO SEI.', 'bot'); setCreateInput({ placeholder: 'Ex.: Compensa', options: [{ label: 'NÃO SEI', value: '-' }] }); return; }
-  if (flow.stage === 'searchStreet') { addCreateMessage('Digite pelo menos parte do nome da rua, avenida ou logradouro. Vou mostrar as opções encontradas.', 'bot'); setCreateInput({ placeholder: 'Ex.: Avenida Brasil' }); return; }
-  if (flow.stage === 'candidate') { addCreateMessage('Encontrei estas opções. Escolha o endereço correto:', 'bot'); const options = flow.candidates.map((address, index) => ({ label: createAddressOptionLabel(address), value: String(index) })); options.push({ label: 'NENHUMA DESTAS', value: 'again' }); setCreateInput({ onlyOptions: true, options }); return; }
-  if (flow.stage === 'manualStreet') { addCreateMessage('Este CEP não trouxe o logradouro. Digite o nome da rua ou avenida.', 'bot'); setCreateInput({ placeholder: 'Rua / Avenida' }); return; }
-  if (flow.stage === 'manualNeighborhood') { addCreateMessage('Qual é o bairro?', 'bot'); setCreateInput({ placeholder: 'Ex.: Compensa' }); return; }
-  if (flow.stage === 'number') { addCreateMessage('Qual é o número do imóvel?', 'bot'); setCreateInput({ placeholder: 'Ex.: 145', options: [{ label: 'S/N', value: 'S/N' }] }); return; }
-  if (flow.stage === 'complement') { addCreateMessage('Existe complemento?', 'bot'); setCreateInput({ placeholder: 'Ex.: Apto 202, Bloco B', options: [{ label: 'SEM COMPLEMENTO', value: '-' }] }); }
-}
-function startCreateAddressFlow(field) {
-  createState.addressFlow = { field, stage: 'mode', data: {}, candidates: [] };
-  addCreateMessage(field.label, 'bot');
-  renderCreateAddressStage();
-}
-function finishCreateAddressFlow() {
-  const flow = createState.addressFlow;
-  if (!flow) return;
-  createState.answers[flow.field.key] = flow.skipped ? '' : normalizeCreateAddress(flow.data);
-  createState.addressFlow = null;
-  createState.step += 1;
-  askCreateField();
-}
-async function handleCreateAddressSubmission(raw) {
-  const flow = createState.addressFlow;
-  if (!flow) return false;
-  const value = String(raw || '').trim();
-  if (flow.stage === 'mode') {
-    const labels = { cep: 'USAR CEP', search: 'PROCURAR ENDEREÇO', skip: 'NÃO INFORMAR' };
-    addCreateMessage(labels[value] || value, 'user');
-    if (value === 'skip' && flow.field.optional) { flow.skipped = true; finishCreateAddressFlow(); return true; }
-    flow.stage = value === 'search' ? 'searchUf' : 'cep'; renderCreateAddressStage(); return true;
-  }
-  if (flow.stage === 'cep') {
-    addCreateMessage(value, 'user'); setCreateComposerIdle('Consultando CEP...');
-    try { flow.data = await lookupCreateCep(value); flow.stage = 'confirm'; }
-    catch (error) { addCreateMessage(error?.message === 'CEP_INVALIDO' ? 'Esse CEP não está no formato correto. Digite 8 números.' : 'Não encontrei esse CEP. Tente novamente ou use a pesquisa por endereço.', 'bot'); flow.stage = 'mode'; }
-    renderCreateAddressStage(); return true;
-  }
-  if (flow.stage === 'confirm') { addCreateMessage(value === 'yes' ? 'ESTÁ CORRETO' : 'PROCURAR OUTRO', 'user'); if (value === 'again') { flow.data = {}; flow.stage = 'mode'; } else flow.stage = flow.data.street ? (flow.data.neighborhood ? 'number' : 'manualNeighborhood') : 'manualStreet'; renderCreateAddressStage(); return true; }
-  if (flow.stage === 'searchUf') { const uf = value.toLocaleUpperCase('pt-BR'); if (!/^[A-Z]{2}$/.test(uf)) { addCreateMessage('Informe uma UF válida com duas letras, por exemplo AM.', 'bot'); renderCreateAddressStage(); return true; } addCreateMessage(uf, 'user'); flow.data.uf = uf; flow.stage = 'searchCity'; renderCreateAddressStage(); return true; }
-  if (flow.stage === 'searchCity') { addCreateMessage(value, 'user'); flow.data.city = value; flow.stage = 'searchNeighborhood'; renderCreateAddressStage(); return true; }
-  if (flow.stage === 'searchNeighborhood') { addCreateMessage(value === '-' ? 'NÃO SEI' : value, 'user'); flow.data.neighborhoodHint = value === '-' ? '' : value; flow.stage = 'searchStreet'; renderCreateAddressStage(); return true; }
-  if (flow.stage === 'searchStreet') {
-    addCreateMessage(value, 'user'); setCreateComposerIdle('Procurando endereços...');
-    try { flow.candidates = await searchCreateAddress({ uf: flow.data.uf, city: flow.data.city, neighborhood: flow.data.neighborhoodHint, street: value }); if (!flow.candidates.length) { addCreateMessage('Não encontrei opções com esses dados. Tente outro trecho da rua ou use o CEP.', 'bot'); flow.stage = 'mode'; } else flow.stage = 'candidate'; }
-    catch { addCreateMessage('Não consegui consultar os endereços agora. Tente novamente ou use o CEP.', 'bot'); flow.stage = 'mode'; }
-    renderCreateAddressStage(); return true;
-  }
-  if (flow.stage === 'candidate') { if (value === 'again') { addCreateMessage('NENHUMA DESTAS', 'user'); flow.stage = 'mode'; renderCreateAddressStage(); return true; } const candidate = flow.candidates[Number(value)]; if (!candidate) return true; addCreateMessage(createAddressOptionLabel(candidate), 'user'); flow.data = { ...candidate }; flow.stage = candidate.street ? (candidate.neighborhood ? 'number' : 'manualNeighborhood') : 'manualStreet'; renderCreateAddressStage(); return true; }
-  if (flow.stage === 'manualStreet') { addCreateMessage(value, 'user'); flow.data.street = value; flow.stage = flow.data.neighborhood ? 'number' : 'manualNeighborhood'; renderCreateAddressStage(); return true; }
-  if (flow.stage === 'manualNeighborhood') { addCreateMessage(value, 'user'); flow.data.neighborhood = value; flow.stage = 'number'; renderCreateAddressStage(); return true; }
-  if (flow.stage === 'number') { addCreateMessage(value, 'user'); flow.data.number = value; flow.stage = 'complement'; renderCreateAddressStage(); return true; }
-  if (flow.stage === 'complement') { addCreateMessage(value === '-' ? 'SEM COMPLEMENTO' : value, 'user'); flow.data.complement = value === '-' ? '' : value; finishCreateAddressFlow(); return true; }
+
+function isFinanceiro(a) {
+  if (normStatus(a.status) === 'Concluído') return true;
+  if (normStatus(a.status) === 'Excluído' && a.financeiro_status === 'Concluído') return true;
   return false;
 }
 
-function createTextHtml(value = '') {
-  return createEscape(value).replace(/\n/g, '<br>');
+function isAtivoCliente(c) {
+  const st = (c?.status || '').toLowerCase().trim();
+  if (st === 'inativo' || st === 'excluido' || st === 'excluído') return false;
+  if (c?.ativo === false) return false;
+  return true;
 }
 
-function formatCreateCurrency(value = '') {
-  const original = String(value || '').trim();
-  if (!original) return '';
-
-  let raw = original.replace(/R\$/gi, '').replace(/\s+/g, '').replace(/[^0-9,.-]/g, '');
-  if (!raw || !/[0-9]/.test(raw)) return original;
-
-  const comma = raw.lastIndexOf(',');
-  const dot = raw.lastIndexOf('.');
-  let normalized = raw;
-
-  if (comma >= 0 && dot >= 0) {
-    if (comma > dot) normalized = raw.replace(/\./g, '').replace(',', '.');
-    else normalized = raw.replace(/,/g, '');
-  } else if (comma >= 0) {
-    const decimals = raw.length - comma - 1;
-    normalized = decimals <= 2 ? raw.replace(/\./g, '').replace(',', '.') : raw.replace(/,/g, '');
-  } else if (dot >= 0) {
-    const decimals = raw.length - dot - 1;
-    normalized = decimals <= 2 ? raw.replace(/,/g, '') : raw.replace(/\./g, '');
-  }
-
-  const number = Number(normalized);
-  if (!Number.isFinite(number)) return original;
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(number);
+function podeTerAcoes(a) {
+  return !['Excluído', 'Recusado', 'Concluído'].includes(normStatus(a.status));
 }
 
-
-function parseCreateCurrencyNumber(value = '') {
-  const rawValue = String(value || '').trim();
-  if (!rawValue) return null;
-  let raw = rawValue.replace(/R\$/gi, '').replace(/\s+/g, '').replace(/[^0-9,.-]/g, '');
-  if (!raw || !/[0-9]/.test(raw)) return null;
-
-  const comma = raw.lastIndexOf(',');
-  const dot = raw.lastIndexOf('.');
-  if (comma >= 0 && dot >= 0) raw = comma > dot ? raw.replace(/\./g, '').replace(',', '.') : raw.replace(/,/g, '');
-  else if (comma >= 0) raw = raw.length - comma - 1 <= 2 ? raw.replace(/\./g, '').replace(',', '.') : raw.replace(/,/g, '');
-  else if (dot >= 0) raw = raw.length - dot - 1 <= 2 ? raw.replace(/,/g, '') : raw.replace(/\./g, '');
-
-  const number = Number(raw);
-  return Number.isFinite(number) ? number : null;
-}
-
-function createWordsUnderThousand(value) {
-  const small = ["zero", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez", "onze", "doze", "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove"];
-  const tens = ["", "", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"];
-  const hundreds = ["", "", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos", "oitocentos", "novecentos"];
-  const n = Math.floor(value);
-  if (n < 20) return small[n];
-  if (n < 100) {
-    const rest = n % 10;
-    return tens[Math.floor(n / 10)] + (rest ? ` e ${small[rest]}` : '');
-  }
-  if (n === 100) return 'cem';
-  const rest = n % 100;
-  return (n < 200 ? 'cento' : hundreds[Math.floor(n / 100)]) + (rest ? ` e ${createWordsUnderThousand(rest)}` : '');
-}
-
-function createIntegerWords(value) {
-  let n = Math.floor(Math.abs(value));
-  if (n === 0) return 'zero';
-  const scales = [
-    { value: 1000000000000, one: 'trilhão', many: 'trilhões' },
-    { value: 1000000000, one: 'bilhão', many: 'bilhões' },
-    { value: 1000000, one: 'milhão', many: 'milhões' },
-    { value: 1000, one: 'mil', many: 'mil' }
+function calcDiasFechados(empresa) {
+  if (!empresa) return [];
+  const mapa = [
+    { campo: 'dom', indice: 0 }, { campo: 'seg', indice: 1 },
+    { campo: 'ter', indice: 2 }, { campo: 'qua', indice: 3 },
+    { campo: 'qui', indice: 4 }, { campo: 'sex', indice: 5 },
+    { campo: 'sab', indice: 6 }
   ];
-  const parts = [];
+  // Se empresa nunca configurou os dias (todos null), aplica padrao: seg-sex aberto, sab+dom fechado
+  const nuncaConfigurou = mapa.every(d => empresa[d.campo] === null || empresa[d.campo] === undefined);
+  if (nuncaConfigurou) return [0, 6];
+  return mapa.filter(d => empresa[d.campo] === false).map(d => d.indice);
+}
 
-  for (const scale of scales) {
-    if (n < scale.value) continue;
-    const qty = Math.floor(n / scale.value);
-    n %= scale.value;
-    if (scale.value === 1000 && qty === 1) parts.push('mil');
-    else parts.push(`${createWordsUnderThousand(qty)} ${qty === 1 ? scale.one : scale.many}`);
+function parseDiasSemana(valor) {
+  if (!valor) return [1,2,3,4,5];
+  if (Array.isArray(valor)) return valor.map(Number);
+  // Supabase retorna "{1,2,3}" como string para integer[]
+  if (typeof valor === 'string') {
+    return valor.replace(/[{}]/g, '').split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
   }
-  if (n) parts.push(createWordsUnderThousand(n));
-
-  return parts.join(parts.length > 1 && n > 0 && n < 100 ? ' e ' : ', ').replace(/, ([^,]+)$/, ' e $1');
+  return [1,2,3,4,5];
 }
 
-function createCurrencyWords(value = '') {
-  const number = parseCreateCurrencyNumber(value);
-  if (number === null) return '';
-  const rounded = Math.round(Math.abs(number) * 100);
-  const reais = Math.floor(rounded / 100);
-  const centavos = rounded % 100;
-  const parts = [];
-
-  if (reais) parts.push(`${createIntegerWords(reais)} ${reais === 1 ? 'real' : 'reais'}`);
-  if (centavos) parts.push(`${createIntegerWords(centavos)} ${centavos === 1 ? 'centavo' : 'centavos'}`);
-  return parts.length ? parts.join(' e ') : 'zero reais';
+function isDiaFechado(dataStr, diasFechados) {
+  if (!dataStr || !diasFechados || diasFechados.length === 0) return false;
+  const d = new Date(dataStr + 'T00:00:00');
+  return diasFechados.includes(d.getDay());
 }
 
-function createNaturalName(value = '') {
-  const clean = String(value || '').trim().replace(/\s+/g, ' ');
-  if (!clean) return '';
-  const lowerWords = new Set(['da', 'das', 'de', 'do', 'dos', 'e']);
-  return clean.toLocaleLowerCase('pt-BR').split(' ').map((word, index) => {
-    if (index > 0 && lowerWords.has(word)) return word;
-    return word.charAt(0).toLocaleUpperCase('pt-BR') + word.slice(1);
+function toast(msg, type = 'info') {
+  const typeMap = { ok: 'ok', err: 'err', warn: 'info', info: 'info' };
+  showNotif(msg, '', typeMap[type] || 'info');
+}
+
+const NOTIFICATION_LIMIT = 100;
+let appNotifications = [];
+
+function notificationStorageKey() {
+  return `vyxora_notifications_${state?.empresa?.id || 'guest'}`;
+}
+
+function loadStoredNotifications() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(notificationStorageKey()) || '[]');
+    appNotifications = Array.isArray(saved) ? saved.slice(0, NOTIFICATION_LIMIT) : [];
+  } catch (_) {
+    appNotifications = [];
+  }
+  renderNotificationCenter();
+}
+
+function saveStoredNotifications() {
+  try {
+    localStorage.setItem(notificationStorageKey(), JSON.stringify(appNotifications.slice(0, NOTIFICATION_LIMIT)));
+  } catch (_) {}
+}
+
+function escapeNotificationText(value) {
+  return String(value || '').replace(/[&<>'"]/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  })[char]);
+}
+
+function addAppNotification(title, message = '', type = 'new', sourceId = '') {
+  const sourceKey = sourceId ? `${type}:${sourceId}` : '';
+  if (sourceKey && appNotifications.some(item => item.sourceKey === sourceKey)) return;
+  appNotifications.unshift({
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    sourceKey,
+    title,
+    message,
+    type,
+    read: false,
+    createdAt: new Date().toISOString()
+  });
+  appNotifications = appNotifications.slice(0, NOTIFICATION_LIMIT);
+  saveStoredNotifications();
+  renderNotificationCenter();
+  playNotificationSound();
+}
+
+function playNotificationSound() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(740, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(980, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.20);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.21);
+    setTimeout(() => ctx.close().catch(() => {}), 350);
+  } catch (_) {}
+}
+
+function formatNotificationDate(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+  return sameDay
+    ? `Hoje, ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+    : date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderNotificationCenter() {
+  const list = $('notificationList');
+  const empty = $('notificationEmpty');
+  const unread = appNotifications.filter(item => !item.read).length;
+  [$('notificationBadge'), $('mobileNotificationBadge')].forEach(badge => {
+    if (!badge) return;
+    badge.textContent = unread > 99 ? '99+' : String(unread);
+    badge.hidden = unread === 0;
+  });
+  if (!list || !empty) return;
+  const center = list.closest('.notification-center');
+  const isEmpty = appNotifications.length === 0;
+  center?.classList.toggle('is-empty', isEmpty);
+  empty.style.display = isEmpty ? 'flex' : 'none';
+  list.setAttribute('aria-hidden', isEmpty ? 'true' : 'false');
+  list.innerHTML = appNotifications.map(item => `
+    <article class="notification-row ${item.read ? '' : 'unread'}" data-id="${item.id}">
+      <button class="notification-row-main" onclick="markNotificationRead('${item.id}')">
+        <span class="notification-row-icon">${item.type === 'new' ? '📅' : '🔔'}</span>
+        <span class="notification-row-content">
+          <strong>${escapeNotificationText(item.title)}</strong>
+          ${item.message ? `<span>${escapeNotificationText(item.message)}</span>` : ''}
+          <small>${formatNotificationDate(item.createdAt)}</small>
+        </span>
+        ${item.read ? '' : '<i aria-label="Não lida"></i>'}
+      </button>
+      <button class="notification-row-delete" onclick="deleteNotification('${item.id}')" aria-label="Excluir">✕</button>
+    </article>
+  `).join('');
+}
+
+function openNotificationCenter() {
+  const overlay = $('notificationCenterOverlay');
+  if (!overlay) return;
+  renderNotificationCenter();
+  overlay.classList.add('open');
+  document.body.classList.add('notification-center-open');
+}
+
+function closeNotificationCenter(event) {
+  if (event && event.target !== $('notificationCenterOverlay')) return;
+  $('notificationCenterOverlay')?.classList.remove('open');
+  document.body.classList.remove('notification-center-open');
+}
+
+function markNotificationRead(id) {
+  const item = appNotifications.find(notification => notification.id === id);
+  if (!item) return;
+  item.read = true;
+  saveStoredNotifications();
+  renderNotificationCenter();
+}
+
+function markAllNotificationsRead() {
+  appNotifications.forEach(item => { item.read = true; });
+  saveStoredNotifications();
+  renderNotificationCenter();
+}
+
+function deleteNotification(id) {
+  appNotifications = appNotifications.filter(item => item.id !== id);
+  saveStoredNotifications();
+  renderNotificationCenter();
+}
+
+function clearAllNotifications() {
+  appNotifications = [];
+  saveStoredNotifications();
+  renderNotificationCenter();
+}
+
+// Mensagens operacionais continuam discretas e nunca se acumulam.
+function showNotif(title, msg = '', type = 'info', duration = 2800) {
+  const stack = $('notifStack');
+  if (!stack) return;
+  stack.innerHTML = '';
+  const item = document.createElement('div');
+  item.className = 'notif-item compact';
+  const icons = {
+    new: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="1"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+    ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+    err: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+  };
+  item.innerHTML = `
+    <div class="notif-icon ${type}">${icons[type] || icons.info}</div>
+    <div class="notif-body">
+      <div class="notif-title">${escapeNotificationText(title)}</div>
+      ${msg ? `<div class="notif-msg">${escapeNotificationText(msg)}</div>` : ''}
+    </div>
+    <button class="notif-close" onclick="this.parentElement.remove()" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  `;
+  stack.appendChild(item);
+  setTimeout(() => {
+    item.classList.add('out');
+    setTimeout(() => item.remove(), 350);
+  }, duration);
+}
+
+function clearNotifDot() { renderNotificationCenter(); }
+
+window.addEventListener('scroll', () => {
+  const nav = $('landNav');
+  if (nav) nav.classList.toggle('scrolled', scrollY > 40);
+});
+
+window.addEventListener('hashchange', () => {
+  const slug = getPublicSlug();
+  if (slug) loadPublic(slug);
+});
+
+document.addEventListener('click', function(e) {
+  if (_openMenu) {
+    if (_openMenuBtn && _openMenuBtn.contains(e.target)) return;
+    if (_openMenu.contains(e.target)) return;
+    closeAllMenus();
+  }
+});
+
+document.addEventListener('scroll', closeAllMenus, { passive: true });
+
+let _vyxoraLoaderFinished = false;
+let _vyxoraLoaderProgress = 12;
+let _vyxoraLoaderTimers = [];
+
+function atualizarTelaCarregamento(progress, title, detail, stage) {
+  if (_vyxoraLoaderFinished) return;
+
+  _vyxoraLoaderProgress = Math.max(_vyxoraLoaderProgress, Math.min(100, progress));
+  const bar = $('vyxoraLoaderBar');
+  const percent = $('vyxoraLoaderPercent');
+  const titleEl = $('vyxoraLoaderTitle');
+  const detailEl = $('vyxoraLoaderDetail');
+  const stageEl = $('vyxoraLoaderStage');
+
+  if (bar) bar.style.width = `${_vyxoraLoaderProgress}%`;
+  if (percent) percent.textContent = `${Math.round(_vyxoraLoaderProgress)}%`;
+  if (titleEl && title) titleEl.textContent = title;
+  if (detailEl && detail) detailEl.textContent = detail;
+  if (stageEl && stage) stageEl.textContent = stage;
+}
+
+function iniciarEtapasCarregamento() {
+  const etapas = [
+    [420, 30, 'Organizando o aplicativo', 'Preparando os recursos essenciais', 'Organizando'],
+    [980, 54, 'Carregando seus recursos', 'Conectando serviços e preferências', 'Carregando'],
+    [1580, 76, 'Ajustando sua experiência', 'Deixando tudo pronto para você', 'Ajustando'],
+    [2150, 89, 'Finalizando', 'Só mais um instante', 'Finalizando']
+  ];
+
+  etapas.forEach(([delay, progress, title, detail, stage]) => {
+    _vyxoraLoaderTimers.push(setTimeout(() => {
+      atualizarTelaCarregamento(progress, title, detail, stage);
+    }, delay));
+  });
+}
+
+function esconderTelaCarregamento() {
+  if (_vyxoraLoaderFinished) return;
+  atualizarTelaCarregamento(100, 'Tudo pronto', 'Abrindo a VyXora Agendas', 'Concluído');
+  _vyxoraLoaderFinished = true;
+  _vyxoraLoaderTimers.forEach(clearTimeout);
+  _vyxoraLoaderTimers = [];
+
+  const loader = $('vyxoraLoader');
+  document.documentElement.classList.remove('auth-performance-mode');
+  document.body.classList.remove('auth-performance-mode', 'vx-booting');
+  document.body.classList.add('vx-ready');
+  VYXORA_SCROLL.unlock('loader');
+
+  if (!loader) return;
+  setTimeout(() => {
+    loader.classList.add('is-hidden');
+    loader.style.pointerEvents = 'none';
+    setTimeout(() => loader.remove(), 320);
+  }, 220);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // O Android usa o mesmo loader, porém com duração mínima curta para sensação de app nativo.
+  if (!VYXORA_MOBILE_DIRECT_BOOT) iniciarEtapasCarregamento();
+
+  const minimumDelay = VYXORA_MOBILE_DIRECT_BOOT ? 700 : 2350;
+  const minimumDisplay = new Promise(resolve => setTimeout(resolve, minimumDelay));
+  const startup = init();
+
+  Promise.allSettled([startup, minimumDisplay]).finally(() => {
+    requestAnimationFrame(() => requestAnimationFrame(esconderTelaCarregamento));
+  });
+}, { once: true });
+
+// Proteção para falhas externas de rede ou bibliotecas.
+setTimeout(esconderTelaCarregamento, 5200);
+
+async function init() {
+  await loadCategorias();
+  if (typeof window.isPublicChargeRoute === 'function' && window.isPublicChargeRoute()) {
+    await window.loadPublicChargeRoute();
+    return;
+  }
+  const slug = getPublicSlug();
+  if (slug) { await loadPublic(slug); return; }
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (session?.user) {
+      const detail = $('vyxoraLoaderDetail');
+      if (detail) detail.textContent = 'Organizando seu painel';
+
+      const ok = await carregarConta(session.user);
+      if (!ok) await db.auth.signOut();
+    }
+  } catch (e) { console.error('Erro ao verificar sessão:', e); }
+  if (!state.user && window.matchMedia('(max-width: 620px)').matches) abrirBoasVindasMobile();
+}
+
+function getPublicSlug() {
+  if (location.hash.startsWith('#agendar/')) return location.hash.replace('#agendar/', '').trim();
+  return null;
+}
+
+async function carregarConta(user) {
+  try {
+    const { data: perfil, error: pe } = await db.from('agenda_perfis').select('*').eq('auth_user_id', user.id).single();
+    if (pe || !perfil) { console.warn('Perfil não encontrado para', user.id); return false; }
+    const { data: empresa, error: ee } = await db.from('agenda_empresas').select('*').eq('id', perfil.empresa_id).single();
+    if (ee || !empresa) { console.warn('Empresa não encontrada para perfil', perfil.id); return false; }
+    state.user = user; state.perfil = perfil; state.empresa = empresa;
+    showDashboard(); await loadAll(); atualizarBloqueioPublicacao(); return true;
+  } catch (e) { console.error('Erro em carregarConta:', e); return false; }
+}
+
+async function loadCategorias() {
+  try {
+    const { data, error } = await db.from('agenda_categorias').select('*').order('nome');
+    if (error) { console.warn('Erro ao carregar categorias:', error.message); state.categorias = []; }
+    else state.categorias = data || [];
+  } catch (e) { console.warn('Exceção ao carregar categorias:', e); state.categorias = []; }
+  preencherSelectCategorias();
+}
+
+function preencherSelectCategorias() {
+  const sel = $('empCategoria');
+  if (!sel) return;
+  if (sel.dataset.preenchido === '1') return;
+  if (!state.categorias || state.categorias.length === 0) {
+    const fallback = [
+      { id: 'beleza', nome: 'Beleza & Estética', icone: '💅' },
+      { id: 'saude', nome: 'Saúde', icone: '🏥' },
+      { id: 'barbearia', nome: 'Barbearia', icone: '✂️' },
+      { id: 'fitness', nome: 'Fitness & Bem-estar', icone: '🏋️' },
+      { id: 'tatuagem', nome: 'Tatuagem & Piercing', icone: '🎨' },
+      { id: 'pet', nome: 'Pet Shop', icone: '🐾' },
+      { id: 'educacao', nome: 'Educação', icone: '📚' },
+      { id: 'consultoria', nome: 'Consultoria', icone: '💼' },
+      { id: 'fotografia', nome: 'Fotografia', icone: '📸' },
+      { id: 'outro', nome: 'Outro', icone: '✦' }
+    ];
+    sel.innerHTML = fallback.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join('');
+  } else {
+    sel.innerHTML = state.categorias.map(c => `<option value="${c.id}">${c.icone || ''} ${c.nome}</option>`).join('');
+  }
+  sel.dataset.preenchido = '1';
+}
+
+const CATEGORIAS_FALLBACK = [
+  { id: 'beleza', nome: 'Beleza & Estética', icone: '💅' },
+  { id: 'saude', nome: 'Saúde', icone: '🏥' },
+  { id: 'barbearia', nome: 'Barbearia', icone: '✂️' },
+  { id: 'fitness', nome: 'Fitness & Bem-estar', icone: '🏋️' },
+  { id: 'tatuagem', nome: 'Tatuagem & Piercing', icone: '🎨' },
+  { id: 'pet', nome: 'Pet Shop', icone: '🐾' },
+  { id: 'educacao', nome: 'Educação', icone: '📚' },
+  { id: 'consultoria', nome: 'Consultoria', icone: '💼' },
+  { id: 'fotografia', nome: 'Fotografia', icone: '📸' },
+  { id: 'outro', nome: 'Outro', icone: '✦' }
+];
+
+function renderCategoriasCadastro(filtro) {
+  const grid = $('authCategoryGrid');
+  if (!grid) return;
+  const termo = String(filtro || '').trim().toLowerCase();
+  const lista = (state.categorias && state.categorias.length) ? state.categorias : CATEGORIAS_FALLBACK;
+  const filtrada = termo ? lista.filter(c => (c.nome || '').toLowerCase().includes(termo)) : lista;
+  const atual = $('empCategoria')?.value || '';
+
+  if (!filtrada.length) {
+    grid.innerHTML = '<div class="auth-category-empty">Nenhuma categoria encontrada.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtrada.map(c => {
+    const nome = String(c.nome || '').replace(/"/g, '&quot;');
+    const icone = c.icone || '✦';
+    const selecionada = String(c.id) === String(atual) ? ' selected' : '';
+    return `<button type="button" class="auth-category-option${selecionada}" data-categoria-value="${c.id}" data-categoria-nome="${nome}" data-categoria-icone="${icone}">
+      <span class="auth-category-option-icon">${icone}</span>
+      <span><strong>${c.nome || ''}</strong><small>Toque para selecionar</small></span>
+    </button>`;
+  }).join('');
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  if (!inp) return;
+  const reveal = inp.type === 'password';
+  const start = inp.selectionStart;
+  const end = inp.selectionEnd;
+
+  inp.type = reveal ? 'text' : 'password';
+  btn.classList.toggle('show', reveal);
+  btn.setAttribute('aria-pressed', reveal ? 'true' : 'false');
+  btn.setAttribute('aria-label', reveal ? 'Ocultar senha' : 'Mostrar senha');
+
+  // Android recria o campo ao alternar o type. Restaurar o foco e a seleção
+  // evita o salto do teclado, o cursor perdido e o toque duplicado no ícone.
+  requestAnimationFrame(() => {
+    try {
+      inp.focus({ preventScroll: true });
+      if (Number.isInteger(start) && Number.isInteger(end)) inp.setSelectionRange(start, end);
+    } catch (_) {}
+  });
+}
+
+document.addEventListener('pointerdown', function(e) {
+  if (e.target?.closest?.('#authOverlay .pw-eye')) e.preventDefault();
+});
+
+function abrirSeletorCategoria() {
+  renderCategoriasCadastro('');
+  const search = $('authCategorySearch');
+  if (search) search.value = '';
+  const cadastro = $('formCadastro');
+  if (cadastro) cadastro.style.cssText = 'display:none !important; visibility:hidden !important;';
+  const panel = $('authCategoryPanel');
+  if (panel) panel.style.cssText = 'display:flex !important; visibility:visible !important;';
+  const overlay = $('authOverlay');
+  if (overlay) {
+    overlay.dataset.authScreen = 'formCategory';
+    overlay.scrollTop = 0;
+  }
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (formArea) formArea.scrollTop = 0;
+  setTimeout(() => search?.focus({ preventScroll: true }), 60);
+}
+
+function fecharSeletorCategoria() {
+  const panel = $('authCategoryPanel');
+  if (panel) panel.style.cssText = 'display:none !important; visibility:hidden !important;';
+  const cadastro = $('formCadastro');
+  if (cadastro) cadastro.style.cssText = 'display:block !important; visibility:visible !important;';
+  const overlay = $('authOverlay');
+  if (overlay) {
+    overlay.dataset.authScreen = 'formCadastro';
+    overlay.scrollTop = 0;
+  }
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (formArea) formArea.scrollTop = 0;
+  _mostrarStep(2);
+}
+
+function filtrarCategoriasCadastro(valor) {
+  renderCategoriasCadastro(valor);
+}
+
+document.addEventListener('click', function(e) {
+  const opt = e.target.closest('.auth-category-option');
+  if (!opt) return;
+  const select = $('empCategoria');
+  const valor = opt.dataset.categoriaValue;
+  if (select && valor != null) {
+    select.value = valor;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  const iconEl = $('empCategoriaTriggerIcon');
+  const textEl = $('empCategoriaTriggerText');
+  if (iconEl) iconEl.textContent = opt.dataset.categoriaIcone || '✦';
+  if (textEl) textEl.textContent = opt.dataset.categoriaNome || 'Escolher área de atuação';
+  fecharSeletorCategoria();
+});
+
+function showDashboard() {
+  const lv = $('landingView'), dv = $('dashboardView'), pv = $('publicView');
+  if (lv) lv.style.display = 'none';
+  if (dv) dv.style.display = 'block';
+  if (pv) pv.style.display = 'none';
+  closeAuth();
+  if (state.empresa) {
+    renderAvatarPainel();
+    setText('sideNome', state.empresa.nome);
+    setText('topbarNome', state.empresa.nome);
+    setText('mobileDashNome', state.empresa.nome);
+    setText('sidePlan', state.empresa.plano || 'Grátis');
+    const sideCard = $('sideAvatar')?.closest('.side-user-card');
+    if (sideCard) sideCard.setAttribute('data-tip', state.empresa.nome || 'Empresa');
+    const lb = $('sideLinkBox');
+    if (lb) lb.textContent = publicUrl(state.empresa.slug);
+  }
+  unlockPublicModalScroll();
+  setView('dashboard');
+  loadStoredNotifications();
+  setupRealtime();
+  startAutoSync();
+  syncNativePushSubscription();
+}
+
+function syncNativePushSubscription() {
+  try {
+    if (state?.empresa?.id && window.VyxoraAndroid?.subscribeToCompany) {
+      window.VyxoraAndroid.subscribeToCompany(String(state.empresa.id));
+    }
+  } catch (e) { console.warn('NÃ£o foi possÃ­vel ativar o push nativo:', e); }
+}
+
+function openMobileMenu() {
+  const overlay = $('mobileMenuOverlay'), drawer = $('mobileMenuDrawer');
+  if (overlay) overlay.classList.add('open');
+  if (drawer) drawer.classList.add('open');
+  document.body.classList.add('menu-open');
+}
+
+function closeMobileMenu() {
+  const overlay = $('mobileMenuOverlay'), drawer = $('mobileMenuDrawer');
+  if (overlay) overlay.classList.remove('open');
+  if (drawer) drawer.classList.remove('open');
+  document.body.classList.remove('menu-open');
+}
+
+function menuOpenPublic() { closeMobileMenu(); openPublic(); }
+function menuCopyPublicLink() { closeMobileMenu(); copyPublicLink(); }
+function menuNotifications() {
+  closeMobileMenu();
+  openNotificationCenter();
+}
+
+/* Tooltip real dos ícones da sidebar (substitui o ::after, que ficava cortado pelo
+   overflow da sidebar). Um único elemento, criado sob demanda, reposicionado a cada
+   hover via getBoundingClientRect — nunca é cortado, porque é filho direto do body. */
+(function initSidebarTooltip() {
+  let tipEl = null;
+  function getTip() {
+    if (!tipEl) {
+      tipEl = document.createElement('div');
+      tipEl.className = 'sidebar-tooltip';
+      document.body.appendChild(tipEl);
+    }
+    return tipEl;
+  }
+  function mostrar(el) {
+    const texto = el.getAttribute('data-tip');
+    if (!texto) return;
+    const tip = getTip();
+    tip.textContent = texto;
+    const r = el.getBoundingClientRect();
+    tip.style.left = r.left + 'px';
+    tip.style.top = 'auto';
+    tip.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+    tip.classList.add('show');
+  }
+  function esconder() {
+    if (tipEl) tipEl.classList.remove('show');
+  }
+  document.addEventListener('mouseover', (ev) => {
+    const el = ev.target.closest('.sidebar [data-tip]');
+    if (el) mostrar(el);
+  });
+  document.addEventListener('mouseout', (ev) => {
+    const el = ev.target.closest('.sidebar [data-tip]');
+    if (el) esconder();
+  });
+})();
+
+function setView(view) {
+  const target = $('view-' + view);
+  if (!target) return;
+
+  const atual = document.querySelector('.view.active');
+  if (atual !== target) {
+    // Troca síncrona e sem transição no Android para evitar flash da tela anterior.
+    document.body.classList.add('vx-view-switching');
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v === target));
+    requestAnimationFrame(() => document.body.classList.remove('vx-view-switching'));
+  }
+
+  // Reseta o scroll sem animação. "instant" não é suportado igualmente em WebViews.
+  if (window.innerWidth <= 768) {
+    window.scrollTo(0, 0);
+    const dm = document.querySelector('.dash-main');
+    if (dm) dm.scrollTop = 0;
+  }
+  const navMap = {
+    dashboard: ['Dashboard', 'Controle completo do seu negócio.'],
+    agenda: ['Agenda', 'Criar e acompanhar horários.'],
+    clientes: ['Clientes', 'Cadastro de clientes.'],
+    servicos: ['Serviços', 'Catálogo e preços.'],
+    profissionais: ['Profissionais', 'Equipe de atendimento.'],
+    financeiro: ['Financeiro', 'Valores e resultados.'],
+    relatorios: ['Relatórios', 'Dados e métricas.'],
+    config: ['Configurações', 'Dados do negócio.']
+  };
+  const info = navMap[view] || ['', ''];
+  setText('pageTitle', info[0]);
+  setText('pageSub', info[1]);
+
+  const copyBtn = $('topbarCopyLink');
+  if (copyBtn) copyBtn.style.display = (view !== 'dashboard') ? 'none' : '';
+
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
+  });
+  document.querySelectorAll('.mob-nav-btn').forEach(b => {
+    b.classList.toggle('active', (b.getAttribute('onclick') || '').includes(`'${view}'`));
+  });
+  if (view === 'relatorios') window.renderRelatoriosFinanceiros?.();
+}
+
+
+const AUTH_PENDING_KEY = 'vyxora_pending_signup_v1';
+let _authEmail = '';
+let _recoveryEmail = '';
+let _resendTimer = null;
+
+function authFeedback(message = '', type = 'error') {
+  const box = $('authFeedback');
+  if (!box) return;
+  box.textContent = String(message || '');
+  box.className = 'auth-feedback' + (message ? ` show ${type}` : '');
+}
+
+function clearAuthFieldErrors(exceptInput = null) {
+  document.querySelectorAll('#authOverlay .auth-field-error').forEach(error => {
+    if (exceptInput && error.closest('.field')?.contains(exceptInput)) return;
+    error.remove();
+  });
+  document.querySelectorAll('#authOverlay .field.has-auth-error').forEach(field => {
+    if (exceptInput && field.contains(exceptInput)) return;
+    field.classList.remove('has-auth-error');
+    field.querySelectorAll('input, select, textarea').forEach(input => {
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-describedby');
+    });
+  });
+}
+
+function authFail(message, inputId = '') {
+  authFeedback();
+  const input = inputId ? $(inputId) : null;
+  if (input) {
+    clearAuthFieldErrors(input);
+    input.setAttribute('aria-invalid', 'true');
+    const field = input.closest('.field');
+    if (field) {
+      field.classList.add('has-auth-error');
+      let error = field.querySelector('.auth-field-error');
+      if (!error) {
+        error = document.createElement('small');
+        error.className = 'auth-field-error';
+        error.setAttribute('role', 'alert');
+        field.appendChild(error);
+      }
+      error.textContent = String(message || 'Confira este campo.');
+      error.id = error.id || `${input.id}Error`;
+      input.setAttribute('aria-describedby', error.id);
+    }
+    input.focus({ preventScroll: true });
+  } else {
+    toast(message, 'err');
+  }
+  return false;
+}
+
+function authSuccess(message) {
+  authFeedback();
+  toast(message, 'ok');
+}
+
+function authCodeStatus(kind, message = '', type = 'info') {
+  const id = kind === 'recovery' ? 'recoveryCodeStatus' : 'verifyCodeStatus';
+  const status = $(id);
+  if (!status) return;
+  status.textContent = String(message || '');
+  status.className = 'auth-code-status' + (message ? ` show ${type}` : '');
+}
+
+function clearAuthCodeStatuses() {
+  authCodeStatus('signup');
+  authCodeStatus('recovery');
+}
+
+function esconderTelasAuth() {
+  ['formLogin','formCadastro','formVerifyEmail','formForgotPassword','formRecoveryCode','formNewPassword','authCategoryPanel'].forEach(id => {
+    const el = $(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function mostrarTelaAuth(id) {
+  esconderTelasAuth();
+  authFeedback();
+  clearAuthCodeStatuses();
+  if (id === 'formVerifyEmail' || id === 'formRecoveryCode') {
+    const operationalNotices = $('notifStack');
+    if (operationalNotices) operationalNotices.innerHTML = '';
+  }
+  clearAuthFieldErrors();
+  const overlay = $('authOverlay');
+  if (overlay) {
+    overlay.dataset.authScreen = id;
+    overlay.scrollTop = 0;
+  }
+  const el = $(id);
+  if (el) el.style.display = 'block';
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (formArea) formArea.scrollTop = 0;
+}
+
+function normalizarCodigo(valor) {
+  return String(valor || '').replace(/\D/g, '').slice(0, 8);
+}
+
+function mensagemAuth(error, fallback) {
+  const code = String(error?.code || '').toLowerCase();
+  const msg = String(error?.message || '').toLowerCase();
+  if (code.includes('otp_expired') || msg.includes('expired')) return 'O código expirou. Solicite um novo.';
+  if (code.includes('otp_disabled') || msg.includes('invalid') || msg.includes('token')) return 'Código inválido. Confira e tente novamente.';
+  if (code.includes('email_not_confirmed') || msg.includes('email not confirmed')) return 'Confirme seu e-mail antes de entrar.';
+  if (code.includes('over_request_rate_limit') || msg.includes('rate limit')) return 'Muitas tentativas. Aguarde um pouco e tente novamente.';
+  if (msg.includes('already registered')) return 'Este e-mail já está cadastrado.';
+  return error?.message || fallback;
+}
+
+function guardarCadastroPendente(data) {
+  // Nunca persiste senha no navegador. O OTP confirmado deve devolver uma
+  // sessão válida antes de qualquer dado do negócio ser provisionado.
+  const { senha: _senhaDescartada, ...cadastroSeguro } = data || {};
+  localStorage.setItem(AUTH_PENDING_KEY, JSON.stringify({ ...cadastroSeguro, createdAt: Date.now() }));
+}
+
+function lerCadastroPendente() {
+  try {
+    const data = JSON.parse(localStorage.getItem(AUTH_PENDING_KEY) || 'null');
+    if (data?.senha) {
+      const { senha: _senhaAntiga, ...cadastroSeguro } = data;
+      localStorage.setItem(AUTH_PENDING_KEY, JSON.stringify(cadastroSeguro));
+      return cadastroSeguro;
+    }
+    return data;
+  }
+  catch (_) { return null; }
+}
+
+function limparCadastroPendente() {
+  localStorage.removeItem(AUTH_PENDING_KEY);
+}
+
+function iniciarContagemReenvio(buttonId, seconds = 60) {
+  if (_resendTimer) clearInterval(_resendTimer);
+  const btn = $(buttonId);
+  if (!btn) return;
+  let left = seconds;
+  btn.disabled = true;
+  btn.textContent = `Reenviar em ${left}s`;
+  _resendTimer = setInterval(() => {
+    left -= 1;
+    if (left <= 0) {
+      clearInterval(_resendTimer); _resendTimer = null;
+      btn.disabled = false; btn.textContent = 'Reenviar código';
+    } else btn.textContent = `Reenviar em ${left}s`;
+  }, 1000);
+}
+
+function showVerifyEmail(email) {
+  _authEmail = String(email || '').trim().toLowerCase();
+  setText('verifyEmailLabel', _authEmail);
+  const code = $('verifyEmailCode'); if (code) { code.value = ''; syncAuthCodeBoxes(code); }
+  mostrarTelaAuth('formVerifyEmail');
+  setTimeout(() => code?.focus({ preventScroll: true }), 60);
+}
+
+function showForgotPassword() {
+  const current = ($('loginEmail')?.value || _recoveryEmail || '').trim();
+  const input = $('recoveryEmail'); if (input) input.value = current;
+  mostrarTelaAuth('formForgotPassword');
+  setTimeout(() => input?.focus({ preventScroll: true }), 60);
+}
+
+function showRecoveryCode(email) {
+  _recoveryEmail = String(email || '').trim().toLowerCase();
+  setText('recoveryEmailLabel', _recoveryEmail);
+  const code = $('recoveryCode'); if (code) { code.value = ''; syncAuthCodeBoxes(code); }
+  mostrarTelaAuth('formRecoveryCode');
+  setTimeout(() => code?.focus({ preventScroll: true }), 60);
+}
+
+function showNewPassword() {
+  mostrarTelaAuth('formNewPassword');
+  setTimeout(() => $('newPassword')?.focus({ preventScroll: true }), 60);
+}
+
+function voltarCadastroEmail() {
+  showCadastro();
+  _mostrarStep(1);
+  setTimeout(() => $('cadEmail')?.focus({ preventScroll: true }), 60);
+}
+
+async function reenviarCodigoCadastro() {
+  const email = _authEmail || lerCadastroPendente()?.email;
+  if (!email) return authFail('Informe o e-mail do cadastro.', 'verifyEmailCode');
+  const sessao = await db.auth.getSession();
+  if (sessao?.data?.session) {
+    return authFail('Esta conta já foi confirmada. Faça login.', 'verifyEmailCode');
+  }
+  const btn = $('btnResendSignup'); if (btn) btn.disabled = true;
+  const { error } = await db.auth.resend({ type: 'signup', email });
+  if (error) { if (btn) btn.disabled = false; return authFail(mensagemAuth(error, 'Não foi possível reenviar o código.'), 'verifyEmailCode'); }
+  authCodeStatus('signup', 'Novo código enviado. Confira sua caixa de entrada.', 'success');
+  iniciarContagemReenvio('btnResendSignup', 60);
+}
+
+async function confirmarEmailCadastro() {
+  const email = _authEmail || lerCadastroPendente()?.email;
+  const token = normalizarCodigo($('verifyEmailCode')?.value);
+  if (!email || token.length < 6) return authFail('Digite o código de confirmação recebido por e-mail.', 'verifyEmailCode');
+  const btn = $('btnVerifyEmail'); if (btn) { btn.disabled = true; btn.textContent = 'Confirmando...'; }
+  try {
+    const { data, error } = await db.auth.verifyOtp({ email, token, type: 'signup' });
+    if (error || !data?.user || !data?.session) {
+      return authFail(mensagemAuth(error, 'Código inválido ou expirado.'), 'verifyEmailCode');
+    }
+    await db.auth.setSession(data.session);
+
+    const pendente = lerCadastroPendente();
+    if (pendente && pendente.email === email) {
+      const ok = await provisionarCadastroConfirmado(data.user, pendente);
+      if (!ok) return;
+      limparCadastroPendente();
+    } else {
+      const ok = await carregarConta(data.user);
+      if (!ok) return toast('E-mail confirmado. Complete novamente os dados do negócio para criar o painel.', 'err');
+    }
+    closeAuth();
+    showNotif('E-mail confirmado!', 'Sua conta está pronta para uso.', 'ok', 5000);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar e continuar →'; }
+  }
+}
+
+async function enviarCodigoRecuperacao() {
+  const email = ($('recoveryEmail')?.value || '').trim().toLowerCase();
+  if (!email) return authFail('Digite o e-mail da conta que deseja recuperar.', 'recoveryEmail');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return authFail('Digite um endereço de e-mail válido.', 'recoveryEmail');
+  const btn = $('btnSendRecovery'); if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+  try {
+    const response = await fetch('/api/auth-recovery-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) return authFail(payload.error || 'Não foi possível solicitar a recuperação agora.', 'recoveryEmail');
+    showRecoveryCode(email);
+    authCodeStatus('recovery', 'Se a conta existir, o código chegará em instantes.', 'success');
+    iniciarContagemReenvio('btnResendRecovery', 60);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar código →'; }
+  }
+}
+
+async function reenviarCodigoRecuperacao() {
+  if (!_recoveryEmail) return showForgotPassword();
+  const btn = $('btnResendRecovery'); if (btn) btn.disabled = true;
+  try {
+    const response = await fetch('/api/auth-recovery-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: _recoveryEmail })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) return authFail(payload.error || 'Não foi possível solicitar um novo código agora.', 'recoveryCode');
+    authCodeStatus('recovery', 'Novo código solicitado. Confira sua caixa de entrada.', 'success');
+    iniciarContagemReenvio('btnResendRecovery', 60);
+  } finally {
+    if (btn && !_resendTimer) btn.disabled = false;
+  }
+}
+
+async function validarCodigoRecuperacao() {
+  const token = normalizarCodigo($('recoveryCode')?.value);
+  if (!_recoveryEmail || token.length < 6) return authFail('Digite o código de recuperação recebido por e-mail.', 'recoveryCode');
+  const btn = $('btnVerifyRecovery'); if (btn) { btn.disabled = true; btn.textContent = 'Validando...'; }
+  try {
+    const { data, error } = await db.auth.verifyOtp({ email: _recoveryEmail, token, type: 'recovery' });
+    if (error || !data?.session) return authFail(mensagemAuth(error, 'Código inválido ou expirado.'), 'recoveryCode');
+    showNewPassword();
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Validar código →'; }
+  }
+}
+
+async function salvarNovaSenha() {
+  const password = $('newPassword')?.value || '';
+  const confirm = $('newPasswordConfirm')?.value || '';
+  if (password.length < 8 || !/[A-Za-zÀ-ÿ]/.test(password) || !/\d/.test(password)) {
+    return authFail('Use pelo menos 8 caracteres, incluindo uma letra e um número.', 'newPassword');
+  }
+  if (password !== confirm) return authFail('As senhas não são iguais. Confira e tente novamente.', 'newPasswordConfirm');
+  const btn = $('btnUpdatePassword'); if (btn) { btn.disabled = true; btn.textContent = 'Atualizando...'; }
+  try {
+    const { error } = await db.auth.updateUser({ password });
+    if (error) return toast(mensagemAuth(error, 'Não foi possível atualizar a senha.'), 'err');
+    await db.auth.signOut();
+    toast('Senha atualizada. Entre com a nova senha.', 'ok');
+    showLogin();
+    if ($('loginEmail')) $('loginEmail').value = _recoveryEmail;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar senha →'; }
+  }
+}
+
+let _authViewportBaseline = 0;
+let _authViewportTimer = null;
+
+function scrollAuthFieldIntoView(field = document.activeElement) {
+  const overlay = $('authOverlay');
+  const area = overlay?.querySelector('.auth-form-area');
+  if (!overlay?.classList.contains('open') || !area || !field?.closest?.('#authOverlay')) return;
+  if (overlay.dataset.authScreen === 'formLogin') return;
+  const fieldRect = field.getBoundingClientRect();
+  const areaRect = area.getBoundingClientRect();
+  const targetTop = area.scrollTop + fieldRect.top - areaRect.top - Math.max(68, area.clientHeight * .34);
+  area.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+}
+
+function syncAuthVisualViewport() {
+  const overlay = $('authOverlay');
+  if (!overlay || window.innerWidth > 620) return;
+  const viewport = window.visualViewport;
+  const height = Math.round(viewport?.height || window.innerHeight);
+  const offsetTop = Math.round(viewport?.offsetTop || 0);
+  _authViewportBaseline = Math.max(_authViewportBaseline, window.innerHeight, height);
+  const keyboardOpen = _authViewportBaseline - height > 120;
+
+  overlay.style.setProperty('--auth-visual-height', `${height}px`);
+  overlay.style.setProperty('--auth-visual-top', `${offsetTop}px`);
+  overlay.classList.toggle('keyboard-open', keyboardOpen);
+  const stack = $('notifStack');
+  if (stack) {
+    const coveredBottom = Math.max(0, window.innerHeight - (offsetTop + height));
+    stack.style.setProperty('--auth-toast-bottom', `${coveredBottom + 18}px`);
+  }
+
+  if (keyboardOpen) {
+    clearTimeout(_authViewportTimer);
+    _authViewportTimer = setTimeout(() => scrollAuthFieldIntoView(), 70);
+  }
+}
+
+window.visualViewport?.addEventListener('resize', syncAuthVisualViewport);
+window.visualViewport?.addEventListener('scroll', syncAuthVisualViewport);
+window.addEventListener('orientationchange', () => {
+  _authViewportBaseline = 0;
+  setTimeout(syncAuthVisualViewport, 120);
+});
+document.addEventListener('focusin', function(e) {
+  if (!e.target?.matches?.('#authOverlay input, #authOverlay select, #authOverlay textarea')) return;
+  setTimeout(syncAuthVisualViewport, 80);
+  setTimeout(() => scrollAuthFieldIntoView(e.target), 220);
+});
+
+function openAuth(mode) {
+  const overlay = $('authOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('mobile-welcome-open', 'mobile-welcome-leaving');
+
+  // Suspende a página de fundo enquanto a autenticação está aberta.
+  document.documentElement.classList.add('auth-performance-mode');
+  document.body.classList.add('auth-performance-mode');
+  VYXORA_SCROLL.lock('auth');
+
+  if (mode === 'login') showLogin(); else showCadastro();
+
+  // Exibe somente após preparar o formulário, evitando duas renderizações.
+  overlay.classList.add('open');
+  _authViewportBaseline = Math.max(window.innerHeight, window.visualViewport?.height || 0);
+  requestAnimationFrame(syncAuthVisualViewport);
+}
+
+function closeAuth() {
+  const overlay = $('authOverlay');
+  if (window.innerWidth <= 620 && !state.user && !getPublicSlug()) {
+    overlay?.classList.remove('keyboard-open', 'mobile-welcome-leaving');
+    overlay?.style.removeProperty('--auth-visual-height');
+    overlay?.style.removeProperty('--auth-visual-top');
+    $('notifStack')?.style.removeProperty('--auth-toast-bottom');
+    _authViewportBaseline = 0;
+    abrirBoasVindasMobile();
+    return;
+  }
+  if (overlay) overlay.classList.remove('open', 'mobile-welcome-open', 'mobile-welcome-leaving');
+
+  document.documentElement.classList.remove('auth-performance-mode');
+  document.body.classList.remove('auth-performance-mode');
+  VYXORA_SCROLL.unlock('auth');
+  _authViewportBaseline = 0;
+  overlay?.classList.remove('keyboard-open');
+  overlay?.style.removeProperty('--auth-visual-height');
+  overlay?.style.removeProperty('--auth-visual-top');
+  $('notifStack')?.style.removeProperty('--auth-toast-bottom');
+}
+
+function abrirBoasVindasMobile() {
+  if (window.innerWidth > 620 || getPublicSlug() || state.user) return;
+  const overlay = $('authOverlay');
+  if (!overlay) return;
+  esconderTelasAuth();
+  overlay.classList.add('open', 'mobile-welcome-open');
+  document.documentElement.classList.add('auth-performance-mode');
+  document.body.classList.add('auth-performance-mode');
+  VYXORA_SCROLL.lock('auth');
+}
+
+function continuarBoasVindasMobile() {
+  const overlay = $('authOverlay');
+  overlay?.classList.add('mobile-welcome-leaving');
+  setTimeout(() => {
+    overlay?.classList.remove('mobile-welcome-open', 'mobile-welcome-leaving');
+    showLogin();
+    requestAnimationFrame(syncAuthVisualViewport);
+  }, 260);
+}
+
+function pularBoasVindasMobile() {
+  const overlay = $('authOverlay');
+  overlay?.classList.remove('mobile-welcome-open', 'mobile-welcome-leaving');
+  showLogin();
+  requestAnimationFrame(syncAuthVisualViewport);
+}
+
+function sairBoasVindasMobile(destino) {
+  const overlay = $('authOverlay');
+  overlay?.classList.add('mobile-welcome-leaving');
+  setTimeout(() => {
+    overlay?.classList.remove('mobile-welcome-open', 'mobile-welcome-leaving');
+    if (destino === 'cadastro') showCadastro();
+    else showLogin();
+    requestAnimationFrame(syncAuthVisualViewport);
+  }, 260);
+}
+
+function abrirCadastroPelasBoasVindas() { sairBoasVindasMobile('cadastro'); }
+function abrirLoginPelasBoasVindas() { sairBoasVindasMobile('login'); }
+
+function showLogin() {
+  mostrarTelaAuth('formLogin');
+}
+
+function showCadastro() {
+  esconderTelasAuth();
+  authFeedback();
+  const overlay = $('authOverlay');
+  if (overlay) {
+    overlay.dataset.authScreen = 'formCadastro';
+    overlay.scrollTop = 0;
+  }
+  const fc = $('formCadastro');
+  if (fc) fc.style.cssText = 'display:block !important; visibility:visible !important;';
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (formArea) formArea.scrollTop = 0;
+  if ($('cadSenha')) $('cadSenha').placeholder = '8+ caracteres, letra e número';
+  if (typeof _mostrarStep === 'function') _mostrarStep(1);
+  preencherSelectCategorias();
+}
+
+// ── STEPS DO CADASTRO ──
+function _mostrarStep(n) {
+  ['step1', 'step2', 'step3'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) { el.style.cssText = 'display:none !important; visibility:hidden !important;'; el.classList.remove('active'); }
+  });
+  const alvo = document.getElementById('step' + n);
+  if (alvo) { alvo.style.cssText = 'display:block !important; visibility:visible !important;'; alvo.classList.add('active'); }
+  ['st1', 'st2', 'st3'].forEach(function(id, i) {
+    const dot = document.getElementById(id);
+    if (!dot) return;
+    dot.className = 'step-dot' + (i + 1 === n ? ' active' : (i + 1 < n ? ' done' : ''));
+  });
+  atualizarCabecalhoCadastro(n);
+  const overlay = $('authOverlay');
+  const formArea = document.querySelector('#authOverlay .auth-form-area');
+  if (overlay) overlay.scrollTop = 0;
+  if (formArea) formArea.scrollTop = 0;
+}
+
+function primeiroNomeCadastro() {
+  const nome = ($('cadNome')?.value || '').trim().replace(/\s+/g, ' ');
+  return nome ? nome.split(' ')[0].slice(0, 32) : '';
+}
+
+function atualizarCabecalhoCadastro(etapa) {
+  const titulo = $('cadastroSaudacao');
+  const mensagem = $('cadastroMensagem');
+  if (!titulo || !mensagem) return;
+  const nome = primeiroNomeCadastro();
+  const textos = {
+    1: [nome ? `Olá, ${nome}` : 'Vamos começar?', 'Crie seu acesso. Você configura o negócio depois, dentro do painel.'],
+    2: [nome ? `Olá, ${nome}` : 'Sobre você', 'Agora, conte sobre o seu negócio.'],
+    3: [nome ? `Estamos quase lá, ${nome}` : 'Estamos quase lá', 'Vamos preparar os primeiros detalhes da sua agenda.']
+  };
+  const [novoTitulo, novaMensagem] = textos[etapa] || textos[1];
+  titulo.classList.remove('auth-heading-change');
+  void titulo.offsetWidth;
+  titulo.textContent = novoTitulo;
+  mensagem.textContent = novaMensagem;
+  titulo.classList.add('auth-heading-change');
+}
+
+function setStep(n) { _mostrarStep(n); }
+function goStep1() { _mostrarStep(1); }
+
+async function goStep2() {
+  const nome = $('cadNome')?.value?.trim();
+  const email = $('cadEmail')?.value?.trim().toLowerCase();
+  const senha = $('cadSenha')?.value?.trim();
+  if (!nome) return authFail('Conte para a gente como você quer ser chamado.', 'cadNome');
+  if (!email) return authFail('Digite seu melhor e-mail.', 'cadEmail');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return authFail('Digite um endereço de e-mail válido.', 'cadEmail');
+  if (!senha) return authFail('Crie uma senha para proteger sua conta.', 'cadSenha');
+  if (senha.length < 8 || !/[A-Za-zÀ-ÿ]/.test(senha) || !/\d/.test(senha)) {
+    return authFail('Use pelo menos 8 caracteres, incluindo uma letra e um número.', 'cadSenha');
+  }
+  authFeedback();
+  const btn = $('btnGoStep2');
+  if (btn) { btn.disabled = true; btn.textContent = 'Verificando e-mail...'; }
+  try {
+    const response = await fetch('/api/auth-email-exists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return authFail(payload.error || 'Não foi possível verificar o e-mail. Tente novamente.', 'cadEmail');
+    }
+    if (payload.exists) {
+      return authFail('Este e-mail já possui uma conta. Entre ou redefina sua senha.', 'cadEmail');
+    }
+    const signupResponse = await fetch('/api/auth-signup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha, nome })
+    });
+    const signupPayload = await signupResponse.json().catch(() => ({}));
+    if (!signupResponse.ok) {
+      return authFail(mensagemAuth({ message: signupPayload.error }, 'Não foi possível criar a conta.'), 'cadEmail');
+    }
+    const authData = signupPayload.data;
+    if (!authData?.user) return authFail('Não foi possível criar a conta. Tente novamente.', 'cadEmail');
+    guardarCadastroPendente({ email, nomeUser: nome });
+    if (authData.session) {
+      try { await db.auth.signOut(); } catch (_) {}
+    }
+    showVerifyEmail(email);
+    iniciarContagemReenvio('btnResendSignup', 60);
+    authCodeStatus('signup', 'Código enviado. Confira sua caixa de entrada.', 'success');
+  } catch (error) {
+    console.error('Erro ao verificar e-mail:', error);
+    return authFail('Não foi possível verificar o e-mail. Confira sua conexão e tente novamente.', 'cadEmail');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Criar conta'; }
+  }
+}
+
+function goStep3() {
+  const empNome = $('empNome')?.value?.trim();
+  const empSlug = $('empSlug')?.value?.trim();
+  const empWhatsapp = $('empWhatsapp')?.value?.trim();
+  if (!empNome) return authFail('Digite o nome do seu negócio.', 'empNome');
+  if (!empWhatsapp) return authFail('Digite um WhatsApp para seus clientes.', 'empWhatsapp');
+  if (!empSlug) return authFail('Escolha o endereço personalizado da sua agenda.', 'empSlug');
+  authFeedback();
+  _mostrarStep(3);
+}
+
+// Corrige seleção de categoria em componentes personalizados.
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-area-value], [data-categoria-value], .area-option, .categoria-option');
+  if (!btn) return;
+  const select = document.getElementById('empCategoria');
+  const value = btn.dataset.areaValue || btn.dataset.categoriaValue || btn.getAttribute('data-value');
+  if (select && value != null) {
+    select.value = value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    btn.parentElement?.querySelectorAll('.selected, .active').forEach(x => x.classList.remove('selected','active'));
+    btn.classList.add('selected','active');
+  }
+});
+
+function autoSlug() {
+  const el = $('empSlug');
+  if (!el || el.dataset.manual === '1') return;
+  const nomeEl = $('empNome');
+  if (nomeEl) el.value = slugify(nomeEl.value || '');
+}
+
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.id === 'empSlug') e.target.dataset.manual = '1';
+  if (e.target?.closest?.('#authOverlay')) {
+    e.target.removeAttribute('aria-invalid');
+    const field = e.target.closest('.field');
+    if (field?.classList.contains('has-auth-error')) {
+      field.classList.remove('has-auth-error');
+      field.querySelector('.auth-field-error')?.remove();
+      e.target.removeAttribute('aria-describedby');
+    }
+    const box = $('authFeedback');
+    if (box?.classList.contains('error')) authFeedback();
+  }
+  ajustarFonteCampo(e.target);
+});
+
+document.addEventListener('change', function(e) { ajustarFonteCampo(e.target); });
+
+document.addEventListener('input', function(e) {
+  if (e.target?.classList?.contains('auth-code-input')) {
+    e.target.value = normalizarCodigo(e.target.value).slice(0, 8);
+    syncAuthCodeBoxes(e.target);
+  }
+});
+
+function syncAuthCodeBoxes(input) {
+  if (!input) return;
+  const wrap = input.closest('.auth-code-segmented');
+  if (!wrap) return;
+  const value = normalizarCodigo(input.value).slice(0, 8);
+  const boxes = [...wrap.querySelectorAll('.auth-code-boxes span')];
+  boxes.forEach((box, index) => {
+    box.textContent = value[index] || '';
+    box.classList.toggle('is-filled', index < value.length);
+    box.classList.toggle('is-active', document.activeElement === input && index === Math.min(value.length, boxes.length - 1));
+  });
+  wrap.classList.toggle('is-complete', value.length === boxes.length);
+}
+
+function initAuthCodeBoxes() {
+  document.querySelectorAll('.auth-code-segmented').forEach(wrap => {
+    const input = document.getElementById(wrap.dataset.codeInput || '');
+    if (!input || wrap.dataset.ready === '1') return;
+    wrap.dataset.ready = '1';
+    wrap.addEventListener('click', () => input.focus({ preventScroll: true }));
+    input.addEventListener('focus', () => syncAuthCodeBoxes(input));
+    input.addEventListener('blur', () => syncAuthCodeBoxes(input));
+    input.addEventListener('paste', event => {
+      const pasted = normalizarCodigo(event.clipboardData?.getData('text') || '').slice(0, 8);
+      if (!pasted) return;
+      event.preventDefault();
+      input.value = pasted;
+      syncAuthCodeBoxes(input);
+    });
+    syncAuthCodeBoxes(input);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initAuthCodeBoxes, { once: true });
+
+document.addEventListener('keydown', function(e) {
+  const overlay = $('authOverlay');
+  if (!overlay?.classList.contains('open')) return;
+  if (e.key === 'Escape') return closeAuth();
+  if (e.key !== 'Enter' || e.target?.tagName === 'BUTTON') return;
+  e.preventDefault();
+  if ($('formLogin')?.offsetParent) return loginComSenha();
+  if ($('formForgotPassword')?.offsetParent) return enviarCodigoRecuperacao();
+  if ($('formRecoveryCode')?.offsetParent) return validarCodigoRecuperacao();
+  if ($('formVerifyEmail')?.offsetParent) return confirmarEmailCadastro();
+  if ($('formNewPassword')?.offsetParent) return salvarNovaSenha();
+  if ($('step1')?.offsetParent) return goStep2();
+  if ($('step2')?.offsetParent) return goStep3();
+  if ($('step3')?.offsetParent) return finalizarCadastro();
+});
+
+async function loginComSenha() {
+  const email = ($('loginEmail')?.value || '').trim().toLowerCase();
+  const senha = ($('loginSenha')?.value || '').trim();
+  if (!email) return authFail('Digite o e-mail usado no seu cadastro.', 'loginEmail');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return authFail('Digite um endereço de e-mail válido.', 'loginEmail');
+  if (!senha) return authFail('Digite sua senha para continuar.', 'loginSenha');
+  const btn = $('btnLogin'); if (btn) { btn.disabled = true; btn.textContent = 'Entrando...'; }
+  authFeedback();
+  try {
+    const { data, error } = await db.auth.signInWithPassword({ email, password: senha });
+    if (error || !data.user) {
+      const message = mensagemAuth(error, 'E-mail ou senha incorretos.');
+      if (String(error?.code || '').includes('email_not_confirmed') || String(error?.message || '').toLowerCase().includes('email not confirmed')) {
+        showVerifyEmail(email);
+        iniciarContagemReenvio('btnResendSignup', 60);
+      }
+      return authFail(message, 'loginSenha');
+    }
+    const ok = await carregarConta(data.user);
+    if (!ok) { await db.auth.signOut(); return authFail('Perfil ou empresa não encontrado. Refaça o cadastro.'); }
+    showNotif('Login realizado!', 'Bem-vindo de volta.', 'ok', 4000);
+  } catch (e) { console.error('Erro no login:', e); authFail('Não foi possível entrar agora. Verifique sua conexão e tente novamente.'); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'Entrar →'; } }
+}
+
+async function provisionarCadastroConfirmado(user, cadastro) {
+  const btnFin = $('btnFinalizar');
+  try {
+    const { data: perfilExistente } = await db.from('agenda_perfis').select('*').eq('auth_user_id', user.id).maybeSingle();
+    if (perfilExistente) {
+      const ok = await carregarConta(user);
+      return !!ok;
+    }
+    const cadastroBasico = !cadastro.empNomeVal;
+    const slugBase = cadastroBasico ? `agenda-${String(user.id).slice(0, 8)}` : cadastro.empSlugVal;
+    const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', slugBase).maybeSingle();
+    const slugFinal = slugExiste ? slugBase + '-' + Date.now().toString().slice(-4) : slugBase;
+    const { data: empresa, error: errEmp } = await db.from('agenda_empresas').insert({
+      nome: cadastroBasico ? 'Meu negócio' : cadastro.empNomeVal,
+      slug: slugFinal,
+      area_atuacao: cadastroBasico ? 'Outro' : cadastro.areaAtuacao,
+      whatsapp: cadastroBasico ? '' : cadastro.empWhatsappVal,
+      email: cadastro.email,
+      plano: 'Grátis',
+      onboarding_finalizado: !cadastroBasico
+    }).select('*').single();
+    if (errEmp || !empresa) { console.error(errEmp); toast('Não foi possível criar a empresa: ' + (errEmp?.message || 'tente novamente.'), 'err'); return false; }
+    const { error: perfilErr } = await db.from('agenda_perfis').insert({
+      auth_user_id: user.id, empresa_id: empresa.id, nome: cadastro.nomeUser,
+      email: cadastro.email, whatsapp: cadastroBasico ? '' : cadastro.empWhatsappVal, cargo: 'Administrador'
+    });
+    if (perfilErr) { console.error(perfilErr); toast('Não foi possível criar o perfil.', 'err'); return false; }
+    if (!cadastroBasico) {
+      await db.from('agenda_servicos').insert({
+        empresa_id: empresa.id, nome: cadastro.servNome, preco: Number(cadastro.servPreco || 0),
+        duracao_minutos: Number(cadastro.servDuracao || 60), status: 'ativo', descricao: 'Serviço inicial.'
+      });
+      await db.from('agenda_profissionais').insert({
+        empresa_id: empresa.id, nome: cadastro.profNomeVal,
+        especialidade: cadastro.profEsp || 'Profissional', telefone: cadastro.empWhatsappVal, status: 'ativo'
+      });
+    }
+    state.user = user;
+    state.perfil = { auth_user_id: user.id, empresa_id: empresa.id, nome: cadastro.nomeUser, email: cadastro.email };
+    state.empresa = empresa;
+    showDashboard(); await loadAll();
+    showNotif('Conta confirmada!', cadastroBasico ? 'Complete seu espaço pelo painel.' : empresa.nome + ' — painel criado com sucesso.', 'ok', 7000);
+    return true;
+  } catch (e) {
+    console.error('Erro ao provisionar cadastro:', e);
+    toast('Erro ao concluir o cadastro. Tente novamente.', 'err');
+    return false;
+  } finally {
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+  }
+}
+
+async function finalizarCadastro() {
+  const servNome = $('servNome')?.value?.trim();
+  const servPreco = $('servPreco')?.value;
+  const servDuracao = $('servDuracao')?.value;
+  const profNomeVal = $('profNome')?.value?.trim();
+  if (!servNome) return authFail('Digite o nome do seu primeiro serviço.', 'servNome');
+  if (!servPreco) return authFail('Informe o preço do serviço.', 'servPreco');
+  if (!servDuracao) return authFail('Informe a duração do atendimento.', 'servDuracao');
+  if (!profNomeVal) return authFail('Digite o nome do primeiro profissional.', 'profNome');
+  authFeedback();
+  const email = ($('cadEmail')?.value || '').trim().toLowerCase();
+  const senha = ($('cadSenha')?.value || '').trim();
+  const nomeUser = ($('cadNome')?.value || '').trim();
+  const empNomeVal = ($('empNome')?.value || '').trim();
+  const empSlugVal = slugify($('empSlug')?.value || empNomeVal);
+  const empWhatsappVal = ($('empWhatsapp')?.value || '').trim();
+  const catSelect = $('empCategoria');
+  const areaAtuacao = catSelect ? (catSelect.options[catSelect.selectedIndex]?.textContent?.trim() || 'Outro') : 'Outro';
+  const cadastro = {
+    senha,
+    email, nomeUser, empNomeVal, empSlugVal, empWhatsappVal, areaAtuacao,
+    servNome, servPreco, servDuracao, profNomeVal, profEsp: ($('profEsp')?.value || 'Profissional').trim()
+  };
+  const btnFin = $('btnFinalizar');
+  if (btnFin) { btnFin.disabled = true; btnFin.textContent = 'Criando conta...'; }
+  try {
+    const signupResponse = await fetch('/api/auth-signup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha, nome: nomeUser })
+    });
+    const signupPayload = await signupResponse.json().catch(() => ({}));
+    if (!signupResponse.ok) return authFail(mensagemAuth({ message: signupPayload.error }, 'Não foi possível criar a conta.'), 'cadEmail');
+    const authData = signupPayload.data;
+    if (!authData?.user) return toast('Não foi possível criar a conta. Tente novamente.', 'err');
+    guardarCadastroPendente(cadastro);
+
+    // O cadastro sempre deve passar pela confirmação por código antes de
+    // provisionar empresa, perfil, serviço e profissional. Mesmo que uma
+    // sessão seja devolvida por configuração incorreta do Supabase, ela não
+    // pode liberar o painel automaticamente.
+    if (authData.session) {
+      try { await db.auth.signOut(); } catch (_) {}
+    }
+
+    showVerifyEmail(email);
+    iniciarContagemReenvio('btnResendSignup', 60);
+    authCodeStatus('signup', 'Código enviado. Confira sua caixa de entrada.', 'success');
+  } catch (e) {
+    console.error('Erro em finalizarCadastro:', e);
+    toast('Erro inesperado. Tente novamente.', 'err');
+  } finally {
+    if (btnFin) { btnFin.disabled = false; btnFin.textContent = 'Criar painel →'; }
+  }
+}
+
+async function logout() {
+  try {
+    if (window.VyxoraAndroid?.clearCompanySubscription) {
+      window.VyxoraAndroid.clearCompanySubscription();
+    }
+    if (autoSyncTimer) { clearInterval(autoSyncTimer); autoSyncTimer = null; }
+    if (realtimeChannel) { try { db.removeChannel(realtimeChannel); } catch(e) {} realtimeChannel = null; }
+    await db.auth.signOut();
+  } catch(e) {}
+  state.user = null; state.perfil = null; state.empresa = null;
+  state.clientes = []; state.servicos = []; state.profissionais = [];
+  state.agendamentos = []; state.pagamentos = [];
+  location.href = location.pathname;
+}
+
+function setupRealtime() {
+  if (!state?.empresa?.id || !db?.channel) return;
+  if (realtimeChannel) { try { db.removeChannel(realtimeChannel); } catch(e) {} realtimeChannel = null; }
+  const id = state.empresa.id;
+  const tables = ['agenda_agendamentos', 'agenda_clientes', 'agenda_servicos', 'agenda_profissionais'];
+  let ch = db.channel('ap-realtime-' + id);
+  tables.forEach(table => {
+    ch = ch.on('postgres_changes', { event: '*', schema: 'public', table, filter: `empresa_id=eq.${id}` }, payload => {
+      if (table === 'agenda_agendamentos' && payload.eventType === 'INSERT') {
+        addAppNotification('Novo agendamento!', `${payload.new?.cliente_nome || 'Cliente'} acabou de agendar.`, 'new', payload.new?.id || '');
+      }
+      scheduleReload();
+    });
+  });
+  realtimeChannel = ch.subscribe();
+}
+
+let _reloadTimer = null;
+function scheduleReload() {
+  if (_reloadTimer) clearTimeout(_reloadTimer);
+  _reloadTimer = setTimeout(async () => { if (state?.empresa?.id) await loadAll(); }, 400);
+}
+
+function startAutoSync() {
+  if (autoSyncTimer) clearInterval(autoSyncTimer);
+  lastIds = new Set((state.agendamentos || []).map(a => String(a.id)));
+  autoSyncTimer = setInterval(async () => {
+    if (!state?.empresa?.id) return;
+    try {
+      const { data } = await db.from('agenda_agendamentos').select('*').eq('empresa_id', state.empresa.id).order('criado_em', { ascending: false });
+      const novos = (data || []).filter(a => !lastIds.has(String(a.id)));
+      state.agendamentos = ordenarAgendamentosRecentes(data);
+      if (novos.length) novos.forEach(a => addAppNotification('Novo agendamento!', `${a.cliente_nome || 'Cliente'} agendou.`, 'new', a.id || ''));
+      lastIds = new Set(state.agendamentos.map(a => String(a.id)));
+      renderAll();
+    } catch (e) {}
+  }, 5000);
+}
+
+function preserveAgendaFormValues(callback) {
+  const values = {
+    cliente: $('agCliente')?.value || '', telefone: $('agTelefone')?.value || '',
+    servico: $('agServico')?.value || '', profissional: $('agProfissional')?.value || '',
+    data: $('agData')?.value || '', hora: $('agHora')?.value || '', status: $('agStatus')?.value || ''
+  };
+  if (typeof callback === 'function') callback();
+  if ($('agCliente') && values.cliente) $('agCliente').value = values.cliente;
+  if ($('agTelefone') && values.telefone) $('agTelefone').value = values.telefone;
+  if ($('agServico') && values.servico && [...$('agServico').options].some(o => o.value === values.servico)) $('agServico').value = values.servico;
+  if ($('agProfissional') && values.profissional && [...$('agProfissional').options].some(o => o.value === values.profissional)) $('agProfissional').value = values.profissional;
+  if ($('agData') && values.data) $('agData').value = values.data;
+  if ($('agHora') && values.hora) $('agHora').value = values.hora;
+  if ($('agStatus') && values.status) $('agStatus').value = values.status;
+}
+
+async function loadAll() {
+  if (!state.empresa) return;
+  const id = state.empresa.id;
+  try {
+    const [cli, svc, prof, ag, pag] = await Promise.all([
+      db.from('agenda_clientes').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_servicos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_profissionais').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_agendamentos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false }),
+      db.from('agenda_pagamentos').select('*').eq('empresa_id', id).order('criado_em', { ascending: false })
+    ]);
+    state.clientes = cli.data || []; state.servicos = svc.data || [];
+    state.profissionais = prof.data || []; state.agendamentos = ordenarAgendamentosRecentes(ag.data);
+    state.pagamentos = pag.data || [];
+    if (typeof window.loadCobrancasFinanceiras === 'function') {
+      state.cobrancas = await window.loadCobrancasFinanceiras(id);
+    }
+    lastIds = new Set(state.agendamentos.map(a => String(a.id)));
+    renderAll();
+  } catch (e) { console.error('Erro ao carregar dados:', e); }
+}
+
+function renderAll() {
+  preserveAgendaFormValues(() => {
+    renderStats(); renderDashList(); renderCalendar(); renderSelects();
+    renderTimeline(); renderClientes(); renderServicos(); renderProfissionais(); renderFinanceiro(); renderDashPremium(); renderDashChart(); renderDashTrends();
+    if (typeof window.renderVxdDashboard === 'function') window.renderVxdDashboard();
+    const active = document.activeElement;
+    const editingConfig = active && active.closest && active.closest('#view-config');
+    if (!editingConfig) renderConfig();
+  });
+  ajustarFontesCampos();
+}
+
+function renderStats() {
+  const hoje = hojeISO(), mes = mesPrefixo(), ags = state.agendamentos || [];
+  const ativos = ags.filter(a => normStatus(a.status) !== 'Excluído');
+  const st = s => ativos.filter(a => normStatus(a.status) === s).length;
+  const stAll = s => ags.filter(a => normStatus(a.status) === s).length;
+  const concluidos = st('Concluído');
+  const base = ativos.filter(a => normStatus(a.status) !== 'Recusado').length;
+  const taxa = base > 0 ? Math.round(concluidos / base * 100) : 0;
+  const fin = ags.filter(isFinanceiro);
+  const fatHoje = fin.filter(a => dataConclusaoISO(a) === hoje).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const fatMes = fin.filter(a => dataConclusaoISO(a).startsWith(mes)).reduce((s, a) => s + Number(a.valor || 0), 0);
+  setText('statHoje', ativos.filter(a => a.data === hoje).length);
+  setText('statPendentes', st('Pendente')); setText('statConfirmados', st('Confirmado'));
+  setText('statReagendados', st('Reagendado')); setText('statConcluidos', concluidos);
+  setText('statRecusados', st('Recusado')); setText('statExcluidos', stAll('Excluído'));
+  setText('statTaxa', taxa + '%');
+  setText('statFatHoje', money(fatHoje).replace(',00', ''));
+  setText('statFatMes', money(fatMes).replace(',00', ''));
+  setText('statClientes', (state.clientes || []).filter(isAtivoCliente).length);
+  setText('statServicos', (state.servicos || []).filter(s => s.status === 'ativo').length);
+  setText('statProfissionais', (state.profissionais || []).filter(p => p.status === 'ativo').length);
+  setText('statTotal', ativos.length);
+  setText('fc-todos', ativos.length); setText('fc-pendente', st('Pendente'));
+  setText('fc-confirmado', st('Confirmado')); setText('fc-reagendado', st('Reagendado'));
+  setText('fc-concluido', concluidos); setText('fc-recusado', st('Recusado'));
+  setText('fc-excluido', stAll('Excluído'));
+}
+
+function sparkPath(values) {
+  const nums = (values || []).map(Number);
+  if (nums.length < 2) return '';
+  const min = Math.min(...nums), max = Math.max(...nums);
+  const range = (max - min) || 1;
+  const stepX = 100 / (nums.length - 1);
+  return nums.map((v, i) => {
+    const x = (i * stepX).toFixed(2);
+    const y = (26 - ((v - min) / range) * 24).toFixed(2);
+    return (i === 0 ? 'M' : 'L') + x + ',' + y;
   }).join(' ');
 }
 
-function createNaturalSentence(value = '') {
-  let clean = String(value || '').trim().replace(/\s+/g, ' ');
-  if (!clean) return '';
-  const letters = clean.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, '');
-  if (letters && letters === letters.toLocaleUpperCase('pt-BR')) clean = clean.toLocaleLowerCase('pt-BR');
-  clean = clean.replace(/\bar\s*condicionado\b/gi, 'ar-condicionado');
-  return clean.charAt(0).toLocaleUpperCase('pt-BR') + clean.slice(1);
-}
-
-function createNaturalPayment(value = '') {
-  const clean = String(value || '').trim();
-  if (!clean) return '';
-  const key = clean.toLocaleLowerCase('pt-BR').replace(/\s+/g, ' ');
-  const known = {
-    'pix': 'Pix',
-    'dinheiro': 'dinheiro',
-    'cartão': 'cartão',
-    'cartao': 'cartão',
-    'cartão débito': 'cartão de débito',
-    'cartao debito': 'cartão de débito',
-    'cartão de débito': 'cartão de débito',
-    'cartao de debito': 'cartão de débito',
-    'débito': 'cartão de débito',
-    'debito': 'cartão de débito',
-    'cartão crédito': 'cartão de crédito',
-    'cartao credito': 'cartão de crédito',
-    'cartão de crédito': 'cartão de crédito',
-    'cartao de credito': 'cartão de crédito',
-    'crédito': 'cartão de crédito',
-    'credito': 'cartão de crédito',
-    'transferência': 'transferência',
-    'transferencia': 'transferência',
-    'transferência bancária': 'transferência bancária',
-    'transferencia bancaria': 'transferência bancária',
-    'boleto': 'boleto'
-  };
-  return known[key] || createNaturalSentence(clean);
-}
-
-function createNaturalPlace(value = '') {
-  const clean = String(value || '').trim().replace(/,+$/, '').replace(/\s+/g, ' ');
-  if (!clean) return '';
-  const match = clean.match(/^(.+?)[\s,/-]+([A-Za-z]{2})$/);
-  if (match) return `${createNaturalName(match[1])}/${match[2].toLocaleUpperCase('pt-BR')}`;
-  return createNaturalName(clean);
-}
-
-function createNaturalPlaceDate(value = '') {
-  const clean = String(value || '').trim().replace(/\s+/g, ' ');
-  if (!clean) return '';
-  const months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-
-  let match = clean.match(/^(.*?)[,\s-]*(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
-  if (match) {
-    const place = createNaturalPlace(match[1]);
-    const day = String(Number(match[2])).padStart(2, '0');
-    const month = months[Number(match[3]) - 1];
-    const date = month ? `${day} de ${month} de ${match[4]}` : `${match[2]}/${match[3]}/${match[4]}`;
-    return `${place ? `${place}, ` : ''}${date}.`;
+function renderDeltaBadge(elId, deltaValue, opts = {}) {
+  const el = $(elId);
+  if (!el) return;
+  const isPts = !!opts.pts;
+  const rounded = Math.round((deltaValue || 0) * 10) / 10;
+  el.classList.remove('up', 'down', 'flat');
+  if (rounded === 0) {
+    el.textContent = '— 0,0' + (isPts ? 'pts' : '%');
+    el.classList.add('flat');
+    return;
   }
-
-  match = clean.match(/^(.*?)[,\s-]*(\d{1,2})\s+de\s+([A-Za-zÀ-ÖØ-öø-ÿ]+)\s+de\s+(\d{4})\.?$/i);
-  if (match) {
-    const place = createNaturalPlace(match[1]);
-    const day = String(Number(match[2])).padStart(2, '0');
-    const month = match[3].toLocaleLowerCase('pt-BR');
-    return `${place ? `${place}, ` : ''}${day} de ${month} de ${match[4]}.`;
-  }
-
-  return clean.endsWith('.') ? clean : `${clean}.`;
+  const up = rounded > 0;
+  const abs = Math.abs(rounded).toFixed(1).replace('.', ',');
+  el.textContent = (up ? '↑ ' : '↓ ') + abs + (isPts ? 'pts' : '%');
+  el.classList.add(up ? 'up' : 'down');
 }
 
-function createTodayNaturalLabel() {
-  const parts = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).formatToParts(new Date());
-  const day = parts.find(part => part.type === 'day')?.value || '';
-  const month = parts.find(part => part.type === 'month')?.value || '';
-  const year = parts.find(part => part.type === 'year')?.value || '';
-  return `${day} de ${month} de ${year}`;
-}
-
-function createAmountPresentation(value = '') {
-  const formatted = formatCreateCurrency(value);
-  const words = createCurrencyWords(value);
-  return { formatted, words, full: words ? `${formatted} (${words})` : formatted };
-}
-
-function createTodayLabel() {
-  return createTodayNaturalLabel();
-}
-
-function createDocumentDateLabel(value = '') {
-  const natural = createNaturalPlaceDate(value);
-  const match = natural.match(/(\d{2} de [A-Za-zÀ-ÖØ-öø-ÿ]+ de \d{4})/i);
-  return match ? match[1] : createTodayLabel();
-}
-
-function createDocShell({ kind, title, eyebrow = 'DOCUMENTO', meta = '', body = '', footer = '', dateLabel = '' }) {
-  const documentDate = dateLabel || createTodayLabel();
-  return `
-    <article class="soft-doc soft-doc-${kind}">
-      <header class="doc-header">
-        <div>
-          <span class="doc-eyebrow">${createEscape(eyebrow)}</span>
-          <h2>${createEscape(title)}</h2>
-        </div>
-        <div class="doc-header-meta">
-          <span>EMISSÃO</span>
-          <strong>${createEscape(documentDate)}</strong>
-          ${meta}
-        </div>
-      </header>
-      <div class="doc-accent"></div>
-      <div class="doc-content">${body}</div>
-      ${footer || '<footer class="doc-footer"><span>Documento preparado para impressão ou arquivo digital.</span></footer>'}
-    </article>
-  `;
-}
-
-function parsePriceListItems(value = '') {
-  return String(value || '').split(/\n+/).map(line => line.trim()).filter(Boolean).map((line) => {
-    const parts = line.split(/\s+[—–-]\s+|\s*\|\s*|\s*:\s*/);
-    if (parts.length >= 2) {
-      const price = parts.pop().trim();
-      return { name: parts.join(' — ').trim(), price: formatCreateCurrency(price) };
-    }
-    const match = line.match(/^(.*?)(R\$\s*)?([0-9][0-9.,]*)$/i);
-    if (match) return { name: match[1].trim(), price: formatCreateCurrency(match[3]) };
-    return { name: line, price: '' };
-  });
-}
-
-
-function createNaturalMultiline(value = '') {
-  return String(value || '').split(/\n+/).map(line => createNaturalSentence(line)).filter(Boolean).join('\n');
-}
-
-function createSentenceWithPeriod(value = '') {
-  const clean = String(value || '').trim();
-  if (!clean) return '';
-  return /[.!?]$/.test(clean) ? clean : `${clean}.`;
-}
-
-function createPaymentClause(value = '') {
-  const method = createNaturalPayment(value);
-  if (!method) return '';
-  if (method.toLocaleLowerCase('pt-BR') === 'dinheiro') return 'paga em dinheiro';
-  return `paga por meio de ${method}`;
-}
-
-function createReceiptReference(value = '') {
-  const reason = createNaturalSentence(value);
-  const lower = reason.charAt(0).toLocaleLowerCase('pt-BR') + reason.slice(1);
-  const first = lower.split(/\s+/)[0].replace(/[^A-Za-zÀ-ÖØ-öø-ÿ-]/g, '');
-  if (/(ção|dade|agem)$/.test(first) || /^(compra|venda|locação|entrega|manutenção|limpeza|consulta|mensalidade|parcela|diária|hospedagem)$/.test(first)) return `à ${lower}`;
-  if (/^(serviço|produto|pagamento|reparo|conserto|aluguel|fornecimento|transporte|atendimento)$/.test(first)) return `ao ${lower}`;
-  return `a ${lower}`;
-}
-
-function createNaturalDate(value = '') {
-  const clean = String(value || '').trim();
-  if (!clean) return createTodayNaturalLabel();
-  const months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-  let match = clean.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (match) return `${match[3]} de ${months[Number(match[2]) - 1]} de ${match[1]}`;
-  match = clean.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
-  if (match) return `${String(Number(match[1])).padStart(2, '0')} de ${months[Number(match[2]) - 1]} de ${match[3]}`;
-  return clean;
-}
-function createPlaceDateLine(place = '', date = '') {
-  const p = createNaturalPlace(place);
-  return `${p ? `${p}, ` : ''}${createNaturalDate(date)}.`;
-}
-function createIdentityHtml(name, doc, address, label) {
-  const documentId = formatCreateDocumentId(doc);
-  const addressText = formatCreateAddress(address);
-  return `<section class="doc-person-card"><span>${createEscape(label)}</span><strong>${createEscape(createNaturalName(name))}</strong>${documentId ? `<small>${createEscape(documentId)}</small>` : ''}${addressText ? `<p>${createTextHtml(addressText)}</p>` : ''}</section>`;
-}
-function createMajorSectionHeading(label) {
-  return `<div class="doc-major-section-heading"><span>${createEscape(String(label || '').toLocaleUpperCase('pt-BR'))}</span></div>`;
-}
-function parseCreateBudgetItems(value = '') {
-  if (Array.isArray(value)) {
-    return value.map((item) => {
-      const description = createNaturalSentence(item?.description || item?.name || '');
-      const quantity = Number(String(item?.quantity ?? item?.quantityLabel ?? '1').replace(',', '.')) || 1;
-      const quantityLabel = String(item?.quantityLabel ?? item?.quantity ?? quantity);
-      const unitNumber = item?.unitNumber != null ? Number(item.unitNumber) : parseCreateCurrencyNumber(item?.unitPrice ?? item?.price ?? '');
-      const totalNumber = item?.totalNumber != null ? Number(item.totalNumber) : (unitNumber === null ? null : unitNumber * quantity);
-      return {
-        description,
-        quantityLabel,
-        quantity,
-        unitPrice: unitNumber === null ? '' : formatCreateCurrency(String(unitNumber)),
-        unitNumber,
-        totalNumber,
-        total: totalNumber === null ? '' : formatCreateCurrency(String(totalNumber))
-      };
-    }).filter((item) => item.description);
-  }
-  return String(value || '').split(/\n+/).map(line => line.trim()).filter(Boolean).map((line) => {
-    const parts = line.split(/\s*\|\s*|\s*;\s*/).map(part => part.trim());
-    const description = createNaturalSentence(parts[0] || line);
-    const quantityLabel = parts.length >= 3 ? (parts[1] || '1') : '1';
-    const quantity = Number(String(quantityLabel).replace(',', '.')) || 1;
-    const unitRaw = parts.length >= 3 ? parts[2] : (parts[1] || '');
-    const unitNumber = parseCreateCurrencyNumber(unitRaw);
-    const unitPrice = unitNumber === null ? (unitRaw ? formatCreateCurrency(unitRaw) : '') : formatCreateCurrency(String(unitNumber));
-    const totalNumber = unitNumber === null ? null : unitNumber * quantity;
-    return { description, quantityLabel, quantity, unitPrice, totalNumber, total: totalNumber === null ? '' : formatCreateCurrency(String(totalNumber)) };
-  });
-}
-function parseCreatePriceItems(value = '') {
-  if (Array.isArray(value)) {
-    return value.map((item) => {
-      const priceNumber = item?.priceNumber != null ? Number(item.priceNumber) : parseCreateCurrencyNumber(item?.price ?? '');
-      return {
-        name: createNaturalSentence(item?.name || item?.description || ''),
-        detail: createNaturalSentence(item?.detail || ''),
-        priceNumber,
-        price: priceNumber === null ? '' : formatCreateCurrency(String(priceNumber))
-      };
-    }).filter((item) => item.name);
-  }
-  return String(value || '').split(/\n+/).map(line => line.trim()).filter(Boolean).map((line) => {
-    const parts = line.split(/\s*\|\s*|\s*;\s*/).map(part => part.trim());
-    if (parts.length >= 3) return { name: createNaturalSentence(parts[0]), detail: createNaturalSentence(parts[1]), price: formatCreateCurrency(parts.slice(2).join(' ')) };
-    if (parts.length === 2) return { name: createNaturalSentence(parts[0]), detail: '', price: formatCreateCurrency(parts[1]) };
-    const fallback = parsePriceListItems(line)[0] || { name: line, price: '' };
-    return { name: createNaturalSentence(fallback.name), detail: '', price: fallback.price };
-  });
-}
-function buildCreateDocument() {
-  const a = createState.answers;
-  const type = createState.type;
-  if (type === 'receipt') {
-    const receiver = createNaturalName(a.receiver); const payer = createNaturalName(a.payer);
-    const amount = createAmountPresentation(a.amount); const reason = createNaturalSentence(a.reason);
-    const method = createNaturalPayment(a.method); const ref = String(a.paymentRef || '').trim();
-    const placeDate = createPlaceDateLine(a.place, a.issueDate); const dateLabel = createNaturalDate(a.issueDate);
-    const mainSentence = `Recebi de ${payer}${a.payerDoc ? `, ${formatCreateDocumentId(a.payerDoc)}` : ''}, a quantia de ${amount.full}, referente ${createReceiptReference(reason)}, ${createPaymentClause(method)}.`;
-    const body = `<section class="doc-party-grid">${createIdentityHtml(receiver,a.receiverDoc,a.receiverAddress,'RECEBEDOR')}${createIdentityHtml(payer,a.payerDoc,'','PAGADOR')}</section>
-      <section class="doc-prose-block"><p class="doc-lead">${createEscape(mainSentence)}</p><p class="doc-legal-copy">Declaro, para os devidos fins, que o valor acima foi recebido integralmente, dando plena quitação quanto ao pagamento e à finalidade descritos neste recibo.</p></section>
-      <section class="doc-value-card doc-value-card-written"><span>VALOR RECEBIDO</span><div><strong>${createEscape(amount.formatted)}</strong><small>${createEscape(amount.words)}</small></div></section>
-      ${ref ? `<section class="doc-detail-row"><span>REFERÊNCIA</span><strong>${createEscape(ref)}</strong></section>` : ''}
-      <div class="doc-bottom-block"><p class="doc-place-date">${createEscape(placeDate)}</p>${createSignaturePreviewMarkup(receiver,'RESPONSÁVEL PELO RECEBIMENTO')}</div>`;
-    return { title:'RECIBO', html:createDocShell({kind:'receipt',title:'RECIBO',eyebrow:'COMPROVANTE DE RECEBIMENTO',body,dateLabel}), text:`RECIBO\n\n${mainSentence}\n\nDeclaro que o valor foi recebido integralmente, dando plena quitação.\n${ref ? `\nReferência: ${ref}\n` : ''}\n${placeDate}\n\n________________________________\n${receiver}\nResponsável pelo recebimento` };
-  }
-  if (type === 'budget') {
-    const provider=createNaturalName(a.provider), client=createNaturalName(a.client), items=parseCreateBudgetItems(a.items);
-    const totalNumber=items.reduce((sum,item)=>sum+(item.totalNumber||0),0); const total=totalNumber ? createAmountPresentation(String(totalNumber)) : {formatted:'A combinar',words:'',full:'A combinar'};
-    const placeDate=createPlaceDateLine(a.place,a.issueDate), dateLabel=createNaturalDate(a.issueDate);
-    const rows=items.map((item,index)=>`<div class="doc-item-row"><span>${String(index+1).padStart(2,'0')}</span><strong>${createEscape(item.description)}</strong><em>${createEscape(item.quantityLabel)}</em><b>${createEscape(item.unitPrice || '—')}</b><b>${createEscape(item.total || '—')}</b></div>`).join('');
-    const body=`<section class="doc-party-grid">${createIdentityHtml(provider,a.providerDoc,a.providerAddress,'EMITENTE')}${createIdentityHtml(client,a.clientDoc,a.clientAddress,'CLIENTE')}</section>
-      ${a.contact ? `<section class="doc-detail-row"><span>CONTATO</span><strong>${createEscape(a.contact)}</strong></section>`:''}
-      <section class="doc-items-table"><div class="doc-item-head"><span>#</span><span>ITEM / SERVIÇO</span><span>QTD.</span><span>UNITÁRIO</span><span>TOTAL</span></div>${rows}</section>
-      <section class="doc-summary-grid"><div><span>VALOR TOTAL</span><strong>${createEscape(total.formatted)}</strong>${total.words?`<small>${createEscape(total.words)}</small>`:''}</div><div><span>VALIDADE</span><strong>${createEscape(createNaturalSentence(a.validity))}</strong></div></section>
-      <section class="doc-terms-grid">${a.deadline?`<div><span>PRAZO</span><p>${createEscape(createNaturalSentence(a.deadline))}</p></div>`:''}${a.paymentTerms?`<div><span>CONDIÇÕES DE PAGAMENTO</span><p>${createEscape(createNaturalSentence(a.paymentTerms))}</p></div>`:''}</section>
-      ${a.note?`<section class="doc-note-box"><span>OBSERVAÇÕES</span><p>${createTextHtml(createNaturalMultiline(a.note))}</p></section>`:''}
-      <div class="doc-bottom-block compact"><p class="doc-place-date">${createEscape(placeDate)}</p>${createSignaturePreviewMarkup(provider,'RESPONSÁVEL PELO ORÇAMENTO')}</div>`;
-    return {title:'ORÇAMENTO',html:createDocShell({kind:'budget',title:'ORÇAMENTO',eyebrow:'PROPOSTA COMERCIAL',body,dateLabel}),text:`ORÇAMENTO\n\nEmitente: ${provider}${a.providerDoc?` — ${formatCreateDocumentId(a.providerDoc)}`:''}\nCliente: ${client}${a.clientDoc?` — ${formatCreateDocumentId(a.clientDoc)}`:''}\n\n${items.map(i=>`${i.description} | ${i.quantityLabel} | ${i.unitPrice}${i.total?` | ${i.total}`:''}`).join('\n')}\n\nTotal: ${total.full}\nValidade: ${a.validity}${a.deadline?`\nPrazo: ${a.deadline}`:''}${a.paymentTerms?`\nPagamento: ${a.paymentTerms}`:''}${a.note?`\nObservações: ${a.note}`:''}\n\n${placeDate}
-
-________________________________
-${createNaturalName(a.signatureName || provider)}
-Responsável pelo orçamento`};
-  }
-  if (type === 'declaration') {
-    const name=createNaturalName(a.name), doc=formatCreateDocumentId(a.document), rg=String(a.rg||'').trim(), address=formatCreateAddress(a.address);
-    const statement=String(a.statement||'').trim(), purpose=String(a.purpose||'').trim();
-    const placeDate=createPlaceDateLine(a.place,a.issueDate), dateLabel=createNaturalDate(a.issueDate);
-    const identity=[doc?`CPF/CNPJ ${doc}`:'',rg?`documento ${rg}`:''].filter(Boolean).join(' e ');
-    const body=`${createMajorSectionHeading('Identificação do declarante')}<section class="doc-person-card doc-person-wide"><strong>${createEscape(name)}</strong>${identity?`<small>${createEscape(identity)}</small>`:''}${address?`<p>${createTextHtml(address)}</p>`:''}</section>
-      ${createMajorSectionHeading('Declaração')}<section class="doc-prose-block doc-declaration-prose"><div class="doc-declaration-user-text">${createTextHtml(statement)}</div></section>
-      ${purpose?`${createMajorSectionHeading('Finalidade')}<section class="doc-prose-block doc-declaration-purpose"><div class="doc-declaration-user-text">${createTextHtml(purpose)}</div></section>`:''}
-      <div class="doc-bottom-block"><p class="doc-place-date">${createEscape(placeDate)}</p>${createSignaturePreviewMarkup(name,'DECLARANTE')}</div>`;
-    return {title:'DECLARAÇÃO',html:createDocShell({kind:'declaration',title:'DECLARAÇÃO',eyebrow:'DOCUMENTO PARTICULAR',body,dateLabel}),text:`DECLARAÇÃO
-
-${statement}${purpose?`
-
-FINALIDADE
-${purpose}`:''}
-
-${placeDate}
-
-________________________________
-${name}
-Declarante`};
-  }
-  if (type === 'prices') {
-    const name=String(a.name||'Lista de preços').trim(), doc=formatCreateDocumentId(a.document), address=formatCreateAddress(a.address), items=parseCreatePriceItems(a.items), dateLabel=createNaturalDate(a.issueDate), placeDate=createPlaceDateLine(a.place,a.issueDate);
-    const rows=items.map((item,index)=>`<div class="doc-price-row"><span class="doc-price-index">${String(index+1).padStart(2,'0')}</span><div><strong>${createEscape(item.name)}</strong>${item.detail?`<small>${createEscape(item.detail)}</small>`:''}</div><b>${createEscape(item.price)}</b></div>`).join('');
-    const body=`<section class="doc-brand-block"><span>ESTABELECIMENTO / PROFISSIONAL</span><strong>${createEscape(name)}</strong>${doc?`<small>${createEscape(doc)}</small>`:''}${a.contact?`<small>${createEscape(a.contact)}</small>`:''}${address?`<p>${createTextHtml(address)}</p>`:''}</section><section class="doc-price-table">${rows}</section>${a.validity?`<section class="doc-detail-row"><span>VALIDADE / PERÍODO</span><strong>${createEscape(createNaturalSentence(a.validity))}</strong></section>`:''}${a.note?`<section class="doc-note-box"><span>OBSERVAÇÕES</span><p>${createTextHtml(createNaturalMultiline(a.note))}</p></section>`:''}<div class="doc-bottom-block compact"><p class="doc-place-date">${createEscape(placeDate)}</p></div>`;
-    return {title:'LISTA DE PREÇOS',html:createDocShell({kind:'prices',title:'LISTA DE PREÇOS',eyebrow:'TABELA DE VALORES',body,dateLabel}),text:`LISTA DE PREÇOS\n${name}\n${doc?`${doc}\n`:''}${a.contact?`${a.contact}\n`:''}\n${items.map(i=>`${i.name}${i.detail?` — ${i.detail}`:''} — ${i.price}`).join('\n')}${a.validity?`\n\n${a.validity}`:''}${a.note?`\n\nObservações: ${a.note}`:''}\n\n${placeDate}`};
-  }
-  if (type === 'proof') {
-    const issuer=createNaturalName(a.issuer), recipient=createNaturalName(a.recipient), subject=String(a.subject||'').trim(), amount=a.amount?createAmountPresentation(a.amount):null, method=a.method?createNaturalPayment(a.method):'', ref=String(a.reference||'').trim();
-    const placeDate=createPlaceDateLine(a.place,a.issueDate),dateLabel=createNaturalDate(a.issueDate);
-    const body=`${createMajorSectionHeading('Emitente')}<section class="doc-person-card doc-person-wide"><strong>${createEscape(issuer)}</strong>${a.issuerDoc?`<small><b>CPF/CNPJ</b> ${createEscape(formatCreateDocumentId(a.issuerDoc))}</small>`:''}${a.issuerAddress?`<p><b>ENDEREÇO</b><br>${createTextHtml(formatCreateAddress(a.issuerAddress))}</p>`:''}</section>
-      ${createMajorSectionHeading('Destinatário')}<section class="doc-person-card doc-person-wide"><strong>${createEscape(recipient)}</strong>${a.recipientDoc?`<small><b>CPF/CNPJ</b> ${createEscape(formatCreateDocumentId(a.recipientDoc))}</small>`:''}</section>
-      ${amount?`<section class="doc-value-card doc-value-card-written"><span>VALOR REGISTRADO</span><div><strong>${createEscape(amount.formatted)}</strong><small>${createEscape(amount.words)}</small></div></section>`:''}
-      ${createMajorSectionHeading('Registro / finalidade')}<section class="doc-prose-block"><div class="doc-declaration-user-text">${createTextHtml(subject)}</div></section>
-      ${(method||ref)?`${createMajorSectionHeading('Dados da operação')}<section class="doc-proof-operation">${method?`<div><span>FORMA DE PAGAMENTO</span><strong>${createEscape(method)}</strong></div>`:''}${ref?`<div><span>REFERÊNCIA</span><strong>${createEscape(ref)}</strong></div>`:''}</section>`:''}
-      <div class="doc-bottom-block"><p class="doc-place-date">${createEscape(placeDate)}</p>${createSignaturePreviewMarkup(issuer,'EMITENTE / RESPONSÁVEL')}</div>`;
-    return {title:'COMPROVANTE',html:createDocShell({kind:'proof',title:'COMPROVANTE',eyebrow:'REGISTRO FORMAL',body,dateLabel}),text:`COMPROVANTE
-
-Emitente: ${issuer}${a.issuerDoc?` — ${formatCreateDocumentId(a.issuerDoc)}`:''}
-Destinatário: ${recipient}${a.recipientDoc?` — ${formatCreateDocumentId(a.recipientDoc)}`:''}
-
-${subject}${amount?`
-
-Valor: ${amount.full}`:''}${method?`
-Forma/meio: ${method}`:''}${ref?`
-Referência: ${ref}`:''}
-
-${placeDate}
-
-________________________________
-${issuer}
-Emitente / Responsável`};
-  }
-  if (type === 'label') {
-    const recipient=createNaturalName(a.recipient), sender=createNaturalName(a.sender), raddr=formatCreateAddress(a.recipientAddress), saddr=formatCreateAddress(a.senderAddress), rdoc=formatCreateDocumentId(a.recipientDoc), sdoc=formatCreateDocumentId(a.senderDoc);
-    const body=`<section class="doc-label-recipient"><span>DESTINATÁRIO</span><strong>${createEscape(recipient)}</strong>${rdoc?`<small>${createEscape(rdoc)}</small>`:''}${a.recipientPhone?`<small>${createEscape(a.recipientPhone)}</small>`:''}<p>${createTextHtml(raddr)}</p></section><div class="doc-label-route"><span>REMETENTE</span><i>→</i><span>DESTINATÁRIO</span></div><section class="doc-label-sender"><span>REMETENTE</span><strong>${createEscape(sender)}</strong>${sdoc?`<small>${createEscape(sdoc)}</small>`:''}${a.senderPhone?`<small>${createEscape(a.senderPhone)}</small>`:''}<p>${createTextHtml(saddr)}</p></section>${a.note?`<section class="doc-label-note"><strong>${createEscape(String(a.note).trim())}</strong></section>`:''}`;
-    return {title:'ETIQUETA',html:createDocShell({kind:'label',title:'ETIQUETA DE ENVIO',eyebrow:'IDENTIFICAÇÃO DE REMESSA',body,footer:'<footer class="doc-footer"><span>Confira os dados de destinatário e remetente antes da postagem.</span></footer>'}),text:`ETIQUETA DE ENVIO\n\nDESTINATÁRIO\n${recipient}${rdoc?`\n${rdoc}`:''}${a.recipientPhone?`\n${a.recipientPhone}`:''}\n${raddr}\n\nREMETENTE\n${sender}${sdoc?`\n${sdoc}`:''}${a.senderPhone?`\n${a.senderPhone}`:''}\n${saddr}${a.note?`\n\nOBSERVAÇÃO\n${a.note}`:''}`};
-  }
-  return { title: 'DOCUMENTO', html: '<p>Documento pronto.</p>', text: 'Documento pronto.' };
-}
-
-function finishCreateDocument() {
-  const documentData = buildCreateDocument();
-  createState.finalText = documentData.text;
-
-  setCreateComposerIdle('Documento pronto');
-  if (createPreviewType) createPreviewType.textContent = documentData.title;
-  if (createDocumentPreview) createDocumentPreview.innerHTML = documentData.html;
-  if (createPreviewCard) createPreviewCard.hidden = false;
-
-  addCreateMessage('Pronto. Seu documento foi criado.', 'bot');
-  void prepareCreatePdfDownload();
-
-  requestAnimationFrame(() => { if (createFlow) createFlow.scrollTop = createFlow.scrollHeight; });
-}
-
-function resetCreateFlow() {
-  createState = { type: null, step: 0, answers: {}, finalText: '', addressFlow: null, itemFlow: null };
-  resetCreatePdfPreparation();
-  if (createMessages) {
-    createMessages.innerHTML = '';
-    addCreateMessage('O que você quer criar?', 'bot');
-  }
-  if (createOptions) createOptions.hidden = false;
-  if (createPreviewCard) createPreviewCard.hidden = true;
-  if (createResetButton) createResetButton.hidden = true;
-
-  // Tela inicial do CRIAR: somente pergunta + teclado inline de opções.
-  // O composer aparece apenas depois que um tipo de documento é escolhido
-  // e a etapa realmente exigir digitação.
-  if (createAnswerWrap) createAnswerWrap.innerHTML = '';
-  if (createComposer) {
-    createComposer.classList.remove('create-options-only');
-    createComposer.hidden = true;
-  }
-  if (createSendButton) createSendButton.disabled = true;
-
-  createOptions?.querySelectorAll('.create-option').forEach((button) => {
-    button.classList.remove('is-selected');
-  });
-
+function renderSparkline(elId, values) {
+  const svg = $(elId);
+  if (!svg) return;
+  const path = svg.querySelector('.stat-spark-line');
+  if (!path) return;
+  const novoPath = sparkPath(values);
+  const mudou = path.getAttribute('d') !== novoPath;
+  path.setAttribute('d', novoPath);
+  if (!mudou) return;
+  let len = 300;
+  try { len = path.getTotalLength(); } catch (e) {}
+  path.style.transition = 'none';
+  path.style.strokeDasharray = len;
+  path.style.strokeDashoffset = len;
+  void path.getBoundingClientRect();
   requestAnimationFrame(() => {
-    if (createFlow) createFlow.scrollTop = 0;
+    path.style.transition = 'stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1)';
+    path.style.strokeDashoffset = '0';
   });
 }
 
-createOptions?.addEventListener('click', (event) => {
-  const option = event.target.closest('.create-option');
-  if (!option) return;
-  startCreateFlow(option.dataset.createType);
+function renderDashTrends() {
+  const ags = state.agendamentos || [];
+  const fin = ags.filter(isFinanceiro);
+  const hojeDate = new Date();
+
+  const dias7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(hojeDate); d.setDate(d.getDate() - i);
+    dias7.push(fin.filter(a => dataConclusaoISO(a) === dataLocalISO(d)).reduce((s, a) => s + Number(a.valor || 0), 0));
+  }
+  const fatOntemVal = dias7[5], fatHojeVal = dias7[6];
+  renderDeltaBadge('statFatHojeDelta', fatOntemVal > 0 ? ((fatHojeVal - fatOntemVal) / fatOntemVal * 100) : (fatHojeVal > 0 ? 100 : 0));
+  renderSparkline('statFatHojeSpark', dias7);
+
+  const meses6 = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(hojeDate.getFullYear(), hojeDate.getMonth() - i, 1);
+    const prefixo = dataLocalISO(d).slice(0, 7);
+    meses6.push(fin.filter(a => dataConclusaoISO(a).startsWith(prefixo)).reduce((s, a) => s + Number(a.valor || 0), 0));
+  }
+  const fatMesPassadoVal = meses6[4], fatMesVal = meses6[5];
+  renderDeltaBadge('statFatMesDelta', fatMesPassadoVal > 0 ? ((fatMesVal - fatMesPassadoVal) / fatMesPassadoVal * 100) : (fatMesVal > 0 ? 100 : 0));
+  renderSparkline('statFatMesSpark', meses6);
+
+  function taxaDoMes(prefixo) {
+    const doMes = ags.filter(a => (a.data || '').startsWith(prefixo) && normStatus(a.status) !== 'Excluído');
+    const concl = doMes.filter(a => normStatus(a.status) === 'Concluído').length;
+    const base = doMes.filter(a => normStatus(a.status) !== 'Recusado').length;
+    return base > 0 ? Math.round(concl / base * 100) : 0;
+  }
+  const taxas6 = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(hojeDate.getFullYear(), hojeDate.getMonth() - i, 1);
+    taxas6.push(taxaDoMes(dataLocalISO(d).slice(0, 7)));
+  }
+  renderDeltaBadge('statTaxaDelta', taxas6[5] - taxas6[4], { pts: true });
+  renderSparkline('statTaxaSpark', taxas6);
+
+  const clientesAtivos = (state.clientes || []).filter(isAtivoCliente);
+  const clientesAgoraVal = clientesAtivos.length;
+  const fimMesPassado = new Date(hojeDate.getFullYear(), hojeDate.getMonth(), 0);
+  const clientesFimMesPassadoVal = clientesAtivos.filter(c => c.criado_em && new Date(c.criado_em) <= fimMesPassado).length;
+  renderDeltaBadge('statClientesDelta', clientesFimMesPassadoVal > 0 ? ((clientesAgoraVal - clientesFimMesPassadoVal) / clientesFimMesPassadoVal * 100) : (clientesAgoraVal > 0 ? 100 : 0));
+  const clientesSpark = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(hojeDate.getFullYear(), hojeDate.getMonth() - i + 1, 0);
+    clientesSpark.push(clientesAtivos.filter(c => c.criado_em && new Date(c.criado_em) <= d).length);
+  }
+  renderSparkline('statClientesSpark', clientesSpark);
+}
+
+function renderDashList() {
+  const el = $('dashAptList');
+  if (!el) return;
+  const visibles = ordenarAtendimentosAgendados(state.agendamentos)
+    .filter(a => ['Pendente', 'Confirmado', 'Reagendado'].includes(normStatus(a.status))).slice(0, 6);
+  if (!visibles.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📅</div><p>Nenhum agendamento pendente.</p></div>'; return;
+  }
+  el.innerHTML = visibles.map(a => `
+    <div class="apt-item">
+      <div class="apt-row">
+        <div class="apt-av">${initial(a.cliente_nome)}</div>
+        <div class="apt-info">
+          <div class="apt-name">${a.cliente_nome || 'Cliente'}</div>
+          <div class="apt-meta">${a.servico_nome || '—'} · ${a.profissional_nome || '—'} · ${formatDate(a.data)} ${a.hora || ''}</div>
+        </div>
+        <span class="badge ${badgeClass(a.status)}">${normStatus(a.status)}</span>
+      </div>
+      ${renderAcoes(a)}
+    </div>`).join('');
+}
+
+function renderCalendar() {
+  const el = $('calGrid');
+  if (!el) return;
+  const days = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+  const hoje = new Date();
+  const anoAtual = hoje.getFullYear(), mesAtual = hoje.getMonth();
+  const totalDias = new Date(anoAtual, mesAtual + 1, 0).getDate();
+  const busy = new Set(
+    (state.agendamentos || []).filter(a => {
+      if (normStatus(a.status) === 'Excluído' || !a.data) return false;
+      const d = new Date(a.data + 'T00:00:00');
+      return d.getFullYear() === anoAtual && d.getMonth() === mesAtual;
+    }).map(a => String(new Date(a.data + 'T00:00:00').getDate()))
+  );
+  const today = String(hoje.getDate());
+  let html = days.map(d => `<div class="cal-label">${d}</div>`).join('');
+  for (let i = 1; i <= totalDias; i++) {
+    const d = String(i);
+    html += `<div class="cal-day${busy.has(d) ? ' busy' : ''}${d === today ? ' today' : ''}">${i}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderSelects() {
+  const agS = $('agServico'), agP = $('agProfissional'), agC = $('agClienteSelect');
+  const selectedServico = agS ? agS.value : '';
+  const selectedProfissional = agP ? agP.value : '';
+  const selectedCliente = agC ? agC.value : '';
+  if (agS) {
+    agS.innerHTML = '<option value="">Escolha serviço</option>' +
+      (state.servicos || []).filter(s => (s.status || 'ativo') === 'ativo')
+        .map(s => `<option value="${s.id}">${s.nome} — ${money(s.preco).replace(',00','')}</option>`).join('');
+    if (selectedServico && [...agS.options].some(o => o.value === selectedServico)) agS.value = selectedServico;
+  }
+  if (agP) {
+    agP.innerHTML = '<option value="">Escolha profissional</option>' +
+      (state.profissionais || []).filter(p => (p.status || 'ativo') === 'ativo')
+        .map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+    if (selectedProfissional && [...agP.options].some(o => o.value === selectedProfissional)) agP.value = selectedProfissional;
+  }
+  if (agC) {
+    agC.innerHTML = '<option value="">Escolha o cliente</option>' +
+      (state.clientes || []).filter(c => (c.status || 'ativo') === 'ativo')
+        .map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+    if (selectedCliente && [...agC.options].some(o => o.value === selectedCliente)) {
+      agC.value = selectedCliente;
+      vxAgendaClienteSelecionado(selectedCliente);
+    }
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// VYXORA ANDROID — AGENDA PREMIUM
+// ═══════════════════════════════════════════════════════════════
+let _vxAgendaDate = new Date();
+function vxIsMobileAgenda(){ return window.matchMedia('(max-width: 768px)').matches; }
+function vxISODate(d){ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function vxAgendaDateLabel(d){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const x=new Date(d); x.setHours(0,0,0,0);
+  const diff=Math.round((x-today)/86400000);
+  const mon=x.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase();
+  const prefix=diff===0?'HOJE':diff===1?'AMANHÃ':diff===-1?'ONTEM':x.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','').toUpperCase();
+  return `${prefix} · ${String(x.getDate()).padStart(2,'0')} ${mon}`;
+}
+
+function vxNormalizeAgendaDate(value){
+  if(!value) return '';
+  const s=String(value).trim();
+  const m=s.match(/^(\d{4}-\d{2}-\d{2})/);
+  if(m) return m[1];
+  const d=new Date(s);
+  if(Number.isNaN(d.getTime())) return s.slice(0,10);
+  return vxISODate(d);
+}
+function vxAgendaRowsForSelectedDay(){
+  const selected=vxISODate(_vxAgendaDate);
+  return ordenarAgendamentosRecentes(state.agendamentos).filter(a=>vxNormalizeAgendaDate(a.data)===selected);
+}
+function vxUpdateAgendaFilterCounts(){
+  if(!vxIsMobileAgenda()) return;
+  const all=ordenarAgendamentosRecentes(state.agendamentos);
+  const rows=all.filter(a=>normStatus(a.status)!=='Excluído');
+  const counts={
+    todos:rows.length,
+    pendente:rows.filter(a=>normStatus(a.status)==='Pendente').length,
+    confirmado:rows.filter(a=>normStatus(a.status)==='Confirmado').length,
+    reagendado:rows.filter(a=>normStatus(a.status)==='Reagendado').length,
+    concluido:rows.filter(a=>normStatus(a.status)==='Concluído').length,
+    recusado:rows.filter(a=>normStatus(a.status)==='Recusado').length,
+    excluido:all.filter(a=>normStatus(a.status)==='Excluído').length
+  };
+  Object.entries(counts).forEach(([k,v])=>{
+    const el=document.getElementById('fc-'+k);
+    if(el) el.textContent=String(v);
+  });
+}
+function vxAgendaSyncDateUI(){
+  const t=document.getElementById('vxAgendaDateText'); if(t)t.textContent=vxAgendaDateLabel(_vxAgendaDate);
+  const p=document.getElementById('vxAgendaDatePicker'); if(p)p.value=vxISODate(_vxAgendaDate);
+  vxUpdateAgendaFilterCounts();
+}
+function vxAgendaDay(step){ _vxAgendaDate.setDate(_vxAgendaDate.getDate()+step); vxAgendaSyncDateUI(); const agData=document.getElementById('agData'); if(agData) agData.value=vxISODate(_vxAgendaDate); }
+function vxAgendaPickDate(){ const p=document.getElementById('vxAgendaDatePicker'); if(!p)return; if(typeof p.showPicker==='function')p.showPicker(); else p.click(); }
+function vxOpenAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet'); if(!s)return; s.classList.add('open');s.setAttribute('aria-hidden','false'); }
+function vxCloseAgendaAdd(){ const s=document.getElementById('vxAgendaAddSheet'); if(!s)return; s.classList.remove('open');s.setAttribute('aria-hidden','true'); }
+function vxOpenAgendaForm(type){
+  if(!vxIsMobileAgenda()) return;
+  vxCloseAgendaAdd();
+  if(type==='agendamento'){ document.getElementById('view-agenda')?.classList.add('vx-form-open'); setTimeout(()=>document.getElementById('agClienteSelect')?.focus(),180); return; }
+  if(type==='cliente'){
+    if(typeof setView==='function') { setView('clientes'); return; }
+    if(typeof showView==='function') { showView('clientes'); return; }
+    document.querySelector('[data-view="clientes"]')?.click();
+  }
+}
+function vxCloseAgendaForm(){ document.getElementById('view-agenda')?.classList.remove('vx-form-open'); }
+function vxOpenAgendaClient(returnTo='agenda'){
+  if(!vxIsMobileAgenda()) return;
+  const screen=document.getElementById('vxAgendaClientScreen');
+  if(!screen) return;
+  screen.dataset.return=returnTo;
+  screen.classList.add('open');
+  screen.setAttribute('aria-hidden','false');
+  document.body.classList.add('vx-agenda-client-open');
+  setTimeout(()=>document.getElementById('vxAgCliNome')?.focus(),120);
+}
+function vxCloseAgendaClient(){
+  const screen=document.getElementById('vxAgendaClientScreen');
+  if(!screen) return;
+  screen.classList.remove('open');
+  screen.setAttribute('aria-hidden','true');
+  document.body.classList.remove('vx-agenda-client-open');
+}
+async function vxSalvarClienteRapido(){
+  const nome=(document.getElementById('vxAgCliNome')?.value||'').trim();
+  const telefone=(document.getElementById('vxAgCliTel')?.value||'').trim();
+  const email=(document.getElementById('vxAgCliEmail')?.value||'').trim();
+  if(!nome) return toast('Digite o nome.', 'err');
+  const screen=document.getElementById('vxAgendaClientScreen');
+  const returnTo=screen?.dataset.return||'agenda';
+  const btn=document.getElementById('vxAgendaClientSave');
+  if(btn) btn.disabled=true;
+  try{
+    const { error }=await db.from('agenda_clientes').insert({
+      empresa_id:state.empresa.id,
+      nome,
+      telefone,
+      email,
+      status:'ativo'
+    });
+    if(error) return toast('Erro ao salvar: '+error.message,'err');
+    await loadAll();
+    if(returnTo==='appointment'){
+      const nomeInput=document.getElementById('agCliente');
+      const telInput=document.getElementById('agTelefone');
+      if(nomeInput) nomeInput.value=nome;
+      if(telInput) telInput.value=telefone;
+    }
+    ['vxAgCliNome','vxAgCliTel','vxAgCliEmail'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value='';
+    });
+    vxCloseAgendaClient();
+    showNotif('Cliente adicionado',nome+' salvo com sucesso.','ok');
+    if(returnTo==='appointment'){
+      setTimeout(()=>document.getElementById('agServico')?.focus(),120);
+    }
+  } finally {
+    if(btn) btn.disabled=false;
+  }
+}
+
+
+window.vxOpenAgendaClient = vxOpenAgendaClient;
+window.vxCloseAgendaClient = vxCloseAgendaClient;
+window.vxSalvarClienteRapido = vxSalvarClienteRapido;
+window.vxOpenAgendaAdd = vxOpenAgendaAdd;
+window.vxCloseAgendaAdd = vxCloseAgendaAdd;
+window.vxOpenAgendaForm = vxOpenAgendaForm;
+window.vxCloseAgendaForm = vxCloseAgendaForm;
+window.vxAgendaDay = vxAgendaDay;
+window.vxAgendaPickDate = vxAgendaPickDate;
+
+document.addEventListener('DOMContentLoaded',()=>{
+  
+  vxUpdateAgendaFilterCounts();
 });
 
-createMessages?.addEventListener('click', async (event) => {
-  const button = event.target.closest('.create-inline-option');
-  if (!button) return;
-  const value = button.dataset.createQuickValue || '';
-  const label = button.dataset.createQuickLabel || value;
-  clearCreateInlineOptions();
 
-  if (createState.addressFlow) {
-    await handleCreateAddressSubmission(value);
+function vxAgendaClienteSelecionado(id){
+  const cliente=(state.clientes||[]).find(c=>String(c.id)===String(id));
+  const nomeInput=document.getElementById('agCliente');
+  const telInput=document.getElementById('agTelefone');
+  const summary=document.getElementById('vxAgendaClientSummary');
+  const summaryName=document.getElementById('vxAgendaClientSummaryName');
+  const summaryContact=document.getElementById('vxAgendaClientSummaryContact');
+  if(!cliente){
+    if(nomeInput) nomeInput.value='';
+    if(telInput) telInput.value='';
+    if(summary) summary.hidden=true;
     return;
   }
-  if (createState.itemFlow) {
-    await handleCreateItemSubmission(value, label);
+  if(nomeInput) nomeInput.value=cliente.nome||'';
+  if(telInput) telInput.value=cliente.telefone||'';
+  const contact=[cliente.telefone,cliente.email].filter(Boolean).join(' | ');
+  if(summaryName) summaryName.textContent=cliente.nome||'Cliente';
+  if(summaryContact) summaryContact.textContent=contact||'Sem contato informado';
+  if(summary) summary.hidden=false;
+}
+window.vxAgendaClienteSelecionado=vxAgendaClienteSelecionado;
+
+
+
+let _vxAgendaPickerType='';
+let _vxAgendaCalDate=new Date();
+
+function vxFormatAgendaDate(iso){
+  if(!iso) return 'Escolher data';
+  const [y,m,d]=iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function vxSyncAgendaModalControlLabels(){
+  const clienteId=$('vxAgCliente')?.value;
+  const servicoId=$('vxAgServico')?.value;
+  const profissionalId=$('vxAgProfissional')?.value;
+
+  const cliente=(state.clientes||[]).find(x=>String(x.id)===String(clienteId));
+  const servico=(state.servicos||[]).find(x=>String(x.id)===String(servicoId));
+  const prof=(state.profissionais||[]).find(x=>String(x.id)===String(profissionalId));
+
+  if($('vxAgClienteLabel')) $('vxAgClienteLabel').textContent=cliente?.nome||'Escolha o cliente';
+  if($('vxAgServicoLabel')) $('vxAgServicoLabel').textContent=servico?.nome||'Escolha o serviço';
+  if($('vxAgProfissionalLabel')) $('vxAgProfissionalLabel').textContent=prof?.nome||'Escolha o profissional';
+  if($('vxAgDataLabel')) $('vxAgDataLabel').textContent=$('vxAgData')?.value?vxFormatAgendaDate($('vxAgData').value):'Escolher data';
+  if($('vxAgHoraLabel')) $('vxAgHoraLabel').textContent=$('vxAgHora')?.value||'Escolher horário';
+  if($('vxAgStatusLabel')) $('vxAgStatusLabel').textContent=$('vxAgStatus')?.value||'Pendente';
+}
+
+function vxOpenAgendaPickerBase(title){
+  const layer=$('vxAgendaPickerLayer');
+  const titleEl=$('vxAgendaPickerTitle');
+  const content=$('vxAgendaPickerContent');
+  if(!layer||!content) return null;
+  if(titleEl) titleEl.textContent=title;
+  layer.hidden=false;
+  layer.style.setProperty('display','grid','important');
+  return content;
+}
+
+function vxCloseAgendaPicker(){
+  const layer=$('vxAgendaPickerLayer');
+  if(!layer) return;
+  layer.hidden=true;
+  layer.style.setProperty('display','none','important');
+  _vxAgendaPickerType='';
+}
+window.vxCloseAgendaPicker=vxCloseAgendaPicker;
+
+function vxAgendaChoiceItems(type){
+  if(type==='cliente'){
+    return (state.clientes||[])
+      .filter(x=>(x.status||'ativo')==='ativo')
+      .map(x=>({value:String(x.id),label:x.nome,sub:[x.telefone,x.email].filter(Boolean).join(' | ')}));
+  }
+  if(type==='servico'){
+    return (state.servicos||[])
+      .filter(x=>(x.status||'ativo')==='ativo')
+      .map(x=>({value:String(x.id),label:x.nome,sub:x.preco!=null?money(x.preco):''}));
+  }
+  if(type==='profissional'){
+    return (state.profissionais||[])
+      .filter(x=>(x.status||'ativo')==='ativo')
+      .map(x=>({value:String(x.id),label:x.nome,sub:''}));
+  }
+  if(type==='status'){
+    return [
+      {value:'Pendente',label:'Pendente',sub:''},
+      {value:'Confirmado',label:'Confirmado',sub:''}
+    ];
+  }
+  return [];
+}
+
+function vxOpenAgendaChoice(type){
+  _vxAgendaPickerType=type;
+  const titles={cliente:'Escolha o cliente',servico:'Escolha o serviço',profissional:'Escolha o profissional',status:'Escolha o status'};
+  const content=vxOpenAgendaPickerBase(titles[type]||'Escolha');
+  if(!content) return;
+
+  const current=$(`vxAg${type==='cliente'?'Cliente':type==='servico'?'Servico':type==='profissional'?'Profissional':'Status'}`)?.value||'';
+  const items=vxAgendaChoiceItems(type);
+
+  content.innerHTML=`<div class="vx-agenda-choice-list">${
+    items.length ? items.map(item=>`
+      <button type="button" class="vx-agenda-choice-item${String(current)===item.value?' selected':''}" onclick="vxSelectAgendaChoice('${type}','${String(item.value).replace(/'/g,"\\'")}')">
+        <span><strong>${escapeHtml(item.label||'')}</strong>${item.sub?`<small>${escapeHtml(item.sub)}</small>`:''}</span>
+        <i>${String(current)===item.value?'✓':''}</i>
+      </button>`).join('')
+      : '<div class="vx-agenda-picker-empty">Nenhuma opção disponível.</div>'
+  }</div>`;
+}
+window.vxOpenAgendaChoice=vxOpenAgendaChoice;
+
+function vxSelectAgendaChoice(type,value){
+  const map={cliente:'vxAgCliente',servico:'vxAgServico',profissional:'vxAgProfissional',status:'vxAgStatus'};
+  const input=$(map[type]);
+  if(input) input.value=value;
+
+  if(type==='cliente') vxAgendaModalClienteInfo();
+
+  // Trocar profissional ou serviço invalida horário anterior.
+  if(type==='profissional'||type==='servico'){
+    if($('vxAgHora')) $('vxAgHora').value='';
+  }
+
+  vxSyncAgendaModalControlLabels();
+  vxCloseAgendaPicker();
+}
+window.vxSelectAgendaChoice=vxSelectAgendaChoice;
+
+function vxOpenAgendaCalendar(){
+  _vxAgendaPickerType='data';
+  const current=$('vxAgData')?.value;
+  _vxAgendaCalDate=current?new Date(current+'T12:00:00'):new Date();
+  vxRenderAgendaCalendar();
+}
+window.vxOpenAgendaCalendar=vxOpenAgendaCalendar;
+
+function vxAgendaCalMove(delta){
+  _vxAgendaCalDate=new Date(_vxAgendaCalDate.getFullYear(),_vxAgendaCalDate.getMonth()+delta,1);
+  vxRenderAgendaCalendar();
+}
+window.vxAgendaCalMove=vxAgendaCalMove;
+
+function vxRenderAgendaCalendar(){
+  const content=vxOpenAgendaPickerBase('Escolha a data');
+  if(!content) return;
+
+  const y=_vxAgendaCalDate.getFullYear();
+  const m=_vxAgendaCalDate.getMonth();
+  const first=new Date(y,m,1);
+  const last=new Date(y,m+1,0);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const closed=state.empresa?.dias_fechados||state.diasFechados||[];
+  const selected=$('vxAgData')?.value||'';
+  const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  let days='';
+  for(let i=0;i<first.getDay();i++) days+='<span class="vx-agenda-cal-empty"></span>';
+  for(let d=1;d<=last.getDate();d++){
+    const dt=new Date(y,m,d); dt.setHours(0,0,0,0);
+    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const disabled=dt<today||closed.includes(dt.getDay());
+    days+=`<button type="button" class="vx-agenda-cal-day${selected===iso?' selected':''}${disabled?' disabled':''}" ${disabled?'disabled':`onclick="vxSelectAgendaDate('${iso}')"`}>${d}</button>`;
+  }
+
+  content.innerHTML=`
+    <div class="vx-agenda-cal-nav">
+      <button type="button" onclick="vxAgendaCalMove(-1)">‹</button>
+      <strong>${monthNames[m]} de ${y}</strong>
+      <button type="button" onclick="vxAgendaCalMove(1)">›</button>
+    </div>
+    <div class="vx-agenda-cal-week"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+    <div class="vx-agenda-cal-grid">${days}</div>`;
+}
+
+function vxSelectAgendaDate(iso){
+  if($('vxAgData')) $('vxAgData').value=iso;
+  if($('vxAgHora')) $('vxAgHora').value='';
+  vxSyncAgendaModalControlLabels();
+  vxCloseAgendaPicker();
+}
+window.vxSelectAgendaDate=vxSelectAgendaDate;
+
+async function vxOpenAgendaTimes(){
+  const data=$('vxAgData')?.value;
+  const profissionalId=$('vxAgProfissional')?.value;
+  if(!data) return toast('Escolha a data primeiro.','warn');
+  if(!profissionalId) return toast('Escolha o profissional antes do horário.','warn');
+
+  const content=vxOpenAgendaPickerBase('Escolha o horário');
+  if(!content) return;
+  content.innerHTML='<div class="vx-agenda-picker-empty">Carregando horários...</div>';
+
+  const empresa=state.empresa||{};
+  const profissional=(state.profissionais||[]).find(x=>String(x.id)===String(profissionalId))||{};
+  const inicio=empresa.horario_inicio||profissional.horario_inicio||'09:00';
+  const fim=empresa.horario_fim||profissional.horario_fim||'18:00';
+  const intervalo=Math.max(5,Number(empresa.intervalo_slots||profissional.intervalo_slots||30));
+
+  const {data:registros,error}=await db.from('agenda_agendamentos')
+    .select('hora,status')
+    .eq('data',data)
+    .eq('profissional_id',profissionalId)
+    .in('status',['Pendente','Confirmado','Reagendado']);
+
+  if(error){
+    content.innerHTML='<div class="vx-agenda-picker-empty">Não foi possível carregar os horários.</div>';
     return;
   }
 
-  const config = CREATE_TYPES[createState.type];
-  const field = config?.fields?.[createState.step];
-  if (!field) return;
-  createState.answers[field.key] = normalCreateValue(value);
-  addCreateMessage(label || 'Não informar', 'user');
-  createState.step += 1;
-  askCreateField();
-});
+  const ocupados=new Set((registros||[]).map(x=>(x.hora||'').slice(0,5)));
+  const [hi,mi]=inicio.split(':').map(Number);
+  const [hf,mf]=fim.split(':').map(Number);
+  const slots=[];
+  for(let t=hi*60+mi;t<hf*60+mf;t+=intervalo){
+    const h=`${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
+    slots.push(h);
+  }
 
-createComposer?.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const config = CREATE_TYPES[createState.type];
-  if (!config) return;
-  const control = createAnswerWrap?.querySelector('input, textarea, select');
-  if (!control) return;
-  const raw = String(control.value || '').trim();
-  if (!raw) { if (!control.hidden) control.focus(); return; }
-  if (createState.addressFlow) { await handleCreateAddressSubmission(raw); return; }
-  if (createState.itemFlow) { await handleCreateItemSubmission(raw); return; }
-  const field = config.fields[createState.step];
-  if (!field) return;
-  const value = normalCreateValue(raw);
-  if (field.kind === 'currency' && value !== '-') {
-    const numericValue = parseCreateCurrencyNumber(value);
-    if (numericValue === null || numericValue < 0) {
-      addCreateMessage('Informe um valor válido, por exemplo 1.200,00.', 'bot');
-      control.focus();
+  const current=$('vxAgHora')?.value||'';
+  content.innerHTML=`<div class="vx-agenda-time-grid">${
+    slots.map(h=>`<button type="button" class="vx-agenda-time-item${current===h?' selected':''}${ocupados.has(h)?' disabled':''}" ${ocupados.has(h)?'disabled':`onclick="vxSelectAgendaTime('${h}')"`}>${h}${ocupados.has(h)?'<small>Ocupado</small>':''}</button>`).join('')
+  }</div>`;
+}
+window.vxOpenAgendaTimes=vxOpenAgendaTimes;
+
+function vxSelectAgendaTime(hora){
+  if($('vxAgHora')) $('vxAgHora').value=hora;
+  vxSyncAgendaModalControlLabels();
+  vxCloseAgendaPicker();
+}
+window.vxSelectAgendaTime=vxSelectAgendaTime;
+
+
+function vxAgendaModalIsMobile(){
+  return window.matchMedia('(max-width:768px)').matches;
+}
+
+function vxPopulateAgendaModal(){
+  const date=$('vxAgData');
+  const status=$('vxAgStatus');
+
+  if(date && !date.value){
+    const now=new Date();
+    const y=now.getFullYear(), m=String(now.getMonth()+1).padStart(2,'0'), d=String(now.getDate()).padStart(2,'0');
+    date.value=`${y}-${m}-${d}`;
+    const label=$('vxAgDataLabel');
+    if(label) label.textContent=vxFormatAgendaDate(date.value);
+  }
+
+  if(status && !status.value) status.value='Pendente';
+  const statusLabel=$('vxAgStatusLabel');
+  if(statusLabel) statusLabel.textContent=status?.value||'Pendente';
+
+  vxSyncAgendaModalControlLabels();
+}
+
+function vxApplyAgendaModalFinalStyle(){
+  const modal=$('vxAgendaModal');
+  const card=modal?.querySelector('.vx-agenda-modal-card');
+  const backdrop=modal?.querySelector('.vx-agenda-modal-backdrop');
+  const head=modal?.querySelector('.vx-agenda-modal-head');
+  const closeBtn=head?.querySelector('button');
+  const body=modal?.querySelector('.vx-agenda-modal-body');
+  const save=$('vxAgendaModalSave');
+
+  if(!modal||!card||!body) return;
+
+  const imp=(el,prop,val)=>el?.style.setProperty(prop,val,'important');
+
+  // Modal: centralizado de verdade e usando praticamente a tela toda.
+  imp(modal,'display','grid');
+  imp(modal,'position','fixed');
+  imp(modal,'inset','0');
+  imp(modal,'width','100vw');
+  imp(modal,'height','var(--vx-clientes-viewport-h, 100dvh)');
+  imp(modal,'min-height','100dvh');
+  imp(modal,'max-width','100vw');
+  imp(modal,'overflow','visible');
+  imp(modal,'place-items','center');
+  imp(modal,'align-items','center');
+  imp(modal,'justify-items','center');
+  imp(modal,'padding','0 8px');
+  imp(modal,'margin','0');
+  imp(modal,'transform','none');
+  imp(modal,'background','#08070d');
+
+  // Agenda permanece visível atrás.
+  imp(backdrop,'background','#08070d');
+  imp(backdrop,'backdrop-filter','none');
+  imp(backdrop,'-webkit-backdrop-filter','none');
+  imp(backdrop,'pointer-events','none');
+
+  // Caixa principal: larga e 100% quadrada.
+  imp(card,'width','calc(100vw - 16px)');
+  imp(card,'max-width','calc(100vw - 16px)');
+  imp(card,'max-height','calc(var(--vx-clientes-viewport-h, 100dvh) - 16px)');
+  imp(card,'box-sizing','border-box');
+  imp(card,'overflow-y','hidden');
+  imp(card,'overflow-x','hidden');
+  imp(card,'position','relative');
+  imp(card,'top','auto');
+  imp(card,'right','auto');
+  imp(card,'bottom','auto');
+  imp(card,'left','auto');
+  imp(card,'margin','0 auto');
+  imp(card,'transform','none');
+  imp(card,'padding','0 14px 14px');
+  imp(card,'border-radius','0');
+
+  /* Campos reais do modal Cliente: força formato totalmente quadrado. */
+  ['vxCliNome','vxCliTel','vxCliEmail'].forEach(id=>{
+    const input=$(id);
+    imp(input,'border-radius','0');
+    imp(input,'-webkit-border-radius','0');
+  });
+  imp(card,'background','#0d0b10');
+  imp(card,'border','1px solid rgba(163,101,232,.24)');
+  imp(card,'box-shadow','0 14px 32px rgba(0,0,0,.28)');
+
+  // Cabeçalho.
+  imp(head,'height','44px');
+  imp(head,'min-height','44px');
+  imp(head,'margin','0 -14px 12px');
+  imp(head,'padding','0 12px 0 14px');
+  imp(head,'border-radius','0');
+  imp(head,'background','#0d0b10');
+
+  imp(closeBtn,'width','30px');
+  imp(closeBtn,'height','30px');
+  imp(closeBtn,'border-radius','0');
+  imp(closeBtn,'position','relative');
+  imp(closeBtn,'z-index','2147483647');
+  imp(closeBtn,'pointer-events','auto');
+  imp(closeBtn,'touch-action','manipulation');
+
+  // Grade interna centralizada e usando toda a largura útil.
+  imp(body,'width','100%');
+  imp(body,'margin','0 auto');
+  imp(body,'grid-template-columns','minmax(0,1fr) minmax(0,1fr)');
+  imp(body,'gap','10px 12px');
+
+  modal.querySelectorAll('.vx-agenda-modal-field').forEach(field=>{
+    imp(field,'width','100%');
+    imp(field,'margin','0');
+  });
+
+  modal.querySelectorAll('.vx-agenda-modal-field select, .vx-agenda-modal-field input').forEach(input=>{
+    imp(input,'width','100%');
+    imp(input,'height','44px');
+    imp(input,'min-height','44px');
+    imp(input,'padding','0 12px');
+    imp(input,'border-radius','0');
+    imp(input,'background','#09080b');
+  });
+
+  modal.querySelectorAll('.vx-agenda-modal-client, .vx-agenda-modal-status').forEach(field=>{
+    imp(field,'grid-column','1 / -1');
+  });
+
+  imp(save,'width','100%');
+  imp(save,'height','44px');
+  imp(save,'min-height','44px');
+  imp(save,'margin','12px 0 0');
+  imp(save,'border-radius','0');
+  imp(save,'box-shadow','none');
+}
+
+function vxOpenAgendaModal(){
+  if(!vxAgendaModalIsMobile()) return;
+  vxPopulateAgendaModal();
+  const modal=$('vxAgendaModal');
+  if(!modal) return;
+
+  // IMPORTANTE: tira o modal de dentro da Agenda antes de abrir.
+  // Isso evita qualquer corte causado por overflow/transform dos containers da tela.
+  if(modal.parentElement !== document.body){
+    document.body.appendChild(modal);
+  }
+
+  const success=$('vxAgendaSuccess');
+  const formBody=modal.querySelector('.vx-agenda-modal-body');
+  const saveBtn=$('vxAgendaModalSave');
+  if(success){
+    success.hidden=true;
+    success.style.setProperty('display','none','important');
+  }
+  if(formBody){
+    formBody.hidden=false;
+    formBody.style.setProperty('display','grid','important');
+  }
+  if(saveBtn){
+    saveBtn.hidden=false;
+    saveBtn.style.setProperty('display','block','important');
+  }
+
+  modal.style.removeProperty('display');
+  modal.style.removeProperty('pointer-events');
+
+  vxApplyAgendaModalFinalStyle();
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.classList.add('vx-agenda-modal-open');
+}
+
+
+document.addEventListener('click',(e)=>{
+  const btn=e.target?.closest?.('.vx-agenda-modal-close');
+  if(!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  vxCloseAgendaModal();
+},true);
+
+function vxCloseAgendaModal(){
+  const modal=document.getElementById('vxAgendaModal');
+  if(!modal) return;
+
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+
+  // Força o fechamento visual imediatamente.
+  modal.style.setProperty('display','none','important');
+  modal.style.setProperty('pointer-events','none','important');
+
+  document.body.classList.remove('vx-agenda-modal-open');
+}
+
+function vxAgendaModalClienteInfo(){
+  const id=$('vxAgCliente')?.value;
+  const c=(state.clientes||[]).find(x=>String(x.id)===String(id));
+  const info=$('vxAgClienteInfo');
+  const label=$('vxAgClienteLabel');
+  if(label) label.textContent=c?.nome||'Escolha o cliente';
+  if(!info) return;
+  const contact=[c?.telefone,c?.email].filter(Boolean).join(' | ');
+  info.textContent=contact||'';
+}
+
+
+function vxResetAgendaModalForm(){
+  ['vxAgCliente','vxAgServico','vxAgProfissional','vxAgHora'].forEach(id=>{
+    const el=$(id); if(el) el.value='';
+  });
+  const status=$('vxAgStatus');
+  if(status) status.value='Pendente';
+  const info=$('vxAgClienteInfo');
+  if(info) info.textContent='';
+  vxSyncAgendaModalControlLabels();
+}
+
+function vxShowAgendaSuccess(clienteNome){
+  const modal=$('vxAgendaModal');
+  const body=modal?.querySelector('.vx-agenda-modal-body');
+  const save=$('vxAgendaModalSave');
+  const success=$('vxAgendaSuccess');
+  const text=$('vxAgendaSuccessText');
+
+  if(text) text.textContent=(clienteNome||'Cliente')+' agendado com sucesso.';
+
+  // O CSS do formulário usa display:grid!important.
+  // Por isso o atributo hidden sozinho não era suficiente.
+  if(body){
+    body.hidden=true;
+    body.style.setProperty('display','none','important');
+  }
+  if(save){
+    save.hidden=true;
+    save.style.setProperty('display','none','important');
+  }
+  if(success){
+    success.hidden=false;
+    success.style.setProperty('display','flex','important');
+  }
+}
+
+function vxNovoAgendamentoAposSucesso(){
+  const modal=$('vxAgendaModal');
+  const body=modal?.querySelector('.vx-agenda-modal-body');
+  const save=$('vxAgendaModalSave');
+  const success=$('vxAgendaSuccess');
+
+  if(success){
+    success.hidden=true;
+    success.style.setProperty('display','none','important');
+  }
+  if(body){
+    body.hidden=false;
+    body.style.setProperty('display','grid','important');
+  }
+  if(save){
+    save.hidden=false;
+    save.style.setProperty('display','block','important');
+  }
+
+  vxResetAgendaModalForm();
+  vxPopulateAgendaModal();
+}
+
+window.vxNovoAgendamentoAposSucesso=vxNovoAgendamentoAposSucesso;
+
+async function vxSalvarAgendamentoModal(){
+  if(!vxAgendaModalIsMobile()) return;
+  const clienteId=$('vxAgCliente')?.value;
+  const servicoId=$('vxAgServico')?.value;
+  const profissionalId=$('vxAgProfissional')?.value;
+  const data=$('vxAgData')?.value;
+  const hora=$('vxAgHora')?.value;
+  const status=$('vxAgStatus')?.value||'Pendente';
+
+  if(!clienteId||!servicoId||!profissionalId||!data||!hora){
+    toast('Preencha todos os campos.','err');
+    return;
+  }
+
+  const cliente=(state.clientes||[]).find(c=>String(c.id)===String(clienteId));
+  const serv=(state.servicos||[]).find(s=>String(s.id)===String(servicoId));
+  const prof=(state.profissionais||[]).find(p=>String(p.id)===String(profissionalId));
+  const btn=$('vxAgendaModalSave');
+  if(btn) btn.disabled=true;
+
+  try{
+    const { data:novoAgendamento, error }=await db.from('agenda_agendamentos').insert({
+      empresa_id:state.empresa.id,
+      cliente_id:clienteId,
+      servico_id:serv?.id||null,
+      profissional_id:prof?.id||null,
+      cliente_nome:cliente?.nome||'',
+      cliente_telefone:cliente?.telefone||'',
+      servico_nome:serv?.nome||'',
+      profissional_nome:prof?.nome||'',
+      data,
+      hora,
+      status,
+      valor:Number(serv?.preco||0)
+    }).select('*').single();
+    if(error){
+      toast('Erro ao salvar: '+error.message,'err');
       return;
     }
-  }
-  if (field.kind === 'documentId' && !isValidCreateDocumentId(value)) {
-    addCreateMessage('Esse CPF/CNPJ não é válido. Confira os números e tente novamente.', 'bot');
-    control.focus();
-    return;
-  }
-  clearCreateInlineOptions();
-  createState.answers[field.key] = value;
-  let display = value || 'Não informar';
-  if (field.kind === 'date' && value) display = createNaturalDate(value);
-  addCreateMessage(display, 'user');
-  createState.step += 1;
-  askCreateField();
-});
 
-createResetButton?.addEventListener('click', resetCreateFlow);
+    // Atualiza imediatamente o estado local, sem depender do ciclo completo de loadAll().
+    if(novoAgendamento){
+      const semDuplicar=(state.agendamentos||[]).filter(a=>String(a.id)!==String(novoAgendamento.id));
+      state.agendamentos=ordenarAgendamentosRecentes([novoAgendamento,...semDuplicar]);
 
-createCopyButton?.addEventListener('click', async () => {
-  if (!createState.finalText) return;
-  try {
-    await navigator.clipboard.writeText(createState.finalText);
-    createCopyButton.textContent = 'COPIADO';
-    setTimeout(() => { createCopyButton.textContent = 'COPIAR'; }, 1400);
-  } catch {
-    const area = document.createElement('textarea');
-    area.value = createState.finalText;
-    document.body.appendChild(area);
-    area.select();
-    document.execCommand('copy');
-    area.remove();
-  }
-});
+      // Atualiza exatamente as duas áreas afetadas pelo novo agendamento.
+      renderTimeline();
+      renderClientes();
 
-createWhatsappButton?.addEventListener('click', () => {
-  if (!createState.finalText) return;
-  const url = `https://wa.me/?text=${encodeURIComponent(createState.finalText)}`;
-  window.open(url, '_blank', 'noopener,noreferrer');
-});
-
-function createPdfFilename() {
-  const raw = String(createPreviewType?.textContent || createState.type || 'documento')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return `${raw || 'documento'}.pdf`;
-}
-
-function resetCreatePdfPreparation() {
-  createPdfPrepareVersion += 1;
-  if (createPreparedPdf?.objectUrl) {
-    try { URL.revokeObjectURL(createPreparedPdf.objectUrl); } catch {}
-  }
-  createPreparedPdf = null;
-  createPdfPreparePromise = null;
-  if (createPrintButton) {
-    createPrintButton.disabled = true;
-    createPrintButton.textContent = 'IMPRIMIR / PDF';
-  }
-}
-
-function isAndroidWebView() {
-  // O aplicativo oficial expõe a ponte SoftAndroid via addJavascriptInterface.
-  // Ela é uma identificação muito mais confiável do que depender apenas do UA,
-  // pois alguns WebViews recentes não incluem o marcador "wv".
-  try {
-    if (typeof window !== 'undefined' && window.SoftAndroid) return true;
-  } catch (_) {}
-  const ua = String(navigator.userAgent || '');
-  return /Android/i.test(ua) && (/;\s*wv\)/i.test(ua) || /Version\/4\.0/i.test(ua));
-}
-
-function closeYoutubeWebViewMenu() {
-  // Fluxo antigo removido: o YouTube baixa direto dentro do app.
-}
-
-function showYoutubeWebViewMenu() {
-  // Mantido apenas como compatibilidade interna; não exibe mais aviso/modal.
-}
-
-function createPdfBlobUrl(payload) {
-  const binary = atob(String(payload || ''));
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  const blob = new Blob([bytes], { type: 'application/pdf' });
-  return URL.createObjectURL(blob);
-}
-
-function savePreparedPdfLocally(prepared) {
-  if (!prepared?.objectUrl) throw new Error('PDF local indisponível.');
-  const link = document.createElement('a');
-  link.href = prepared.objectUrl;
-  link.download = prepared.filename || 'documento.pdf';
-  link.rel = 'noopener';
-  link.style.display = 'none';
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-}
-
-function submitPreparedPdfToWebView(prepared) {
-  const base64 = String(prepared?.payload || '').trim();
-  if (!base64) throw new Error('PDF vazio.');
-
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = `https://${WORKER_MEDIA_HOST}/pdf/direct`;
-  form.target = '_self';
-  form.acceptCharset = 'UTF-8';
-  form.style.display = 'none';
-
-  const pdfInput = document.createElement('input');
-  pdfInput.type = 'hidden';
-  pdfInput.name = 'pdf';
-  pdfInput.value = base64;
-  form.appendChild(pdfInput);
-
-  const nameInput = document.createElement('input');
-  nameInput.type = 'hidden';
-  nameInput.name = 'filename';
-  nameInput.value = prepared.filename || 'documento.pdf';
-  form.appendChild(nameInput);
-
-  document.body.appendChild(form);
-  form.submit();
-  setTimeout(() => form.remove(), 1500);
-}
-
-async function prepareCreatePdfDownload() {
-  if (!createState.finalText || !createPrintButton) return null;
-  if (createPreparedPdf?.signature === createState.finalText) return createPreparedPdf;
-  if (createPdfPreparePromise) return createPdfPreparePromise;
-
-  const version = ++createPdfPrepareVersion;
-  const signature = createState.finalText;
-  createPrintButton.disabled = true;
-  createPrintButton.textContent = 'PREPARANDO PDF...';
-
-  createPdfPreparePromise = (async () => {
-    try {
-      if (!window.CodenCreatePdf?.generate) throw new Error('Motor profissional de PDF não foi carregado.');
-      const result = await window.CodenCreatePdf.generate(createState.type, createState.answers || {});
-      if (version !== createPdfPrepareVersion || signature !== createState.finalText) return null;
-      const payload = String(result?.payload || '');
-      if (!payload) throw new Error('O gerador retornou um PDF vazio.');
-
-      if (createPreparedPdf?.objectUrl) {
-        try { URL.revokeObjectURL(createPreparedPdf.objectUrl); } catch {}
-      }
-      createPreparedPdf = {
-        payload,
-        filename: createPdfFilename(),
-        signature,
-        objectUrl: createPdfBlobUrl(payload)
-      };
-      createPrintButton.disabled = false;
-      createPrintButton.textContent = 'BAIXAR PDF';
-      return createPreparedPdf;
-    } catch (error) {
-      console.error('Falha ao preparar PDF:', error);
-      if (version === createPdfPrepareVersion) {
-        createPreparedPdf = null;
-        createPrintButton.disabled = false;
-        createPrintButton.textContent = 'TENTAR PDF NOVAMENTE';
-      }
-      return null;
-    } finally {
-      if (version === createPdfPrepareVersion) createPdfPreparePromise = null;
+      // Mantém contadores/resumos coerentes.
+      renderStats();
+      renderDashList();
+      renderCalendar();
+      if(typeof vxUpdateAgendaFilterCounts==='function') vxUpdateAgendaFilterCounts();
     }
-  })();
 
-  return createPdfPreparePromise;
+    // Sincronização completa em seguida; se outro renderer falhar,
+    // Agenda e Clientes já terão sido atualizados acima.
+    try{
+      await loadAll();
+    }catch(syncErr){
+      console.warn('Sincronização pós-agendamento:',syncErr);
+    }
+
+    vxResetAgendaModalForm();
+    vxShowAgendaSuccess(cliente?.nome||'Cliente');
+  } finally {
+    if(btn) btn.disabled=false;
+  }
 }
 
-createPrintButton?.addEventListener('click', () => {
-  if (!createState.finalText) return;
+window.vxApplyAgendaModalFinalStyle=vxApplyAgendaModalFinalStyle;
+window.vxOpenAgendaModal=vxOpenAgendaModal;
+window.vxCloseAgendaModal=vxCloseAgendaModal;
+window.vxSalvarAgendamentoModal=vxSalvarAgendamentoModal;
 
-  if (!createPreparedPdf || createPreparedPdf.signature !== createState.finalText) {
-    void prepareCreatePdfDownload();
-    return;
-  }
-
-  try {
-    createPrintButton.textContent = 'INICIANDO DOWNLOAD...';
-    if (isAndroidWebView()) submitPreparedPdfToWebView(createPreparedPdf);
-    else savePreparedPdfLocally(createPreparedPdf);
-    setTimeout(() => {
-      if (createPrintButton) createPrintButton.textContent = 'BAIXAR PDF';
-    }, 1200);
-  } catch (error) {
-    console.error('Falha ao iniciar download do PDF:', error);
-    createPrintButton.textContent = 'TENTAR PDF NOVAMENTE';
+window.addEventListener('resize',()=>{
+  if(document.getElementById('vxAgendaModal')?.classList.contains('open')){
+    vxApplyAgendaModalFinalStyle();
   }
 });
 
-resetCreateFlow();
 
 
-// Handoff do WebApp para o navegador externo: quando o site é aberto com
-// ?youtube=<link>, preenche o campo e dispara a análise automaticamente.
-(function consumeYoutubeBrowserHandoff() {
-  if (isAndroidWebView()) return;
-  let handedUrl = '';
-  try {
-    const params = new URLSearchParams(window.location.search);
-    handedUrl = String(params.get('youtube') || '').trim();
-    if (!handedUrl) return;
-    params.delete('youtube');
-    const cleanQuery = params.toString();
-    const cleanUrl = `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}${window.location.hash || ''}`;
-    window.history.replaceState({}, '', cleanUrl);
-  } catch (_) {
+function setFilter(filter, btn) {
+  _agendaFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTimeline();
+}
+
+function renderTimeline() {
+  const el = $('agendaTimeline');
+  if (!el) return;
+  const mobile=vxIsMobileAgenda();
+  const all=ordenarAgendamentosRecentes(state.agendamentos);
+  const ags=all;
+  const statusMap = { pendente:'Pendente', confirmado:'Confirmado', reagendado:'Reagendado', concluido:'Concluído', recusado:'Recusado', excluido:'Excluído' };
+  let filtered;
+  if (_agendaFilter === 'excluido') filtered = ags.filter(a => normStatus(a.status) === 'Excluído');
+  else if (_agendaFilter !== 'todos') { const target=statusMap[_agendaFilter]; filtered=ags.filter(a=>normStatus(a.status)===target); }
+  else filtered=ags.filter(a=>normStatus(a.status)!=='Excluído');
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-state vx-agenda-empty"><p>Nenhum agendamento neste filtro.</p></div>`;
+    vxUpdateAgendaFilterCounts();
+    return;
+  }
+  el.innerHTML='';
+  filtered.forEach(a=>{
+    const block=document.createElement('div');
+    block.className='tl-block'; block.id='ag-'+a.id;
+    const tel=(a.cliente_telefone||a.telefone||'').trim();
+    const email=(a.cliente_email||a.email||'').trim();
+    const contact=[tel,email].filter(Boolean).join(' | ');
+    block.innerHTML=`
+      <div class="tl-time">${String(a.hora||'—').slice(0,5)}</div>
+      <div class="tl-line"></div>
+      <div class="tl-content">
+        <div class="tl-card">
+          <div class="tl-card-top">
+            <div class="apt-av">${initial(a.cliente_nome)}</div>
+            <div class="tl-card-info">
+              <div class="tl-card-name">${a.cliente_nome||'Cliente'}</div>
+              <div class="tl-card-service">${a.servico_nome||'—'}</div>
+              ${contact?`<div class="tl-card-contact" title="${contact.replace(/"/g,'&quot;')}">${contact}</div>`:''}
+            </div>
+            <div class="tl-card-status"><span class="badge ${badgeClass(a.status)}">${normStatus(a.status)}</span></div>
+          </div>
+          ${renderAcoes(a)}
+        </div>
+      </div>`;
+    const card=block.querySelector('.tl-card');
+    const menu=buildActionMenu(a.id,[
+      {icon:'✏️',label:'Editar',action:()=>editAgendamento(a.id)},
+      {icon:'📋',label:'Duplicar',action:()=>duplicarAgendamento(a.id)},
+      'sep',
+      {icon:'🗑',label:'Excluir',cls:'danger',action:()=>excluirAgendamento(a.id)}
+    ]);
+    if(card)card.appendChild(menu);
+    el.appendChild(block);
+  });
+  vxUpdateAgendaFilterCounts();
+}
+function renderAcoes(a) {
+  const tel=(a.cliente_telefone||a.telefone||'').replace(/\D/g,'');
+  const s=normStatus(a.status);
+  const wa=tel?`<button class="act-btn whatsapp vx-action-wide" onclick="abrirWA('${a.id}')">WhatsApp</button>`:'';
+  if(s==='Excluído') return `<div class="apt-actions vx-actions-compact"><button class="act-btn muted" disabled>Excluído</button></div>`;
+  if(s==='Recusado') return `<div class="apt-actions vx-actions-compact">${wa||'<button class="act-btn muted" disabled>Recusado</button>'}</div>`;
+  if(s==='Concluído') return `<div class="apt-actions vx-actions-compact vx-actions-completed">${wa}<button class="act-btn refuse" onclick="excluirAgendamento('${a.id}')">Arquivar</button></div>`;
+  return `<div class="apt-actions vx-actions-compact">
+    ${s!=='Confirmado'?`<button class="act-btn confirm" onclick="confirmarAg('${a.id}')">Confirmar</button>`:`<button class="act-btn confirm" disabled>Confirmado</button>`}
+    <button class="act-btn refuse" onclick="openModalRecusa('${a.id}')">Recusar</button>
+    <button class="act-btn reschedule" onclick="openModalReagendar('${a.id}')">Reagendar</button>
+    <button class="act-btn conclude" onclick="concluirAg('${a.id}')">Concluir</button>
+    ${wa}
+  </div>`;
+}
+function ensureActionCenterModal() {
+  let modal = document.getElementById('actionCenterModal');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.id = 'actionCenterModal';
+  modal.className = 'action-center-modal';
+  modal.setAttribute('aria-hidden', 'true');
+  modal.innerHTML = `
+    <div class="action-center-backdrop" data-action-close></div>
+    <section class="action-center-dialog" role="dialog" aria-modal="true" aria-labelledby="actionCenterTitle">
+      <header class="action-center-head">
+        <div>
+          <span class="action-center-kicker">GERENCIAR</span>
+          <h3 id="actionCenterTitle">Ações do agendamento</h3>
+          <p>Escolha o que deseja fazer com este registro.</p>
+        </div>
+        <button type="button" class="action-center-close" data-action-close aria-label="Fechar">×</button>
+      </header>
+      <div class="action-center-list" id="actionCenterList"></div>
+      <button type="button" class="action-center-cancel" data-action-close>Cancelar</button>
+    </section>`;
+
+  modal.addEventListener('click', e => {
+    if (e.target.closest('[data-action-close]')) closeActionCenterModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeActionCenterModal();
+  });
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function openActionCenterModal(items, title = 'Ações do agendamento') {
+  const modal = ensureActionCenterModal();
+  const list = modal.querySelector('#actionCenterList');
+  const heading = modal.querySelector('#actionCenterTitle');
+  heading.textContent = title;
+  list.innerHTML = '';
+
+  items.filter(item => item !== 'sep').forEach(item => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'action-center-item' + (item.cls ? ' ' + item.cls : '');
+    button.innerHTML = `
+      <span class="action-center-icon">${item.icon}</span>
+      <span class="action-center-copy">
+        <strong>${item.label}</strong>
+        <small>${item.label === 'Editar' ? 'Alterar dados deste registro' : item.label === 'Duplicar' ? 'Criar uma nova cópia' : 'Remover este registro'}</small>
+      </span>
+      <span class="action-center-arrow">›</span>`;
+    button.addEventListener('click', () => {
+      closeActionCenterModal();
+      setTimeout(() => item.action(), 120);
+    });
+    list.appendChild(button);
+  });
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('action-center-open');
+  requestAnimationFrame(() => modal.querySelector('.action-center-close')?.focus());
+}
+
+function closeActionCenterModal() {
+  const modal = document.getElementById('actionCenterModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('action-center-open');
+}
+
+function buildActionMenu(id, items) {
+  const wrap = document.createElement('div');
+  wrap.className = 'action-menu action-menu-center';
+
+  const btn = document.createElement('button');
+  btn.className = 'action-menu-btn';
+  btn.type = 'button';
+  btn.setAttribute('aria-label', 'Abrir ações do registro');
+  btn.setAttribute('aria-haspopup', 'dialog');
+  btn.innerHTML = '<span></span><span></span><span></span>';
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    e.preventDefault();
+    openActionCenterModal(items, 'Ações do agendamento');
+  });
+
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function closeAllMenus() {
+  closeActionCenterModal();
+  document.querySelectorAll('.action-menu.open').forEach(menu => menu.classList.remove('open'));
+  document.querySelectorAll('.action-dropdown.open').forEach(drop => drop.classList.remove('open'));
+  document.querySelectorAll('body > .action-dropdown').forEach(drop => drop.remove());
+  _openMenu = null;
+  _openMenuBtn = null;
+}
+
+function renderClientes() {
+  const el = $('clientesGrid');
+  if (!el) return;
+  const clientes = state.clientes || [];
+  if (!clientes.length) { el.innerHTML = '<div class="empty-state directory-empty" style="grid-column:1/-1"><div class="es-icon">👥</div><p>Nenhum cliente cadastrado.</p><span>Use + ADICIONAR para criar o primeiro contato.</span></div>'; return; }
+  el.innerHTML = '';
+  clientes.forEach(c => {
+    const agts = (state.agendamentos || []).filter(a => a.cliente_nome === c.nome && normStatus(a.status) !== 'Excluído').length;
+    const gasto = (state.agendamentos || []).filter(a => a.cliente_nome === c.nome && isFinanceiro(a)).reduce((s, a) => s + Number(a.valor || 0), 0);
+    const ativo = isAtivoCliente(c);
+    const card = document.createElement('div'); card.className = 'client-card premium-record-card' + (ativo ? '' : ' inactive');
+    card.innerHTML = `
+      <div class="record-card-accent"></div>
+      <div class="record-card-top">
+        <div class="cc-av record-avatar">${initial(c.nome)}</div>
+        <div class="record-main"><div class="cc-name record-name">${c.nome}</div><div class="record-type">Cliente</div></div>
+        <span class="badge ${ativo ? 'badge-green' : 'badge-gray'} record-status">${ativo ? 'Ativo' : 'Inativo'}</span>
+      </div>
+      <div class="record-contact-list">
+        <div class="record-contact"><span>☎</span><div><small>Telefone</small><strong>${c.telefone || 'Não informado'}</strong></div></div>
+        <div class="record-contact"><span>✉</span><div><small>E-mail</small><strong>${c.email || 'Não informado'}</strong></div></div>
+      </div>
+      <div class="cc-stats record-stats">
+        <div class="cc-stat"><div class="cc-sl">Atendimentos</div><div class="cc-sv">${agts}</div></div>
+        <div class="cc-stat"><div class="cc-sl">Total gasto</div><div class="cc-sv record-money">${money(gasto).replace(',00', '')}</div></div>
+      </div>`;
+    const menu = buildActionMenu(c.id, [
+      { icon: '✏️', label: 'Editar', action: () => editCliente(c.id) },
+      { icon: '📋', label: 'Duplicar', action: () => duplicarCliente(c.id) }, 'sep',
+      ativo ? { icon: '⏸', label: 'Desativar', cls: 'danger', action: () => toggleCliente(c.id, false) }
+             : { icon: '▶️', label: 'Ativar', cls: 'success', action: () => toggleCliente(c.id, true) },
+      { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirCliente(c.id) }
+    ]);
+    card.appendChild(menu); el.appendChild(card);
+  });
+}
+
+function renderServicos() {
+  const el = $('servicosGrid');
+  if (!el) return;
+  const vis = (state.servicos || []).filter(s => s.status !== 'excluido');
+  if (!vis.length) { el.innerHTML = '<div class="empty-state directory-empty" style="grid-column:1/-1"><div class="es-icon">✦</div><p>Nenhum serviço cadastrado.</p><span>Adicione o primeiro item do seu catálogo.</span></div>'; return; }
+  el.innerHTML = '';
+  vis.forEach(s => {
+    const ativo = s.status === 'ativo';
+    const card = document.createElement('div'); card.className = 'svc-card premium-record-card service-record-card' + (ativo ? '' : ' inactive');
+    card.innerHTML = `
+      <div class="record-card-accent"></div>
+      <div class="service-card-head"><span class="service-symbol">◈</span><span class="badge ${ativo ? 'badge-green' : 'badge-gray'} record-status">${ativo ? 'Ativo' : 'Inativo'}</span></div>
+      <div class="svc-name record-name">${s.nome}</div>
+      <div class="record-type">Serviço cadastrado</div>
+      <div class="service-info-grid">
+        <div class="service-info"><small>Valor</small><strong>${money(s.preco).replace(',00', '')}</strong></div>
+        <div class="service-info"><small>Duração</small><strong>${s.duracao_minutos || 60} min</strong></div>
+      </div>
+      <div class="service-footer"><span>Pronto para agendamentos</span><span>⏱</span></div>`;
+    const menu = buildActionMenu(s.id, [
+      { icon: '✏️', label: 'Editar', action: () => editServico(s.id) },
+      { icon: '📋', label: 'Duplicar', action: () => duplicarServico(s.id) }, 'sep',
+      ativo ? { icon: '⏸', label: 'Desativar', cls: 'danger', action: () => toggleServico(s.id, 'inativo') }
+             : { icon: '▶️', label: 'Ativar', cls: 'success', action: () => toggleServico(s.id, 'ativo') },
+      { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirServico(s.id) }
+    ]);
+    card.appendChild(menu); el.appendChild(card);
+  });
+}
+
+function renderProfissionais() {
+  const el = $('profGrid');
+  if (!el) return;
+  const vis = (state.profissionais || []).filter(p => p.status !== 'excluido');
+  if (!vis.length) { el.innerHTML = '<div class="empty-state directory-empty" style="grid-column:1/-1"><div class="es-icon">👤</div><p>Nenhum profissional cadastrado.</p><span>Adicione quem fará parte da agenda da empresa.</span></div>'; return; }
+  el.innerHTML = '';
+  vis.forEach(p => {
+    const ativo = p.status === 'ativo';
+    const card = document.createElement('div'); card.className = 'prof-card premium-record-card professional-record-card' + (ativo ? '' : ' inactive');
+    card.innerHTML = `
+      <div class="record-card-accent"></div>
+      <div class="professional-card-top">
+        <div class="prof-av record-avatar">${initial(p.nome)}</div>
+        <span class="badge ${ativo ? 'badge-green' : 'badge-gray'} record-status">${ativo ? 'Disponível' : 'Indisponível'}</span>
+      </div>
+      <div class="prof-name record-name">${p.nome}</div>
+      <div class="prof-esp professional-specialty">${p.especialidade || 'Profissional'}</div>
+      <div class="professional-contact"><span>☎</span><strong>${p.telefone || 'Telefone não informado'}</strong></div>
+      <div class="professional-footer"><div class="online-dot${ativo ? '' : ' off'}">${ativo ? 'Agenda ativa' : 'Agenda inativa'}</div><span class="team-label">Equipe</span></div>`;
+    const menu = buildActionMenu(p.id, [
+      { icon: '✏️', label: 'Editar', action: () => editProfissional(p.id) },
+      { icon: '📋', label: 'Duplicar', action: () => duplicarProfissional(p.id) }, 'sep',
+      ativo ? { icon: '⏸', label: 'Desativar', cls: 'danger', action: () => toggleProfissional(p.id, 'inativo') }
+             : { icon: '▶️', label: 'Ativar', cls: 'success', action: () => toggleProfissional(p.id, 'ativo') },
+      { icon: '🗑', label: 'Excluir', cls: 'danger', action: () => excluirProfissional(p.id) }
+    ]);
+    card.appendChild(menu); el.appendChild(card);
+  });
+}
+
+const DIAS_SEMANA_ABREV = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const DIAS_SEMANA_NOME = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const MESES_ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+let chartPeriodAtual = 'dias';
+let _chartHoverState = null;
+
+// Série de CONTAGEM por status (Confirmados/Recusados/Concluídos), usada pelo gráfico de desempenho do PC.
+// Não usa isFinanceiro() de propósito: Concluídos aqui é status operacional puro, não a regra financeira
+// (que também aceita Excluído+financeiro_status=Concluído). getChartSeries()/getPeriodBreakdown() continuam intactas.
+function getStatusSeries(period, offsetPeriods = 0) {
+  const ags = state.agendamentos || [];
+  const dataAgendada = a => a.data || '';
+  const dataConclusao = a => dataConclusaoISO(a);
+  const ehConfirmado = a => normStatus(a.status) === 'Confirmado';
+  const ehRecusado = a => normStatus(a.status) === 'Recusado';
+  const ehConcluido = a => normStatus(a.status) === 'Concluído';
+  const contar = (deIso, ateIso, teste, campoData) => ags.filter(a => teste(a) && campoData(a) >= deIso && campoData(a) <= ateIso).length;
+
+  if (period === 'semanas') {
+    const pts = [];
+    const hoje = new Date(hojeISO() + 'T00:00:00');
+    hoje.setDate(hoje.getDate() - offsetPeriods * 8 * 7);
+    for (let w = 7; w >= 0; w--) {
+      const fim = new Date(hoje); fim.setDate(fim.getDate() - w * 7);
+      const ini = new Date(fim); ini.setDate(ini.getDate() - 6);
+      const iniISO = dataLocalISO(ini), fimISO = dataLocalISO(fim);
+      pts.push({
+        label: (w === 0 && offsetPeriods === 0) ? 'Atual' : `S-${w}`,
+        full: `${ini.getDate()}/${ini.getMonth() + 1} a ${fim.getDate()}/${fim.getMonth() + 1}`,
+        confirmados: contar(iniISO, fimISO, ehConfirmado, dataAgendada),
+        recusados: contar(iniISO, fimISO, ehRecusado, dataAgendada),
+        concluidos: contar(iniISO, fimISO, ehConcluido, dataConclusao),
+      });
+    }
+    return pts;
+  }
+  if (period === 'meses') {
+    const pts = [];
+    const hoje = new Date();
+    hoje.setMonth(hoje.getMonth() - offsetPeriods * 6);
+    for (let m = 5; m >= 0; m--) {
+      const d = new Date(hoje.getFullYear(), hoje.getMonth() - m, 1);
+      const prefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      pts.push({
+        label: MESES_ABREV[d.getMonth()],
+        full: `${MESES_ABREV[d.getMonth()]}/${d.getFullYear()}`,
+        confirmados: ags.filter(a => ehConfirmado(a) && dataAgendada(a).startsWith(prefix)).length,
+        recusados: ags.filter(a => ehRecusado(a) && dataAgendada(a).startsWith(prefix)).length,
+        concluidos: ags.filter(a => ehConcluido(a) && dataConclusao(a).startsWith(prefix)).length,
+      });
+    }
+    return pts;
+  }
+  const pts = [];
+  const hoje = new Date(hojeISO() + 'T00:00:00');
+  hoje.setDate(hoje.getDate() - offsetPeriods * 14);
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(hoje); d.setDate(d.getDate() - i);
+    const iso = dataLocalISO(d);
+    const dataFmt = `${d.getDate()}/${d.getMonth() + 1}`;
+    pts.push({
+      label: (i === 0 && offsetPeriods === 0) ? 'Hoje' : dataFmt,
+      full: `${DIAS_SEMANA_NOME[d.getDay()]}, ${dataFmt}`,
+      confirmados: contar(iso, iso, ehConfirmado, dataAgendada),
+      recusados: contar(iso, iso, ehRecusado, dataAgendada),
+      concluidos: contar(iso, iso, ehConcluido, dataConclusao),
+    });
+  }
+  return pts;
+}
+
+function getPeriodRange(period) {
+  const hoje = new Date(hojeISO() + 'T00:00:00');
+  if (period === 'semanas') {
+    const ini = new Date(hoje); ini.setDate(ini.getDate() - 7 * 7 - 6);
+    return { inicioISO: dataLocalISO(ini), fimISO: hojeISO() };
+  }
+  if (period === 'meses') {
+    const ini = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1);
+    return { inicioISO: dataLocalISO(ini), fimISO: hojeISO() };
+  }
+  const ini = new Date(hoje); ini.setDate(ini.getDate() - 13);
+  return { inicioISO: dataLocalISO(ini), fimISO: hojeISO() };
+}
+
+function getPeriodBreakdown(period) {
+  const { inicioISO, fimISO } = getPeriodRange(period);
+  const ags = (state.agendamentos || []).filter(a => {
+    const iso = dataConclusaoISO(a);
+    return iso >= inicioISO && iso <= fimISO;
+  });
+  const recebido = ags.filter(isFinanceiro).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const aReceber = ags.filter(a => ['Pendente', 'Confirmado', 'Reagendado'].includes(normStatus(a.status))).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const cancelado = ags.filter(a => normStatus(a.status) === 'Recusado').reduce((s, a) => s + Number(a.valor || 0), 0);
+  return { recebido, aReceber, cancelado };
+}
+
+function getChartSeries(period, offsetPeriods = 0) {
+  const fin = (state.agendamentos || []).filter(isFinanceiro);
+  const somaNoIntervalo = (deIso, ateIso) => fin
+    .filter(a => { const iso = dataConclusaoISO(a); return iso >= deIso && iso <= ateIso; })
+    .reduce((s, a) => s + Number(a.valor || 0), 0);
+  const atendimentosNoIntervalo = (deIso, ateIso) => fin
+    .filter(a => { const iso = dataConclusaoISO(a); return iso >= deIso && iso <= ateIso; }).length;
+
+  if (period === 'semanas') {
+    const pts = [];
+    const hoje = new Date(hojeISO() + 'T00:00:00');
+    hoje.setDate(hoje.getDate() - offsetPeriods * 8 * 7);
+    for (let w = 7; w >= 0; w--) {
+      const fim = new Date(hoje); fim.setDate(fim.getDate() - w * 7);
+      const ini = new Date(fim); ini.setDate(ini.getDate() - 6);
+      const iniISO = dataLocalISO(ini), fimISO = dataLocalISO(fim);
+      pts.push({ label: (w === 0 && offsetPeriods === 0) ? 'Atual' : `S-${w}`, valor: somaNoIntervalo(iniISO, fimISO), atendimentos: atendimentosNoIntervalo(iniISO, fimISO), full: `${ini.getDate()}/${ini.getMonth() + 1} a ${fim.getDate()}/${fim.getMonth() + 1}` });
+    }
+    return pts;
+  }
+  if (period === 'meses') {
+    const pts = [];
+    const hoje = new Date();
+    hoje.setMonth(hoje.getMonth() - offsetPeriods * 6);
+    for (let m = 5; m >= 0; m--) {
+      const d = new Date(hoje.getFullYear(), hoje.getMonth() - m, 1);
+      const prefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const valor = fin.filter(a => dataConclusaoISO(a).startsWith(prefix)).reduce((s, a) => s + Number(a.valor || 0), 0);
+      const atendimentos = fin.filter(a => dataConclusaoISO(a).startsWith(prefix)).length;
+      pts.push({ label: MESES_ABREV[d.getMonth()], valor, atendimentos, full: `${MESES_ABREV[d.getMonth()]}/${d.getFullYear()}` });
+    }
+    return pts;
+  }
+  // dias (padrão): últimos 14 dias
+  const pts = [];
+  const hoje = new Date(hojeISO() + 'T00:00:00');
+  hoje.setDate(hoje.getDate() - offsetPeriods * 14);
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(hoje); d.setDate(d.getDate() - i);
+    const iso = dataLocalISO(d);
+    const dataFmt = `${d.getDate()}/${d.getMonth() + 1}`;
+    pts.push({ label: (i === 0 && offsetPeriods === 0) ? 'Hoje' : dataFmt, valor: somaNoIntervalo(iso, iso), atendimentos: atendimentosNoIntervalo(iso, iso), full: `${DIAS_SEMANA_NOME[d.getDay()]}, ${dataFmt}` });
+  }
+  return pts;
+}
+
+function moneyCompact(v) {
+  if (v >= 1000) return 'R$' + (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1).replace('.', ',') + 'mil';
+  return money(v).replace(',00', '');
+}
+
+function setChartPeriod(period) {
+  chartPeriodAtual = period;
+  document.querySelectorAll('.dash-chart-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.period === period);
+  });
+  renderDashChart();
+}
+
+function renderDashChart() {
+  const svg = $('dashChartSvg');
+  if (!svg) return;
+  const pts = getChartSeries(chartPeriodAtual);
+  const ptsAnterior = getChartSeries(chartPeriodAtual, 1);
+  const totalValor = pts.reduce((s, p) => s + p.valor, 0);
+  const totalAtendimentos = pts.reduce((s, p) => s + p.atendimentos, 0);
+  const melhor = pts.reduce((m, p) => (p.valor > m.valor ? p : m), pts[0] || { valor: 0, full: '—' });
+  const ticket = totalAtendimentos > 0 ? totalValor / totalAtendimentos : 0;
+
+  setText('chartFatValue', money(totalValor).replace(',00', ''));
+  setText('chartFatSub', chartPeriodAtual === 'dias' ? 'Faturamento nos últimos 14 dias' : chartPeriodAtual === 'semanas' ? 'Faturamento nas últimas 8 semanas' : 'Faturamento nos últimos 6 meses');
+  setText('chartMelhor', melhor && melhor.valor > 0 ? melhor.full : '—');
+  setText('chartTicket', money(ticket).replace(',00', ''));
+  setText('chartAtendimentos', totalAtendimentos);
+  setText('chartLegendText', `Faturamento por ${chartPeriodAtual === 'dias' ? 'dia' : chartPeriodAtual === 'semanas' ? 'semana' : 'mês'} · último: ${money(pts[pts.length - 1] ? pts[pts.length - 1].valor : 0).replace(',00', '')}`);
+  setText('chartLegendGhostText', chartPeriodAtual === 'dias' ? '14 dias anteriores' : chartPeriodAtual === 'semanas' ? '8 semanas anteriores' : '6 meses anteriores');
+
+  const breakdown = getPeriodBreakdown(chartPeriodAtual);
+  setText('chartBreakdownRecebido', money(breakdown.recebido).replace(',00', ''));
+  setText('chartBreakdownAReceber', money(breakdown.aReceber).replace(',00', ''));
+  setText('chartBreakdownCancelado', money(breakdown.cancelado).replace(',00', ''));
+
+  const W = 640, H = 200, padX = 14, padY = 22, padTop = 30;
+  const n = pts.length;
+  const maxValReal = Math.max(...pts.map(p => p.valor));
+  const maxValAnteriorReal = Math.max(...ptsAnterior.map(p => p.valor), 0);
+  const maxVal = Math.max(maxValReal, maxValAnteriorReal, 1) * 1.18;
+  const baseY = H - padY;
+  const usableH = baseY - padTop;
+  const slot = (W - padX * 2) / Math.max(1, n);
+
+  function smoothPath(points) {
+    if (!points.length) return '';
+    if (points.length === 1) return `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+    let d = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+      const c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+      const c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+    }
+    return d;
+  }
+
+  const points = pts.map((p, i) => {
+    const x = padX + slot * (i + 0.5);
+    const y = maxVal > 0 ? baseY - (p.valor / maxVal) * usableH : baseY;
+    return { ...p, x, y, isLast: i === n - 1 };
+  });
+  const pointsGhost = ptsAnterior.map((p, i) => {
+    const x = padX + slot * (i + 0.5);
+    const y = maxVal > 0 ? baseY - (p.valor / maxVal) * usableH : baseY;
+    return { ...p, x, y };
+  });
+
+  const gridEl = $('chartGrid');
+  let gridHtml = '';
+  for (let g = 0; g <= 3; g++) {
+    const gy = padTop + (g * usableH) / 3;
+    const isBase = g === 3;
+    gridHtml += `<line x1="${padX}" y1="${gy.toFixed(1)}" x2="${W - padX}" y2="${gy.toFixed(1)}" class="${isBase ? 'dash-chart-baseline' : 'dash-chart-grid-line'}"></line>`;
+  }
+  if (gridEl) gridEl.innerHTML = gridHtml;
+
+  // ── 3 séries do PC: Confirmados/Recusados/Concluídos (contagem, não R$) ──
+  const statusPts = getStatusSeries(chartPeriodAtual);
+  const statusPtsAnterior = getStatusSeries(chartPeriodAtual, 1);
+  const maxStatusReal = Math.max(...statusPts.map(p => Math.max(p.confirmados, p.recusados, p.concluidos)), 0);
+  const maxStatusAnteriorReal = Math.max(...statusPtsAnterior.map(p => Math.max(p.confirmados, p.recusados, p.concluidos)), 0);
+  const maxStatus = Math.max(maxStatusReal, maxStatusAnteriorReal, 1) * 1.18;
+
+  // Eixo Y acompanha a escala realmente exibida: contagem no PC (3 séries), R$ no mobile (barras).
+  const yAxisEl = $('chartYAxis');
+  if (yAxisEl) {
+    const ehDesktop = window.matchMedia('(min-width: 901px)').matches;
+    const topo = ehDesktop ? maxStatus : maxVal;
+    const steps = [topo, topo * 0.66, topo * 0.33, 0];
+    yAxisEl.innerHTML = steps.map(v => `<span>${ehDesktop ? Math.round(v) : moneyCompact(Math.round(v))}</span>`).join('');
+  }
+
+  function serieCoords(lista, campo) {
+    return lista.map((p, i) => {
+      const x = padX + slot * (i + 0.5);
+      const y = baseY - (p[campo] / maxStatus) * usableH;
+      return { ...p, x, y, valorSerie: p[campo], isLast: i === n - 1 };
+    });
+  }
+  const pConfirmados = serieCoords(statusPts, 'confirmados');
+  const pRecusados = serieCoords(statusPts, 'recusados');
+  const pConcluidos = serieCoords(statusPts, 'concluidos');
+  const pConfirmadosGhost = serieCoords(statusPtsAnterior, 'confirmados');
+  const pRecusadosGhost = serieCoords(statusPtsAnterior, 'recusados');
+  const pConcluidosGhost = serieCoords(statusPtsAnterior, 'concluidos');
+
+  const assinaturaStatus = [pConfirmados, pRecusados, pConcluidos].map(s => s.map(p => `${p.x.toFixed(1)}:${p.y.toFixed(1)}`).join(',')).join('|');
+  const lineConfirmadosEl = $('chartLineConfirmados');
+  const statusMudou = !lineConfirmadosEl || lineConfirmadosEl.dataset.sig !== assinaturaStatus;
+
+  function desenharGhost(elId, coords) {
+    const el = $(elId);
+    if (el) el.setAttribute('d', smoothPath(coords));
+  }
+  desenharGhost('chartLineConfirmadosGhost', pConfirmadosGhost);
+  desenharGhost('chartLineRecusadosGhost', pRecusadosGhost);
+  desenharGhost('chartLineConcluidosGhost', pConcluidosGhost);
+
+  const areaConcluidosEl = $('chartAreaConcluidos');
+  const linePathConcluidos = smoothPath(pConcluidos);
+  if (areaConcluidosEl) {
+    const areaPathConcluidos = pConcluidos.length ? `${linePathConcluidos} L${pConcluidos[n - 1].x.toFixed(1)},${baseY.toFixed(1)} L${pConcluidos[0].x.toFixed(1)},${baseY.toFixed(1)} Z` : '';
+    areaConcluidosEl.setAttribute('d', areaPathConcluidos);
+    if (statusMudou) areaConcluidosEl.style.opacity = '0';
+  }
+
+  function desenharLinhaPrincipal(elId, coords, path, atrasoExtra) {
+    const el = $(elId);
+    if (!el) return;
+    el.setAttribute('d', path);
+    if (!statusMudou) return;
+    let len = 900;
+    try { len = el.getTotalLength(); } catch (e) {}
+    el.style.transition = 'none';
+    el.style.strokeDasharray = `${len} ${len}`;
+    el.style.strokeDashoffset = String(len);
+    void el.getBoundingClientRect();
+    requestAnimationFrame(() => {
+      el.style.transition = `stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1) ${atrasoExtra}ms`;
+      el.style.strokeDashoffset = '0';
+      if (elId === 'chartLineConcluidos' && areaConcluidosEl) {
+        areaConcluidosEl.style.transition = 'opacity 0.9s ease 0.3s';
+        areaConcluidosEl.style.opacity = '1';
+      }
+    });
+  }
+  desenharLinhaPrincipal('chartLineConfirmados', pConfirmados, smoothPath(pConfirmados), 0);
+  desenharLinhaPrincipal('chartLineRecusados', pRecusados, smoothPath(pRecusados), 80);
+  desenharLinhaPrincipal('chartLineConcluidos', pConcluidos, linePathConcluidos, 160);
+  if (lineConfirmadosEl) lineConfirmadosEl.dataset.sig = assinaturaStatus;
+
+  // Pontos existem matematicamente (statusPts/pConfirmados/pRecusados/pConcluidos), mas não
+  // desenham círculo nenhum permanente. Guarda a leitura mais recente pro hover (crosshair) usar.
+  _chartHoverState = { statusPts, pConfirmados, pRecusados, pConcluidos, padX, W: 640, n, padTop, baseY };
+  configurarHoverGrafico();
+
+  function garantirIndicador(elId, classeExtra) {
+    const el = $(elId);
+    if (!el) return;
+    if (!el.querySelector('.dash-chart-dot')) {
+      el.innerHTML = `<circle class="dash-chart-dot ${classeExtra}" r="4" style="opacity:0"></circle>`;
+    }
+  }
+  garantirIndicador('chartDotsConfirmados', 'is-green');
+  garantirIndicador('chartDotsRecusados', 'is-red');
+  garantirIndicador('chartDotsConcluidos', 'is-purple');
+
+  // barras — mantidas só para o Android/WebApp (o PC agora usa a linha acima); mesmo 'points'/'pointsGhost'
+  const assinaturaBars = points.map(p => `${p.x.toFixed(1)}:${p.y.toFixed(1)}`).join('|');
+  const barsEl = $('chartBars');
+  const dadosMudaram = !barsEl || barsEl.dataset.sig !== assinaturaBars;
+  const barW = Math.max(6, Math.min(46, slot * 0.82));
+  const barsGhostEl = $('chartBarsGhost');
+  const ghostW = Math.min(barW * 1.7, slot * 0.85);
+  const assinaturaGhost = pointsGhost.map(p => `${p.x.toFixed(1)}:${p.y.toFixed(1)}`).join('|');
+  if (barsGhostEl && barsGhostEl.dataset.sig !== assinaturaGhost) {
+    barsGhostEl.dataset.sig = assinaturaGhost;
+    barsGhostEl.innerHTML = pointsGhost.map((p) => {
+      const h = Math.max(0, baseY - p.y);
+      return `<rect class="dash-chart-bar-ghost" x="${(p.x - ghostW / 2).toFixed(1)}" y="${p.y.toFixed(1)}" width="${ghostW.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(3, ghostW / 2).toFixed(1)}" style="opacity:0"><title>${p.full}: ${money(p.valor)}</title></rect>`;
+    }).join('');
+    const ghostRects = barsGhostEl.querySelectorAll('.dash-chart-bar-ghost');
+    requestAnimationFrame(() => {
+      ghostRects.forEach((r, i) => {
+        r.style.transition = `opacity 0.5s ease ${300 + i * 16}ms`;
+        r.style.opacity = '1';
+      });
+    });
+  }
+
+  if (barsEl && dadosMudaram) {
+    barsEl.dataset.sig = assinaturaBars;
+    barsEl.innerHTML = points.map((p, i) => {
+      const fill = p.isLast ? 'url(#barGradRecent)' : 'url(#barGradPast)';
+      const bx = (p.x - barW / 2).toFixed(1);
+      const brx = Math.min(4, barW / 2).toFixed(1);
+      return `<g class="dash-chart-bar-group" data-i="${i}">` +
+        `<rect class="dash-chart-bar${p.isLast ? ' is-recent' : ''}" data-i="${i}" x="${bx}" y="${baseY.toFixed(1)}" width="${barW.toFixed(1)}" height="0" rx="${brx}" fill="${fill}"></rect>` +
+        `<rect class="dash-chart-bar-hatch" x="${bx}" y="${baseY.toFixed(1)}" width="${barW.toFixed(1)}" height="0" rx="${brx}" fill="url(#barHatch)"></rect>` +
+        `</g>`;
+    }).join('');
+    const rects = barsEl.querySelectorAll('.dash-chart-bar');
+    rects.forEach((r, i) => {
+      const p = points[i];
+      const hatch = r.nextElementSibling;
+      const h = Math.max(0, baseY - p.y);
+      r.style.transition = 'none';
+      if (hatch) hatch.style.transition = 'none';
+      requestAnimationFrame(() => {
+        const t = `y 0.55s cubic-bezier(.2,.8,.2,1) ${i * 16}ms, height 0.55s cubic-bezier(.2,.8,.2,1) ${i * 16}ms`;
+        r.style.transition = t;
+        r.setAttribute('y', p.y.toFixed(1));
+        r.setAttribute('height', h.toFixed(1));
+        if (hatch) {
+          hatch.style.transition = t;
+          hatch.setAttribute('y', p.y.toFixed(1));
+          hatch.setAttribute('height', h.toFixed(1));
+        }
+      });
+      r.addEventListener('mouseenter', () => showChartTooltip(p, r));
+      r.addEventListener('mouseleave', hideChartTooltip);
+    });
+  }
+
+  const labelsEl = $('chartLabels');
+  if (labelsEl) {
+    const mobile = window.innerWidth < 480;
+    const showEvery = n > 10 ? (mobile ? 4 : 2) : (n > 6 ? (mobile ? 2 : 1) : 1);
+    labelsEl.innerHTML = pts.map((p, i) => {
+      const isLast = i === n - 1;
+      const visible = isLast || (i % showEvery === 0 && i !== n - 2);
+      return `<span${visible ? '' : ' style="opacity:0"'}>${p.label}</span>`;
+    }).join('');
+  }
+}
+
+function showChartTooltip(ponto, dotEl) {
+  const tip = $('chartTooltip');
+  const wrap = dotEl.closest('.dash-chart-svg-wrap');
+  if (!tip || !wrap) return;
+  const wrapRect = wrap.getBoundingClientRect();
+  const dotRect = dotEl.getBoundingClientRect();
+  const ticketDia = ponto.atendimentos > 0 ? ponto.valor / ponto.atendimentos : 0;
+  const atendimentosTxt = ponto.atendimentos === 1 ? '1 atendimento' : `${ponto.atendimentos} atendimentos`;
+  tip.innerHTML = `
+    <div class="dash-chart-tooltip-date">${ponto.full}</div>
+    <div class="dash-chart-tooltip-value">${money(ponto.valor).replace(',00', '')}</div>
+    <div class="dash-chart-tooltip-row"><span>${atendimentosTxt}</span>${ponto.atendimentos > 0 ? `<span>tíquete ${money(ticketDia).replace(',00', '')}</span>` : ''}</div>
+  `;
+  tip.style.left = (dotRect.left - wrapRect.left + dotRect.width / 2) + 'px';
+  tip.style.top = (dotRect.top - wrapRect.top) + 'px';
+  tip.classList.add('is-visible');
+  dotEl.classList.add('is-hover');
+}
+
+function configurarHoverGrafico() {
+  const capture = $('chartHoverCapture');
+  const svg = $('dashChartSvg');
+  if (!capture || !svg || capture.dataset.wired) return;
+  capture.dataset.wired = '1';
+
+  function svgXDoMouse(clientX) {
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    const relX = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    return vb.x + relX * vb.width;
+  }
+
+  capture.addEventListener('mousemove', (ev) => {
+    const st = _chartHoverState;
+    if (!st || !st.n) return;
+    const svgX = svgXDoMouse(ev.clientX);
+    let melhorI = 0, melhorDist = Infinity;
+    st.pConfirmados.forEach((p, i) => {
+      const d = Math.abs(p.x - svgX);
+      if (d < melhorDist) { melhorDist = d; melhorI = i; }
+    });
+    atualizarHoverParaIndice(melhorI);
+  });
+  capture.addEventListener('mouseleave', esconderHoverGrafico);
+}
+
+function atualizarHoverParaIndice(i) {
+  const st = _chartHoverState;
+  if (!st) return;
+  const pC = st.pConfirmados[i], pR = st.pRecusados[i], pK = st.pConcluidos[i];
+  if (!pC || !pR || !pK) return;
+
+  const crosshair = $('chartCrosshair');
+  if (crosshair) {
+    crosshair.setAttribute('x1', pC.x.toFixed(1));
+    crosshair.setAttribute('x2', pC.x.toFixed(1));
+    crosshair.setAttribute('y1', st.padTop.toFixed(1));
+    crosshair.setAttribute('y2', st.baseY.toFixed(1));
+    crosshair.classList.add('is-visible');
+  }
+  posicionarIndicador('chartDotsConfirmados', pC);
+  posicionarIndicador('chartDotsRecusados', pR);
+  posicionarIndicador('chartDotsConcluidos', pK);
+
+  const svg = $('dashChartSvg');
+  const wrap = svg && svg.closest('.dash-chart-svg-wrap');
+  if (svg && wrap) {
+    const wrapRect = wrap.getBoundingClientRect();
+    const svgRect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    const pxX = svgRect.left - wrapRect.left + ((pC.x - vb.x) / vb.width) * svgRect.width;
+    const pxY = svgRect.top - wrapRect.top + ((Math.min(pC.y, pR.y, pK.y) - vb.y) / vb.height) * svgRect.height;
+    showStatusTooltip(st.statusPts[i], pxX, pxY);
+  }
+}
+
+function posicionarIndicador(elId, ponto) {
+  const el = $(elId);
+  const dot = el && el.querySelector('.dash-chart-dot');
+  if (!dot) return;
+  dot.setAttribute('cx', ponto.x.toFixed(1));
+  dot.setAttribute('cy', ponto.y.toFixed(1));
+  dot.style.opacity = '1';
+}
+
+function esconderHoverGrafico() {
+  const crosshair = $('chartCrosshair');
+  if (crosshair) crosshair.classList.remove('is-visible');
+  ['chartDotsConfirmados', 'chartDotsRecusados', 'chartDotsConcluidos'].forEach(id => {
+    const dot = $(id) && $(id).querySelector('.dash-chart-dot');
+    if (dot) dot.style.opacity = '0';
+  });
+  hideChartTooltip();
+}
+
+function showStatusTooltip(ponto, xPixel, yPixel) {
+  const tip = $('chartTooltip');
+  if (!tip) return;
+  tip.innerHTML = `
+    <div class="dash-chart-tooltip-date">${ponto.full}</div>
+    <div class="dash-chart-tooltip-row dash-chart-tooltip-status">
+      <span class="is-green">● Confirmados <b>${ponto.confirmados}</b></span>
+      <span class="is-red">● Recusados <b>${ponto.recusados}</b></span>
+      <span class="is-purple">● Concluídos <b>${ponto.concluidos}</b></span>
+    </div>
+  `;
+  tip.style.left = xPixel + 'px';
+  tip.style.top = yPixel + 'px';
+  tip.classList.add('is-visible');
+}
+
+function hideChartTooltip() {
+  const tip = $('chartTooltip');
+  if (tip) tip.classList.remove('is-visible');
+  document.querySelectorAll('.dash-chart-dot.is-hover, .dash-chart-bar.is-hover').forEach(el => el.classList.remove('is-hover'));
+}
+
+function renderFinanceiro() {
+  if (typeof window.renderFinanceiroV2 === 'function') return window.renderFinanceiroV2();
+  const todos = state.agendamentos || [];
+  const fin = todos.filter(isFinanceiro);
+  const total = fin.reduce((s, a) => s + Number(a.valor || 0), 0);
+  const ticket = fin.length ? total / fin.length : 0;
+  const hoje = hojeISO();
+  const mes = mesPrefixo();
+
+  const fatHoje = fin.filter(a => dataConclusaoISO(a) === hoje).reduce((s, a) => s + Number(a.valor || 0), 0);
+  const fatMes = fin.filter(a => dataConclusaoISO(a).startsWith(mes)).reduce((s, a) => s + Number(a.valor || 0), 0);
+
+  setText('finHoje', money(fatHoje).replace(',00', ''));
+  setText('finHojeSub', new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' }));
+  setText('finMes', money(fatMes).replace(',00', ''));
+  setText('finMesSub', new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }));
+  setText('finTicket', money(ticket).replace(',00', ''));
+  setText('finPagos', fin.length);
+  setText('finPagosSub', 'Todos os tempos');
+
+  renderFinBars7(fin, hoje);
+  renderFinWeekRanking(fin);
+
+  const naoExcluidos = todos.filter(a => normStatus(a.status) !== 'Excluído');
+  const clientesUnicos = new Set(naoExcluidos.map(a => (a.cliente_telefone || a.cliente_nome || '').trim().toLowerCase()).filter(Boolean));
+  const taxa = naoExcluidos.length ? Math.round((fin.length / naoExcluidos.length) * 100) : 0;
+  setText('finClientesUnicos', clientesUnicos.size);
+  setText('finTotalAgendamentos', naoExcluidos.length);
+  setText('finTaxaConclusao', taxa + '%');
+}
+
+function renderFinBars7(fin, hojeStr, containerId, badgeId) {
+  containerId = containerId || 'finBars7';
+  badgeId = badgeId || 'finMelhorDiaBadge';
+  const el = $(containerId);
+  if (!el) return;
+
+  const dias = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(hojeStr + 'T00:00:00');
+    d.setDate(d.getDate() - i);
+    const iso = dataLocalISO(d);
+    const valor = fin.filter(a => dataConclusaoISO(a) === iso).reduce((s, a) => s + Number(a.valor || 0), 0);
+    dias.push({ iso, valor, weekday: d.getDay(), isHoje: iso === hojeStr });
+  }
+
+  const max = Math.max(...dias.map(d => d.valor), 1);
+  const maiorDia = dias.reduce((m, d) => d.valor > m.valor ? d : m, dias[0]);
+
+  el.innerHTML = dias.map(d => {
+    const alturaPct = Math.max(4, Math.round((d.valor / max) * 100));
+    const isTop = d.valor > 0 && d.valor === maiorDia.valor;
+    const label = d.isHoje ? 'Hoje' : DIAS_SEMANA_ABREV[d.weekday];
+    return `<div class="fin-bar-col${isTop ? ' top' : ''}" style="--fin-bar-h:${alturaPct}%">
+      <div class="fin-bar-value">${money(d.valor).replace(',00', '')}</div>
+      <div class="fin-bar-track"><div class="fin-bar-fill"></div></div>
+      <div class="fin-bar-label">${label}</div>
+    </div>`;
+  }).join('');
+
+  const badge = $(badgeId);
+  if (badge) {
+    badge.textContent = maiorDia.valor > 0
+      ? `Melhor dia: ${maiorDia.isHoje ? 'Hoje' : DIAS_SEMANA_NOME[maiorDia.weekday]}`
+      : 'Sem faturamento ainda';
+  }
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.querySelectorAll('.fin-bar-col').forEach(col => col.classList.add('animated'));
+  }));
+}
+
+function renderFinWeekRanking(fin) {
+  const el = $('finWeekList');
+  if (!el) return;
+
+  const totais = [0, 0, 0, 0, 0, 0, 0];
+  fin.forEach(a => {
+    const iso = dataConclusaoISO(a);
+    if (!iso) return;
+    const d = new Date(iso + 'T00:00:00');
+    if (Number.isNaN(d.getTime())) return;
+    totais[d.getDay()] += Number(a.valor || 0);
+  });
+
+  const ranking = totais
+    .map((valor, idx) => ({ idx, valor }))
+    .sort((a, b) => b.valor - a.valor);
+
+  const max = Math.max(...totais, 1);
+
+  el.innerHTML = ranking.map((r, pos) => {
+    const pct = Math.max(3, Math.round((r.valor / max) * 100));
+    const isTop = pos === 0 && r.valor > 0;
+    return `<div class="fin-week-row${isTop ? ' top' : ''}">
+      <div class="fin-week-day${isTop ? ' top' : ''}">${DIAS_SEMANA_NOME[r.idx]}</div>
+      <div class="fin-week-track"><div class="fin-week-fill" data-pct="${pct}"></div></div>
+      <div class="fin-week-val">${money(r.valor).replace(',00', '')}</div>
+    </div>`;
+  }).join('');
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.querySelectorAll('.fin-week-fill').forEach(f => { f.style.width = f.dataset.pct + '%'; });
+  }));
+}
+
+function renderDashPremium() {
+  if (!$('dashDonutValue')) return;
+  const todos = state.agendamentos || [];
+  const ativos = todos.filter(a => normStatus(a.status) !== 'Excluído');
+
+  const concluidos = ativos.filter(a => normStatus(a.status) === 'Concluído').length;
+  const confirmados = ativos.filter(a => ['Confirmado', 'Reagendado'].includes(normStatus(a.status))).length;
+  const pendentes = ativos.filter(a => normStatus(a.status) === 'Pendente').length;
+  const total = ativos.length;
+
+  setText('dashDonutValue', total);
+  setText('dashLegConcluidos', concluidos);
+  setText('dashLegConfirmados', confirmados);
+  setText('dashLegPendentes', pendentes);
+
+  const R = 52, C = 2 * Math.PI * R;
+  const segs = [
+    { id: 'dashDonutConcluidos', val: concluidos },
+    { id: 'dashDonutConfirmados', val: confirmados },
+    { id: 'dashDonutPendentes', val: pendentes }
+  ];
+  let acc = 0;
+  segs.forEach(seg => {
+    const el = $(seg.id);
+    if (!el) return;
+    const frac = total > 0 ? seg.val / total : 0;
+    const len = Math.max(0, frac * C - (frac > 0 ? 2 : 0));
+    el.style.strokeDasharray = `${len} ${C - len}`;
+    el.style.strokeDashoffset = String(-acc);
+    acc += frac * C;
+  });
+}
+
+function atualizarPreviewEmpresa() {
+  const nome = ($('cfgNome')?.value || '').trim();
+  const whatsapp = ($('cfgWhatsapp')?.value || '').trim();
+  const slug = ($('cfgSlug')?.value || '').trim();
+  const endereco = ($('cfgEndereco')?.value || '').trim();
+  const cidade = ($('cfgCidade')?.value || '').trim();
+  const setTxt = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+  setTxt('empPrevNome', nome || 'Nome da empresa');
+  const av = $('empPrevAvatar'); if (av) av.textContent = nome ? nome.trim().charAt(0).toUpperCase() : '?';
+  setTxt('empPrevLink', slug ? ('vyxora.online/' + slug) : 'vyxora.online/agenda');
+  setTxt('empPrevWhats', whatsapp || 'WhatsApp não informado');
+  const enderecoCompleto = [endereco, cidade].filter(Boolean).join(' · ');
+  setTxt('empPrevEndereco', enderecoCompleto || 'Endereço não informado');
+}
+window.atualizarPreviewEmpresa = atualizarPreviewEmpresa;
+
+function renderConfig() {
+  const e = state.empresa || {};
+  const set = (id, v) => { const el = $(id); if (el) el.value = v || ''; };
+  set('cfgNome', e.nome); set('cfgWhatsapp', e.whatsapp); set('cfgSlug', e.slug);
+  set('cfgEndereco', e.endereco); set('cfgCidade', e.cidade);
+  set('cfgInstagram', e.instagram); set('cfgFacebook', e.facebook);
+  set('cfgTiktok', e.tiktok); set('cfgSite', e.site);
+  if (typeof atualizarPreviewEmpresa === 'function') atualizarPreviewEmpresa();
+  renderPreviewImagem('previewFotoPerfil', e.foto_perfil_url);
+  renderPreviewImagem('previewFotoPublica', e.foto_publica_url);
+  const enquadramentoPerfil = getEnquadramentoFoto('perfil', e);
+  const enquadramentoPublico = getEnquadramentoFoto('publica', e);
+  aplicarEnquadramentoFoto($('previewFotoPerfil'), enquadramentoPerfil.x, enquadramentoPerfil.y, enquadramentoPerfil.zoom);
+  aplicarEnquadramentoFoto($('previewFotoPublica'), enquadramentoPublico.x, enquadramentoPublico.y, enquadramentoPublico.zoom);
+  const mensagens = getMensagensWhatsapp();
+  set('msgConfirmacao', mensagens.confirmacao); set('msgRecusa', mensagens.recusa);
+  set('msgReagendamento', mensagens.reagendamento); set('msgContato', mensagens.contato);
+  const diasMap = [
+    { campo: 'seg', id: 'diaSeg' }, { campo: 'ter', id: 'diaTer' },
+    { campo: 'qua', id: 'diaQua' }, { campo: 'qui', id: 'diaQui' },
+    { campo: 'sex', id: 'diaSex' }, { campo: 'sab', id: 'diaSab' },
+    { campo: 'dom', id: 'diaDom' }
+  ];
+  // Verifica se empresa nunca configurou os dias (todos os campos são null)
+  const nuncaConfigurou = diasMap.every(({ campo }) => e[campo] === null || e[campo] === undefined);
+  const padraoDias = ['seg','ter','qua','qui','sex']; // padrão para empresa nova
+  diasMap.forEach(({ campo, id }) => {
+    const btn = $(id); if (!btn) return;
+    const ativo = nuncaConfigurou ? padraoDias.includes(campo) : e[campo] === true;
+    if (ativo) btn.classList.add('ativo'); else btn.classList.remove('ativo');
+  });
+  const hi = $('cfgHorarioInicio'); if (hi) hi.value = e.horario_inicio || '09:00';
+  const hf = $('cfgHorarioFim'); if (hf) hf.value = e.horario_fim || '18:00';
+  const intervaloAtual = String(e.intervalo_slots || 60);
+  const isHidden = $('cfgIntervaloSlots'); if (isHidden) isHidden.value = intervaloAtual;
+  document.querySelectorAll('.intervalo-btn').forEach(b => {
+    b.classList.toggle('ativo', b.dataset.val === intervaloAtual);
+  });
+  const lb = $('cfgLinkBox');
+  if (lb) lb.textContent = '🔗 ' + publicUrl(e.slug || '');
+}
+
+function setConfigTab(tab, botao) {
+  document.querySelectorAll('.config-tab').forEach(item => item.classList.remove('active'));
+  document.querySelectorAll('.config-tab-panel').forEach(item => item.classList.remove('active'));
+  if (botao) botao.classList.add('active');
+  document.querySelector(`[data-config-tab="${tab}"]`)?.classList.add('active');
+  document.querySelectorAll('[data-config-section]').forEach(item => {
+    item.classList.toggle('active', item.dataset.configSection === tab);
+  });
+  const secoes = {
+    empresa: ['Dados da empresa', 'Informações principais do seu negócio.', 'Dados <em>da empresa.</em>'],
+    redes: ['Redes sociais', 'Links exibidos na sua página pública.', 'Redes <em>sociais.</em>'],
+    horarios: ['Horários', 'Dias disponíveis para receber agendamentos.', 'Horários <em>de funcionamento.</em>'],
+    mensagens: ['Mensagens', 'Textos automáticos enviados pelo WhatsApp.', 'Mensagens <em>automáticas.</em>'],
+    fotos: ['Fotos', 'Imagens usadas no painel e na página pública.', 'Fotos <em>de perfil.</em>']
+  };
+  const info = secoes[tab] || secoes.empresa;
+  setText('pageTitle', info[0]); setText('pageSub', info[1]);
+  const titulo = $('configHeroTitle'), subtitulo = $('configHeroSub');
+  if (titulo) titulo.innerHTML = info[2];
+  if (subtitulo) subtitulo.textContent = info[1];
+}
+
+function toggleDia(btn) {
+  if (!btn) return;
+  btn.classList.toggle('ativo');
+}
+
+function selecionarIntervalo(btn) {
+  document.querySelectorAll('.intervalo-btn').forEach(b => b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  const hidden = document.getElementById('cfgIntervaloSlots');
+  if (hidden) hidden.value = btn.dataset.val;
+}
+
+function openConfigSection(tab = 'empresa') { setView('config'); setConfigTab(tab); closeMobileMenu(); }
+
+
+function vxClienteModalIsMobile(){
+  return window.matchMedia('(max-width:768px)').matches;
+}
+
+function vxApplyClienteModalStyle(){
+  const modal=$('vxClientesModal');
+  const card=modal?.querySelector('.vx-clientes-modal-card');
+  if(!modal||!card) return;
+  const imp=(el,prop,val)=>el?.style.setProperty(prop,val,'important');
+
+  imp(modal,'display','grid');
+  imp(modal,'position','fixed');
+  imp(modal,'inset','0');
+  imp(modal,'width','100vw');
+  imp(modal,'height','100dvh');
+  imp(modal,'place-items','center');
+  imp(modal,'padding','0 8px');
+  imp(modal,'margin','0');
+  imp(modal,'background','#08070d');
+  imp(modal,'z-index','100090');
+
+  imp(card,'width','calc(100vw - 16px)');
+  imp(card,'max-width','calc(100vw - 16px)');
+  imp(card,'max-height','calc(100dvh - 16px)');
+  imp(card,'box-sizing','border-box');
+  imp(card,'overflow-y','auto');
+  imp(card,'overflow-x','hidden');
+  imp(card,'margin','0 auto');
+  imp(card,'border-radius','0');
+}
+
+function vxResetClienteModal(){
+  if($('vxCliNome')) $('vxCliNome').value='';
+  if($('vxCliTel')) $('vxCliTel').value='';
+  if($('vxCliEmail')) $('vxCliEmail').value='';
+}
+
+
+let _vxClienteKeyboardRAF=0;
+
+function vxResetClienteModalKeyboardPosition(){
+  const card=document.querySelector('#vxClientesModal .vx-clientes-modal-card');
+  if(!card) return;
+  card.style.removeProperty('transform');
+  card.style.removeProperty('transition');
+}
+
+function vxAjustarClienteModalTeclado(){
+  const modal=$('vxClientesModal');
+  const card=modal?.querySelector('.vx-clientes-modal-card');
+  const email=$('vxCliEmail');
+
+  if(!modal||!card||!modal.classList.contains('open')) return;
+
+  // SOMENTE o campo E-mail pode deslocar o modal.
+  if(document.activeElement!==email){
+    card.style.setProperty('transition','transform .18s ease','important');
+    card.style.setProperty('transform','translateY(0)','important');
     return;
   }
 
-  const run = () => {
-    if (!input || !form) return;
-    input.value = handedUrl;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    window.setTimeout(() => {
-      if (typeof form.requestSubmit === 'function') form.requestSubmit();
-      else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    }, 120);
+  // Sempre mede a partir da posição normal.
+  card.style.setProperty('transition','none','important');
+  card.style.setProperty('transform','translateY(0)','important');
+
+  setTimeout(()=>{
+    if(!modal.classList.contains('open') || document.activeElement!==email) return;
+
+    const vv=window.visualViewport;
+    const saveBtn=$('vxClientesModalSave');
+    if(!saveBtn) return;
+
+    let shift=0;
+
+    if(vv){
+      const visibleBottom=(vv.offsetTop||0)+vv.height;
+      const btnRect=saveBtn.getBoundingClientRect();
+      shift=Math.max(0,(btnRect.bottom+12)-visibleBottom);
+    }else{
+      shift=150;
+    }
+
+    // Evita deslocamento exagerado.
+    shift=Math.min(shift,180);
+
+    card.style.setProperty('transition','transform .18s ease','important');
+    card.style.setProperty(
+      'transform',
+      shift>0 ? `translateY(-${Math.ceil(shift)}px)` : 'translateY(0)',
+      'important'
+    );
+  },220);
+}
+window.vxAjustarClienteModalTeclado=vxAjustarClienteModalTeclado;
+
+function vxOpenClienteModal(){
+  if(!vxClienteModalIsMobile()) return;
+  const modal=$('vxClientesModal');
+  if(!modal) return;
+
+  // Guarda a altura da tela ANTES do teclado abrir.
+  // Assim o teclado não redimensiona nem cria rolagem no modal.
+  const viewportH = window.innerHeight;
+  document.documentElement.style.setProperty('--vx-clientes-viewport-h', `${viewportH}px`);
+  document.body.style.setProperty('overflow','hidden','important');
+  document.body.style.setProperty('overscroll-behavior','none','important');
+
+  // Evita cortes por overflow/transform da view Clientes.
+  if(modal.parentElement!==document.body){
+    document.body.appendChild(modal);
+  }
+
+  const body=modal.querySelector('.vx-clientes-modal-body');
+  const save=$('vxClientesModalSave');
+  const success=$('vxClientesSuccess');
+
+  if(success){
+    success.hidden=true;
+    success.style.setProperty('display','none','important');
+  }
+  if(body){
+    body.hidden=false;
+    body.style.setProperty('display','grid','important');
+  }
+  if(save){
+    save.hidden=false;
+    save.style.setProperty('display','block','important');
+  }
+
+  vxApplyClienteModalStyle();
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.classList.add('vx-clientes-modal-open');
+  vxResetClienteModalKeyboardPosition();
+  setTimeout(()=>{
+    $('vxCliNome')?.focus();
+  },80);
+}
+window.vxOpenClienteModal=vxOpenClienteModal;
+
+function vxCloseClienteModal(){
+  const modal=$('vxClientesModal');
+  if(!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  modal.style.setProperty('display','none','important');
+  modal.style.setProperty('pointer-events','none','important');
+  document.body.classList.remove('vx-clientes-modal-open');
+  document.body.style.removeProperty('overflow');
+  document.body.style.removeProperty('overscroll-behavior');
+  document.documentElement.style.removeProperty('--vx-clientes-viewport-h');
+  vxResetClienteModalKeyboardPosition();
+}
+window.vxCloseClienteModal=vxCloseClienteModal;
+
+function vxShowClienteSuccess(nome){
+  const modal=$('vxClientesModal');
+  const body=modal?.querySelector('.vx-clientes-modal-body');
+  const save=$('vxClientesModalSave');
+  const success=$('vxClientesSuccess');
+  const text=$('vxClientesSuccessText');
+
+  if(text) text.textContent=(nome||'Cliente')+' salvo com sucesso.';
+  if(body){
+    body.hidden=true;
+    body.style.setProperty('display','none','important');
+  }
+  if(save){
+    save.hidden=true;
+    save.style.setProperty('display','none','important');
+  }
+  if(success){
+    success.hidden=false;
+    success.style.setProperty('display','flex','important');
+  }
+}
+
+function vxNovoClienteAposSucesso(){
+  const modal=$('vxClientesModal');
+  const body=modal?.querySelector('.vx-clientes-modal-body');
+  const save=$('vxClientesModalSave');
+  const success=$('vxClientesSuccess');
+
+  if(success){
+    success.hidden=true;
+    success.style.setProperty('display','none','important');
+  }
+  if(body){
+    body.hidden=false;
+    body.style.setProperty('display','grid','important');
+  }
+  if(save){
+    save.hidden=false;
+    save.style.setProperty('display','block','important');
+  }
+
+  vxResetClienteModal();
+  setTimeout(()=>$('vxCliNome')?.focus(),80);
+}
+window.vxNovoClienteAposSucesso=vxNovoClienteAposSucesso;
+
+async function vxSalvarClienteModal(){
+  if(!vxClienteModalIsMobile()) return;
+
+  const nome=($('vxCliNome')?.value||'').trim();
+  const telefone=($('vxCliTel')?.value||'').trim();
+  const email=($('vxCliEmail')?.value||'').trim();
+  const btn=$('vxClientesModalSave');
+
+  if(!nome) return toast('Digite o nome.','err');
+
+  if(btn) btn.disabled=true;
+  try{
+    const {data:novoCliente,error}=await db.from('agenda_clientes').insert({
+      empresa_id:state.empresa.id,
+      nome,
+      telefone,
+      email,
+      status:'ativo'
+    }).select('*').single();
+
+    if(error){
+      toast('Erro ao salvar: '+error.message,'err');
+      return;
+    }
+
+    // Atualização imediata da lista, antes da sincronização geral.
+    if(novoCliente){
+      const semDuplicar=(state.clientes||[]).filter(c=>String(c.id)!==String(novoCliente.id));
+      state.clientes=[novoCliente,...semDuplicar];
+      renderClientes();
+      renderStats();
+      if(typeof renderDashPremium==='function') renderDashPremium();
+    }
+
+    try{
+      await loadAll();
+    }catch(syncErr){
+      console.warn('Sincronização pós-cliente:',syncErr);
+    }
+
+    vxResetClienteModal();
+    vxShowClienteSuccess(nome);
+  }finally{
+    if(btn) btn.disabled=false;
+  }
+}
+window.vxSalvarClienteModal=vxSalvarClienteModal;
+
+// X mobile robusto.
+document.addEventListener('click',(e)=>{
+  const btn=e.target?.closest?.('.vx-clientes-modal-close');
+  if(!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  vxCloseClienteModal();
+},true);
+
+
+async function salvarCliente() {
+  const nome = ($('cliNome')?.value || '').trim();
+  if (!nome) return toast('Digite o nome.', 'err');
+  const { error } = await db.from('agenda_clientes').insert({
+    empresa_id: state.empresa.id, nome,
+    telefone: ($('cliTel')?.value || '').trim(),
+    email: ($('cliEmail')?.value || '').trim(), status: 'ativo'
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('cliNome')) $('cliNome').value = '';
+  if ($('cliTel')) $('cliTel').value = '';
+  if ($('cliEmail')) $('cliEmail').value = '';
+  await loadAll(); showNotif('Cliente adicionado', nome + ' salvo com sucesso.', 'ok');
+}
+
+
+function vxResetServicoModal(){
+  const body=$('vxServicosModal')?.querySelector('.vx-servicos-modal-body');
+  const save=$('vxServicosModalSave');
+  const success=$('vxServicosSuccess');
+  if(body) body.hidden=false;
+  if(save){ save.hidden=false; save.disabled=false; }
+  if(success) success.hidden=true;
+  if($('vxSrvNome')) $('vxSrvNome').value='';
+  if($('vxSrvPreco')) $('vxSrvPreco').value='';
+  if($('vxSrvDur')) $('vxSrvDur').value='';
+}
+function vxOpenServicoModal(){
+  if(!window.matchMedia('(max-width:768px)').matches) return;
+
+  const modal=$('vxServicosModal');
+  if(!modal) return;
+
+  if(modal.parentElement!==document.body){
+    document.body.appendChild(modal);
+  }
+
+  vxResetServicoModal();
+
+  modal.style.removeProperty('display');
+  modal.style.removeProperty('pointer-events');
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.classList.add('vx-servicos-modal-open');
+}
+function vxCloseServicoModal(){
+  const modal=$('vxServicosModal');
+  if(!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('vx-servicos-modal-open');
+  vxResetServicoModal();
+}
+function vxShowServicoSuccess(nome){
+  const body=$('vxServicosModal')?.querySelector('.vx-servicos-modal-body');
+  const save=$('vxServicosModalSave');
+  const success=$('vxServicosSuccess');
+  if(body) body.hidden=true;
+  if(save) save.hidden=true;
+  if(success) success.hidden=false;
+  if($('vxServicosSuccessText')) $('vxServicosSuccessText').textContent=`${nome} salvo com sucesso.`;
+}
+function vxNovoServicoAposSucesso(){
+  vxResetServicoModal();
+  $('vxSrvNome')?.focus();
+}
+async function vxSalvarServicoModal(){
+  const nome=($('vxSrvNome')?.value||'').trim();
+  if(!nome) return toast('Digite o nome.','err');
+  const btn=$('vxServicosModalSave');
+  if(btn) btn.disabled=true;
+  try{
+    const {error}=await db.from('agenda_servicos').insert({
+      empresa_id:state.empresa.id,
+      nome,
+      preco:Number($('vxSrvPreco')?.value||0),
+      duracao_minutos:Number($('vxSrvDur')?.value||60),
+      status:'ativo'
+    });
+    if(error) return toast('Erro ao salvar: '+error.message,'err');
+    await loadAll();
+    renderServicos();
+    renderStats();
+    if(typeof renderDashPremium==='function') renderDashPremium();
+    vxShowServicoSuccess(nome);
+  }finally{
+    if(btn) btn.disabled=false;
+  }
+}
+window.vxOpenServicoModal=vxOpenServicoModal;
+window.vxCloseServicoModal=vxCloseServicoModal;
+window.vxSalvarServicoModal=vxSalvarServicoModal;
+window.vxNovoServicoAposSucesso=vxNovoServicoAposSucesso;
+document.addEventListener('click',(e)=>{
+  const btn=e.target?.closest?.('.vx-servicos-modal-close');
+  if(!btn) return;
+  e.preventDefault(); e.stopPropagation(); vxCloseServicoModal();
+},true);
+
+async function salvarServico() {
+  const nome = ($('srvNome')?.value || '').trim();
+  if (!nome) return toast('Digite o nome.', 'err');
+  const { error } = await db.from('agenda_servicos').insert({
+    empresa_id: state.empresa.id, nome,
+    preco: Number($('srvPreco')?.value || 0),
+    duracao_minutos: Number($('srvDur')?.value || 60), status: 'ativo'
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('srvNome')) $('srvNome').value = '';
+  if ($('srvPreco')) $('srvPreco').value = '';
+  if ($('srvDur')) $('srvDur').value = '';
+  await loadAll(); showNotif('Serviço adicionado', '', 'ok');
+}
+
+async function salvarProfissional() {
+  const nome = ($('proNome')?.value || '').trim();
+  if (!nome) return toast('Digite o nome.', 'err');
+  const { error } = await db.from('agenda_profissionais').insert({
+    empresa_id: state.empresa.id, nome,
+    especialidade: ($('proEsp')?.value || '').trim(),
+    telefone: ($('proTel')?.value || '').trim(), status: 'ativo'
+  });
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  if ($('proNome')) $('proNome').value = '';
+  if ($('proEsp')) $('proEsp').value = '';
+  if ($('proTel')) $('proTel').value = '';
+  await loadAll(); showNotif('Profissional adicionado', '', 'ok');
+}
+
+async function salvarAgendamento() {
+  if (salvarAgendamento._running) return;
+
+  const botao = $('agendaBtnSalvar');
+  salvarAgendamento._running = true;
+  if (botao) botao.disabled = true;
+
+  try {
+    const mobileAgenda = vxIsMobileAgenda();
+
+    let clienteId = mobileAgenda ? ($('agClienteSelect')?.value || null) : null;
+    const agCli = mobileAgenda
+      ? ($('agCliente')?.value || '').trim()
+      : ($('agClienteDesktop')?.value || '').trim();
+    const agTel = mobileAgenda
+      ? ($('agTelefone')?.value || '').trim()
+      : ($('agTelefoneDesktop')?.value || '').trim();
+
+    const agSvc = $('agServico')?.value;
+    const agProf = $('agProfissional')?.value;
+    const agData = $('agData')?.value;
+    const agHora = $('agHora')?.value;
+
+    if (!agCli || !agSvc || !agProf || !agData || !agHora || (mobileAgenda && !clienteId)) {
+      toast('Preencha todos os campos.', 'err');
+      return;
+    }
+
+    const serv = (state.servicos || []).find(s => s.id === agSvc);
+    const prof = (state.profissionais || []).find(p => p.id === agProf);
+
+    // Desktop mantém o fluxo original do sistema.
+    if (!mobileAgenda) {
+      try {
+        const { data: cli } = await db.from('agenda_clientes').insert({
+          empresa_id: state.empresa.id,
+          nome: agCli,
+          telefone: agTel,
+          status: 'ativo'
+        }).select('*').single();
+        if (cli) clienteId = cli.id;
+      } catch (e) {
+        console.warn('Não foi possível criar o cliente automaticamente:', e);
+      }
+    }
+
+    const { error } = await db.from('agenda_agendamentos').insert({
+      empresa_id: state.empresa.id,
+      cliente_id: clienteId,
+      servico_id: serv?.id || null,
+      profissional_id: prof?.id || null,
+      cliente_nome: agCli,
+      cliente_telefone: agTel,
+      servico_nome: serv?.nome || '',
+      profissional_nome: prof?.nome || '',
+      data: agData,
+      hora: agHora,
+      status: $('agStatus')?.value || 'Pendente',
+      valor: Number(serv?.preco || 0)
+    });
+
+    if (error) {
+      toast('Erro ao salvar: ' + error.message, 'err');
+      return;
+    }
+
+    if ($('agClienteSelect')) $('agClienteSelect').value = '';
+    if ($('agCliente')) $('agCliente').value = '';
+    if ($('agTelefone')) $('agTelefone').value = '';
+    if ($('agClienteDesktop')) $('agClienteDesktop').value = '';
+    if ($('agTelefoneDesktop')) $('agTelefoneDesktop').value = '';
+    if ($('vxAgendaClientSummary')) $('vxAgendaClientSummary').hidden = true;
+    if ($('agServico')) $('agServico').value = '';
+    if ($('agProfissional')) $('agProfissional').value = '';
+    if ($('agStatus')) $('agStatus').value = 'Confirmado';
+    if ($('agData')) {
+      if ($('agData')._flatpickr) $('agData')._flatpickr.clear();
+      else $('agData').value = '';
+    }
+    if ($('agHora')) $('agHora').value = '';
+
+    await loadAll();
+    if (vxIsMobileAgenda()) vxCloseAgendaForm();
+    showNotif('Agendamento criado!', `${agCli} — ${formatDate(agData)} às ${agHora}.`, 'ok');
+  } finally {
+    salvarAgendamento._running = false;
+    if (botao) botao.disabled = false;
+  }
+}
+
+async function salvarConfig() {
+  if (!state?.empresa?.id) return;
+  const nome = ($('cfgNome')?.value || '').trim();
+  if (!nome) return toast('Digite o nome.', 'err');
+  const slugAtual = slugify(state.empresa.slug || '');
+  const slugNovo = slugify($('cfgSlug')?.value || slugAtual);
+  const updates = {
+    nome, whatsapp: ($('cfgWhatsapp')?.value || '').trim(),
+    endereco: ($('cfgEndereco')?.value || '').trim(), cidade: ($('cfgCidade')?.value || '').trim()
+  };
+  if (slugNovo !== slugAtual) {
+    const { data: slugExiste } = await db.from('agenda_empresas').select('id').eq('slug', slugNovo).neq('id', state.empresa.id).maybeSingle();
+    if (slugExiste) return toast('Esse link já está em uso.', 'err');
+    updates.slug = slugNovo;
+  }
+  const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar: ' + error.message, 'err');
+  state.empresa = data || { ...state.empresa, ...updates };
+  setText('sideNome', state.empresa.nome); setText('topbarNome', state.empresa.nome); setText('mobileDashNome', state.empresa.nome); renderAvatarPainel();
+  { const sideCard = $('sideAvatar')?.closest('.side-user-card'); if (sideCard) sideCard.setAttribute('data-tip', state.empresa.nome || 'Empresa'); }
+  const lb = $('sideLinkBox'); if (lb) lb.textContent = publicUrl(state.empresa.slug);
+  renderConfig(); showNotif('Configurações salvas', '', 'ok');
+}
+
+async function salvarHorarios() {
+  if (!state?.empresa?.id) return;
+  const diasMap = [
+    { campo: 'seg', id: 'diaSeg' }, { campo: 'ter', id: 'diaTer' },
+    { campo: 'qua', id: 'diaQua' }, { campo: 'qui', id: 'diaQui' },
+    { campo: 'sex', id: 'diaSex' }, { campo: 'sab', id: 'diaSab' },
+    { campo: 'dom', id: 'diaDom' }
+  ];
+  const updates = {};
+  diasMap.forEach(({ campo, id }) => { const btn = $(id); if (btn) updates[campo] = btn.classList.contains('ativo'); });
+  updates.horario_inicio = $('cfgHorarioInicio')?.value || '09:00';
+  updates.horario_fim = $('cfgHorarioFim')?.value || '18:00';
+  updates.intervalo_slots = parseInt($('cfgIntervaloSlots')?.value || '60');
+  const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar horários: ' + error.message, 'err');
+  state.empresa = data || { ...state.empresa, ...updates };
+  showNotif('Horários de funcionamento salvos', '', 'ok');
+}
+
+async function salvarRedesSociais() {
+  if (!state?.empresa?.id) return;
+  const updates = {
+    instagram: ($('cfgInstagram')?.value || '').trim(), facebook: ($('cfgFacebook')?.value || '').trim(),
+    tiktok: ($('cfgTiktok')?.value || '').trim(), site: ($('cfgSite')?.value || '').trim()
+  };
+  const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar redes: ' + error.message, 'err');
+  state.empresa = data || { ...state.empresa, ...updates };
+  showNotif('Redes sociais salvas', '', 'ok');
+}
+
+function abrirEditorFoto(tipo, input) {
+  if (!state?.empresa?.id || !state?.user?.id || !input?.files?.[0]) return;
+  const arquivo = input.files[0];
+  const permitidos = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!permitidos.includes(arquivo.type)) { input.value = ''; return toast('Use uma imagem JPG, PNG ou WEBP.', 'err'); }
+  if (arquivo.size > 5 * 1024 * 1024) { input.value = ''; return toast('A imagem deve ter no máximo 5 MB.', 'err'); }
+  const atual = getEnquadramentoFoto(tipo);
+  _fotoEditor = { tipo, input, arquivo, urlTemporaria: URL.createObjectURL(arquivo), x: atual.x, y: atual.y, zoom: atual.zoom, ponteiros: new Map(), ultimoX: 0, ultimoY: 0, distanciaAnterior: 0 };
+  setText('fotoEditorTitulo', tipo === 'perfil' ? 'Ajustar foto do painel' : 'Ajustar foto pública');
+  aplicarImagemFundo($('fotoEditorCircle'), _fotoEditor.urlTemporaria);
+  atualizarEditorFoto();
+  const overlay = $('fotoEditorOverlay'); if (overlay) overlay.classList.add('open');
+}
+
+function atualizarEditorFoto() {
+  if (!_fotoEditor) return;
+  _fotoEditor.zoom = Math.max(40, Math.min(300, Number(_fotoEditor.zoom) || 100));
+  aplicarEnquadramentoFoto($('fotoEditorCircle'), _fotoEditor.x, _fotoEditor.y, _fotoEditor.zoom);
+}
+
+function iniciarArrasteFotoEditor(evento) {
+  if (!_fotoEditor) return;
+  _fotoEditor.ponteiros.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
+  _fotoEditor.ultimoX = evento.clientX; _fotoEditor.ultimoY = evento.clientY;
+  _fotoEditor.distanciaAnterior = distanciaEntrePonteiros();
+  evento.currentTarget.setPointerCapture?.(evento.pointerId);
+}
+
+function moverFotoEditor(evento) {
+  if (!_fotoEditor?.ponteiros?.has(evento.pointerId)) return;
+  _fotoEditor.ponteiros.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
+  const circulo = $('fotoEditorCircle'), largura = circulo?.clientWidth || 270;
+  if (_fotoEditor.ponteiros.size >= 2) {
+    const distanciaAtual = distanciaEntrePonteiros();
+    if (_fotoEditor.distanciaAnterior) _fotoEditor.zoom += (distanciaAtual - _fotoEditor.distanciaAnterior) / largura * 180;
+    _fotoEditor.distanciaAnterior = distanciaAtual; atualizarEditorFoto(); return;
+  }
+  _fotoEditor.x = Math.max(0, Math.min(100, _fotoEditor.x - (evento.clientX - _fotoEditor.ultimoX) / largura * 100));
+  _fotoEditor.y = Math.max(0, Math.min(100, _fotoEditor.y - (evento.clientY - _fotoEditor.ultimoY) / largura * 100));
+  _fotoEditor.ultimoX = evento.clientX; _fotoEditor.ultimoY = evento.clientY; atualizarEditorFoto();
+}
+
+function distanciaEntrePonteiros() {
+  if (!_fotoEditor?.ponteiros || _fotoEditor.ponteiros.size < 2) return 0;
+  const [a, b] = [..._fotoEditor.ponteiros.values()];
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function finalizarArrasteFotoEditor(evento) {
+  if (!_fotoEditor?.ponteiros) return;
+  _fotoEditor.ponteiros.delete(evento.pointerId);
+  _fotoEditor.distanciaAnterior = distanciaEntrePonteiros();
+}
+
+function zoomFotoEditor(evento) {
+  if (!_fotoEditor) return; evento.preventDefault();
+  _fotoEditor.zoom += evento.deltaY < 0 ? 10 : -10; atualizarEditorFoto();
+}
+
+function fecharEditorFoto() {
+  const overlay = $('fotoEditorOverlay'); if (overlay) overlay.classList.remove('open');
+  if (_fotoEditor?.urlTemporaria) URL.revokeObjectURL(_fotoEditor.urlTemporaria);
+  if (_fotoEditor?.input) _fotoEditor.input.value = '';
+  _fotoEditor = null;
+}
+
+document.addEventListener('pointermove', moverFotoEditor);
+document.addEventListener('pointerup', finalizarArrasteFotoEditor);
+document.addEventListener('pointercancel', finalizarArrasteFotoEditor);
+document.addEventListener('DOMContentLoaded', () => { $('fotoEditorCircle')?.addEventListener('wheel', zoomFotoEditor, { passive: false }); });
+
+async function salvarFotoEditor() {
+  if (!state?.empresa?.id || !state?.user?.id || !_fotoEditor) return;
+  const { tipo, input, arquivo, x, y, zoom } = _fotoEditor;
+  const btn = $('fotoEditorSalvar');
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+  const extensao = (arquivo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const caminho = `${state.user.id}/${tipo}-${Date.now()}.${extensao}`;
+  const coluna = tipo === 'perfil' ? 'foto_perfil_url' : 'foto_publica_url';
+  const prefixo = tipo === 'perfil' ? 'foto_perfil' : 'foto_publica';
+  const { error: uploadError } = await db.storage.from('fotos-perfil').upload(caminho, arquivo, { cacheControl: '3600', upsert: false, contentType: arquivo.type });
+  if (uploadError) { if (btn) { btn.disabled = false; btn.textContent = 'Salvar foto'; } return toast('Erro ao enviar imagem: ' + uploadError.message, 'err'); }
+  const { data: publica } = db.storage.from('fotos-perfil').getPublicUrl(caminho);
+  const url = publica?.publicUrl || '';
+  if (!url) { if (btn) { btn.disabled = false; btn.textContent = 'Salvar foto'; } return toast('Não foi possível gerar o link da imagem.', 'err'); }
+  const updates = { [coluna]: url, [`${prefixo}_x`]: Math.round(x), [`${prefixo}_y`]: Math.round(y), [`${prefixo}_zoom`]: Math.round(zoom) };
+  const { data, error } = await db.from('agenda_empresas').update(updates).eq('id', state.empresa.id).select('*').single();
+  if (error) { if (btn) { btn.disabled = false; btn.textContent = 'Salvar foto'; } return toast('Imagem enviada, mas não foi possível vinculá-la: ' + error.message, 'err'); }
+  state.empresa = data || { ...state.empresa, ...updates };
+  renderPreviewImagem(tipo === 'perfil' ? 'previewFotoPerfil' : 'previewFotoPublica', url);
+  aplicarEnquadramentoFoto($(tipo === 'perfil' ? 'previewFotoPerfil' : 'previewFotoPublica'), x, y, zoom);
+  if (tipo === 'perfil') renderAvatarPainel();
+  if (btn) { btn.disabled = false; btn.textContent = 'Salvar foto'; }
+  fecharEditorFoto(); showNotif(tipo === 'perfil' ? 'Foto do painel atualizada' : 'Imagem pública atualizada', '', 'ok');
+}
+
+async function salvarMensagensWhatsapp() {
+  if (!state?.empresa?.id) return;
+  const mensagens = {
+    confirmacao: ($('msgConfirmacao')?.value || '').trim(), recusa: ($('msgRecusa')?.value || '').trim(),
+    reagendamento: ($('msgReagendamento')?.value || '').trim(), contato: ($('msgContato')?.value || '').trim()
+  };
+  if (Object.values(mensagens).some(msg => !msg)) return toast('Preencha todas as mensagens.', 'err');
+  if (Object.values(mensagens).some(msg => msg.includes('\uFFFD'))) return toast('Existe um caractere inválido nas mensagens. Remova o símbolo e digite o emoji novamente.', 'err');
+  const nomes = { confirmacao: 'Confirmação', recusa: 'Recusa', reagendamento: 'Reagendamento', contato: 'Contato pelo botão WA' };
+  for (const [tipo, obrigatorios] of Object.entries(MARCADORES_OBRIGATORIOS)) {
+    const ausentes = obrigatorios.filter(marcador => !mensagens[tipo].includes(marcador));
+    if (ausentes.length) return toast(`${nomes[tipo]}: inclua ${ausentes.join(', ')}.`, 'err');
+  }
+  const { data, error } = await db.from('agenda_empresas').update({ mensagens_whatsapp: mensagens }).eq('id', state.empresa.id).select('*').single();
+  if (error) return toast('Erro ao salvar mensagens. Verifique a configuração do Supabase.', 'err');
+  state.empresa = data || { ...state.empresa, mensagens_whatsapp: mensagens };
+  showNotif('Mensagens automáticas salvas', '', 'ok');
+}
+
+function restaurarMensagensWhatsappPadrao() {
+  const set = (id, valor) => { const el = $(id); if (el) el.value = valor; };
+  set('msgConfirmacao', MENSAGENS_WHATSAPP_PADRAO.confirmacao); set('msgRecusa', MENSAGENS_WHATSAPP_PADRAO.recusa);
+  set('msgReagendamento', MENSAGENS_WHATSAPP_PADRAO.reagendamento); set('msgContato', MENSAGENS_WHATSAPP_PADRAO.contato);
+  toast('Modelos padrão restaurados. Clique em Salvar mensagens.', 'ok');
+}
+
+async function confirmarAg(id) {
+  let ag = (state.agendamentos || []).find(a => a.id === id);
+  let tel = (ag?.cliente_telefone || ag?.telefone || '').replace(/\D/g, '');
+  let janelaWhatsapp = reservarJanelaWhatsapp(tel);
+  if (!ag) {
+    // Agendamento criado/atualizado pela IA pode não estar no state ainda — busca no Supabase
+    const { data, error: fetchErr } = await db.from('agenda_agendamentos').select('*').eq('id', id).single();
+    if (fetchErr || !data) return toast('Agendamento não encontrado.', 'err');
+    ag = data;
+    // Adiciona ao state para manter consistência
+    if (state.agendamentos) state.agendamentos.push(ag);
+    else state.agendamentos = [ag];
+    tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
+    if (tel && !janelaWhatsapp) janelaWhatsapp = reservarJanelaWhatsapp(tel);
+  }
+  const { error } = await db.from('agenda_agendamentos').update({ status: 'Confirmado' }).eq('id', id);
+  if (error) {
+    if (janelaWhatsapp && !janelaWhatsapp.closed) janelaWhatsapp.close();
+    return toast('Erro ao confirmar.', 'err');
+  }
+  ag.status = 'Confirmado'; renderAll();
+  showNotif('Confirmado!', ag.cliente_nome + ' — ' + formatDate(ag.data) + ' às ' + (ag.hora || '—'), 'ok');
+  if (tel) abrirLinkWhatsapp(tel, montarMensagemWhatsapp('confirmacao', ag), janelaWhatsapp);
+}
+
+async function concluirAg(id) {
+  const ag = (state.agendamentos || []).find(a => a.id === id); if (!ag) return;
+  const concluidoEm = new Date().toISOString();
+  const { error } = await db.from('agenda_agendamentos').update({ status: 'Concluído', financeiro_status: 'Concluído', concluido_em: concluidoEm }).eq('id', id);
+  if (error) return toast('Erro ao concluir.', 'err');
+  ag.status = 'Concluído'; ag.financeiro_status = 'Concluído'; ag.concluido_em = concluidoEm;
+  renderAll(); showNotif('Concluído!', ag.cliente_nome + ' — ' + (ag.servico_nome || '—'), 'ok');
+}
+
+function abrirWA(id) {
+  const ag = (state.agendamentos || []).find(a => a.id === id); if (!ag) return;
+  const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
+  if (!tel) return toast('Telefone não cadastrado.', 'err');
+  const msg = montarMensagemWhatsapp('contato', ag);
+  abrirLinkWhatsapp(tel, msg);
+}
+
+function openModalRecusa(id) {
+  const ag = (state.agendamentos || []).find(a => a.id === id); if (!ag) return;
+  if (!podeTerAcoes(ag)) return toast('Este agendamento não permite recusa.', 'warn');
+  _recusaId = id; _recusaMotivo = null;
+  setText('recusaInfo', `${ag.cliente_nome} · ${formatDate(ag.data)} às ${ag.hora || '—'}`);
+  document.querySelectorAll('.motivo-item').forEach(el => { el.classList.remove('sel'); const r = el.querySelector('.motivo-radio'); if (r) r.innerHTML = ''; });
+  const rmc = $('recusaMotivoCustom'); if (rmc) rmc.value = '';
+  const overlay = $('modalRecusaOverlay'); if (overlay) overlay.classList.add('open');
+  lockPublicModalScroll();
+}
+
+function closeModalRecusa() {
+  const overlay = $('modalRecusaOverlay'); if (overlay) overlay.classList.remove('open');
+  unlockPublicModalScroll();
+  _recusaId = null; _recusaMotivo = null;
+}
+
+function selectMotivo(el, motivo) {
+  document.querySelectorAll('.motivo-item').forEach(o => { o.classList.remove('sel'); const r = o.querySelector('.motivo-radio'); if (r) r.innerHTML = ''; });
+  el.classList.add('sel'); _recusaMotivo = motivo;
+}
+
+async function confirmarRecusa() {
+  if (!_recusaId) return;
+  const motivo = ($('recusaMotivoCustom')?.value || '').trim() || _recusaMotivo;
+  if (!motivo) return toast('Escolha um motivo.', 'err');
+  const ag = (state.agendamentos || []).find(a => a.id === _recusaId); if (!ag) return;
+  const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
+  const janelaWhatsapp = reservarJanelaWhatsapp(tel);
+  const { error } = await db.from('agenda_agendamentos').update({ status: 'Recusado', observacoes: motivo }).eq('id', _recusaId);
+  if (error) {
+    if (janelaWhatsapp && !janelaWhatsapp.closed) janelaWhatsapp.close();
+    return toast('Erro ao recusar.', 'err');
+  }
+  ag.status = 'Recusado'; closeModalRecusa(); renderAll();
+  showNotif('Recusado', ag.cliente_nome + ' — ' + motivo, 'info');
+  if (tel) {
+    const pubLink = state.empresa ? publicUrl(state.empresa.slug) : '';
+    abrirLinkWhatsapp(tel, montarMensagemWhatsapp('recusa', ag, { motivo, link: pubLink }), janelaWhatsapp);
+  }
+}
+
+function openModalReagendar(id) {
+  const ag = (state.agendamentos || []).find(a => a.id === id); if (!ag) return;
+  if (!podeTerAcoes(ag)) return toast('Este agendamento não permite reagendamento.', 'warn');
+  _reagendarId = id;
+  setText('reagendarInfo', `${ag.cliente_nome} · ${formatDate(ag.data)} às ${ag.hora || '—'}`);
+  const rd = $('reagendarData'); if (rd) rd.value = ag.data || '';
+  const rh = $('reagendarHora'); if (rh) rh.value = ag.hora || '';
+  const overlay = $('modalReagendarOverlay'); if (overlay) overlay.classList.add('open');
+  lockSecondScreen();
+}
+
+function closeModalReagendar() {
+  const overlay = $('modalReagendarOverlay'); if (overlay) overlay.classList.remove('open');
+  unlockSecondScreen();
+  _reagendarId = null;
+}
+
+async function confirmarReagendar() {
+  if (!_reagendarId) return;
+  const data = $('reagendarData')?.value, hora = $('reagendarHora')?.value;
+  if (!data || !hora) return toast('Escolha nova data e hora.', 'err');
+  const ag = (state.agendamentos || []).find(a => a.id === _reagendarId); if (!ag) return;
+  const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
+  const janelaWhatsapp = reservarJanelaWhatsapp(tel);
+  const { error } = await db.from('agenda_agendamentos').update({ data, hora, status: 'Reagendado' }).eq('id', _reagendarId);
+  if (error) {
+    if (janelaWhatsapp && !janelaWhatsapp.closed) janelaWhatsapp.close();
+    return toast('Erro ao reagendar.', 'err');
+  }
+  ag.data = data; ag.hora = hora; ag.status = 'Reagendado';
+  closeModalReagendar(); renderAll();
+  showNotif('Reagendado!', ag.cliente_nome + ' → ' + formatDate(data) + ' às ' + hora, 'ok');
+  if (tel) abrirLinkWhatsapp(tel, montarMensagemWhatsapp('reagendamento', ag, { novaData: data, novaHora: hora }), janelaWhatsapp);
+}
+
+function openConfirmModal({ icon = '⚠️', type = 'danger', title = 'Tem certeza?', body = 'Esta ação não pode ser desfeita.', btnLabel = 'Confirmar', cb }) {
+  const wrap = $('confirmIconWrap'); if (wrap) { wrap.className = 'confirm-icon-wrap ' + type; wrap.textContent = icon; }
+  setText('confirmTitle', title); setText('confirmBody', body);
+  const btn = $('confirmActionBtn');
+  if (btn) { btn.textContent = btnLabel; btn.className = 'btn ' + (type === 'danger' ? 'btn-danger' : 'btn-primary'); }
+  _confirmCb = cb;
+  const overlay = $('confirmOverlay'); if (overlay) overlay.classList.add('open');
+  lockSecondScreen();
+}
+
+function closeConfirmModal() {
+  const overlay = $('confirmOverlay'); if (overlay) overlay.classList.remove('open'); _confirmCb = null;
+  unlockSecondScreen();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const confirmBtn = $('confirmActionBtn');
+  if (confirmBtn) confirmBtn.addEventListener('click', () => { if (_confirmCb) _confirmCb(); closeConfirmModal(); });
+  const confirmOverlay = $('confirmOverlay');
+  if (confirmOverlay) confirmOverlay.addEventListener('click', e => { if (e.target === confirmOverlay) closeConfirmModal(); });
+  const editOverlay = $('editOverlay');
+  if (editOverlay) editOverlay.addEventListener('click', e => { if (e.target === editOverlay) closeEditModal(); });
+  const modalRecusaOverlay = $('modalRecusaOverlay');
+  if (modalRecusaOverlay) modalRecusaOverlay.addEventListener('click', e => { if (e.target === modalRecusaOverlay) closeModalRecusa(); });
+  const modalReagendarOverlay = $('modalReagendarOverlay');
+  if (modalReagendarOverlay) modalReagendarOverlay.addEventListener('click', e => { if (e.target === modalReagendarOverlay) closeModalReagendar(); });
+  const pubDataInput = $('pubData');
+  if (pubDataInput) pubDataInput.addEventListener('change', function() { validarDataPublica(this.value); });
+});
+
+function validarDataPublica(dataStr) {
+  const aviso = $('pubDataAviso'), inputData = $('pubData');
+  if (!aviso || !inputData) return true;
+  if (!dataStr) { aviso.style.display = 'none'; inputData.style.borderColor = ''; return true; }
+  const diasFechados = state.pubDiasFechados || [];
+  const fechado = isDiaFechado(dataStr, diasFechados);
+  if (fechado) {
+    aviso.style.display = 'block'; inputData.style.borderColor = '#ef4444';
+    inputData.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.2)'; return false;
+  } else { aviso.style.display = 'none'; inputData.style.borderColor = ''; inputData.style.boxShadow = ''; return true; }
+}
+
+function openEditModal(title, bodyHtml, saveCb) {
+  setText('editModalTitle', title);
+  const body = $('editModalBody'); if (body) body.innerHTML = bodyHtml;
+  _editSaveCb = saveCb;
+  const saveBtn = $('editSaveBtn'); if (saveBtn) saveBtn.onclick = () => { if (_editSaveCb) _editSaveCb(); };
+  const overlay = $('editOverlay'); if (overlay) overlay.classList.add('open');
+  lockSecondScreen();
+}
+
+function closeEditModal() {
+  const overlay = $('editOverlay'); if (overlay) overlay.classList.remove('open'); _editSaveCb = null;
+  unlockSecondScreen();
+}
+
+function editServico(id) {
+  const s = (state.servicos || []).find(x => x.id === id); if (!s) return;
+  openEditModal('Editar Serviço', `
+    <div class="form-gap">
+      <div class="field"><label>Nome</label><input id="ed_sn" value="${s.nome || ''}"></div>
+      <div class="field-row">
+        <div class="field"><label>Preço (R$)</label><input id="ed_sp" type="number" value="${s.preco || 0}"></div>
+        <div class="field"><label>Duração (min)</label><input id="ed_sd" type="number" value="${s.duracao_minutos || 60}"></div>
+      </div>
+    </div>`, async () => {
+    const nome = ($('ed_sn')?.value || '').trim(); if (!nome) return toast('Preencha o nome.', 'err');
+    const { error } = await db.from('agenda_servicos').update({ nome, preco: Number($('ed_sp')?.value || 0), duracao_minutos: Number($('ed_sd')?.value || 60) }).eq('id', id);
+    if (error) return toast('Erro ao salvar.', 'err');
+    closeEditModal(); await loadAll(); showNotif('Serviço atualizado', '', 'ok');
+  });
+}
+
+function editProfissional(id) {
+  const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
+  const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const diasSemana = parseDiasSemana(p.dias_semana);
+  const diasHtml = dias.map((d,i) => `
+    <label class="dia-check">
+      <input type="checkbox" id="ed_dia_${i}" ${diasSemana.includes(i) ? 'checked' : ''}>
+      <span>${d}</span>
+    </label>`).join('');
+  openEditModal('Editar Profissional', `
+    <div class="form-gap">
+      <div class="field"><label>Nome</label><input id="ed_pn" value="${p.nome || ''}"></div>
+      <div class="field"><label>Especialidade</label><input id="ed_pe" value="${p.especialidade || ''}"></div>
+      <div class="field"><label>Telefone</label><input id="ed_pt" value="${p.telefone || ''}"></div>
+    </div>`, async () => {
+    const nome = ($('ed_pn')?.value || '').trim(); if (!nome) return toast('Preencha o nome.', 'err');
+    const { error } = await db.from('agenda_profissionais').update({
+      nome, especialidade: ($('ed_pe')?.value || '').trim(), telefone: ($('ed_pt')?.value || '').trim()
+    }).eq('id', id);
+    if (error) return toast('Erro ao salvar.', 'err');
+    closeEditModal(); await loadAll(); showNotif('Profissional atualizado', '', 'ok');
+  });
+}
+
+function editCliente(id) {
+  const c = (state.clientes || []).find(x => x.id === id); if (!c) return;
+  openEditModal('Editar Cliente', `
+    <div class="form-gap">
+      <div class="field"><label>Nome</label><input id="ed_cn" value="${c.nome || ''}"></div>
+      <div class="field"><label>Telefone</label><input id="ed_ct" value="${c.telefone || ''}"></div>
+      <div class="field"><label>E-mail</label><input id="ed_ce" value="${c.email || ''}"></div>
+    </div>`, async () => {
+    const nome = ($('ed_cn')?.value || '').trim(); if (!nome) return toast('Preencha o nome.', 'err');
+    const { error } = await db.from('agenda_clientes').update({ nome, telefone: ($('ed_ct')?.value || '').trim(), email: ($('ed_ce')?.value || '').trim() }).eq('id', id);
+    if (error) return toast('Erro ao salvar.', 'err');
+    closeEditModal(); await loadAll(); showNotif('Cliente atualizado', '', 'ok');
+  });
+}
+
+function editAgendamento(id) {
+  const a = (state.agendamentos || []).find(x => x.id === id); if (!a) return;
+  const svcopts = (state.servicos || []).filter(s => s.status === 'ativo').map(s => `<option value="${s.id}"${s.id === a.servico_id ? ' selected' : ''}>${s.nome}</option>`).join('');
+  const profopts = (state.profissionais || []).filter(p => p.status === 'ativo').map(p => `<option value="${p.id}"${p.id === a.profissional_id ? ' selected' : ''}>${p.nome}</option>`).join('');
+  openEditModal('Editar Agendamento', `
+    <div class="form-gap">
+      <div class="field-row">
+        <div class="field"><label>Cliente</label><input id="ed_ac" value="${a.cliente_nome || ''}"></div>
+        <div class="field"><label>Telefone</label><input id="ed_atel" value="${a.cliente_telefone || ''}"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Serviço</label><select id="ed_as">${svcopts}</select></div>
+        <div class="field"><label>Profissional</label><select id="ed_ap">${profopts}</select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Data</label><input id="ed_ad" type="date" value="${a.data || ''}"></div>
+        <div class="field"><label>Hora</label><input id="ed_ah" type="time" value="${a.hora || ''}"></div>
+      </div>
+      <div class="field"><label>Status</label><select id="ed_ast">
+        <option${normStatus(a.status) === 'Confirmado' ? ' selected' : ''}>Confirmado</option>
+        <option${normStatus(a.status) === 'Pendente' ? ' selected' : ''}>Pendente</option>
+        <option${normStatus(a.status) === 'Reagendado' ? ' selected' : ''}>Reagendado</option>
+        <option${normStatus(a.status) === 'Concluído' ? ' selected' : ''}>Concluído</option>
+        <option${normStatus(a.status) === 'Recusado' ? ' selected' : ''}>Recusado</option>
+        <option${normStatus(a.status) === 'Excluído' ? ' selected' : ''}>Excluído</option>
+      </select></div>
+    </div>`, async () => {
+    const cli = ($('ed_ac')?.value || '').trim(), data = $('ed_ad')?.value, hora = $('ed_ah')?.value;
+    if (!cli || !data || !hora) return toast('Preencha cliente, data e hora.', 'err');
+    const serv = (state.servicos || []).find(s => s.id === $('ed_as')?.value);
+    const prof = (state.profissionais || []).find(p => p.id === $('ed_ap')?.value);
+    const status = $('ed_ast')?.value || 'Pendente';
+    const updates = {
+      cliente_nome: cli, cliente_telefone: ($('ed_atel')?.value || '').trim(),
+      servico_id: $('ed_as')?.value || null, profissional_id: $('ed_ap')?.value || null,
+      servico_nome: serv?.nome || a.servico_nome, profissional_nome: prof?.nome || a.profissional_nome,
+      data, hora, status, valor: Number(serv?.preco || a.valor || 0)
+    };
+    if (normStatus(status) === 'Concluído') { updates.financeiro_status = 'Concluído'; updates.concluido_em = a.concluido_em || new Date().toISOString(); }
+    const { error } = await db.from('agenda_agendamentos').update(updates).eq('id', id);
+    if (error) return toast('Erro ao salvar.', 'err');
+    closeEditModal(); await loadAll(); showNotif('Agendamento atualizado', '', 'ok');
+  });
+}
+
+async function duplicarServico(id) {
+  const s = (state.servicos || []).find(x => x.id === id); if (!s) return;
+  await db.from('agenda_servicos').insert({ empresa_id: state.empresa.id, nome: s.nome + ' (cópia)', preco: s.preco, duracao_minutos: s.duracao_minutos, status: 'ativo' });
+  await loadAll(); showNotif('Serviço duplicado', '', 'info');
+}
+
+async function duplicarProfissional(id) {
+  const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
+  await db.from('agenda_profissionais').insert({ empresa_id: state.empresa.id, nome: p.nome + ' (cópia)', especialidade: p.especialidade, telefone: p.telefone, status: 'ativo' });
+  await loadAll(); showNotif('Profissional duplicado', '', 'info');
+}
+
+async function duplicarCliente(id) {
+  const c = (state.clientes || []).find(x => x.id === id); if (!c) return;
+  await db.from('agenda_clientes').insert({ empresa_id: state.empresa.id, nome: c.nome + ' (cópia)', telefone: c.telefone, email: c.email, status: 'ativo' });
+  await loadAll(); showNotif('Cliente duplicado', '', 'info');
+}
+
+async function duplicarAgendamento(id) {
+  const a = (state.agendamentos || []).find(x => x.id === id); if (!a) return;
+  await db.from('agenda_agendamentos').insert({
+    empresa_id: state.empresa.id, cliente_id: a.cliente_id, servico_id: a.servico_id,
+    profissional_id: a.profissional_id, cliente_nome: a.cliente_nome, cliente_telefone: a.cliente_telefone,
+    servico_nome: a.servico_nome, profissional_nome: a.profissional_nome,
+    data: a.data, hora: a.hora, status: 'Pendente', valor: a.valor
+  });
+  await loadAll(); showNotif('Agendamento duplicado como Pendente', '', 'info');
+}
+
+function toggleServico(id, ns) {
+  const s = (state.servicos || []).find(x => x.id === id); if (!s) return;
+  openConfirmModal({ icon: ns === 'ativo' ? '▶️' : '⏸', type: ns === 'ativo' ? 'info' : 'danger', title: ns === 'ativo' ? 'Ativar serviço?' : 'Desativar serviço?', body: `"${s.nome}"`, btnLabel: ns === 'ativo' ? 'Ativar' : 'Desativar',
+    cb: async () => { await db.from('agenda_servicos').update({ status: ns }).eq('id', id); await loadAll(); showNotif(ns === 'ativo' ? 'Serviço ativado' : 'Serviço desativado', '', 'ok'); }
+  });
+}
+
+function toggleProfissional(id, ns) {
+  const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
+  openConfirmModal({ icon: ns === 'ativo' ? '▶️' : '⏸', type: ns === 'ativo' ? 'info' : 'danger', title: ns === 'ativo' ? 'Ativar profissional?' : 'Desativar?', body: `"${p.nome}"`, btnLabel: ns === 'ativo' ? 'Ativar' : 'Desativar',
+    cb: async () => { await db.from('agenda_profissionais').update({ status: ns }).eq('id', id); await loadAll(); showNotif(ns === 'ativo' ? 'Profissional ativado' : 'Profissional desativado', '', 'ok'); }
+  });
+}
+
+function toggleCliente(id, ativar) {
+  const c = (state.clientes || []).find(x => x.id === id); if (!c) return;
+  openConfirmModal({ icon: ativar ? '▶️' : '⏸', type: ativar ? 'info' : 'danger', title: ativar ? 'Ativar cliente?' : 'Desativar?', body: `"${c.nome}"`, btnLabel: ativar ? 'Ativar' : 'Desativar',
+    cb: async () => { await db.from('agenda_clientes').update({ status: ativar ? 'ativo' : 'inativo' }).eq('id', id); await loadAll(); showNotif(ativar ? 'Cliente ativado' : 'Cliente desativado', '', 'ok'); }
+  });
+}
+
+function excluirServico(id) {
+  const s = (state.servicos || []).find(x => x.id === id); if (!s) return;
+  openConfirmModal({ icon: '🗑', type: 'danger', title: 'Excluir serviço?', body: `"${s.nome}"`, btnLabel: 'Excluir',
+    cb: async () => { await db.from('agenda_servicos').update({ status: 'excluido' }).eq('id', id); await loadAll(); showNotif('Serviço excluído', '', 'info'); }
+  });
+}
+
+function excluirProfissional(id) {
+  const p = (state.profissionais || []).find(x => x.id === id); if (!p) return;
+  openConfirmModal({ icon: '🗑', type: 'danger', title: 'Excluir profissional?', body: `"${p.nome}"`, btnLabel: 'Excluir',
+    cb: async () => { await db.from('agenda_profissionais').update({ status: 'excluido' }).eq('id', id); await loadAll(); showNotif('Profissional excluído', '', 'info'); }
+  });
+}
+
+function excluirCliente(id) {
+  const c = (state.clientes || []).find(x => x.id === id); if (!c) return;
+  openConfirmModal({ icon: '🗑', type: 'danger', title: 'Excluir cliente?', body: `"${c.nome}"`, btnLabel: 'Excluir',
+    cb: async () => { await db.from('agenda_clientes').update({ status: 'inativo' }).eq('id', id); await loadAll(); showNotif('Cliente removido', '', 'info'); }
+  });
+}
+
+function excluirAgendamento(id) {
+  const a = (state.agendamentos || []).find(x => x.id === id); if (!a) return;
+  const jaFoi = normStatus(a.status) === 'Concluído' || a.financeiro_status === 'Concluído';
+  openConfirmModal({ icon: '🗑', type: 'danger', title: jaFoi ? 'Arquivar agendamento?' : 'Excluir agendamento?',
+    body: `"${a.cliente_nome}" em ${formatDate(a.data)}.${jaFoi ? ' O faturamento será preservado.' : ''}`, btnLabel: jaFoi ? 'Arquivar' : 'Excluir',
+    cb: async () => {
+      const payload = jaFoi ? { status: 'Excluído', financeiro_status: 'Concluído' } : { status: 'Excluído' };
+      const { error } = await db.from('agenda_agendamentos').update(payload).eq('id', id);
+      if (error) return toast('Erro ao excluir.', 'err');
+      await loadAll(); showNotif(jaFoi ? 'Agendamento arquivado' : 'Agendamento excluído', jaFoi ? 'Faturamento mantido.' : '', 'info');
+    }
+  });
+}
+
+function atualizarBloqueioPublicacao() {
+  const sideLink = $('sideLinkBox');
+  if (sideLink) {
+    sideLink.textContent = state?.empresa?.slug ? publicUrl(state.empresa.slug) : '';
+    sideLink.classList.remove('is-locked');
+  }
+  document.querySelectorAll('.dash-copy-button').forEach(button => {
+    button.classList.remove('is-locked');
+    button.setAttribute('aria-disabled', 'false');
+    const label = button.querySelector('.dash-copy-label');
+    if (label) label.textContent = 'Copiar link';
+  });
+}
+
+function copyPublicLink(button = null) {
+  if (!state?.empresa?.slug) return;
+  const link = publicUrl(state.empresa.slug);
+  if (navigator.clipboard) navigator.clipboard.writeText(link).catch(() => {});
+  if (button?.classList?.contains('dash-copy-button')) {
+    const label = button.querySelector('.dash-copy-label');
+    button.classList.add('is-copied');
+    if (label) label.textContent = '✓ Link copiado!';
+    clearTimeout(button._copyResetTimer);
+    button._copyResetTimer = setTimeout(() => {
+      button.classList.remove('is-copied');
+      if (label) label.textContent = 'Copiar link da agenda';
+    }, 2400);
+  }
+  showNotif('Link copiado!', link, 'ok', 3000);
+}
+
+function openPublic() {
+  if (!state?.empresa?.slug) return;
+  history.pushState(null, '', '#agendar/' + state.empresa.slug);
+  loadPublic(state.empresa.slug);
+}
+
+async function loadPublic(slug) {
+  const lv = $('landingView'), dv = $('dashboardView'), pv = $('publicView');
+  if (lv) lv.style.display = 'none';
+  if (dv) dv.style.display = 'none';
+  if (pv) pv.style.display = 'block';
+  const { data: empresa, error } = await db.from('agenda_empresas').select('*').eq('slug', slug).single();
+  if (error || !empresa) { setText('pubNomeEmpresa', 'Agenda não encontrada'); setText('pubDescEmpresa', 'Verifique se o link está correto.'); return; }
+  state.pubEmpresa = empresa;
+  state.pubDiasFechados = calcDiasFechados(empresa);
+  aplicarBloqueioDataPublica(state.pubDiasFechados);
+  setText('pubNomeEmpresa', empresa.nome);
+  setText('pubDescEmpresa', '');
+  const fotoPublica = $('pubFotoPublica');
+  if (fotoPublica) {
+    if (empresa.foto_publica_url) {
+      aplicarImagemFundo(fotoPublica, empresa.foto_publica_url);
+      const enquadramento = getEnquadramentoFoto('publica', empresa);
+      aplicarEnquadramentoFoto(fotoPublica, enquadramento.x, enquadramento.y, enquadramento.zoom);
+      fotoPublica.className = 'pub-cover';
+      fotoPublica.innerHTML = '';
+      fotoPublica.style.display = 'block';
+    } else {
+      // Sem foto: exibe avatar com iniciais do nome da empresa
+      const iniciais = (empresa.nome || 'VY')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(p => p[0].toUpperCase())
+        .join('');
+      fotoPublica.className = 'pub-cover pub-cover-inicial';
+      fotoPublica.style.backgroundImage = '';
+      fotoPublica.innerHTML = `<span class="pub-cover-letra">${iniciais}</span>`;
+      fotoPublica.style.display = 'block';
+    }
+  }
+  const localizacao = $('pubLocalizacao');
+  if (localizacao) {
+    const enderecoCompleto = [empresa.endereco, empresa.cidade].filter(Boolean).join(' • ');
+    localizacao.innerHTML = enderecoCompleto ? `<span>📍</span><span style="flex:1">${escapeHtml(enderecoCompleto)}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCompleto)}" target="_blank" rel="noopener">Ver mapa</a>` : '';
+    localizacao.style.display = enderecoCompleto ? 'flex' : 'none';
+  }
+  const sociais = $('pubSociais');
+  if (sociais) {
+    let html = '';
+    const enderecoCompleto = [empresa.endereco, empresa.cidade].filter(Boolean).join(' • ');
+    if (enderecoCompleto) html += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCompleto)}" target="_blank" rel="noopener" class="pub-social">📍 ${escapeHtml(enderecoCompleto)}</a>`;
+    if (empresa.instagram) { const h = empresa.instagram.replace('@', '').replace(/.*instagram\.com\//, ''); html += `<a href="${escapeHtml(normalizarUrl(h, 'https://instagram.com/'))}" target="_blank" rel="noopener" class="pub-social">📸 @${escapeHtml(h)}</a>`; }
+    if (empresa.facebook) { const url = /facebook\.com\//i.test(empresa.facebook) ? normalizarUrl(empresa.facebook) : normalizarUrl(empresa.facebook, 'https://facebook.com/'); html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="pub-social">f Facebook</a>`; }
+    if (empresa.tiktok) { const h = empresa.tiktok.replace('@', '').replace(/.*tiktok\.com\/@?/, ''); html += `<a href="https://tiktok.com/@${escapeHtml(h)}" target="_blank" rel="noopener" class="pub-social">♪ @${escapeHtml(h)}</a>`; }
+    if (empresa.site) { const url = normalizarUrl(empresa.site); const lbl = empresa.site.replace(/^https?:\/\//, '').replace(/\/$/, ''); html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="pub-social">🌐 ${escapeHtml(lbl)}</a>`; }
+    sociais.innerHTML = html; sociais.style.display = html ? 'flex' : 'none';
+  }
+  // Botão WhatsApp flutuante
+  const fab = $('pubWhatsappFab');
+  if (fab && empresa.whatsapp) {
+    const num = empresa.whatsapp.replace(/\D/g, '');
+    fab.href = `https://wa.me/${num}`;
+    fab.style.display = 'flex';
+  } else if (fab) {
+    fab.style.display = 'none';
+  }
+  const [svcs, profs] = await Promise.all([
+    db.from('agenda_servicos').select('*').eq('empresa_id', empresa.id).eq('status', 'ativo').order('nome'),
+    db.from('agenda_profissionais').select('*').eq('empresa_id', empresa.id).eq('status', 'ativo').order('nome')
+  ]);
+  state.servicos = svcs.data || []; state.profissionais = profs.data || [];
+  const ps = $('pubServicos');
+  if (ps) {
+    ps.innerHTML = state.servicos.map(s => `
+      <div class="choice" onclick="selectPubSvc('${s.id}',this)">
+        <div class="choice-icon">✦</div>
+        <div style="flex:1;min-width:0"><div class="choice-title">${s.nome}</div><div class="choice-sub">${s.duracao_minutos || 60} min</div></div>
+        <div class="choice-price">${money(s.preco).replace(',00', '')}</div>
+      </div>`).join('') || '<div class="empty-state"><div class="es-icon">✦</div><p>Nenhum serviço disponível.</p></div>';
+  }
+  const pp = $('pubProfissionais');
+  if (pp) {
+    pp.innerHTML = state.profissionais.map(p => `
+      <div class="choice" onclick="selectPubProf('${p.id}',this)">
+        <div class="choice-icon">👤</div>
+        <div style="flex:1;min-width:0"><div class="choice-title">${p.nome}</div></div>
+      </div>`).join('') || '<div class="empty-state"><div class="es-icon">👤</div><p>Nenhum profissional disponível.</p></div>';
+  }
+}
+
+function aplicarBloqueioDataPublica(diasFechados) {
+  const inputData = $('pubData'); if (!inputData) return;
+  const diasBloqueados = Array.isArray(diasFechados) ? diasFechados : [];
+  if (inputData._diaFechadoListener) inputData.removeEventListener('change', inputData._diaFechadoListener);
+  inputData._diaFechadoListener = function() { validarDataPublica(this.value); };
+  inputData.addEventListener('change', inputData._diaFechadoListener);
+  const hoje = hojeISO(); inputData.min = hoje;
+  if (inputData._flatpickr) {
+    const hojeLocal = new Date(); hojeLocal.setHours(0, 0, 0, 0);
+    inputData._flatpickr.set('onDayCreate', [(_, __, ___, dayElem) => {
+      if (diasBloqueados.includes(dayElem.dateObj.getDay())) dayElem.classList.add('dia-fechado');
+      else if (dayElem.dateObj >= hojeLocal) dayElem.classList.add('dia-disponivel');
+    }]);
+    inputData._flatpickr.set('minDate', hoje);
+    inputData._flatpickr.set('disable', [date => diasBloqueados.includes(date.getDay())]);
+    inputData._flatpickr.redraw();
+    if (!inputData._flatpickr.calendarContainer.querySelector('.calendar-legenda')) {
+      const legenda = document.createElement('div'); legenda.className = 'calendar-legenda';
+      legenda.innerHTML = `<span><i class="calendar-dot disponivel"></i>Disponível</span><span><i class="calendar-dot indisponivel"></i>Indisponível</span>`;
+      inputData._flatpickr.calendarContainer.appendChild(legenda);
+    }
+    if (isDiaFechado(inputData.value, diasBloqueados)) inputData._flatpickr.clear();
+  }
+  validarDataPublica(inputData.value);
+}
+
+function selectPubSvc(id, el) {
+  state.pubServico = (state.servicos || []).find(s => s.id === id);
+  document.querySelectorAll('#pubServicos .choice').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function selectPubProf(id, el) {
+  state.pubProfissional = (state.profissionais || []).find(p => p.id === id);
+  document.querySelectorAll('#pubProfissionais .choice').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+async function confirmarAgendamentoPublico() {
+  const pubNome = $('pubClienteNome')?.value?.trim(), pubTel = $('pubClienteTel')?.value?.trim();
+  const pubData = $('pubData')?.value, pubHora = $('pubHora')?.value;
+  if (!state.pubEmpresa) return toast('Empresa não carregada. Atualize a página e tente novamente.', 'err');
+  if (!state.pubServico) return toast('Escolha um serviço antes de confirmar.', 'warn');
+  if (!state.pubProfissional) return toast('Escolha um profissional antes de confirmar.', 'warn');
+  if (!pubData) return toast('Escolha uma data antes de confirmar.', 'warn');
+  if (!pubHora) return toast('Escolha um horário antes de confirmar.', 'warn');
+  if (!pubNome) return toast('Informe seu nome completo.', 'warn');
+  if (!pubTel || pubTel.replace(/\D/g, '').length < 10) return toast('Informe um WhatsApp válido.', 'warn');
+  if (isDiaFechado(pubData, state.pubDiasFechados || [])) { validarDataPublica(pubData); return toast('Este dia não está disponível. Escolha outra data.', 'err'); }
+  if (horarioPublicoJaPassou(pubData, pubHora)) {
+    const horaInput = $('pubHora');
+    const horaLabel = $('pubHoraLabel');
+    const horaBtn = $('pubHoraBtn');
+    if (horaInput) horaInput.value = '';
+    if (horaLabel) horaLabel.textContent = 'Escolher horário';
+    if (horaBtn) horaBtn.classList.remove('selecionado');
+    return toast('Este horário já passou. Escolha um horário disponível.', 'warn');
+  }
+
+  const botao = document.querySelector('.pub-confirm-btn');
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Confirmando...';
+  }
+
+  await finalizarAgendamentoPublico();
+}
+
+async function finalizarAgendamentoPublico() {
+  const pubNome = $('pubClienteNome')?.value?.trim(), pubTel = $('pubClienteTel')?.value?.trim();
+  const pubData = $('pubData')?.value, pubHora = $('pubHora')?.value;
+  const mb = $('pubMainBody'), cs = $('pubConfirmScreen');
+  try {
+    let clienteId = null;
+    const { data: cli } = await db.from('agenda_clientes').insert({ empresa_id: state.pubEmpresa.id, nome: pubNome, telefone: pubTel, status: 'ativo' }).select('*').single();
+    if (cli) clienteId = cli.id;
+    const { data: novoAgendamento, error } = await db.from('agenda_agendamentos').insert({
+      empresa_id: state.pubEmpresa.id, cliente_id: clienteId,
+      servico_id: state.pubServico.id, profissional_id: state.pubProfissional.id,
+      cliente_nome: pubNome, cliente_telefone: pubTel,
+      servico_nome: state.pubServico.nome, profissional_nome: state.pubProfissional.nome,
+      data: pubData, hora: pubHora, status: 'Pendente',
+      valor: Number(state.pubServico.preco || 0), observacoes: ''
+    }).select('id, empresa_id').single();
+    if (error) { console.error(error); return toast('Erro ao confirmar: ' + error.message, 'err'); }
+    if (novoAgendamento?.id) {
+      fetch('/api/push/new-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appointmentId: novoAgendamento.id,
+          companyId: novoAgendamento.empresa_id
+        })
+      }).catch(e => console.warn('Falha ao enviar notificaÃ§Ã£o push:', e));
+    }
+    const dataFormatada = (() => {
+      try {
+        return new Date(pubData + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+      } catch (_) { return pubData; }
+    })();
+
+    const preencher = (id, valor) => { const el = $(id); if (el) el.textContent = valor || '—'; };
+    preencher('pubSuccessServico', state.pubServico?.nome);
+    preencher('pubSuccessProfissional', state.pubProfissional?.nome);
+    preencher('pubSuccessData', dataFormatada);
+    preencher('pubSuccessHora', pubHora);
+
+    const hero = document.querySelector('#publicView .pub-hero');
+    if (mb) mb.style.display = 'none';
+    if (hero) hero.style.display = 'none';
+    if (cs) cs.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    console.error('Erro ao confirmar agendamento público:', e);
+    toast('Erro inesperado. Tente novamente.', 'err');
+  } finally {
+    const botao = document.querySelector('.pub-confirm-btn');
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = 'Confirmar agendamento ✓';
+    }
+  }
+}
+
+function resetPublic() {
+  const mb = $('pubMainBody'), cs = $('pubConfirmScreen');
+  const hero = document.querySelector('#publicView .pub-hero');
+  if (mb) mb.style.display = '';
+  if (hero) hero.style.display = '';
+  if (cs) cs.style.display = 'none';
+  ['pubClienteNome', 'pubClienteTel', 'pubData', 'pubHora'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+  const aviso = $('pubDataAviso'); if (aviso) aviso.style.display = 'none';
+  const inputData = $('pubData'); if (inputData) { inputData.style.borderColor = ''; inputData.style.boxShadow = ''; }
+  state.pubServico = null; state.pubProfissional = null;
+  document.querySelectorAll('.choice').forEach(c => c.classList.remove('active'));
+}
+
+function voltarDaPublica() {
+  history.pushState(null, '', location.pathname);
+  const pv = $('publicView'); if (pv) pv.style.display = 'none';
+  if (state?.empresa) { const dv = $('dashboardView'); if (dv) dv.style.display = 'block'; setView('dashboard'); }
+  else { const lv = $('landingView'); if (lv) lv.style.display = 'block'; }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+(function() {
+  function forcePublicIsolation() {
+    if (!location.hash || !location.hash.startsWith('#agendar/')) return;
+    const landing = document.getElementById('landingView');
+    const dashboard = document.getElementById('dashboardView');
+    const publicView = document.getElementById('publicView');
+    if (landing) landing.style.display = 'none';
+    if (dashboard) dashboard.style.display = 'none';
+    if (publicView) publicView.style.display = 'block';
+    document.body.classList.add('public-mode');
+  }
+  window.addEventListener('hashchange', forcePublicIsolation);
+  window.addEventListener('DOMContentLoaded', forcePublicIsolation);
+  setTimeout(forcePublicIsolation, 300);
+  setTimeout(forcePublicIsolation, 1000);
+})();
+
+Object.assign(window, {
+  openAuth, closeAuth, showLogin, showCadastro,
+  abrirBoasVindasMobile, continuarBoasVindasMobile, pularBoasVindasMobile,
+  abrirCadastroPelasBoasVindas, abrirLoginPelasBoasVindas,
+  goStep1, goStep2, goStep3, autoSlug,
+  loginComSenha, finalizarCadastro, logout,
+  showForgotPassword, confirmarEmailCadastro, reenviarCodigoCadastro, voltarCadastroEmail,
+  enviarCodigoRecuperacao, reenviarCodigoRecuperacao, validarCodigoRecuperacao, salvarNovaSenha,
+  setView, setFilter,
+  setConfigTab, openConfigSection,
+  salvarCliente, salvarServico, salvarProfissional, salvarAgendamento,
+  salvarConfig, salvarRedesSociais, salvarHorarios, salvarMensagensWhatsapp, restaurarMensagensWhatsappPadrao,
+  toggleDia, selecionarIntervalo,
+  abrirEditorFoto, fecharEditorFoto, atualizarEditorFoto, iniciarArrasteFotoEditor, salvarFotoEditor,
+  confirmarAg, concluirAg, abrirWA,
+  openModalRecusa, closeModalRecusa, selectMotivo, confirmarRecusa,
+  openModalReagendar, closeModalReagendar, confirmarReagendar,
+  editCliente, editServico, editProfissional, editAgendamento,
+  duplicarCliente, duplicarServico, duplicarProfissional, duplicarAgendamento,
+  toggleCliente, toggleServico, toggleProfissional,
+  excluirCliente, excluirServico, excluirProfissional, excluirAgendamento,
+  copyPublicLink, openPublic, voltarDaPublica,
+  selectPubSvc, selectPubProf, confirmarAgendamentoPublico, finalizarAgendamentoPublico, resetPublic,
+  closeEditModal, closeConfirmModal, closeModalRecusa, closeModalReagendar,
+  toast, clearNotifDot, loadPublic,
+  openMobileMenu, closeMobileMenu,
+  menuOpenPublic, menuCopyPublicLink, menuNotifications,
+  openNotificationCenter, closeNotificationCenter, markNotificationRead,
+  markAllNotificationsRead, deleteNotification, clearAllNotifications,
+  abrirCalendarioPublico, fecharCalendarioPublico, pubCalMes, selecionarDataPublica,
+  abrirSlotsPublico, fecharSlotsPublico, selecionarSlot
+});
+
+
+// ── TRAVA DE ROLAGEM DOS MODAIS PÚBLICOS ─────────────────────────────────────
+let _publicModalLockCount = 0;
+
+function lockPublicModalScroll() {
+  _publicModalLockCount += 1;
+  if (_publicModalLockCount > 1) return;
+  document.documentElement.classList.add('public-modal-open');
+  document.body.classList.add('public-modal-open');
+}
+
+function unlockPublicModalScroll() {
+  _publicModalLockCount = Math.max(0, _publicModalLockCount - 1);
+  if (_publicModalLockCount > 0) return;
+  document.documentElement.classList.remove('public-modal-open');
+  document.body.classList.remove('public-modal-open');
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── CALENDÁRIO PÚBLICO FULLSCREEN ─────────────────────────────────────────────
+let _pubCalAno, _pubCalMes;
+
+function abrirCalendarioPublico() {
+  if (!state.pubServico) {
+    toast('Escolha um serviço antes de selecionar a data.', 'warn');
+    document.getElementById('pubServicos')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!state.pubProfissional) {
+    toast('Escolha um profissional antes de selecionar a data.', 'warn');
+    document.getElementById('pubProfissionais')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  const hoje = new Date();
+  _pubCalAno = hoje.getFullYear();
+  _pubCalMes = hoje.getMonth();
+  renderPubCal();
+  const ov = document.getElementById('pubCalendarioOverlay');
+  if (ov) { ov.style.display = 'flex'; requestAnimationFrame(() => ov.classList.add('open')); }
+  VYXORA_SCROLL.lock('public-calendar');
+}
+
+function fecharCalendarioPublico(e) {
+  if (e && e.target !== document.getElementById('pubCalendarioOverlay')) return;
+  const ov = document.getElementById('pubCalendarioOverlay');
+  if (ov) { ov.classList.remove('open'); setTimeout(() => ov.style.display = 'none', 200); }
+  VYXORA_SCROLL.unlock('public-calendar');
+}
+
+function pubCalMes(dir) {
+  _pubCalMes += dir;
+  if (_pubCalMes > 11) { _pubCalMes = 0; _pubCalAno++; }
+  if (_pubCalMes < 0) { _pubCalMes = 11; _pubCalAno--; }
+  renderPubCal();
+}
+
+function renderPubCal() {
+  const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const titulo = document.getElementById('pubCalTitulo');
+  if (titulo) titulo.textContent = nomes[_pubCalMes] + ' ' + _pubCalAno;
+
+  // Calendário respeita apenas os dias configurados pela empresa
+  const diasFechados = state.pubDiasFechados || [];
+
+  const grid = document.getElementById('pubCalGrid');
+  if (!grid) return;
+
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const primeiroDia = new Date(_pubCalAno, _pubCalMes, 1);
+  const ultimoDia = new Date(_pubCalAno, _pubCalMes + 1, 0);
+  const iniciaSemana = primeiroDia.getDay();
+
+  const totalDias = ultimoDia.getDate();
+
+  // Dias do mês anterior para preencher início
+  let html = '';
+  if (iniciaSemana > 0) {
+    const diasAnterior = new Date(_pubCalAno, _pubCalMes, 0).getDate();
+    for (let i = iniciaSemana - 1; i >= 0; i--) {
+      html += `<div class="pub-cal-cell fora-mes">${diasAnterior - i}</div>`;
+    }
+  }
+
+  // Dias do mês atual
+  for (let d = 1; d <= totalDias; d++) {
+    const data = new Date(_pubCalAno, _pubCalMes, d);
+    const diaSemana = data.getDay();
+    const passado = data < hoje;
+    const fechadoEmpresa = diasFechados.includes(diaSemana);
+    const bloqueado = passado || fechadoEmpresa;
+    const iso = `${_pubCalAno}-${String(_pubCalMes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const selecionado = document.getElementById('pubData')?.value === iso;
+    html += `<div class="pub-cal-cell${bloqueado?' bloqueado':''}${selecionado?' selecionado':''}" ${!bloqueado?`onclick="selecionarDataPublica('${iso}')"`:''}>${d}</div>`;
+  }
+
+  // Dias do próximo mês para completar última semana
+  const ultimoDiaSemana = ultimoDia.getDay();
+  if (ultimoDiaSemana < 6) {
+    for (let d = 1; d <= 6 - ultimoDiaSemana; d++) {
+      html += `<div class="pub-cal-cell fora-mes">${d}</div>`;
+    }
+  }
+
+  grid.innerHTML = html;
+}
+
+function selecionarDataPublica(iso) {
+  const input = document.getElementById('pubData');
+  const btn = document.getElementById('pubDataBtn');
+  const label = document.getElementById('pubDataLabel');
+  if (input) input.value = iso;
+  if (label) {
+    const [y,m,d] = iso.split('-');
+    const nomes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    label.textContent = `${parseInt(d)} de ${nomes[parseInt(m)-1]} de ${y}`;
+  }
+  if (btn) btn.classList.add('selecionado');
+  const horaBtn = document.getElementById('pubHoraBtn');
+  if (horaBtn) horaBtn.disabled = false;
+  const horaLabel = document.getElementById('pubHoraLabel');
+  if (horaLabel) { horaLabel.textContent = 'Escolher horário'; }
+  const horaInput = document.getElementById('pubHora');
+  if (horaInput) horaInput.value = '';
+  fecharCalendarioPublico();
+  renderPubCal();
+}
+
+// ── SLOTS DE HORÁRIO ────────────────────────────────────────────────────────────
+// Na agenda pública, horários que já passaram no dia atual não podem ser reservados.
+// A comparação usa o horário local do dispositivo do cliente, sem afetar datas futuras.
+function horarioPublicoJaPassou(dataISO, horaHHMM) {
+  if (!dataISO || !horaHHMM) return false;
+  const agora = new Date();
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  const dia = String(agora.getDate()).padStart(2, '0');
+  const hojeISO = `${ano}-${mes}-${dia}`;
+  if (dataISO !== hojeISO) return false;
+
+  const [h, m] = String(horaHHMM).slice(0, 5).split(':').map(Number);
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return false;
+  const horarioSelecionado = new Date(ano, agora.getMonth(), agora.getDate(), h, m, 0, 0);
+  return horarioSelecionado <= agora;
+}
+
+async function abrirSlotsPublico() {
+  const data = document.getElementById('pubData')?.value;
+  const prof = state.pubProfissional;
+
+  if (!state.pubServico) {
+    toast('Escolha um serviço antes de ver os horários.', 'warn');
+    document.getElementById('pubServicos')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!prof) {
+    toast('Escolha um profissional para ver os horários disponíveis.', 'warn');
+    document.getElementById('pubProfissionais')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!data) {
+    toast('Escolha uma data antes de selecionar o horário.', 'warn');
+    document.getElementById('pubDataBtn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // Usa horários da empresa; fallback para os do profissional se empresa não tiver
+  const empresa = state.pubEmpresa || {};
+  const inicio = empresa.horario_inicio || prof.horario_inicio || '09:00';
+  const fim = empresa.horario_fim || prof.horario_fim || '18:00';
+  const intervalo = empresa.intervalo_slots || prof.intervalo_slots || 30;
+
+  // Buscar agendamentos ocupados nesse dia para esse profissional
+  const { data: ags } = await db.from('agenda_agendamentos')
+    .select('hora, status')
+    .eq('profissional_id', prof.id)
+    .eq('data', data)
+    .in('status', ['Pendente','Confirmado','Reagendado']);
+
+  const ocupados = new Set((ags || []).map(a => a.hora?.slice(0,5)));
+
+  // Gerar slots
+  const slots = [];
+  const [hIni, mIni] = inicio.split(':').map(Number);
+  const [hFim, mFim] = fim.split(':').map(Number);
+  let atual = hIni * 60 + mIni;
+  const fimMin = hFim * 60 + mFim;
+  while (atual < fimMin) {
+    const h = String(Math.floor(atual/60)).padStart(2,'0');
+    const m = String(atual%60).padStart(2,'0');
+    slots.push(`${h}:${m}`);
+    atual += intervalo;
+  }
+
+  const grid = document.getElementById('pubSlotsGrid');
+  if (grid) {
+    grid.innerHTML = slots.length ? slots.map(s => {
+      const ocup = ocupados.has(s);
+      const passou = horarioPublicoJaPassou(data, s);
+      const indisponivel = ocup || passou;
+      const classe = passou ? 'passado' : (ocup ? 'ocupado' : 'livre');
+      const tag = passou ? '<span class="slot-tag">Indisponível</span>' : (ocup ? '<span class="slot-tag">Ocupado</span>' : '');
+      return `<div class="pub-slot ${classe}" ${!indisponivel ? `onclick="selecionarSlot('${s}')"` : ''}>${s}${tag}</div>`;
+    }).join('') : '<p style="color:var(--text3);text-align:center;padding:24px">Nenhum horário disponível neste dia.</p>';
+  }
+
+  const titulo = document.getElementById('pubSlotsTitulo');
+  if (titulo) {
+    const [y,m,d] = data.split('-');
+    const nomes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    titulo.textContent = `Horários — ${parseInt(d)} ${nomes[parseInt(m)-1]}`;
+  }
+
+  const ov = document.getElementById('pubSlotsOverlay');
+  if (ov) { ov.style.display = 'flex'; requestAnimationFrame(() => ov.classList.add('open')); }
+  VYXORA_SCROLL.lock('public-slots');
+}
+
+function fecharSlotsPublico(e) {
+  if (e && e.target !== document.getElementById('pubSlotsOverlay')) return;
+  const ov = document.getElementById('pubSlotsOverlay');
+  if (ov) { ov.classList.remove('open'); setTimeout(() => ov.style.display = 'none', 200); }
+  VYXORA_SCROLL.unlock('public-slots');
+}
+
+function selecionarSlot(hora) {
+  const input = document.getElementById('pubHora');
+  const btn = document.getElementById('pubHoraBtn');
+  const label = document.getElementById('pubHoraLabel');
+  if (input) input.value = hora;
+  if (label) label.textContent = hora;
+  if (btn) btn.classList.add('selecionado');
+  fecharSlotsPublico();
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+
+// ── CEP e Autocomplete de Endereço ───────────────────────────────────────────
+
+let _enderecoTimer = null;
+async function autocompleteEndereco(valor) {
+  const box = $('enderecoSuggestions');
+  if (!box) return;
+  if (!valor || valor.length < 4) { box.style.display = 'none'; return; }
+  clearTimeout(_enderecoTimer);
+  _enderecoTimer = setTimeout(async () => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=br&q=${encodeURIComponent(valor)}`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } });
+      const lista = await res.json();
+      if (!lista.length) { box.style.display = 'none'; return; }
+      box.innerHTML = lista.map((item, i) => {
+        const a = item.address || {};
+        const rua = [a.road, a.house_number].filter(Boolean).join(', ');
+        const bairro = a.suburb || a.neighbourhood || a.quarter || '';
+        const cidade = a.city || a.town || a.village || a.municipality || '';
+        const estado = a.state_code || a.state || '';
+        const linha1 = rua || item.display_name.split(',')[0];
+        const linha2 = [bairro, cidade, estado].filter(Boolean).join(', ');
+        return `<div class="endereco-suggestion-item" onclick="selecionarEndereco(${i})" data-rua="${escapeHtml(linha1)}" data-cidade="${escapeHtml([cidade, estado].filter(Boolean).join(', '))}">
+          <span class="es-icon">📍</span>
+          <span><strong>${escapeHtml(linha1)}</strong>${linha2 ? '<br><small>' + escapeHtml(linha2) + '</small>' : ''}</span>
+        </div>`;
+      }).join('');
+      box.style.display = 'block';
+    } catch (e) { box.style.display = 'none'; }
+  }, 400);
+}
+
+function selecionarEndereco(idx) {
+  const box = $('enderecoSuggestions');
+  if (!box) return;
+  const items = box.querySelectorAll('.endereco-suggestion-item');
+  const item = items[idx];
+  if (!item) return;
+  const end = $('cfgEndereco');
+  const cid = $('cfgCidade');
+  if (end) end.value = item.dataset.rua || '';
+  if (cid && item.dataset.cidade) cid.value = item.dataset.cidade;
+  box.style.display = 'none';
+}
+
+document.addEventListener('click', (e) => {
+  const box = $('enderecoSuggestions');
+  if (box && !box.contains(e.target) && e.target.id !== 'cfgEndereco') {
+    box.style.display = 'none';
+  }
+});
+
+
+// Garante que os seletores nativos de data e hora abram dentro dos modais.
+document.addEventListener('DOMContentLoaded', () => {
+  ['reagendarData', 'reagendarHora'].forEach((id) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+
+    input.addEventListener('click', () => {
+      try {
+        if (typeof input.showPicker === 'function') input.showPicker();
+      } catch (_) {
+        // Alguns navegadores abrem o seletor automaticamente.
+      }
+    });
+  });
+});
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+// V14 — REAGENDAMENTO MÍNIMO USANDO EXATAMENTE OS OVERLAYS PÚBLICOS EXISTENTES
+// Não altera HTML nem CSS do painel.
+// ═════════════════════════════════════════════════════════════════════════════
+(() => {
+  let modoSeletor = 'publico';
+  let reagendamentoAtual = null;
+  let novaData = '';
+  let novaHora = '';
+
+  const originalAbrirCalendarioPublico = abrirCalendarioPublico;
+  const originalSelecionarDataPublica = selecionarDataPublica;
+  const originalSelecionarSlot = selecionarSlot;
+  const originalFecharCalendarioPublico = fecharCalendarioPublico;
+  const originalFecharSlotsPublico = fecharSlotsPublico;
+  const originalRenderPubCal = renderPubCal;
+
+  function resetarModoReagendamento() {
+    modoSeletor = 'publico';
+    reagendamentoAtual = null;
+    novaData = '';
+    novaHora = '';
+
+    const tituloCal = document.querySelector('#pubCalendarioOverlay .pub-modal-title');
+    const tituloSlots = document.querySelector('#pubSlotsOverlay .pub-modal-title');
+    if (tituloCal) tituloCal.textContent = 'Escolha a data';
+    if (tituloSlots) tituloSlots.textContent = 'Escolha o horário';
+  }
+
+  function abrirOverlayExistente(id) {
+    const overlay = document.getElementById(id);
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => overlay.classList.add('open'));
+    lockPublicModalScroll();
+  }
+
+  function fecharOverlayExistente(id) {
+    const overlay = document.getElementById(id);
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    setTimeout(() => {
+      if (!overlay.classList.contains('open')) overlay.style.display = 'none';
+    }, 200);
+    unlockPublicModalScroll();
+  }
+
+  function formatarDataCurta(iso) {
+    const [ano, mes, dia] = iso.split('-').map(Number);
+    const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    return `${dia} de ${meses[mes - 1]} de ${ano}`;
+  }
+
+  abrirCalendarioPublico = function() {
+    modoSeletor = 'publico';
+    return originalAbrirCalendarioPublico();
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
-  else run();
+  openModalReagendar = function(id) {
+    const ag = (state.agendamentos || []).find(item => String(item.id) === String(id));
+    if (!ag) return;
+    if (!podeTerAcoes(ag)) {
+      return toast('Este agendamento não permite reagendamento.', 'warn');
+    }
+
+    modoSeletor = 'reagendamento';
+    reagendamentoAtual = ag;
+    novaData = '';
+    novaHora = '';
+
+    const hoje = new Date();
+    _pubCalAno = hoje.getFullYear();
+    _pubCalMes = hoje.getMonth();
+
+    const tituloCal = document.querySelector('#pubCalendarioOverlay .pub-modal-title');
+    if (tituloCal) tituloCal.textContent = 'Escolha a nova data';
+
+    originalRenderPubCal();
+    abrirOverlayExistente('pubCalendarioOverlay');
+  };
+
+  renderPubCal = function() {
+    if (modoSeletor !== 'reagendamento') {
+      return originalRenderPubCal();
+    }
+
+    const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const titulo = document.getElementById('pubCalTitulo');
+    if (titulo) titulo.textContent = `${nomes[_pubCalMes]} ${_pubCalAno}`;
+
+    const grid = document.getElementById('pubCalGrid');
+    if (!grid) return;
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const primeiroDia = new Date(_pubCalAno, _pubCalMes, 1);
+    const ultimoDia = new Date(_pubCalAno, _pubCalMes + 1, 0);
+    const iniciaSemana = primeiroDia.getDay();
+
+    let html = '';
+
+    if (iniciaSemana > 0) {
+      const diasAnterior = new Date(_pubCalAno, _pubCalMes, 0).getDate();
+      for (let i = iniciaSemana - 1; i >= 0; i -= 1) {
+        html += `<div class="pub-cal-cell fora-mes">${diasAnterior - i}</div>`;
+      }
+    }
+
+    for (let dia = 1; dia <= ultimoDia.getDate(); dia += 1) {
+      const data = new Date(_pubCalAno, _pubCalMes, dia);
+      data.setHours(0, 0, 0, 0);
+      const bloqueado = data < hoje;
+      const iso = `${_pubCalAno}-${String(_pubCalMes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+      const selecionado = novaData === iso;
+
+      html += `<div class="pub-cal-cell${bloqueado ? ' bloqueado' : ''}${selecionado ? ' selecionado' : ''}" ${bloqueado ? '' : `onclick="selecionarDataPublica('${iso}')"`}>${dia}</div>`;
+    }
+
+    const ultimoDiaSemana = ultimoDia.getDay();
+    if (ultimoDiaSemana < 6) {
+      for (let dia = 1; dia <= 6 - ultimoDiaSemana; dia += 1) {
+        html += `<div class="pub-cal-cell fora-mes">${dia}</div>`;
+      }
+    }
+
+    grid.innerHTML = html;
+  };
+
+  selecionarDataPublica = function(iso) {
+    if (modoSeletor !== 'reagendamento') {
+      return originalSelecionarDataPublica(iso);
+    }
+
+    novaData = iso;
+    novaHora = '';
+    fecharOverlayExistente('pubCalendarioOverlay');
+    carregarHorariosReagendamento();
+  };
+
+  async function carregarHorariosReagendamento() {
+    if (!reagendamentoAtual || !novaData) return;
+
+    const empresa = state.empresa || {};
+    const profissional = (state.profissionais || []).find(
+      item => String(item.id) === String(reagendamentoAtual.profissional_id)
+    ) || {};
+
+    const inicio = empresa.horario_inicio || profissional.horario_inicio || '09:00';
+    const fim = empresa.horario_fim || profissional.horario_fim || '18:00';
+    const intervalo = Math.max(5, Number(empresa.intervalo_slots || profissional.intervalo_slots || 30));
+
+    let consulta = db.from('agenda_agendamentos')
+      .select('id, hora, status')
+      .eq('data', novaData)
+      .in('status', ['Pendente', 'Confirmado', 'Reagendado']);
+
+    if (reagendamentoAtual.profissional_id) {
+      consulta = consulta.eq('profissional_id', reagendamentoAtual.profissional_id);
+    }
+
+    const { data: registros, error } = await consulta;
+    const grid = document.getElementById('pubSlotsGrid');
+
+    if (error) {
+      if (grid) grid.innerHTML = '<p style="color:var(--text3);text-align:center;padding:24px">Não foi possível carregar os horários.</p>';
+      return;
+    }
+
+    const ocupados = new Set(
+      (registros || [])
+        .filter(item => String(item.id) !== String(reagendamentoAtual.id))
+        .map(item => (item.hora || '').slice(0, 5))
+    );
+
+    const [hIni, mIni] = inicio.split(':').map(Number);
+    const [hFim, mFim] = fim.split(':').map(Number);
+    let atual = hIni * 60 + mIni;
+    const limite = hFim * 60 + mFim;
+    const slots = [];
+
+    while (atual < limite) {
+      slots.push(`${String(Math.floor(atual / 60)).padStart(2, '0')}:${String(atual % 60).padStart(2, '0')}`);
+      atual += intervalo;
+    }
+
+    if (grid) {
+      grid.innerHTML = slots.map(hora => {
+        const ocupado = ocupados.has(hora);
+        return `<div class="pub-slot${ocupado ? ' ocupado' : ' livre'}" ${ocupado ? '' : `onclick="selecionarSlot('${hora}')"`}>${hora}${ocupado ? '<span class="slot-tag">Ocupado</span>' : ''}</div>`;
+      }).join('');
+    }
+
+    const titulo = document.getElementById('pubSlotsTitulo');
+    if (titulo) titulo.textContent = `Novo horário — ${formatarDataCurta(novaData)}`;
+
+    const tituloModal = document.querySelector('#pubSlotsOverlay .pub-modal-title');
+    if (tituloModal) tituloModal.textContent = 'Escolha o novo horário';
+
+    abrirOverlayExistente('pubSlotsOverlay');
+  }
+
+  selecionarSlot = function(hora) {
+    if (modoSeletor !== 'reagendamento') {
+      return originalSelecionarSlot(hora);
+    }
+
+    novaHora = hora;
+    fecharOverlayExistente('pubSlotsOverlay');
+
+    openConfirmModal({
+      icon: '📅',
+      type: 'info',
+      title: 'Confirmar reagendamento?',
+      body: `${reagendamentoAtual.cliente_nome} será reagendado para ${formatarDataCurta(novaData)} às ${novaHora}.`,
+      btnLabel: 'Reagendar',
+      cb: salvarReagendamento
+    });
+  };
+
+  async function salvarReagendamento() {
+    if (!reagendamentoAtual || !novaData || !novaHora) return;
+
+    const ag = reagendamentoAtual;
+    const tel = (ag.cliente_telefone || ag.telefone || '').replace(/\D/g, '');
+    const janelaWhatsapp = reservarJanelaWhatsapp(tel);
+
+    const { error } = await db.from('agenda_agendamentos')
+      .update({ data: novaData, hora: novaHora, status: 'Reagendado' })
+      .eq('id', ag.id);
+
+    if (error) {
+      if (janelaWhatsapp && !janelaWhatsapp.closed) janelaWhatsapp.close();
+      return toast('Erro ao reagendar.', 'err');
+    }
+
+    ag.data = novaData;
+    ag.hora = novaHora;
+    ag.status = 'Reagendado';
+
+    const dadosMensagem = { novaData, novaHora };
+    resetarModoReagendamento();
+    renderAll();
+    showNotif('Reagendado!', `${ag.cliente_nome} → ${formatDate(ag.data)} às ${ag.hora}`, 'ok');
+
+    if (tel) {
+      abrirLinkWhatsapp(
+        tel,
+        montarMensagemWhatsapp('reagendamento', ag, dadosMensagem),
+        janelaWhatsapp
+      );
+    }
+  }
+
+  fecharCalendarioPublico = function(e) {
+    if (modoSeletor !== 'reagendamento') {
+      return originalFecharCalendarioPublico(e);
+    }
+
+    if (e && e.target !== document.getElementById('pubCalendarioOverlay')) return;
+    fecharOverlayExistente('pubCalendarioOverlay');
+    resetarModoReagendamento();
+  };
+
+  fecharSlotsPublico = function(e) {
+    if (modoSeletor !== 'reagendamento') {
+      return originalFecharSlotsPublico(e);
+    }
+
+    if (e && e.target !== document.getElementById('pubSlotsOverlay')) return;
+    fecharOverlayExistente('pubSlotsOverlay');
+    resetarModoReagendamento();
+  };
 })();
+
+
+// Entrada progressiva da página inicial premium.
+function initLandingPremiumMotion() {
+  const landing = document.getElementById('landingView');
+  if (!landing || landing.dataset.motionReady === '1') return;
+  landing.dataset.motionReady = '1';
+
+  const items = landing.querySelectorAll('.landing-reveal');
+  if (!('IntersectionObserver' in window)) {
+    items.forEach(item => item.classList.add('is-visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -45px 0px' });
+
+  items.forEach((item, index) => {
+    item.style.transitionDelay = `${Math.min(index % 4, 3) * 70}ms`;
+    observer.observe(item);
+  });
+}
+
+// A home leve não usa observadores ou animações de entrada contínuas.
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#landingView .landing-reveal').forEach(el => el.classList.add('is-visible'));
+}, { once: true });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// AGENDA INTERNA — usa exatamente os mesmos overlays da Página Pública
+// para data e horário, sem abrir os seletores nativos/Flatpickr.
+// ═════════════════════════════════════════════════════════════════════════════
+(() => {
+  let modoAgendaInterna = false;
+  let agendaAno = 0;
+  let agendaMes = 0;
+  let agendaData = '';
+
+  const anteriorSelecionarData = selecionarDataPublica;
+  const anteriorSelecionarSlot = selecionarSlot;
+  const anteriorPubCalMes = pubCalMes;
+  const anteriorFecharCalendario = fecharCalendarioPublico;
+  const anteriorFecharSlots = fecharSlotsPublico;
+
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const mesesCurtos = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+  function abrirOverlay(id) {
+    const overlay = document.getElementById(id);
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => overlay.classList.add('open'));
+    VYXORA_SCROLL.lock('overlay:' + id);
+  }
+
+  function fecharOverlay(id) {
+    const overlay = document.getElementById(id);
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    setTimeout(() => {
+      if (!overlay.classList.contains('open')) overlay.style.display = 'none';
+    }, 200);
+    VYXORA_SCROLL.unlock('overlay:' + id);
+  }
+
+  function formatarDataAgenda(iso) {
+    if (!iso) return 'Escolher data';
+    const [ano, mes, dia] = iso.split('-').map(Number);
+    return `${dia} de ${mesesCurtos[mes - 1]} de ${ano}`;
+  }
+
+  function renderCalendarioAgendaInterna() {
+    const titulo = document.getElementById('pubCalTitulo');
+    if (titulo) titulo.textContent = `${meses[agendaMes]} ${agendaAno}`;
+
+    const grid = document.getElementById('pubCalGrid');
+    if (!grid) return;
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const primeiro = new Date(agendaAno, agendaMes, 1);
+    const ultimo = new Date(agendaAno, agendaMes + 1, 0);
+    const inicioSemana = primeiro.getDay();
+    const diasFechados = state.empresa?.dias_fechados || state.diasFechados || [];
+
+    let html = '';
+    if (inicioSemana > 0) {
+      const anterior = new Date(agendaAno, agendaMes, 0).getDate();
+      for (let i = inicioSemana - 1; i >= 0; i -= 1) {
+        html += `<div class="pub-cal-cell fora-mes">${anterior - i}</div>`;
+      }
+    }
+
+    for (let dia = 1; dia <= ultimo.getDate(); dia += 1) {
+      const data = new Date(agendaAno, agendaMes, dia);
+      data.setHours(0, 0, 0, 0);
+      const iso = `${agendaAno}-${String(agendaMes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+      const bloqueado = data < hoje || diasFechados.includes(data.getDay());
+      const selecionado = agendaData === iso;
+      html += `<div class="pub-cal-cell${bloqueado ? ' bloqueado' : ''}${selecionado ? ' selecionado' : ''}" ${bloqueado ? '' : `onclick="selecionarDataPublica('${iso}')"`}>${dia}</div>`;
+    }
+
+    const ultimoDiaSemana = ultimo.getDay();
+    if (ultimoDiaSemana < 6) {
+      for (let dia = 1; dia <= 6 - ultimoDiaSemana; dia += 1) {
+        html += `<div class="pub-cal-cell fora-mes">${dia}</div>`;
+      }
+    }
+    grid.innerHTML = html;
+  }
+
+  window.abrirCalendarioAgendaInterna = function() {
+    modoAgendaInterna = true;
+    agendaData = document.getElementById('agData')?.value || '';
+    const base = agendaData ? new Date(`${agendaData}T12:00:00`) : new Date();
+    agendaAno = base.getFullYear();
+    agendaMes = base.getMonth();
+
+    const titulo = document.querySelector('#pubCalendarioOverlay .pub-modal-title');
+    if (titulo) titulo.textContent = 'Escolha a data';
+    renderCalendarioAgendaInterna();
+    abrirOverlay('pubCalendarioOverlay');
+  };
+
+  pubCalMes = function(direcao) {
+    if (!modoAgendaInterna) return anteriorPubCalMes(direcao);
+    agendaMes += direcao;
+    if (agendaMes > 11) { agendaMes = 0; agendaAno += 1; }
+    if (agendaMes < 0) { agendaMes = 11; agendaAno -= 1; }
+    renderCalendarioAgendaInterna();
+  };
+
+  selecionarDataPublica = function(iso) {
+    if (!modoAgendaInterna) return anteriorSelecionarData(iso);
+
+    agendaData = iso;
+    const input = document.getElementById('agData');
+    const label = document.getElementById('agDataLabel');
+    const botao = document.getElementById('agDataBtn');
+    if (input) input.value = iso;
+    if (label) label.textContent = formatarDataAgenda(iso);
+    if (botao) botao.classList.add('selecionado');
+
+    const horaInput = document.getElementById('agHora');
+    const horaLabel = document.getElementById('agHoraLabel');
+    const horaBotao = document.getElementById('agHoraBtn');
+    if (horaInput) horaInput.value = '';
+    if (horaLabel) horaLabel.textContent = 'Escolher horário';
+    if (horaBotao) horaBotao.classList.remove('selecionado');
+
+    fecharOverlay('pubCalendarioOverlay');
+    window.abrirHorariosAgendaInterna();
+  };
+
+  window.abrirHorariosAgendaInterna = async function() {
+    modoAgendaInterna = true;
+    const data = document.getElementById('agData')?.value;
+    const profissionalId = document.getElementById('agProfissional')?.value;
+
+    if (!data) return toast('Escolha a data primeiro.', 'warn');
+    if (!profissionalId) return toast('Escolha o profissional antes do horário.', 'warn');
+
+    const empresa = state.empresa || {};
+    const profissional = (state.profissionais || []).find(item => String(item.id) === String(profissionalId)) || {};
+    const inicio = empresa.horario_inicio || profissional.horario_inicio || '09:00';
+    const fim = empresa.horario_fim || profissional.horario_fim || '18:00';
+    const intervalo = Math.max(5, Number(empresa.intervalo_slots || profissional.intervalo_slots || 30));
+
+    let consulta = db.from('agenda_agendamentos')
+      .select('hora, status')
+      .eq('data', data)
+      .eq('profissional_id', profissionalId)
+      .in('status', ['Pendente', 'Confirmado', 'Reagendado']);
+
+    const { data: registros, error } = await consulta;
+    const grid = document.getElementById('pubSlotsGrid');
+    if (!grid) return;
+
+    if (error) {
+      grid.innerHTML = '<p style="color:var(--text3);text-align:center;padding:24px">Não foi possível carregar os horários.</p>';
+    } else {
+      const ocupados = new Set((registros || []).map(item => (item.hora || '').slice(0, 5)));
+      const [hIni, mIni] = inicio.split(':').map(Number);
+      const [hFim, mFim] = fim.split(':').map(Number);
+      let atual = hIni * 60 + mIni;
+      const limite = hFim * 60 + mFim;
+      const slots = [];
+      while (atual < limite) {
+        slots.push(`${String(Math.floor(atual / 60)).padStart(2, '0')}:${String(atual % 60).padStart(2, '0')}`);
+        atual += intervalo;
+      }
+      grid.innerHTML = slots.map(hora => {
+        const ocupado = ocupados.has(hora);
+        return `<div class="pub-slot${ocupado ? ' ocupado' : ' livre'}" ${ocupado ? '' : `onclick="selecionarSlot('${hora}')"`}>${hora}${ocupado ? '<span class="slot-tag">Ocupado</span>' : ''}</div>`;
+      }).join('');
+    }
+
+    const titulo = document.getElementById('pubSlotsTitulo');
+    if (titulo) titulo.textContent = `Horários — ${formatarDataAgenda(data)}`;
+    const tituloModal = document.querySelector('#pubSlotsOverlay .pub-modal-title');
+    if (tituloModal) tituloModal.textContent = 'Escolha o horário';
+    abrirOverlay('pubSlotsOverlay');
+  };
+
+  selecionarSlot = function(hora) {
+    if (!modoAgendaInterna) return anteriorSelecionarSlot(hora);
+
+    const input = document.getElementById('agHora');
+    const label = document.getElementById('agHoraLabel');
+    const botao = document.getElementById('agHoraBtn');
+    if (input) input.value = hora;
+    if (label) label.textContent = hora;
+    if (botao) botao.classList.add('selecionado');
+    fecharOverlay('pubSlotsOverlay');
+    modoAgendaInterna = false;
+  };
+
+  fecharCalendarioPublico = function(evento) {
+    if (!modoAgendaInterna) return anteriorFecharCalendario(evento);
+    if (evento && evento.target !== document.getElementById('pubCalendarioOverlay')) return;
+    fecharOverlay('pubCalendarioOverlay');
+    modoAgendaInterna = false;
+  };
+
+  fecharSlotsPublico = function(evento) {
+    if (!modoAgendaInterna) return anteriorFecharSlots(evento);
+    if (evento && evento.target !== document.getElementById('pubSlotsOverlay')) return;
+    fecharOverlay('pubSlotsOverlay');
+    modoAgendaInterna = false;
+  };
+
+  // Mantém os rótulos sincronizados quando o formulário é limpo pelo sistema.
+  document.addEventListener('DOMContentLoaded', () => {
+    const observar = () => {
+      const data = document.getElementById('agData');
+      const hora = document.getElementById('agHora');
+      const dataLabel = document.getElementById('agDataLabel');
+      const horaLabel = document.getElementById('agHoraLabel');
+      const dataBtn = document.getElementById('agDataBtn');
+      const horaBtn = document.getElementById('agHoraBtn');
+      if (!data || !hora) return;
+
+      let anteriorData = data.value;
+      let anteriorHora = hora.value;
+      setInterval(() => {
+        if (data.value !== anteriorData) {
+          anteriorData = data.value;
+          if (dataLabel) dataLabel.textContent = data.value ? formatarDataAgenda(data.value) : 'Escolher data';
+          dataBtn?.classList.toggle('selecionado', Boolean(data.value));
+        }
+        if (hora.value !== anteriorHora) {
+          anteriorHora = hora.value;
+          if (horaLabel) horaLabel.textContent = hora.value || 'Escolher horário';
+          horaBtn?.classList.toggle('selecionado', Boolean(hora.value));
+        }
+      }, 250);
+    };
+    observar();
+  }, { once: true });
+})();
+
+/* =========================================================
+   AGENDA V14 — selects personalizados para Serviço,
+   Profissional e Status. Mantém os <select> originais como
+   fonte de valor para preservar toda a lógica existente.
+   ========================================================= */
+(() => {
+  const SELECT_IDS = ['agServico', 'agProfissional', 'agStatus'];
+  const instances = new Map();
+  let activeInstance = null;
+  let layer = null;
+  let panel = null;
+
+  function ensureLayer() {
+    if (layer) return;
+
+    layer = document.createElement('div');
+    layer.className = 'agenda-custom-select-layer';
+    layer.hidden = true;
+    layer.innerHTML = `
+      <div class="agenda-custom-select-backdrop" data-agenda-select-close></div>
+      <div class="agenda-custom-select-panel" role="listbox" tabindex="-1"></div>
+    `;
+    document.body.appendChild(layer);
+    panel = layer.querySelector('.agenda-custom-select-panel');
+
+    layer.addEventListener('click', (event) => {
+      if (event.target.closest('[data-agenda-select-close]')) {
+        closeCustomSelect();
+        return;
+      }
+
+      const optionButton = event.target.closest('[data-agenda-select-value]');
+      if (!optionButton || !activeInstance || optionButton.disabled) return;
+
+      const value = optionButton.dataset.agendaSelectValue ?? '';
+      activeInstance.select.value = value;
+      activeInstance.select.dispatchEvent(new Event('input', { bubbles: true }));
+      activeInstance.select.dispatchEvent(new Event('change', { bubbles: true }));
+      syncTrigger(activeInstance);
+      closeCustomSelect(true);
+    });
+  }
+
+  function selectedOption(select) {
+    return select.options[select.selectedIndex] || select.options[0] || null;
+  }
+
+  function syncTrigger(instance) {
+    const option = selectedOption(instance.select);
+    instance.label.textContent = option?.textContent?.trim() || 'Selecione';
+    instance.trigger.disabled = instance.select.disabled;
+    instance.trigger.setAttribute('aria-disabled', String(instance.select.disabled));
+  }
+
+  function renderOptions(instance) {
+    panel.replaceChildren();
+    const fragment = document.createDocumentFragment();
+
+    Array.from(instance.select.options).forEach((option) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'agenda-custom-select-option';
+      button.dataset.agendaSelectValue = option.value;
+      button.textContent = option.textContent.trim();
+      button.disabled = option.disabled;
+      button.setAttribute('role', 'option');
+      button.setAttribute('aria-selected', String(option.selected));
+      if (option.selected) button.classList.add('is-selected');
+      fragment.appendChild(button);
+    });
+
+    panel.appendChild(fragment);
+  }
+
+  function positionPanel(trigger) {
+    if (window.matchMedia('(max-width: 700px)').matches) {
+      panel.style.removeProperty('left');
+      panel.style.removeProperty('top');
+      panel.style.removeProperty('width');
+      return;
+    }
+
+    const rect = trigger.getBoundingClientRect();
+    const viewportPadding = 12;
+    const width = Math.max(rect.width, 220);
+    panel.style.width = `${Math.min(width, window.innerWidth - viewportPadding * 2)}px`;
+
+    const estimatedHeight = Math.min(panel.scrollHeight || 260, 360);
+    const spaceBelow = window.innerHeight - rect.bottom - viewportPadding;
+    const opensAbove = spaceBelow < Math.min(estimatedHeight, 220) && rect.top > spaceBelow;
+    const top = opensAbove
+      ? Math.max(viewportPadding, rect.top - estimatedHeight - 6)
+      : Math.min(window.innerHeight - estimatedHeight - viewportPadding, rect.bottom + 6);
+    const left = Math.min(
+      Math.max(viewportPadding, rect.left),
+      window.innerWidth - Math.min(width, window.innerWidth - viewportPadding * 2) - viewportPadding
+    );
+
+    panel.style.left = `${left}px`;
+    panel.style.top = `${Math.max(viewportPadding, top)}px`;
+  }
+
+  function openCustomSelect(instance) {
+    if (!instance || instance.select.disabled) return;
+    ensureLayer();
+
+    if (activeInstance && activeInstance !== instance) {
+      activeInstance.trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    activeInstance = instance;
+    syncTrigger(instance);
+    renderOptions(instance);
+    positionPanel(instance.trigger);
+
+    layer.hidden = false;
+    instance.trigger.setAttribute('aria-expanded', 'true');
+    requestAnimationFrame(() => layer.classList.add('is-open'));
+  }
+
+  function closeCustomSelect(restoreFocus = false) {
+    if (!layer || layer.hidden) return;
+
+    const previous = activeInstance;
+    layer.classList.remove('is-open');
+    previous?.trigger.setAttribute('aria-expanded', 'false');
+    activeInstance = null;
+
+    window.setTimeout(() => {
+      if (!layer.classList.contains('is-open')) layer.hidden = true;
+    }, 140);
+
+    if (restoreFocus && previous?.trigger) {
+      previous.trigger.focus({ preventScroll: true });
+    }
+  }
+
+  function enhanceSelect(select) {
+    if (!select || select.dataset.agendaCustomSelect === 'true') return;
+
+    select.dataset.agendaCustomSelect = 'true';
+    select.classList.add('agenda-native-select-hidden');
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'agenda-custom-select-trigger';
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.innerHTML = `
+      <span class="agenda-custom-select-trigger__label"></span>
+      <span class="agenda-custom-select-trigger__chevron" aria-hidden="true"></span>
+    `;
+    select.insertAdjacentElement('afterend', trigger);
+
+    const instance = {
+      select,
+      trigger,
+      label: trigger.querySelector('.agenda-custom-select-trigger__label')
+    };
+    instances.set(select.id, instance);
+    syncTrigger(instance);
+
+    trigger.addEventListener('click', () => {
+      if (activeInstance === instance && layer?.classList.contains('is-open')) {
+        closeCustomSelect();
+      } else {
+        openCustomSelect(instance);
+      }
+    });
+
+    select.addEventListener('change', () => syncTrigger(instance));
+    select.addEventListener('input', () => syncTrigger(instance));
+
+    const observer = new MutationObserver(() => {
+      syncTrigger(instance);
+      if (activeInstance === instance) {
+        renderOptions(instance);
+        positionPanel(instance.trigger);
+      }
+    });
+    observer.observe(select, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['disabled', 'selected', 'label', 'value']
+    });
+  }
+
+  function initAgendaCustomSelects() {
+    SELECT_IDS.forEach((id) => enhanceSelect(document.getElementById(id)));
+  }
+
+  document.addEventListener('DOMContentLoaded', initAgendaCustomSelects, { once: true });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && activeInstance) closeCustomSelect(true);
+  });
+
+  window.addEventListener('resize', () => {
+    if (activeInstance && layer?.classList.contains('is-open')) {
+      positionPanel(activeInstance.trigger);
+    }
+  }, { passive: true });
+
+  window.addEventListener('scroll', () => {
+    if (activeInstance && !window.matchMedia('(max-width: 700px)').matches) {
+      closeCustomSelect();
+    }
+  }, { passive: true, capture: true });
+})();
+
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const closeBtn=document.querySelector('#vxAgendaModal .vx-agenda-modal-close');
+  if(closeBtn){
+    const forceClose=(e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      vxCloseAgendaModal();
+    };
+    closeBtn.addEventListener('click',forceClose,{passive:false});
+    closeBtn.addEventListener('touchend',forceClose,{passive:false});
+    closeBtn.addEventListener('pointerup',forceClose,{passive:false});
+  }
+});
+
+
+
+
+
+
+
+
+
+// Modal Cliente: somente o E-mail desloca o card para cima.
+document.addEventListener('focusin',(e)=>{
+  const modal=$('vxClientesModal');
+  const card=modal?.querySelector('.vx-clientes-modal-card');
+  if(!modal||!card) return;
+
+  if(e.target?.id==='vxCliEmail'){
+    setTimeout(vxAjustarClienteModalTeclado,60);
+    return;
+  }
+
+  // Nome e WhatsApp ficam sempre na posição normal.
+  if(e.target?.id==='vxCliNome' || e.target?.id==='vxCliTel'){
+    card.style.setProperty('transition','transform .18s ease','important');
+    card.style.setProperty('transform','translateY(0)','important');
+  }
+});
+
+document.addEventListener('focusout',(e)=>{
+  if(e.target?.id!=='vxCliEmail') return;
+  setTimeout(()=>{
+    const modal=$('vxClientesModal');
+    const card=modal?.querySelector('.vx-clientes-modal-card');
+    if(card){
+      card.style.setProperty('transition','transform .18s ease','important');
+      card.style.setProperty('transform','translateY(0)','important');
+    }
+  },120);
+});
